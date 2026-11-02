@@ -602,6 +602,7 @@ async function shotMode() {
   const fresh = () => { document.body.innerHTML = '<div id="team" class="on"></div><div id="pickerView"></div><div class="tip" id="tip"></div><div class="drawer" id="drawer"><div class="card" id="dcard"></div></div>'; };
   if (mode === 'draft') { await init(); document.querySelectorAll('nav,header,section:not(#draft),footer').forEach(e => e.remove()); return; }
   if (mode === 'hero') { await init(); document.querySelectorAll('nav,section,footer').forEach(e => e.remove()); document.querySelector('.hero .btns').remove(); return; }
+  if (mode === 'banner') { await init(); document.querySelectorAll('nav,section,footer').forEach(e => e.remove()); document.querySelector('.hero .btns').remove(); const st = document.createElement('style'); st.textContent = 'body{overflow:hidden}.hero{height:100vh;min-height:0;display:flex;flex-direction:column;justify-content:center;box-sizing:border-box}.hero .wrap{width:100%;margin:0;padding:0 70px;box-sizing:border-box}'; document.head.appendChild(st); return; }
   if (mode === 'looks') {
     const st = document.createElement('style'); st.textContent = '.looks{flex-wrap:wrap;overflow:visible}.look{flex:0 0 190px}'; document.head.appendChild(st);
     for (const tid of tids) {

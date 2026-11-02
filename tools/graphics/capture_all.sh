@@ -9,6 +9,7 @@ shot() { "$CHROME" --headless=new --disable-gpu --hide-scrollbars --force-device
 
 # Explorer
 shot shots/hero     1280,560  "index.html?shot=hero"
+shot banner         1280,640  "index.html?shot=banner"
 shot shots/header   1100,250  "index.html?shot=header&teams=21"
 shot shots/looks    1100,1110 "index.html?shot=looks&teams=29,30"
 shot shots/looks2   1100,1290 "index.html?shot=looks&teams=18"
