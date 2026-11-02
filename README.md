@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/shots/hero.png" alt="NFL History for Football GM, a passion project by JenZiMiBruh" width="100%"></p>
+<p align="center"><img src="assets/banner.png" alt="NFL History for Football GM, a passion project by JenZiMiBruh" width="100%"></p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/live-through%20Week%208%20%C2%B7%20Nov%201%2C%202026-1f9d55?style=for-the-badge" alt="Live through Week 8">
