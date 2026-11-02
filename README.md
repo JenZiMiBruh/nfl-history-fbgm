@@ -195,7 +195,7 @@ Every new full-history sim is measured the same way, and the biggest misses get 
 
 ## 🗓️ Roster updates & timeline
 
-Like Madden, the league is updated all year: **weekly roster updates during the season** (stats, signings, trades, injuries, ratings), then free agency in March, the real draft in April, the schedule in May, and a **new season release every August**. Full schedule in [docs/roadmap.md](docs/roadmap.md).
+Like Madden, the league is updated all year: **a roster update the day after every game during the season**, following the NFL schedule (stats, signings, trades, injuries, ratings), then free agency in March, the real draft in April, the schedule in May, and a **new season release every August**. Full schedule in [docs/roadmap.md](docs/roadmap.md).
 
 ## How it was built
 

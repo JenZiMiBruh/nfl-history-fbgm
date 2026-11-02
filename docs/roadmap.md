@@ -1,6 +1,6 @@
 # Timeline & roadmap
 
-What's out, how it stays current, and what's coming. Like Madden, the league gets **roster updates all year**: weekly during the season, and at every big offseason moment. Dates for future items are targets, not promises.
+What's out, how it stays current, and what's coming. Like Madden, the league gets **roster updates all year**: the day after every game during the season, and at every big offseason moment. Dates for future items are targets, not promises.
 
 ## Released
 
@@ -15,8 +15,8 @@ Every year follows the same schedule, the way Madden's roster updates do.
 
 | When | Update | What changes |
 |---|---|---|
-| **Every week, Sep–Jan** | Weekly roster update | Results, standings and stats through Sunday. Rosters, signings, trades, injuries and depth charts. Ratings move with how players are actually playing |
-| **Playoffs, Jan–Feb** | After each round | Results, playoff stats and the bracket |
+| **The day after every game, Sep–Jan** | Game-day roster update | Follows the NFL schedule: Friday after Thursday Night Football, Monday after Sunday, Tuesday after Monday Night Football (and the day after Saturday and holiday games). Results, standings and stats through the last game. Rosters, signings, trades, injuries and depth charts. Ratings move with how players are actually playing |
+| **Playoffs, Jan–Feb** | The day after each playoff game day | Results, playoff stats and the bracket |
 | **After the Super Bowl, Feb** | Season wrap-up | Final stats and awards added to history; the season becomes pickable in the season selector |
 | **Mid-Mar** | Free agency update | Re-signings, cuts, trades and free-agent signings on their new teams. Retirements |
 | **Late Apr** | Draft update | The real draft: every pick on the team that made it. Next three draft classes re-ranked |
@@ -25,14 +25,14 @@ Every year follows the same schedule, the way Madden's roster updates do.
 
 ## This season (2026)
 
-| Week | Games | Update ready |
+| Week | Games | Updates |
 |---|---|---|
-| 8 | Nov 1 | ✅ out now |
-| 9 | Nov 8 | Nov 9–10 |
-| 10–17 | Nov 15 – Jan 3 | the Monday or Tuesday after |
-| 18 | Jan 10, 2027 | Jan 11–12 |
-| Playoffs | Jan 16 – Feb 7 | after each round |
-| Super Bowl LXI | Feb 14 | Feb 15–16: final 2026 season |
+| 8 | Oct 29 – Nov 2 | ✅ through Sunday, Nov 1 |
+| 9 | Nov 5 – 9 | Fri Nov 6 · Mon Nov 9 · Tue Nov 10 |
+| 10–17 | Nov 12 – Jan 4 | the day after every game day (Thanksgiving and Christmas games included) |
+| 18 | Jan 9 – 10, 2027 | Sun Jan 10 · Mon Jan 11 |
+| Playoffs | Jan 16 – Feb 7 | the day after each playoff game day |
+| Super Bowl LXI | Feb 14 | Feb 15: final 2026 season |
 
 ## 2027
 
