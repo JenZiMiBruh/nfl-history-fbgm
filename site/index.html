@@ -561,6 +561,7 @@ const defaultIdx = T => { const n = T.seasons.length, last = T.seasons[n - 1]; r
 
 // The jersey number to show on a look: the franchise's best player's number in that era.
 function num(T, l) {
+  if (T.tid === 0 && l.from <= 2022 && l.to >= 2004) return '11'; // Larry Fitzgerald's years in Arizona
   let best = null;
   for (const p of T.players) for (const x of p.s) if (x[0] >= l.from && x[0] <= l.to && x[4] && (!best || x[1] > best[1])) best = x;
   return best ? best[4] : '';
