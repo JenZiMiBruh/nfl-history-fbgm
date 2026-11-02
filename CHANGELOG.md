@@ -6,6 +6,13 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.2 · Nov 2, 2026
+
+### Pass rushers rush like themselves (thanks for the Maxx Crosby question)
+
+- **Pass rush now comes from each lineman's and linebacker's own career sack rate** (and tackles for loss from 1999), instead of following his overall. Maxx Crosby's pass rush went from 59 to 70: his overall is still 69 because of a quiet start to 2026 (3 sacks in 8 games), but on the field he rushes like Crosby. Myles Garrett 80, Micah Parsons 76, T.J. Watt 74.
+- **All of history too:** Reggie White 1987 and Aaron Donald 2018 at 77 pass rush, Bruce Smith 1990 at 74, Lawrence Taylor 1986 and Michael Strahan 2001 at 73. Every historic overall stays exactly the same; only the skill mix changed. (Sacks became official in 1982, so earlier linemen keep the old method.)
+
 ## v1.1 · Nov 2, 2026
 
 ### Ratings fixes (thanks, r/Football_GM)

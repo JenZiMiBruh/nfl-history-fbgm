@@ -56,8 +56,8 @@ const DRIVERS = {
     recPg: [per(s.rec, s.gp), s.gp], ydsPg: [per(s.recYds, s.gp), s.gp], ypr: [per(s.recYds, s.rec), s.rec],
     catchPct: [per(s.rec, s.tgt), s.tgt], tdPg: [per(s.recTD, s.gp), s.gp], fmbPt: [s.fmbData ? per(s.fmb, s.rec + s.rus) : undefined, s.rec]
   }),
-  DL: (s) => ({ skPg: [per(s.defSk, s.gp), s.gp], tckPg: [s.tckData ? per(s.tck, s.gp) : undefined, s.gp], ffPg: [per(s.defFmbFrc, s.gp), s.gp] }),
-  LB: (s) => ({ skPg: [per(s.defSk, s.gp), s.gp], tckPg: [s.tckData ? per(s.tck, s.gp) : undefined, s.gp], covPg: [per(s.cov, s.gp), s.gp] }),
+  DL: (s) => ({ skPg: [s.skData ? per(s.defSk, s.gp) : undefined, s.gp], tflPg: [s.tflData ? per(s.defTckLoss, s.gp) : undefined, s.gp], tckPg: [s.tckData ? per(s.tck, s.gp) : undefined, s.gp], ffPg: [per(s.defFmbFrc, s.gp), s.gp] }),
+  LB: (s) => ({ skPg: [s.skData ? per(s.defSk, s.gp) : undefined, s.gp], tflPg: [s.tflData ? per(s.defTckLoss, s.gp) : undefined, s.gp], tckPg: [s.tckData ? per(s.tck, s.gp) : undefined, s.gp], covPg: [per(s.cov, s.gp), s.gp] }),
   CB: (s) => ({ covPg: [per(s.cov, s.gp), s.gp], tckPg: [s.tckData ? per(s.tck, s.gp) : undefined, s.gp] }),
   K: (s) => ({ fgPct: [per(s.fg, s.fga), s.fga], longPct: [per(s.fg50, s.fga50), s.fga50], longPg: [per(s.fg50, s.gp), s.gp], xpPct: [per(s.xp, s.xpa), s.xpa] }),
   P: (s) => ({ ypp: [per(s.pntYds, s.pnt), s.pnt], in20: [per(s.pntIn20, s.pnt), s.pnt] })
@@ -67,14 +67,14 @@ DRIVERS.S = DRIVERS.CB;
 // Volume a stat needs to count fully (and to be in the season's average)
 const QUAL = { QB: 150, RB: 60, WR: 20, TE: 20, DL: 8, LB: 8, CB: 8, S: 8, K: 10, P: 20 };
 // Per-game drivers are measured in games played, so they qualify at 4 games (not the position's attempts threshold)
-const QUAL_BY_DRIVER = { catchPct: 30, ypr: 15, longPct: 3, xpPct: 10, ypc: 50, rushPg: 4, recPg: 4, ydsPg: 4, tdPg: 4 };
+const QUAL_BY_DRIVER = { catchPct: 30, ypr: 15, longPct: 3, xpPct: 10, ypc: 50, rushPg: 4, recPg: 4, ydsPg: 4, tdPg: 4, skPg: 4, tflPg: 4, ffPg: 4 };
 // skill rating -> [driver, weight]
 const SKILLS = {
   QB: { tha: [['cmpPct', 2], ['intPct', -1]], thp: [['ypa', 1], ['ypc', 1]], thv: [['tdPct', 1], ['intPct', -1], ['skPct', -1]], elu: [['rushPg', 1]], spd: [['rushPg', 0.7]], bsc: [['fmbPt', -1]] },
   RB: { spd: [['ypc', 1], ['rushPg', 0.5]], elu: [['ypc', 1], ['rushPg', 1]], stre: [['tdRate', 1]], bsc: [['fmbPt', -1]], hnd: [['catchPct', 1], ['recPg', 1]], rtr: [['recPg', 1]] },
   WR: { hnd: [['catchPct', 1.5], ['recPg', 0.5]], rtr: [['recPg', 1], ['ydsPg', 1]], spd: [['ypr', 1], ['tdPg', 0.3]], elu: [['ypr', 0.5]], bsc: [['fmbPt', -1]] },
-  DL: { prs: [['skPg', 2], ['ffPg', 0.5]], rns: [['tckPg', 1]], tck: [['tckPg', 1]] },
-  LB: { tck: [['tckPg', 2]], rns: [['tckPg', 1]], prs: [['skPg', 1]], pcv: [['covPg', 1]] },
+  DL: { prs: [['skPg', 2], ['tflPg', 0.7], ['ffPg', 0.5]], rns: [['tckPg', 1], ['tflPg', 0.5]], tck: [['tckPg', 1]] },
+  LB: { tck: [['tckPg', 2]], rns: [['tckPg', 1], ['tflPg', 0.5]], prs: [['skPg', 1], ['tflPg', 0.3]], pcv: [['covPg', 1]] },
   CB: { pcv: [['covPg', 2]], tck: [['tckPg', 0.5]], spd: [['covPg', 0.5]] },
   S: { pcv: [['covPg', 1.5]], tck: [['tckPg', 1]], spd: [['covPg', 0.3]] },
   K: { kac: [['fgPct', 2], ['xpPct', 1]], kpw: [['longPct', 1], ['longPg', 1]] },
@@ -109,7 +109,7 @@ for (const a of master.awards || []) for (const aw of a.awards || []) {
 for (const p of master.players) for (const a of p.awards || []) if (a.type === 'All-Star') floor(p.pid, a.season, 0.95);
 
 // Season totals (regular season, all teams)
-const SUM = ['gp', 'gs', 'pr', 'kr', 'pss', 'pssCmp', 'pssYds', 'pssTD', 'pssInt', 'pssSk', 'rus', 'rusYds', 'rusTD', 'rec', 'tgt', 'recYds', 'recTD', 'fmb', 'defSk', 'defInt', 'defPssDef', 'defFmbFrc', 'defTckSolo', 'defTckAst', 'fg0', 'fga0', 'fg20', 'fga20', 'fg30', 'fga30', 'fg40', 'fga40', 'fg50', 'fga50', 'xp', 'xpa', 'pnt', 'pntYds', 'pntIn20'];
+const SUM = ['gp', 'gs', 'pr', 'kr', 'pss', 'pssCmp', 'pssYds', 'pssTD', 'pssInt', 'pssSk', 'rus', 'rusYds', 'rusTD', 'rec', 'tgt', 'recYds', 'recTD', 'fmb', 'defSk', 'defInt', 'defPssDef', 'defFmbFrc', 'defTckLoss', 'defTckSolo', 'defTckAst', 'fg0', 'fga0', 'fg20', 'fga20', 'fg30', 'fga30', 'fg40', 'fga40', 'fg50', 'fga50', 'xp', 'xpa', 'pnt', 'pntYds', 'pntIn20'];
 function seasonTotals(p) {
   const by = new Map();
   for (const s of p.stats || []) {
@@ -125,6 +125,8 @@ function seasonTotals(p) {
     t.tck = t.defTckSolo + 0.5 * t.defTckAst;
     t.cov = 2 * t.defInt + (season >= 1999 ? t.defPssDef : 0);
     t.tckData = season >= 1994;
+    t.skData = season >= 1982; // sacks are official from 1982
+    t.tflData = season >= 1999;
     t.fmbData = season >= 1994;
   }
   return by;
@@ -331,6 +333,21 @@ for (const x of rows) {
   if (p.weight) base.stre = tmpl[pos].stre + (p.weight - weightMean[pos]) * 0.4;
   for (const [skill, raw] of Object.entries(x.rawS || {})) base[skill] = tmpl[pos][skill] + SPREAD * raw;
   let skills = POS_SKILLS[pos];
+  if ((pos === 'DL' || pos === 'LB') && x.season >= 1982) {
+    // A pass rusher's pass rush is his best sack rate of the seasons so far (with tackles for loss from 1999), on a
+    // wide scale and fading a little each year since, not a share of his overall: Maxx Crosby rushes like Maxx
+    // Crosby even in a quiet half-season. Only his other skills move to match his overall.
+    let rush;
+    for (const y of byPlayer.get(p.pid) || []) {
+      if (y.season > x.season || y.pos !== pos || y.season < 1982 || y.rawS?.prs === undefined || !(y.t?.gp >= 4)) continue;
+      const v = y.rawS.prs - 0.08 * (x.season - y.season);
+      if (rush === undefined || v > rush) rush = v;
+    }
+    if (rush !== undefined) {
+      base.prs = pos === 'DL' ? 50 + 13 * rush : 42 + 13 * rush;
+      skills = skills.filter(k => k !== 'prs');
+    }
+  }
   if (pos === 'QB') {
     // A quarterback's speed and elusiveness come from how much he runs, on a wide scale (Lamar Jackson fast, Matthew
     // Stafford slow), and his strength from his weight; only his passing moves to match his overall
