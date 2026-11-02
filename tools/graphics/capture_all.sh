@@ -26,3 +26,4 @@ shot guide/mod      1100,1700 "guide.html?only=mod"
 for p in "two 760" "curve 640" "example 820" "dist 640" "careers 600" "sources 700" "eras 900" "fixes 860" "funnel 720"; do
   set -- $p; shot "docs/$1" "1100,$2" "visuals.html?only=$1"
 done
+shot poster         1800,2250 "../tools/graphics/poster.html"
