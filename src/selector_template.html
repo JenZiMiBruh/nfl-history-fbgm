@@ -83,7 +83,7 @@
     <h2>1 · Load the master league</h2>
     <div class="drop" id="drop">
       <b>Drop <code>NFL_Master_1966_2026.json.gz</code> here</b> or click to choose it.
-      <div id="hostedLoad" style="display:none;margin-top:12px"><button id="loadHosted" type="button" style="font-size:16px;padding:12px 22px;background:#1f9d55;color:#fff;border:0;border-radius:10px;font-weight:700;cursor:pointer">Load NFL history (92 MB, one time)</button></div>
+      <div id="hostedLoad" style="display:none;margin-top:12px"><button id="loadHosted" type="button" style="font-size:16px;padding:12px 22px;background:#1f9d55;color:#fff;border:0;border-radius:10px;font-weight:700;cursor:pointer">Load NFL history (17 MB, one time)</button></div>
       <input type="file" id="file" accept=".json,.gz,application/json,application/gzip" hidden>
       <div class="note" id="fileInfo">The master file holds every player, stat, record, team season, award and scheduled event.</div>
     </div>
@@ -109,6 +109,7 @@
       </div>
     </div>
     <p class="note" id="phaseNote"></p>
+    <label class="note" style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="lite"> <span><b>Phone-friendly</b>: a much smaller league for low-end phones. Keeps every current player, recent retirees, Hall of Famers and award winners; leaves out long-retired role players.</span></label>
   </section>
 
   <section class="panel">
@@ -155,8 +156,9 @@ const LOGO_ERAS = /*__LOGO_ERAS__*/null;
   $('season').value = '1966';
 
   const phase = () => document.querySelector('input[name=phase]:checked').value;
-  // Week-by-week real data (1999 on), fetched next to the master file the first time a later week is picked
-  const FIRST_WEEKLY = 1999;
+  // Week-by-week real data, fetched next to the master file the first time a later week is picked: every game since
+  // 1966, and game-by-game player stats from 1999 (before that, stats so far are estimated from season totals)
+  const FIRST_WEEKLY = 1966, FIRST_LINES = 1999;
   const WEEKLY = {};
   const weeklyBase = () => { const m = new URLSearchParams(location.search).get('master'); return (m ? m.replace(/[^/]*$/, '') : 'data/') + 'weekly/'; };
   async function loadWeekly(S) {
@@ -200,9 +202,9 @@ const LOGO_ERAS = /*__LOGO_ERAS__*/null;
   // Slice once per season/phase and reuse it for roster views and the download.
   let sliceCache = { key: null, league: null };
   function getSlice() {
-    const S = +$('season').value, ph = phase(), w = WEEKLY[S] ? week() : 1;
-    const key = S + '|' + ph + '|' + w;
-    if (sliceCache.key !== key) sliceCache = { key, league: SL.sliceLeague(master, E, { season: S, phase: ph, week: w, weekly: WEEKLY[S] || undefined, schedules: SCHEDULES, hofYears: HOF_YEARS, logos: LOGOS, logosProcessed: LOGOS_PROCESSED, logoEras: LOGO_ERAS }) };
+    const S = +$('season').value, ph = phase(), w = WEEKLY[S] ? week() : 1, lite = $('lite').checked;
+    const key = S + '|' + ph + '|' + w + '|' + lite;
+    if (sliceCache.key !== key) sliceCache = { key, league: SL.sliceLeague(master, E, { season: S, phase: ph, week: w, lite, weekly: WEEKLY[S] || undefined, schedules: SCHEDULES, hofYears: HOF_YEARS, logos: LOGOS, logosProcessed: LOGOS_PROCESSED, logoEras: LOGO_ERAS }) };
     return sliceCache.league;
   }
   const POS_ORDER = ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S', 'K', 'P'];
@@ -297,8 +299,8 @@ const LOGO_ERAS = /*__LOGO_ERAS__*/null;
       : '<div>' + (ph === 'live' ? 'The live 2027 file keeps its current state; all history events are in the past.' : 'No upcoming events.') + '</div>';
     const notes = {
       preseason: 'Starts before Week 1. Rosters are each team\'s opening-day roster for that season; Football GM builds the schedule when the regular season begins.',
-      regular: week() > 1 ? 'Starts at Week ' + week() + '. Weeks 1-' + (week() - 1) + ' are already played from the real games: standings, every player\'s stats, team stats and head-to-head records.'
-        : S < FIRST_WEEKLY ? 'Starts at Week 1 with the real NFL schedule. (Starting at a later week needs week-by-week stats, which exist from ' + (FIRST_WEEKLY + 1) + ' on.)'
+      regular: week() > 1 ? 'Starts at Week ' + week() + '. Weeks 1-' + (week() - 1) + ' are already played from the real games: standings, results, team stats and head-to-head records' +
+          (S < FIRST_LINES ? ', and every player\'s stats so far, estimated from his real season (game-by-game player stats only exist from ' + (FIRST_LINES + 1) + ').' : ', and every player\'s real stats, game by game.')
         : (S === 1982 || S === 1987) ? 'Starts at Week 1 with the real strike-shortened ' + (S + 1) + ' schedule.' : 'Starts at Week 1 with the real NFL schedule. Pick a later week to start mid-season.',
       playoffs: 'The real ' + (S + 1) + ' regular season is in the books: real records, stats and standings. Hit play and the playoffs begin.',
       afterplayoffs: 'The real ' + (S + 1) + ' season is complete: champion crowned, awards handed out, real retirements done. The draft is next.',
@@ -337,14 +339,14 @@ const LOGO_ERAS = /*__LOGO_ERAS__*/null;
     $('loadHosted').addEventListener('click', async (e) => {
       e.stopPropagation();
       $('loadHosted').disabled = true;
-      setStatus('Downloading NFL history (92 MB)…');
-      const funny = ['Downloading NFL history (92 MB)…','Asking Taysom Hill what position he plays…','Hiding the 1-15 seasons…','Re-reviewing the Tuck Rule (still wrong)…','Teaching 1970s quarterbacks to throw interceptions…','Stretching Larry Fitzgerald’s hands…','Counting the Cardinals’ Super Bowl trophies (this part is fast)…','Loading 28,700 players. Most of them are punters…']; let fi = 0; const fiv = setInterval(() => setStatus(funny[++fi % funny.length]), 2600);
+      setStatus('Downloading NFL history (17 MB)…');
+      const funny = ['Downloading NFL history (17 MB)…','Asking Taysom Hill what position he plays…','Hiding the 1-15 seasons…','Re-reviewing the Tuck Rule (still wrong)…','Teaching 1970s quarterbacks to throw interceptions…','Stretching Larry Fitzgerald’s hands…','Counting the Cardinals’ Super Bowl trophies (this part is fast)…','Loading 28,700 players. Most of them are punters…']; let fi = 0; const fiv = setInterval(() => setStatus(funny[++fi % funny.length]), 2600);
       try {
         const res = await fetch(hostedMaster);
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const blob = await res.blob();
         clearInterval(fiv);
-        await loadFile(new File([blob], 'NFL_Master_1966_2026.json.gz'));
+        await loadFile(new File([blob], hostedMaster.split('/').pop()));
       } catch (err) { clearInterval(fiv); setStatus('Could not download: ' + err.message, 'err'); $('loadHosted').disabled = false; }
     });
   }
@@ -419,6 +421,11 @@ const LOGO_ERAS = /*__LOGO_ERAS__*/null;
   $('go').addEventListener('click', async () => {
     const S = +$('season').value, ph = phase();
     if (week() > 1) await loadWeekly(S);
+    if (ph === 'live' && master.statKeys) {
+      location.href = 'https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/' + ($('lite').checked ? 'NFL_2027_Live_Lite_FBGM.json.gz' : 'NFL_2027_Live_FBGM.json.gz');
+      $('go').disabled = false;
+      return;
+    }
     $('go').disabled = true;
     setStatus('Building league…');
     await new Promise(r => setTimeout(r, 30));
@@ -432,7 +439,7 @@ const LOGO_ERAS = /*__LOGO_ERAS__*/null;
       const blob = new Blob(SL.toJsonChunks(league), { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = ph === 'live' ? 'NFL_2027_Live_FBGM.json' : `NFL_${S + 1}_${ph === 'regular' ? 'Week' + (WEEKLY[S] ? week() : 1) : { preseason: 'Preseason', playoffs: 'Playoffs', afterplayoffs: 'AfterPlayoffs', draft: 'Draft' }[ph]}_FBGM.json`;
+      a.download = ph === 'live' ? 'NFL_2027_Live_FBGM.json' : `NFL_${S + 1}_${ph === 'regular' ? 'Week' + (WEEKLY[S] ? week() : 1) : { preseason: 'Preseason', playoffs: 'Playoffs', afterplayoffs: 'AfterPlayoffs', draft: 'Draft' }[ph]}${$('lite').checked ? '_Phone' : ''}_FBGM.json`;
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(a.href), 60000);
       const nEv = (league.scheduledEvents || []).length;

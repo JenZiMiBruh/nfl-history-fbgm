@@ -84,7 +84,15 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     // Start at week W of the regular season (seasons with weekly data): weeks 1..W-1 are already played, from real games
     const W = phaseName === 'regular' && opts.week > 1 && opts.weekly ? opts.week : 0;
     const wkGames = W ? opts.weekly.games.filter(g => g[0] < W) : [];
-    const wkLines = W ? opts.weekly.lines : {};
+    const wkLines = (W && opts.weekly.lines) || {};
+    // Before 1999 there are no game-by-game player stats: each player's season so far is estimated from his real
+    // season totals, scaled by how much of his team's season has been played
+    const ESTIMATE = !!W && !opts.weekly.lines;
+    const teamPlayed = {}, teamTotal = {}, teamSumEst = {};
+    if (W) for (const [day, h, a] of opts.weekly.games) for (const t of [h, a]) {
+      teamTotal[t] = (teamTotal[t] || 0) + 1;
+      if (day < W) teamPlayed[t] = (teamPlayed[t] || 0) + 1;
+    }
     // Each team's starting quarterback per game: the passer with the most attempts
     const qbStart = new Set();
     if (W) {
@@ -135,7 +143,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       for (const [season, rows] of bySeason) {
         let games = 0;
         for (let i = 0; i < rows.length - 1; i++) {
-          games += rows[i].gp;
+          games += rows[i].gp || 0;
           if (rows[i + 1].tid !== rows[i].tid) realMoves.push({ season, afterGames: games, tid: rows[i + 1].tid, jerseyNumber: rows[i + 1].jerseyNumber !== undefined ? String(rows[i + 1].jerseyNumber) : undefined });
         }
       }
@@ -181,6 +189,24 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       p.hof = !!(hofYears[p.pid] && hofYears[p.pid] <= S);
 
       const played = W ? (wkLines[src.pid] || []).filter(x => x[0] < W) : [];
+      if (ESTIMATE && rowsS.length) {
+        // His real season, cut to the games played so far: his teams in order, each row scaled by the games it covers
+        const totalGp = rowsS.reduce((a, r) => a + (r.gp || 0), 0);
+        const first = rowsS[0].tid;
+        let left = Math.round(totalGp * (teamPlayed[first] || 0) / (teamTotal[first] || 1));
+        for (const r of rowsS) {
+          if (left <= 0 || !r.gp) break;
+          const take = Math.min(r.gp, left), k = take / r.gp;
+          left -= take;
+          const row = {};
+          for (const [key, v] of Object.entries(r)) row[key] = typeof v === 'number' && !['season', 'tid', 'jerseyNumber', 'yearsWithTeam'].includes(key) && !key.endsWith('Lng') ? Math.round(v * k) : v;
+          row.gp = take;
+          p.stats.push(row);
+          const t = teamSumEst[r.tid] = teamSumEst[r.tid] || {};
+          for (const [key, v] of Object.entries(row)) if (typeof v === 'number' && !['season', 'tid', 'jerseyNumber', 'yearsWithTeam', 'gp', 'gs', 'min'].includes(key)) t[key] = key.endsWith('Lng') ? Math.max(t[key] || 0, v) : (t[key] || 0) + v;
+        }
+        p.statsTids = [...new Set(p.stats.map(st => st.tid))];
+      }
       if (played.length) {
         // His season so far, one row per team in the order he played for them, summed from his real games
         const tmpl = (src.stats || []).find(st => !st.playoffs) || {};
@@ -242,6 +268,26 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       }
     }
     for (const p of players) { delete p._gp; delete p._ovr; }
+
+    // Phone-friendly: a much smaller league for low-end phones. Keeps everyone still playing, free agents, the next
+    // three draft classes, players retired within the last 10 seasons, Hall of Famers, and anyone the awards,
+    // All-Star and retired-number pages point to; long-retired role players and later draft classes are left out.
+    // Past seasons show the team's current logo instead of a copy of each era's (see the teams below).
+    if (opts.lite) {
+      const keep = new Set();
+      for (const a of master.awards || []) if (a.season < S) for (const aw of a.awards || []) for (const w of [aw.winner].flat(3)) if (w && w.pid !== undefined) keep.add(w.pid);
+      for (const a of master.allStars || []) if (a.season < S) for (const t of a.teams || []) for (const w of t) if (w && w.pid !== undefined) keep.add(w.pid);
+      for (const t of master.teams) for (const j of t.retiredJerseyNumbers || []) if (j.pid !== undefined) keep.add(j.pid);
+      const before = players.length;
+      for (let i = players.length - 1; i >= 0; i--) {
+        const p = players[i];
+        // Future players: only the next three draft classes
+        if (p.tid === -2) { if (p.draft && p.draft.year <= S + 3) continue; players.splice(i, 1); continue; }
+        if (p.tid !== -3 || p.hof || keep.has(p.pid) || (p.retiredYear !== undefined && p.retiredYear >= S - 10)) continue;
+        players.splice(i, 1);
+      }
+      if (typeof console !== 'undefined') console.log('phone-friendly: kept ' + players.length + ' of ' + before + ' players');
+    }
     fitPayrolls(players, rules);
 
     // -------------------------------------------------------------------- teams
@@ -265,7 +311,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       }
     }
     // Team totals so far: the sum of its players' real lines
-    const teamSum = {};
+    const teamSum = ESTIMATE ? teamSumEst : {};
     for (const ls of Object.values(wkLines)) for (const [day, tid, l] of ls) {
       if (day >= W) continue;
       const t = teamSum[tid] = teamSum[tid] || {};
@@ -297,6 +343,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
           wonDiv: 0, lostDiv: 0, tiedDiv: 0, otlDiv: 0, wonConf: 0, lostConf: 0, tiedConf: 0, otlConf: 0, pts: 0, oppPts: 0, lastTen: [], streak: 0, playoffRoundsWon: -1 });
         if (rec[src.tid]) Object.assign(t.seasons[t.seasons.length - 1], rec[src.tid]);
       }
+      if (opts.lite) for (const ts of t.seasons) if (ts.season < S) { delete ts.imgURL; delete ts.imgURLSmall; }
       t.stats = (src.stats || []).filter(keepStat);
       if (W && rec[src.tid] && !b.disabled) {
         const tmpl = (src.stats || []).find(st => !st.playoffs) || {};
@@ -419,6 +466,8 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       releasedPlayers: []
     };
     shiftSeasons(league, 1);
+    // From the slim selector master (zero stats left out): toJsonChunks puts the zeros back while writing
+    if (master.statKeys) Object.defineProperty(league, '__statKeys', { value: master.statKeys, enumerable: false });
     return league;
   }
 
@@ -470,12 +519,21 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
   /** Serialize in chunks so very large leagues don't need one giant string. */
   function toJsonChunks(league) {
     const parts = ['{'];
+    // Stat lines from the slim master get their zero fields back here, one player at a time, so the full-size
+    // lines never all sit in memory at once
+    const keys = league.__statKeys;
+    const filled = (rows, list) => (rows || []).map(r => { const o = {}; for (const k of list) o[k] = 0; return Object.assign(o, r); });
+    const write = (k, x) => !keys ? JSON.stringify(x)
+      : k === 'players' ? JSON.stringify(Object.assign({}, x, { stats: filled(x.stats, keys.player) }))
+      : k === 'teams' ? JSON.stringify(Object.assign({}, x, { stats: filled(x.stats, keys.team) }))
+      : JSON.stringify(x);
     Object.keys(league).forEach((k, i) => {
       parts.push((i ? ',' : '') + JSON.stringify(k) + ':');
       const v = league[k];
-      if (Array.isArray(v) && v.length > 500) {
+      if (k === 'teams' && keys) parts.push('[' + v.map(x => write(k, x)).join(',') + ']');
+      else if (Array.isArray(v) && v.length > 500) {
         parts.push('[');
-        for (let j = 0; j < v.length; j += 500) parts.push((j ? ',' : '') + v.slice(j, j + 500).map(x => JSON.stringify(x)).join(','));
+        for (let j = 0; j < v.length; j += 500) parts.push((j ? ',' : '') + v.slice(j, j + 500).map(x => write(k, x)).join(','));
         parts.push(']');
       } else parts.push(JSON.stringify(v));
     });
@@ -545,12 +603,13 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     const season = seasonName - 1;
     const phase = arg('phase', 'regular');
     const week = parseInt(arg('week', '0'), 10);
+    const lite = args.includes('--lite');
     const ROOT = path.join(__dirname, '..');
     const E = require('./nfl_eras');
-    const read = (f) => JSON.parse(fs.readFileSync(path.join(ROOT, f), 'utf8'));
+    const read = (f) => JSON.parse(fs.readFileSync(path.isAbsolute(f) ? f : path.join(ROOT, f), 'utf8'));
     const master = read(arg('master', 'NFL_Master_1966_2026.json'));
     const out = sliceLeague(master, E, {
-      season, phase, week, weekly: week > 1 && fs.existsSync(path.join(ROOT, `data_cache/weekly/${season}.json`)) ? read(`data_cache/weekly/${season}.json`) : undefined,
+      season, phase, week, lite, weekly: week > 1 && fs.existsSync(path.join(ROOT, `data_cache/weekly/${season}.json`)) ? read(`data_cache/weekly/${season}.json`) : undefined,
       schedules: read('data_cache/real_schedules.json'), hofYears: read('data_cache/hof_years.json'),
       logos: fs.existsSync(path.join(ROOT, 'data_cache/logos.json')) ? read('data_cache/logos.json') : {},
       logosProcessed: fs.existsSync(path.join(ROOT, 'data_cache/logos_processed.json')) ? read('data_cache/logos_processed.json') : {},

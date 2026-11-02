@@ -49,7 +49,7 @@ Three ways in. Pick the one that sounds like you; every step is below with exact
 
 The real 2026 season as of Sunday, Nov 1: standings, stats, rosters and injuries, with all of NFL history since 1966 behind it. Regular Football GM, nothing to install.
 
-1. **Download** [`NFL_2027_Live_FBGM.json.gz`](../../releases/latest) from the latest release. Don't unzip it.
+1. **Download** [`NFL_2027_Live_FBGM.json.gz`](../../releases/latest/download/NFL_2027_Live_FBGM.json.gz) from the latest release. Don't unzip it. On an older or low-memory phone, get [`NFL_2027_Live_Lite_FBGM.json.gz`](../../releases/latest/download/NFL_2027_Live_Lite_FBGM.json.gz) instead: the same season at 13 MB, without long-retired role players.
 2. **Open** [play.football-gm.com](https://play.football-gm.com) and tap **New League**.
 3. In the **Customize** box, change **Default** to **Upload league file** and choose the file.
 4. **Pick your team** and tap **Create league**.

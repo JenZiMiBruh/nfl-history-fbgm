@@ -46,3 +46,20 @@ for (const p of m.players) { delete p.espnId; delete p.prospectRank; }
 const out = path.join(ROOT, 'NFL_2027_Live_FBGM.json.gz');
 fs.writeFileSync(out, zlib.gzipSync(Buffer.from(JSON.stringify(m)), { level: 9 }));
 console.log(`wrote ${path.basename(out)} (${(fs.statSync(out).size / 1e6).toFixed(1)} MB)`);
+
+// Phone-friendly copy for low-end phones: the same league without long-retired role players and without a copy of
+// every past season's logo (past seasons show the team's current one). Same rules as the selector's option.
+{
+  const S = m.gameAttributes.season;
+  const keep = new Set();
+  for (const a of m.awards || []) for (const aw of a.awards || []) for (const w of [aw.winner].flat(3)) if (w && w.pid !== undefined) keep.add(w.pid);
+  for (const a of m.allStars || []) for (const t of a.teams || []) for (const w of t) if (w && w.pid !== undefined) keep.add(w.pid);
+  for (const t of m.teams) for (const j of t.retiredJerseyNumbers || []) if (j.pid !== undefined) keep.add(j.pid);
+  const before = m.players.length;
+  m.players = m.players.filter(p => p.tid !== -3 || p.hof || keep.has(p.pid) || (p.retiredYear !== undefined && p.retiredYear >= S - 10));
+  for (const t of m.teams) for (const ts of t.seasons || []) if (ts.season < S) { delete ts.imgURL; delete ts.imgURLSmall; }
+  m.meta.name = m.meta.name.replace(')', ', phone-friendly)');
+  const lite = path.join(ROOT, 'NFL_2027_Live_Lite_FBGM.json.gz');
+  fs.writeFileSync(lite, zlib.gzipSync(Buffer.from(JSON.stringify(m)), { level: 9 }));
+  console.log(`wrote ${path.basename(lite)} (${(fs.statSync(lite).size / 1e6).toFixed(1)} MB, ${m.players.length} of ${before} players)`);
+}

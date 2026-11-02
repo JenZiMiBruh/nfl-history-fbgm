@@ -108,7 +108,7 @@ for (const a of master.awards || []) for (const aw of a.awards || []) {
 for (const p of master.players) for (const a of p.awards || []) if (a.type === 'All-Star') floor(p.pid, a.season, 0.95);
 
 // Season totals (regular season, all teams)
-const SUM = ['gp', 'gs', 'pss', 'pssCmp', 'pssYds', 'pssTD', 'pssInt', 'pssSk', 'rus', 'rusYds', 'rusTD', 'rec', 'tgt', 'recYds', 'recTD', 'fmb', 'defSk', 'defInt', 'defPssDef', 'defFmbFrc', 'defTckSolo', 'defTckAst', 'fg0', 'fga0', 'fg20', 'fga20', 'fg30', 'fga30', 'fg40', 'fga40', 'fg50', 'fga50', 'xp', 'xpa', 'pnt', 'pntYds', 'pntIn20'];
+const SUM = ['gp', 'gs', 'pr', 'kr', 'pss', 'pssCmp', 'pssYds', 'pssTD', 'pssInt', 'pssSk', 'rus', 'rusYds', 'rusTD', 'rec', 'tgt', 'recYds', 'recTD', 'fmb', 'defSk', 'defInt', 'defPssDef', 'defFmbFrc', 'defTckSolo', 'defTckAst', 'fg0', 'fga0', 'fg20', 'fga20', 'fg30', 'fga30', 'fg40', 'fga40', 'fg50', 'fga50', 'xp', 'xpa', 'pnt', 'pntYds', 'pntIn20'];
 function seasonTotals(p) {
   const by = new Map();
   for (const s of p.stats || []) {
@@ -144,6 +144,13 @@ for (const p of master.players) {
       const alt = t.pnt >= 10 ? 'P' : t.fga >= 5 ? 'K' : t.rec >= 5 ? 'WR' : t.rus >= 10 ? 'RB' : t.gp >= 4 ? 'WR' : null;
       if (alt) { pos = alt; posFixed = true; }
     }
+    // Listed on one side of the ball but produced only on the other (Jimmy Smith, the Jaguars receiver, listed at CB;
+    // Bob Hayes at DL): rate him where he played
+    if (t && t.gp > 0) {
+      const off = t.rec + t.rus + t.pss, def = t.defTckSolo + t.defTckAst + t.defSk * 3 + t.defInt * 5 + t.defPssDef;
+      if (['DL', 'LB', 'CB', 'S'].includes(pos) && off >= 25 && def < 5) { pos = t.pss >= 50 ? 'QB' : t.rec >= t.rus ? 'WR' : 'RB'; posFixed = true; }
+      else if (['WR', 'RB', 'TE', 'QB'].includes(pos) && def >= 30 && off < 5) { pos = t.defSk >= 4 ? 'DL' : t.defInt + t.defPssDef >= 5 ? 'CB' : 'LB'; posFixed = true; }
+    }
     rows.push({ p, r, pos, posFixed, season: r.season, t, oldOvr: r.ovr ?? 0 });
   }
 }
@@ -169,6 +176,25 @@ for (const pos of MAIN) {
   const ws = rows.filter(x => x.pos === pos && x.p.weight).map(x => x.p.weight);
   weightMean[pos] = ws.reduce((a, b) => a + b, 0) / Math.max(1, ws.length);
 }
+
+// A returner listed at another position: lots of returns, little at his position. His All-Pro honors were for
+// returning, so they don't make him a star cornerback (Devin Hester 2007, Jamal Agnew 2017, Mel Gray 1990-94).
+const positionWork = (pos, t) => ({
+  QB: t.pss, RB: t.rus + t.rec, WR: t.rec, TE: t.rec,
+  CB: t.defInt * 5 + t.defPssDef + (t.tckData ? t.tck : 15), S: t.defInt * 5 + t.defPssDef + (t.tckData ? t.tck : 15),
+  LB: t.defSk * 3 + t.defInt * 5 + (t.tckData ? t.tck : 15), DL: t.defSk * 3 + (t.tckData ? t.tck : 15),
+}[pos]);
+const returnerOnly = (x) => x.t && x.t.pr + x.t.kr >= 15 && positionWork(x.pos, x.t) !== undefined && positionWork(x.pos, x.t) < Math.max(10, (x.t.pr + x.t.kr) / 2);
+// Seasons where games started are recorded for most players (a start count of 0 then really means no starts)
+const gsSeasons = new Set();
+{
+  const by = new Map();
+  for (const x of rows) if (x.t && x.t.gp > 0) { const b = by.get(x.season) || [0, 0]; b[0]++; if (x.t.gs > 0) b[1]++; by.set(x.season, b); }
+  for (const [season, [n, g]] of by) if (g / n > 0.4) gsSeasons.add(season);
+}
+// Played a lot without starting (special teams, deep backup): capped near the position's middle, so one big
+// special-teams year doesn't make him a 76 one season and a 43 the next
+const stCap = (x) => x.t && gsSeasons.has(x.season) && x.pos !== 'K' && x.pos !== 'P' && x.t.gp >= 6 && x.t.gs <= x.t.gp / 3 ? 0.55 : 1;
 
 // ------------------------------------------------------------------ step 1: how good (percentile)
 for (const [, list] of groups) {
@@ -202,12 +228,21 @@ for (const [pid, list] of byPlayer) {
   const raw = list.map(x => x.pct);
   list.forEach((x, i) => {
     if (raw[i] === undefined) return;
-    // A season still being played counts by how much of it is done (7 of 17 games: 41%); the rest leans on last season
-    const g = x.season === LIVE_SEASON && x.t ? Math.min(1, (x.t.gp || 0) / 17) : 1;
+    // A short season counts by how much of it he played (an injured star leans on the seasons around him); the season
+    // still being played counts by how much of it is done, and leans on last season
+    const full = x.season >= 2021 ? 17 : x.season >= 1978 ? 16 : 14;
+    const g = x.t ? Math.min(1, (x.t.gp || 0) / (x.season === LIVE_SEASON ? 17 : full / 2)) : 1;
+    const hasNeighbor = raw[i - 1] !== undefined || raw[i + 1] !== undefined;
     let sum = raw[i] * 0.6 * g, w = 0.6 * g;
-    if (raw[i - 1] !== undefined) { sum += raw[i - 1] * (0.2 + 0.6 * (1 - g)); w += 0.2 + 0.6 * (1 - g); }
-    if (raw[i + 1] !== undefined) { sum += raw[i + 1] * 0.2; w += 0.2; }
-    x.ps = Math.max(sum / w, floors.get(pid + '|' + x.season) || 0);
+    const lean = hasNeighbor ? 0.6 * (1 - g) : 0;
+    if (!hasNeighbor) { sum = raw[i] * 0.6; w = 0.6; }
+    if (raw[i - 1] !== undefined) { const k = 0.2 + (raw[i + 1] !== undefined ? lean / 2 : lean); sum += raw[i - 1] * k; w += k; }
+    if (raw[i + 1] !== undefined && x.season !== LIVE_SEASON) { const k = 0.2 + (raw[i - 1] !== undefined ? lean / 2 : lean); sum += raw[i + 1] * k; w += k; }
+    const fl = floors.get(pid + '|' + x.season) || 0;
+    const ret = returnerOnly(x), cap = stCap(x);
+    x.ps = Math.min(Math.max(sum / w, ret ? 0 : fl), cap);
+    // Rows these rules change are rewritten even below RATE_FROM
+    if ((ret && fl > sum / w) || (cap < 1 && Math.max(sum / w, fl) > cap) || (g < 1 && hasNeighbor)) x.stFixed = true;
   });
   // Seasons with no games: nearest real season, minus a little per year past 30
   list.forEach((x, i) => {
@@ -283,7 +318,7 @@ const clamp = (v) => Math.max(1, Math.min(99, Math.round(v)));
 let n = 0;
 for (const x of rows) {
   const { p, r, pos } = x;
-  if (x.season < RATE_FROM && !x.posFixed) continue;
+  if (x.season < RATE_FROM && !x.posFixed && !x.stFixed) continue;
   const target = pos === 'K' || pos === 'P' ? curve(x.ps) / 0.75 : curve(x.ps);
   const base = { hgt: r.hgt };
   for (const k of KEYS) base[k] = tmpl[pos][k];
