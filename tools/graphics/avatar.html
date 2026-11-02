@@ -1,0 +1,40 @@
+<!doctype html>
+<!-- GitHub profile picture options (500x500 each). ?v=1 jersey, ?v=2 football -->
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap" rel="stylesheet">
+<style>html,body{margin:0;width:500px;height:500px;overflow:hidden;background:#05100a}svg{display:block}</style></head><body>
+<svg id="v1" width="500" height="500" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg1" cx="50%" cy="35%" r="75%"><stop offset="0" stop-color="#16402a"/><stop offset="1" stop-color="#05100a"/></radialGradient>
+    <linearGradient id="gold" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#7ee0a1"/><stop offset="1" stop-color="#f5c542"/></linearGradient>
+    <linearGradient id="shade" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".25"/><stop offset=".5" stop-color="#fff" stop-opacity=".08"/><stop offset="1" stop-color="#000" stop-opacity=".3"/></linearGradient>
+  </defs>
+  <rect width="500" height="500" fill="url(#bg1)"/>
+  <g transform="translate(250 262)">
+    <path d="M-80 -150 L-50 -134 Q0 -112 50 -134 L80 -150 L190 -100 L160 -10 L118 -24 L118 170 L-118 170 L-118 -24 L-160 -10 L-190 -100 Z" fill="#97233F" stroke="#000" stroke-opacity=".35" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M-190 -100 L-80 -150 M80 -150 L190 -100" stroke="#fff" stroke-width="14" stroke-linecap="round"/>
+    <path d="M160 -10 L118 -24 M-160 -10 L-118 -24" stroke="#fff" stroke-width="16" stroke-linecap="round"/>
+    <path d="M-50 -134 Q0 -112 50 -134" stroke="#fff" stroke-width="10" fill="none"/>
+    <text x="0" y="110" text-anchor="middle" font-family="Oswald" font-weight="700" font-size="190" fill="#fff" stroke="#000" stroke-width="5" paint-order="stroke">11</text>
+    <path d="M-80 -150 L-50 -134 Q0 -112 50 -134 L80 -150 L190 -100 L160 -10 L118 -24 L118 170 L-118 170 L-118 -24 L-160 -10 L-190 -100 Z" fill="url(#shade)"/>
+  </g>
+</svg>
+<svg id="v2" width="500" height="500" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <defs>
+    <radialGradient id="bg2" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#1d6b35"/><stop offset="1" stop-color="#06210f"/></radialGradient>
+    <linearGradient id="leather" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b0612f"/><stop offset=".55" stop-color="#7a3a19"/><stop offset="1" stop-color="#4c220d"/></linearGradient>
+    <linearGradient id="gold2" x1="0" x2="1"><stop offset="0" stop-color="#7ee0a1"/><stop offset="1" stop-color="#f5c542"/></linearGradient>
+  </defs>
+  <rect width="500" height="500" fill="url(#bg2)"/>
+  <g stroke="#fff" stroke-opacity=".18" stroke-width="6"><line x1="90" y1="0" x2="90" y2="500"/><line x1="250" y1="0" x2="250" y2="500"/><line x1="410" y1="0" x2="410" y2="500"/></g>
+  <g transform="translate(250 230) rotate(-32)">
+    <path d="M-200 0 C-125 -120 125 -120 200 0 C125 120 -125 120 -200 0Z" fill="url(#leather)" stroke="#2b1206" stroke-width="6"/>
+    <path d="M-158 -42 C-147 -12 -147 12 -158 42 M158 -42 C147 -12 147 12 158 42" stroke="#fff" stroke-width="13" fill="none"/>
+    <rect x="-80" y="-8" width="160" height="16" rx="8" fill="#fff"/>
+    <g fill="#fff"><rect x="-64" y="-26" width="11" height="52" rx="5"/><rect x="-37" y="-26" width="11" height="52" rx="5"/><rect x="-10" y="-26" width="11" height="52" rx="5"/><rect x="17" y="-26" width="11" height="52" rx="5"/><rect x="44" y="-26" width="11" height="52" rx="5"/></g>
+    <path d="M-115 -66 C-40 -92 40 -92 115 -66" fill="none" stroke="#fff" stroke-opacity=".2" stroke-width="12" stroke-linecap="round"/>
+  </g>
+  <text x="250" y="455" text-anchor="middle" font-family="Oswald" font-weight="700" font-size="74" fill="url(#gold2)" letter-spacing="6">JZM</text>
+</svg>
+<script>if (new URLSearchParams(location.search).get('v') === '2') { v1.style.display = 'none'; v2.style.display = 'block'; }</script>
+</body></html>
