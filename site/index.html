@@ -123,6 +123,9 @@ nav .links a.on{color:var(--ink);box-shadow:inset 0 -2px 0 var(--accent)}
 .fans .first{font:600 16px Inter}
 .fans .acts{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
 .fans .acts a{text-decoration:none;font:700 14px Inter;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--panel)}
+.news{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:20px}
+.news div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.news i{font-style:normal;font-size:22px}.news b{display:block;font:700 17px Oswald,sans-serif;text-transform:uppercase;margin:4px 0 2px}.news span{font-size:14px;color:var(--muted);line-height:1.5}
 /* story */
 .story{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
 @media(max-width:860px){.story{grid-template-columns:1fr}}
@@ -283,7 +286,7 @@ footer small{display:block;opacity:.7;margin-top:8px;max-width:520px}
 <body>
 <nav><div class="wrap">
   <a class="brand" href="#top"><i></i>NFL History</a>
-  <div class="links"><a href="#story">Why</a><a href="#teams">Your team</a><a href="#draft">Drafts</a><a href="#build">Build a league</a><a href="#mod">The mod</a><a href="#roadmap">Roadmap</a><a href="guide.html">How to play</a><a class="cta" data-goatcounter-click="download-nav" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_2027_Live_FBGM.json.gz" title="Download this season's league file">Download</a></div>
+  <div class="links"><a href="#story">Why</a><a href="#teams">Your team</a><a href="#draft">Drafts</a><a href="#build">Build a league</a><a href="#mod">The mod</a><a href="#news">What's new</a><a href="#roadmap">Roadmap</a><a href="guide.html">How to play</a><a class="cta" data-goatcounter-click="download-nav" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_2027_Live_FBGM.json.gz" title="Download this season's league file">Download</a></div>
 </div></nav>
 
 <header class="hero" id="top">
@@ -367,7 +370,7 @@ footer small{display:block;opacity:.7;margin-top:8px;max-width:520px}
 <section id="build" style="background:var(--soft)"><div class="wrap">
   <div class="eyebrow">Build a league, right here</div>
   <h2>Start in any season</h2>
-  <p class="muted" style="max-width:720px">Pick a season from 1967 to today and a start point: preseason, week 1, the playoffs, after the playoffs or draft day. Then download your league and upload it in Football GM (<b>New League → Upload league file</b>). Works best on a computer: it loads all 60 years of NFL history into your browser.</p>
+  <p class="muted" style="max-width:720px">Pick a season from 1967 to today and a start point: preseason, any week of the regular season, the playoffs, after the playoffs or draft day. Then download your league and upload it in Football GM (<b>New League → Upload league file</b>). Works on phones too: tick <b>Phone-friendly</b> (on by default on phones) for a smaller league.</p>
   <div class="bsteps"><div><b>1</b>Tap <i>Load NFL history</i></div><div><b>2</b>Pick a season and start point</div><div><b>3</b>Generate &amp; download, then upload in Football GM</div></div>
   <iframe class="selector" src="selector.html?master=data/NFL_Selector_Master.json.gz" loading="lazy" title="Season selector"></iframe>
   <p class="muted" style="font-size:14px">Prefer a bigger window? <a href="selector.html?master=data/NFL_Selector_Master.json.gz">Open the season selector full screen</a>.</p>
@@ -397,6 +400,13 @@ footer small{display:block;opacity:.7;margin-top:8px;max-width:520px}
     <div class="path"><span class="tag">📅 ANY SEASON</span><h3>Pick a year</h3><ol><li>Use Build a league on this page</li><li>Pick a season and a start point, then generate</li><li>Upload your league to Football GM</li></ol><p class="muted" style="font-size:14px">Right in your browser. Want it offline? <a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/nfl_season_selector.html">Download the selector</a>.</p><a class="btn" href="#build">Build a league</a></div>
     <div class="path"><span class="tag">🏈 FULL EXPERIENCE</span><h3>With the mod</h3><ol><li>Download the release zip</li><li>Double-click Install_and_Play</li><li>Play on your computer, or your phone over Wi-Fi</li></ol><p class="muted" style="font-size:14px">The first run sets up in about 5–10 minutes.</p><a class="btn" data-goatcounter-click="download-NFL_History_Mod.zip" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_History_Mod.zip">Download the mod</a><p style="margin:10px 0 0;font-size:14px;text-align:center"><a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/tree/main/mod">Install guide</a></p></div>
   </div>
+</div></section>
+
+<section id="news" style="background:var(--soft)"><div class="wrap">
+  <div class="eyebrow">Updated Nov 2, 2026</div>
+  <h2>What's new</h2>
+  <p class="muted" style="max-width:680px">Fixes from your reports on r/Football_GM, thank you. If something here fixed a problem you hit, download again and start a new league. <a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/blob/main/CHANGELOG.md">Full changelog →</a></p>
+  <div class="news"><div><i>⭐</i><b>Ratings fixed</b><span>Stars stuck near 49 (Olave, Chase, Taylor) are back in the high 70s. Starts now come from real snap counts.</span></div><div><i>🏃</i><b>Quarterbacks run like themselves</b><span>QB speed comes from real running: Lamar 77, Daniels 72, Hurts 67; Stafford and Goff in the low 30s.</span></div><div><i>🏈</i><b>Real starters start</b><span>Every team's real starting QB starts, and nobody is rated at a position he didn't play.</span></div><div><i>📱</i><b>Works on phones</b><span>Building a past season no longer crashes phones: 16 MB instead of 88, with a phone-friendly option.</span></div><div><i>📅</i><b>Start at any week</b><span>Any season since 1966, any week: standings, results and stats already played from the real games.</span></div><div><i>🆚</i><b>Head-to-head and box scores</b><span>Real head-to-head records for every season, and this season's box scores by quarter.</span></div></div>
 </div></section>
 
 <section id="roadmap"><div class="wrap">

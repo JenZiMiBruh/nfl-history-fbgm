@@ -10,6 +10,7 @@
 
 <h2 align="center"><a href="https://jenzimibruh.github.io/nfl-history-fbgm/">🌐 Open the NFL History site →</a></h2>
 <p align="center"><a href="docs/roadmap.md"><b>📅 Roadmap & update calendar</b></a>: the file updates the day after every game</p>
+<p align="center"><a href="CHANGELOG.md"><b>🆕 What's new</b></a>: Nov 2: ratings fixes from your reports, phones no longer crash, start at any week</p>
 <p align="center"><sub>Every team's logos, jerseys, records and ratings · the real draft classes · build a league for any season, right in your browser</sub></p>
 
 <table align="center"><tr>
