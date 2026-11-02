@@ -6,6 +6,11 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.4 · Nov 2, 2026
+
+- **Draft classes restored.** v1.2 and v1.3 accidentally flattened all three real draft classes (2027-2029) to the same 40 overall / 59 potential: a ratings rebuild treated prospects with no NFL games like nobodies. Their real scouting-based ratings are back (top potentials 77-79), and the audit now checks that draft classes keep their spread.
+- **The mod installer works with any Node.js.** Newer Node versions (25 and up, including today's LTS) dropped a tool Football GM needs to install, so the mod failed with "Something went wrong". The installer now downloads its own Node 24 into the mod folder, picks up where it stopped if a run fails, and writes install_log.txt to attach to a GitHub issue if anything still goes wrong.
+
 ## v1.3 · Nov 2, 2026
 
 - **Elite pass-rush seasons count in full.** A player's peak pass rush comes from his actual best seasons, not averaged with the seasons around them. Aaron Donald's 2018 (20.5 sacks from the interior) now ties Myles Garrett's 2025 at the top, alongside J.J. Watt 2014, Mark Gastineau 1984, Richard Dent, Khalil Mack and T.J. Watt. Maxx Crosby's pass rush is 76.

@@ -10,6 +10,7 @@
  *   - returners rated as stars at their listed position (Devin Hester 2007 as a CB)
  *   - every quarterback with the same speed (Stafford and Lamar Jackson)
  *   - starters whose live-season stats didn't come through
+ *   - all three draft classes flattened to one rating
  *
  * Usage: node --max-old-space-size=14000 src/audit_ratings.js [baseline master to compare history against]
  */
@@ -128,7 +129,21 @@ for (const p of m.players.filter(p => p.tid >= 0 && p.ratings.at(-1).season === 
 }
 check('healthy 65+ players with no games this season (missing data?)', missing);
 
-// 10. Top of each position (for a human look)
+// 10. Draft classes keep their spread: prospects must not all share one rating (a rebuild once flattened all three
+// classes to 40 overall / 59 potential)
+const flat = [];
+const classes = {};
+for (const p of m.players.filter(p => p.tid === -2)) (classes[p.draft.year] = classes[p.draft.year] || []).push(p.ratings.at(-1));
+for (const [y, rs] of Object.entries(classes)) {
+  const ovrs = rs.map(r => r.ovr).sort((a, b) => b - a), pots = rs.map(r => r.pot).sort((a, b) => b - a);
+  const distinct = new Set(ovrs).size;
+  const line = `class ${y}: ${rs.length} prospects, ${distinct} distinct overalls, top ${ovrs.slice(0, 3).join('/')}, median ${ovrs[ovrs.length >> 1]}, top potential ${pots[0]}`;
+  if (distinct < 10 || ovrs[0] - ovrs[ovrs.length >> 1] < 8 || pots[0] < 65) flat.push(line);
+  else console.log('info  draft ' + line);
+}
+check('flattened draft classes', flat);
+
+// 11. Top of each position (for a human look)
 for (const pos of ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S']) {
   const v = m.players.filter(p => p.tid >= 0 && p.ratings.at(-1).pos === pos).sort((a, b) => b.ratings.at(-1).ovr - a.ratings.at(-1).ovr).slice(0, 8);
   console.log(`info  top ${pos.padEnd(2)} ${v.map(p => `${p.lastName} ${p.ratings.at(-1).ovr}`).join(', ')}`);

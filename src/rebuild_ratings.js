@@ -136,6 +136,9 @@ function seasonTotals(p) {
 const rows = []; // { p, r, pos, season, t }
 const totalsByPid = new Map();
 for (const p of master.players) {
+  // Draft prospects keep the ratings the draft-class builder gave them (college production, recruiting, position);
+  // with no NFL games they would otherwise all come out the same
+  if (p.tid === -2) continue;
   const tot = seasonTotals(p);
   totalsByPid.set(p.pid, tot);
   for (const r of p.ratings || []) {

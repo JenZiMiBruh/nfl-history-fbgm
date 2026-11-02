@@ -6,15 +6,15 @@ The roster file works in stock Football GM. The mod is what makes history *behav
 
 ## Install
 
-**Windows:** double-click `Install_and_Play.bat`. It installs Node.js and Git if you don't have them, downloads Football GM's source, applies the mod and opens the game. The first run takes 5–10 minutes; after that it starts in seconds.
+**Windows:** double-click `Install_and_Play.bat`. It downloads its own copy of Node.js 24 into the folder (whatever Node you have doesn't matter), installs Git if you don't have it, downloads Football GM's source, applies the mod and opens the game. The first run takes 5–10 minutes; after that it starts in seconds. If something fails, run it again (it picks up where it stopped); if it still fails, open an issue and attach `install_log.txt` from the folder.
 
-**Mac / Linux:** run `./install_and_play.sh`.
+**Mac / Linux:** run `./install_and_play.sh` (needs git; it also uses its own Node.js 24).
 
 **Phone:** run the installer on your computer, then open the address it shows (`http://<your-PC>:3000`) on your phone on the same Wi-Fi. Your phone saves its own leagues. Football GM's license doesn't allow hosting a modded copy online, so a computer on your network is required.
 
 ### Manual install
 
-You need Node 22+, pnpm and git.
+You need Node 24 (not newer: Node 25+ dropped corepack, which installs Football GM's packages), pnpm 11 and git.
 
 ```bash
 git clone https://github.com/zengm-games/zengm.git
