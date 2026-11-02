@@ -13,6 +13,8 @@
  * Then rebuild what depends on the new games, and export:
  *   node src/build_head_to_head.js && node src/build_live_games.js && node src/build_weekly.js 2026 2026
  *   node src/export_vanilla.js "Week N"   (and copy data_cache/weekly/2026.json to the site's data/weekly/)
+ *   node src/build_selector_master.js   (the slim master: the site's data/NFL_Selector_Master.json.gz, also uploaded
+ *   to the release as NFL_Master_1966_2026.json.gz)
  *
  * Usage: node --max-old-space-size=14000 src/update_live.js [season=2026]
  */
