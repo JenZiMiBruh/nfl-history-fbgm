@@ -9,6 +9,7 @@
  *   - players rated on the wrong side of the ball (Jimmy Smith, the Jaguars receiver, as a cornerback)
  *   - returners rated as stars at their listed position (Devin Hester 2007 as a CB)
  *   - every quarterback with the same speed (Stafford and Lamar Jackson)
+ *   - starters whose live-season stats didn't come through
  *
  * Usage: node --max-old-space-size=14000 src/audit_ratings.js [baseline master to compare history against]
  */
@@ -116,7 +117,18 @@ const qbs = m.players.filter(p => p.tid >= 0 && p.ratings.at(-1).pos === 'QB' &&
 const spread = Math.max(...qbs) - Math.min(...qbs);
 check('quarterback speed spread (fastest minus slowest starter) under 30', spread < 30 ? [`spread ${spread}`] : []);
 
-// 9. Top of each position (for a human look)
+// 9. Missing live-season data: a healthy rostered player rated 65+ whose team has played 6+ games but who has no
+// games this season, and isn't a newly arrived player (his team this season differs from last)
+const teamGames = {};
+for (const t of m.teams) teamGames[t.tid] = ((t.seasons || []).find(x => x.season === LIVE) || {}).gp || 0;
+const missing = [];
+for (const p of m.players.filter(p => p.tid >= 0 && p.ratings.at(-1).season === LIVE)) {
+  if (p.ratings.at(-1).ovr < 65 || (p.injury && p.injury.gamesRemaining > 0) || teamGames[p.tid] < 6) continue;
+  if (totals(p, LIVE)('gp') === 0) missing.push(`${nm(p)} ${p.ratings.at(-1).pos} ${p.ratings.at(-1).ovr} (${m.teams[p.tid].abbrev}), no ${LIVE} games`);
+}
+check('healthy 65+ players with no games this season (missing data?)', missing);
+
+// 10. Top of each position (for a human look)
 for (const pos of ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S']) {
   const v = m.players.filter(p => p.tid >= 0 && p.ratings.at(-1).pos === pos).sort((a, b) => b.ratings.at(-1).ovr - a.ratings.at(-1).ovr).slice(0, 8);
   console.log(`info  top ${pos.padEnd(2)} ${v.map(p => `${p.lastName} ${p.ratings.at(-1).ovr}`).join(', ')}`);

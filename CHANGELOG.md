@@ -6,6 +6,12 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.3 · Nov 2, 2026
+
+- **Elite pass-rush seasons count in full.** A player's peak pass rush comes from his actual best seasons, not averaged with the seasons around them. Aaron Donald's 2018 (20.5 sacks from the interior) now ties Myles Garrett's 2025 at the top, alongside J.J. Watt 2014, Mark Gastineau 1984, Richard Dent, Khalil Mack and T.J. Watt. Maxx Crosby's pass rush is 76.
+- **Nose tackles stop the run.** Run defense up front now comes with size as well as tackles: Vita Vea 67 (was 40), Dexter Lawrence 68, Haloti Ngata 2010 78. Lighter edge rushers are rated lower against the run.
+- **A new check for missing data** runs before every release: no healthy starter can be missing his current-season games. (Myles Garrett's empty 2026 is real: he's been on injured reserve with the Rams since Week 1, and the file has him injured.)
+
 ## v1.2 · Nov 2, 2026
 
 ### Pass rushers rush like themselves (thanks for the Maxx Crosby question)

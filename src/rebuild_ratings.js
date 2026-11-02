@@ -332,6 +332,9 @@ for (const x of rows) {
   for (const k of KEYS) base[k] = tmpl[pos][k];
   if (p.weight) base.stre = tmpl[pos].stre + (p.weight - weightMean[pos]) * 0.4;
   for (const [skill, raw] of Object.entries(x.rawS || {})) base[skill] = tmpl[pos][skill] + SPREAD * raw;
+  // Run defense up front comes with size as well as tackles: a 347-pound nose tackle eats blockers instead of making
+  // tackles (Vita Vea), a 250-pound edge rusher is lighter against the run
+  if (p.weight && pos === 'DL') base.rns += (p.weight - weightMean.DL) * 0.5;
   let skills = POS_SKILLS[pos];
   if ((pos === 'DL' || pos === 'LB') && x.season >= 1982) {
     // A pass rusher's pass rush is his best sack rate of the seasons so far (with tackles for loss from 1999), on a
@@ -339,8 +342,9 @@ for (const x of rows) {
     // Crosby even in a quiet half-season. Only his other skills move to match his overall.
     let rush;
     for (const y of byPlayer.get(p.pid) || []) {
-      if (y.season > x.season || y.pos !== pos || y.season < 1982 || y.rawS?.prs === undefined || !(y.t?.gp >= 4)) continue;
-      const v = y.rawS.prs - 0.08 * (x.season - y.season);
+      // each season on its own (not averaged with the seasons around it), so a peak like Aaron Donald's 2018 counts in full
+      if (y.season > x.season || y.pos !== pos || y.season < 1982 || y.raw?.prs === undefined || !(y.t?.gp >= 4)) continue;
+      const v = y.raw.prs - 0.08 * (x.season - y.season);
       if (rush === undefined || v > rush) rush = v;
     }
     if (rush !== undefined) {
