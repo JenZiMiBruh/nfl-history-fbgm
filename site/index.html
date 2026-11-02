@@ -36,28 +36,34 @@ nav .links a{text-decoration:none;color:var(--muted)}nav .links a:hover{color:va
 @media(max-width:700px){nav .links a:not(.cta){display:none}}
 .cta{background:var(--accent);color:#fff!important;padding:8px 14px;border-radius:999px}
 
-/* hero */
-.hero{position:relative;overflow:hidden;background:radial-gradient(1200px 500px at 80% -10%,#1b6b3c 0,transparent 60%),linear-gradient(180deg,var(--turf),var(--turf2));color:#fff;padding:90px 0 70px}
-.hero .yard{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 119px,rgba(255,255,255,.07) 119px 121px);pointer-events:none}
-.hero .wall{position:absolute;right:-40px;top:0;bottom:0;width:58%;display:grid;grid-template-columns:repeat(8,1fr);gap:10px;padding:20px;opacity:.55;transform:rotate(-8deg) scale(1.15);mask-image:linear-gradient(90deg,transparent,#000 40%)}
-.hero .wall svg{width:100%;height:auto;animation:float 6s ease-in-out infinite}
-@keyframes float{50%{transform:translateY(-6px)}}
-@media(prefers-reduced-motion:reduce){.hero .wall svg{animation:none}}
-.hero .inner{position:relative;max-width:640px}
-.hero h1{font-size:clamp(52px,9vw,104px);text-transform:uppercase;line-height:.92}
-.hero h1 span{color:#7fe0a5}
-.hero .sub{font-size:clamp(18px,2.2vw,22px);color:#d6eadc;margin:18px 0 6px}
-.hero .by{font-size:14px;color:#a8d5b7;margin-bottom:28px}
+/* hero: same look as the GitHub banner (tools/graphics/banner.html) */
+.hero{position:relative;overflow:hidden;background:#05100a;color:#fff;padding:96px 0 80px;perspective:1400px;clip-path:inset(0);contain:paint}
+.hero .wall{position:absolute;left:34%;top:-140px;width:1180px;display:grid;grid-template-columns:repeat(12,1fr);gap:14px 12px;transform:rotateY(-24deg) rotateX(6deg) rotateZ(-4deg);transform-origin:0 50%;pointer-events:none}
+.hero .wall>div{filter:drop-shadow(0 8px 10px rgba(0,0,0,.55))}
+.hero .wall svg{width:100%;height:auto;display:block}
+.hero .shade{position:absolute;inset:0;pointer-events:none;background:
+  linear-gradient(90deg,#05100a 0%,#05100a 28%,rgba(5,16,10,.88) 44%,rgba(5,16,10,.25) 66%,rgba(5,16,10,0) 80%),
+  linear-gradient(0deg,#05100a,transparent 22%),linear-gradient(180deg,rgba(5,16,10,.7),transparent 18%),
+  radial-gradient(circle at 78% 40%,rgba(255,240,200,.12),transparent 45%)}
+.hero .inner{position:relative;max-width:620px}
+.hero .eyebrow{color:#7ee0a1!important;letter-spacing:6px}
+.hero h1{font-size:clamp(64px,11vw,128px);text-transform:uppercase;line-height:.92;letter-spacing:1px}
+.hero h1 span{display:block;background:linear-gradient(90deg,#7ee0a1,#f5c542);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .years{display:flex;align-items:center;gap:14px;margin:22px 0 4px;font:700 26px Oswald,sans-serif}
+.hero .years i{flex:0 0 150px;height:3px;background:linear-gradient(90deg,#7ee0a1,#f5c542);border-radius:2px}
+.hero .sub{font-size:clamp(18px,2.2vw,21px);color:#cfe3d5;margin:16px 0 6px;max-width:500px}
+.hero .by{font-size:15px;color:#8fb39b;margin-bottom:28px}
 .hero .by b{color:#fff}
 .btns{display:flex;flex-wrap:wrap;gap:12px}
 .btn{display:inline-flex;align-items:center;gap:8px;padding:13px 20px;border-radius:12px;font-weight:700;text-decoration:none;border:0;cursor:pointer;font-size:15px}
-.btn.primary{background:#fff;color:var(--turf)}
-.btn.ghost{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25)}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:46px;max-width:640px}
-.stats div{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:14px}
-.stats b{display:block;font-family:Oswald;font-size:30px;line-height:1}
-.stats span{font-size:12px;color:#b9dcc5}
-@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}.hero .wall{width:100%;opacity:.18}}
+.btn.primary{background:linear-gradient(90deg,#7ee0a1,#f5c542);color:#05100a}
+.btn.ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.22)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);margin-top:42px;max-width:600px;background:rgba(10,15,11,.82);border:2px solid rgba(245,197,66,.5);border-radius:12px;padding:16px 0}
+.stats div{text-align:center;border-left:2px solid rgba(255,255,255,.12)}.stats div:first-child{border:0}
+.stats b{display:block;font-family:Oswald;font-size:32px;line-height:1.1;color:#f5c542}
+.stats span{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#a9c9b3}
+@media(max-width:700px){.hero .wall{left:-10%;opacity:.35}.hero .shade{background:linear-gradient(90deg,rgba(5,16,10,.92),rgba(5,16,10,.6)),linear-gradient(0deg,#05100a,transparent 22%)}.stats{grid-template-columns:repeat(2,1fr);gap:14px 0}.stats div:nth-child(3){border:0}}
+.cta{background:linear-gradient(90deg,#7ee0a1,#f5c542);color:#05100a!important}
 
 /* story */
 .story{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
@@ -220,12 +226,13 @@ footer small{display:block;opacity:.7;margin-top:8px;max-width:520px}
 </div></nav>
 
 <header class="hero" id="top">
-  <div class="yard"></div>
   <div class="wall" id="wall" aria-hidden="true"></div>
+  <div class="shade"></div>
   <div class="wrap"><div class="inner">
     <div class="eyebrow" style="color:#7fe0a5">For Football GM</div>
     <h1>NFL <span>History</span></h1>
-    <p class="sub">Every season from 1966 to today. Real players, real ratings, real schedules, and every logo and jersey, switching on the real date.</p>
+    <div class="years">1966<i></i>TODAY</div>
+    <p class="sub">Every season, every uniform. Real players, real ratings, real schedules, and every logo and jersey, switching on the real date.</p>
     <p class="by">A passion project by <b>JenZiMiBruh</b></p>
     <div class="btns">
       <a class="btn primary" href="#teams">Explore your team's history →</a>
@@ -365,7 +372,8 @@ async function init() {
   // Hero wall: one jersey per look from across the league.
   const all = [];
   for (const t of TEAMS) all.push(t.colors);
-  $('#wall').innerHTML = Array.from({ length: 48 }, (_, i) => `<div style="animation-delay:${(i % 7) * .4}s">${jersey(all[(i * 5) % all.length])}</div>`).join('');
+  const nums = [12, 7, 32, 80, 56, 19, 34, 88, 13, 4, 22, 99, 10, 52, 87, 8, 18, 92, 81, 28, 15, 3, 74, 21];
+  $('#wall').innerHTML = Array.from({ length: 84 }, (_, i) => { const r = Math.floor(i / 12), c = i % 12; return `<div>${r === 4 && c === 6 ? jersey(['#97233F', '#FFFFFF', '#000000'], '11') : jersey(all[(i * 5) % all.length], nums[(r * 5 + c * 7 + i) % nums.length])}</div>`; }).join('');
   initDraft();
   route();
 }
@@ -661,7 +669,7 @@ shotMode();
     if (pos < code.length) return;
     pos = 0;
     const wall = document.getElementById('wall');
-    if (wall) wall.innerHTML = Array.from({ length: 48 }, (_, i) => `<div style="animation-delay:${(i % 7) * .4}s">${jersey(['#97233F', '#FFFFFF', '#000000'], '11')}</div>`).join('');
+    if (wall) wall.innerHTML = Array.from({ length: 84 }, (_, i) => `<div style="animation-delay:${(i % 7) * .4}s">${jersey(['#97233F', '#FFFFFF', '#000000'], '11')}</div>`).join('');
     scrollTo({ top: 0, behavior: 'smooth' });
     toast('11 out of 10 jerseys agree: Larry would have caught that.');
   });
