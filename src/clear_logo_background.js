@@ -20,13 +20,23 @@ const ERAS = path.join(ROOT, 'data_cache', 'logos_eras_final.json');
 const PROCESSED = path.join(ROOT, 'data_cache', 'logos_processed.json');
 const MASTER = path.join(ROOT, 'NFL_Master_1966_2026.json');
 
+const inPolygon = (x, y, pts) => {
+  let c = false;
+  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+    const [xi, yi] = pts[i], [xj, yj] = pts[j];
+    if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c;
+  }
+  return c;
+};
+
 // Coordinates are for the 256x256 logo images
 const FIXES = [
   {
     tid: 0, era: 0, name: 'St. Louis Cardinals 1966-69 (white behind the cardinal, inside the arch)',
-    seeds: [[88, 115], [107, 47], [104, 52], [110, 44]],
-    // the back leg's outline has a gap where it meets the patch: stay left of its edge, knee (75,172) to sock (62,200)
-    keepOut: (x, y) => y > 172 && x > 75 - (y - 172) * 13 / 28,
+    seeds: [[88, 115], [107, 47], [104, 52], [110, 44], [75, 185], [62, 180]],
+    // the back leg's shin has a gap in its outline where it meets the patch: keep everything inside the shin, traced from
+    // the outlines (under the thigh, down the black diagonal, the cuff, the faint top line)
+    keepOut: (x, y) => inPolygon(x, y, [[90, 177], [130, 167], [90, 213], [67, 213], [67, 195], [80, 195], [86, 186]]),
   },
 ];
 

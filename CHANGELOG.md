@@ -6,6 +6,10 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.7 · Nov 2, 2026
+
+- **1966-69 Cardinals logo, take two.** v1.6 left part of the white background around the cardinal's back leg. The leg is now traced from its outline, so only the leg stays white and the background behind it is see-through.
+
 ## v1.6 · Nov 2, 2026
 
 - **1966-69 St. Louis Cardinals logo cleaned up.** A patch of the scan's white background was left between the Gateway Arch and the cardinal (and by its head), so it showed as a white block on colored backgrounds. It's see-through now, like the rest of the logo. Thanks for the report!
