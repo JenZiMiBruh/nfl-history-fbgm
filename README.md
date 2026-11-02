@@ -193,6 +193,10 @@ The test: start in 1966, sim all the way to today, and compare with what really 
 
 Every new full-history sim is measured the same way, and the biggest misses get fixed in the next version. Receivers, pass rushers and early-era scoring are next. Details in [docs/results.md](docs/results.md).
 
+## 🗓️ Timeline
+
+The live file updates every Monday after Sunday's games through Super Bowl LXI (Feb 14, 2027). Next up: tuning receivers and pass rushers, the 2027 class refresh (Feb–Mar), the real 2027 draft (April) and schedule (May). Full timeline in [docs/roadmap.md](docs/roadmap.md).
+
 ## How it was built
 
 <p align="center"><img src="assets/pipeline.svg" alt="Data pipeline: sources, build, clean and rate, play" width="100%"></p>
