@@ -7,6 +7,8 @@
  *
  * phase: "preseason" (FBGM phase 0) | "regular" (phase 1, real schedule, week 1)
  *        | "live" (2026 only: the master as-is, the live season with real results so far)
+ * week:  with phase "regular", start at that week (1999+): earlier weeks are played from real games
+ *        (opts.weekly = data_cache/weekly/<season>.json; CLI: --week 9)
  */
 (function (root) {
   'use strict';
@@ -79,6 +81,17 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     // How much of season S has really happened: 0 nothing, 1 regular season, 2 regular season and playoffs
     const DONE = phaseName === 'playoffs' ? 1 : (phaseName === 'afterplayoffs' || phaseName === 'draft') ? 2 : 0;
     const keepStat = s => s.season < S || (DONE && s.season === S && (DONE === 2 || !s.playoffs));
+    // Start at week W of the regular season (seasons with weekly data): weeks 1..W-1 are already played, from real games
+    const W = phaseName === 'regular' && opts.week > 1 && opts.weekly ? opts.week : 0;
+    const wkGames = W ? opts.weekly.games.filter(g => g[0] < W) : [];
+    const wkLines = W ? opts.weekly.lines : {};
+    // Each team's starting quarterback per game: the passer with the most attempts
+    const qbStart = new Set();
+    if (W) {
+      const top = new Map();
+      for (const [pid, ls] of Object.entries(wkLines)) for (const [day, tid, l] of ls) if (day < W && l.pss > (top.get(day + '|' + tid)?.pss || 0)) top.set(day + '|' + tid, { pid, pss: l.pss });
+      for (const [k, v] of top) qbStart.add(v.pid + '|' + k);
+    }
     const rules = E.getRules(S);
     const align = E.getAlignment(S);
     const hofYears = opts.hofYears || {};
@@ -167,10 +180,30 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       delete p.retiredYear;
       p.hof = !!(hofYears[p.pid] && hofYears[p.pid] <= S);
 
+      const played = W ? (wkLines[src.pid] || []).filter(x => x[0] < W) : [];
+      if (played.length) {
+        // His season so far, one row per team in the order he played for them, summed from his real games
+        const tmpl = (src.stats || []).find(st => !st.playoffs) || {};
+        const byTid = new Map();
+        for (const [day, tid, l] of played.slice().sort((a, b) => a[0] - b[0])) {
+          if (!byTid.has(tid)) {
+            const row = {};
+            for (const k of Object.keys(tmpl)) row[k] = typeof tmpl[k] === 'number' ? 0 : tmpl[k];
+            const real = rowsS.find(r => r.tid === tid);
+            byTid.set(tid, Object.assign(row, { season: S, playoffs: false, tid, jerseyNumber: real?.jerseyNumber ?? src.jerseyNumber, yearsWithTeam: real?.yearsWithTeam ?? 1 }));
+          }
+          const row = byTid.get(tid);
+          for (const [k, v] of Object.entries(l)) row[k] = k.endsWith('Lng') ? Math.max(row[k] || 0, v) : (row[k] || 0) + v;
+          row.gp = (row.gp || 0) + 1;
+          if (qbStart.has(src.pid + '|' + day + '|' + tid)) { row.gs = (row.gs || 0) + 1; }
+        }
+        p.stats.push(...byTid.values());
+        p.statsTids = [...new Set(p.stats.map(s => s.tid))];
+      }
       if (rowsS.length) {
-        // Starting team = first team listed that season (later rows are mid-season moves).
+        // Starting team = first team listed that season (later rows are mid-season moves); at week W, his team by then
         const row = rowsS[0];
-        p.tid = row.tid;
+        p.tid = played.length ? played.slice().sort((a, b) => b[0] - a[0])[0][1] : row.tid;
         if (row.jerseyNumber) p.jerseyNumber = row.jerseyNumber;
         p._gp = rowsS.reduce((a, s) => a + (s.gp || 0), 0);
         p._ovr = p.ratings[p.ratings.length - 1].ovr;
@@ -212,6 +245,32 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     fitPayrolls(players, rules);
 
     // -------------------------------------------------------------------- teams
+    // Standings after weeks 1..W-1: overall, home/away, division and conference records, points, streak, last ten
+    const rec = {};
+    const blankRec = () => ({ gp: 0, gpHome: 0, won: 0, lost: 0, tied: 0, otl: 0, wonHome: 0, lostHome: 0, tiedHome: 0, otlHome: 0, wonAway: 0, lostAway: 0, tiedAway: 0, otlAway: 0,
+      wonDiv: 0, lostDiv: 0, tiedDiv: 0, otlDiv: 0, wonConf: 0, lostConf: 0, tiedConf: 0, otlConf: 0, pts: 0, oppPts: 0, lastTen: [], streak: 0 });
+    for (const [, h, a, hp, ap] of wkGames.slice().sort((x, y) => x[0] - y[0])) {
+      for (const [me, opp, pf, pa, home] of [[h, a, hp, ap, true], [a, h, ap, hp, false]]) {
+        const r = rec[me] = rec[me] || blankRec();
+        const res = pf > pa ? 'won' : pf < pa ? 'lost' : 'tied';
+        r.gp++; if (home) r.gpHome++;
+        r[res]++; r[res + (home ? 'Home' : 'Away')]++;
+        if (align.teamDiv[me] && align.teamDiv[opp]) {
+          if (align.teamDiv[me].did === align.teamDiv[opp].did) r[res + 'Div']++;
+          if (align.teamDiv[me].cid === align.teamDiv[opp].cid) r[res + 'Conf']++;
+        }
+        r.pts += pf; r.oppPts += pa;
+        r.lastTen = [res === 'won' ? 1 : res === 'lost' ? 0 : 'TIE', ...r.lastTen].slice(0, 10);
+        r.streak = res === 'won' ? (r.streak > 0 ? r.streak + 1 : 1) : res === 'lost' ? (r.streak < 0 ? r.streak - 1 : -1) : 0;
+      }
+    }
+    // Team totals so far: the sum of its players' real lines
+    const teamSum = {};
+    for (const ls of Object.values(wkLines)) for (const [day, tid, l] of ls) {
+      if (day >= W) continue;
+      const t = teamSum[tid] = teamSum[tid] || {};
+      for (const [k, v] of Object.entries(l)) t[k] = k.endsWith('Lng') ? Math.max(t[k] || 0, v) : (t[k] || 0) + v;
+    }
     const teams = master.teams.map(src => {
       const b = E.getTeamBranding(src.tid, S);
       const a = align.teamDiv[src.tid];
@@ -236,8 +295,16 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
           colors: b.colors, jersey: b.jersey, pop: b.pop, stadiumCapacity: b.stadiumCapacity, season: S, gp: 0, gpHome: 0, att: 0, cash: 25000,
           won: 0, lost: 0, tied: 0, otl: 0, wonHome: 0, lostHome: 0, tiedHome: 0, otlHome: 0, wonAway: 0, lostAway: 0, tiedAway: 0, otlAway: 0,
           wonDiv: 0, lostDiv: 0, tiedDiv: 0, otlDiv: 0, wonConf: 0, lostConf: 0, tiedConf: 0, otlConf: 0, pts: 0, oppPts: 0, lastTen: [], streak: 0, playoffRoundsWon: -1 });
+        if (rec[src.tid]) Object.assign(t.seasons[t.seasons.length - 1], rec[src.tid]);
       }
       t.stats = (src.stats || []).filter(keepStat);
+      if (W && rec[src.tid] && !b.disabled) {
+        const tmpl = (src.stats || []).find(st => !st.playoffs) || {};
+        const row = {};
+        for (const k of Object.keys(tmpl)) row[k] = typeof tmpl[k] === 'number' ? 0 : tmpl[k];
+        Object.assign(row, { season: S, playoffs: false, tid: src.tid }, teamSum[src.tid] || {}, { gp: rec[src.tid].gp, pts: rec[src.tid].pts, oppPts: rec[src.tid].oppPts });
+        t.stats.push(row);
+      }
       t.retiredJerseyNumbers = (src.retiredJerseyNumbers || []).filter(j => j.seasonRetired < S);
       return t;
     });
@@ -313,7 +380,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     let schedule = [];
     const real = opts.schedules && opts.schedules[S];
     if (P === PHASES.regular && !DONE && real) {
-      schedule = real.filter(g => !teams[g.homeTid].disabled && !teams[g.awayTid].disabled).map((g, gid) => ({ gid, day: g.day, homeTid: g.homeTid, awayTid: g.awayTid }));
+      schedule = real.filter(g => !teams[g.homeTid].disabled && !teams[g.awayTid].disabled && (!W || g.day >= W)).map((g, gid) => ({ gid, day: g.day, homeTid: g.homeTid, awayTid: g.awayTid }));
     }
 
     // ---------------------------------------------------------- scheduled events
@@ -334,7 +401,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     const league = {
       version: master.version,
       startingSeason: E.FIRST_SEASON,
-      meta: { name: `NFL ${S}-${String(S + 1).slice(2)} (${PHASE_LABELS[phaseName] || phaseName})` },
+      meta: { name: `NFL ${S}-${String(S + 1).slice(2)} (${W ? 'Week ' + W : PHASE_LABELS[phaseName] || phaseName})` },
       gameAttributes: ga,
       teams,
       players,
@@ -347,7 +414,8 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       events: (master.events || []).filter(e => e.season < S || (DONE && e.season === S)),
       // Real head-to-head records for the seasons already played (this season's once its games are done)
       headToHeads: (master.headToHeads || []).filter(h => h.season < S || (DONE && h.season === S))
-        .map(h => h.season === S && DONE !== 2 ? { ...h, playoffs: {} } : h),
+        .map(h => h.season === S && DONE !== 2 ? { ...h, playoffs: {} } : h)
+        .concat(W ? [weekHeadToHead(S, wkGames)] : []),
       releasedPlayers: []
     };
     shiftSeasons(league, 1);
@@ -360,6 +428,18 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
    * The master and nfl_eras keep the NFL's own naming (the year a season starts); this is applied last.
    * Birth years stay real, so ages are as of the year a season ends.
    */
+  /** Head-to-head records from a list of [day, homeTid, awayTid, homePts, awayPts] games. */
+  function weekHeadToHead(season, games) {
+    const regularSeason = {};
+    for (const [, h, a, hp, ap] of games) {
+      const [x, y, px, py] = h < a ? [h, a, hp, ap] : [a, h, ap, hp];
+      const r = (regularSeason[x] = regularSeason[x] || {})[y] = regularSeason[x][y] || { won: 0, lost: 0, tied: 0, otl: 0, otw: 0, pts: 0, oppPts: 0 };
+      if (px > py) r.won++; else if (px < py) r.lost++; else r.tied++;
+      r.pts += px; r.oppPts += py;
+    }
+    return { season, regularSeason, playoffs: {} };
+  }
+
   function shiftSeasons(league, d) {
     const bump = (o, k) => { if (o && typeof o[k] === 'number' && Number.isFinite(o[k])) o[k] += d; };
     const bumpAll = (arr, k) => { for (const x of arr || []) bump(x, k); };
@@ -464,17 +544,19 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     const seasonName = parseInt(arg('season', '1967'), 10);
     const season = seasonName - 1;
     const phase = arg('phase', 'regular');
+    const week = parseInt(arg('week', '0'), 10);
     const ROOT = path.join(__dirname, '..');
     const E = require('./nfl_eras');
     const read = (f) => JSON.parse(fs.readFileSync(path.join(ROOT, f), 'utf8'));
     const master = read(arg('master', 'NFL_Master_1966_2026.json'));
     const out = sliceLeague(master, E, {
-      season, phase, schedules: read('data_cache/real_schedules.json'), hofYears: read('data_cache/hof_years.json'),
+      season, phase, week, weekly: week > 1 && fs.existsSync(path.join(ROOT, `data_cache/weekly/${season}.json`)) ? read(`data_cache/weekly/${season}.json`) : undefined,
+      schedules: read('data_cache/real_schedules.json'), hofYears: read('data_cache/hof_years.json'),
       logos: fs.existsSync(path.join(ROOT, 'data_cache/logos.json')) ? read('data_cache/logos.json') : {},
       logosProcessed: fs.existsSync(path.join(ROOT, 'data_cache/logos_processed.json')) ? read('data_cache/logos_processed.json') : {},
       logoEras: fs.existsSync(path.join(ROOT, 'data_cache/logos_eras_final.json')) ? read('data_cache/logos_eras_final.json') : null
     });
-    const file = arg('out', path.join(ROOT, `NFL_${seasonName}_${phase}_FBGM.json`));
+    const file = arg('out', path.join(ROOT, `NFL_${seasonName}_${week > 1 ? 'week' + week : phase}_FBGM.json`));
     fs.writeFileSync(file, toJsonChunks(out).join(''));
     console.log('wrote', file, 'players', out.players.length, 'events', out.scheduledEvents.length);
   }

@@ -100,7 +100,7 @@
         <label>Point in the year</label>
         <div class="phases" id="phases">
           <label><input type="radio" name="phase" value="preseason">Preseason</label>
-          <label><input type="radio" name="phase" value="regular" checked>Regular Season, Week 1</label>
+          <label><input type="radio" name="phase" value="regular" checked>Regular Season, <select id="week" aria-label="Week"><option value="1">Week 1</option></select></label>
           <label class="done"><input type="radio" name="phase" value="playoffs">Playoffs</label>
           <label class="done"><input type="radio" name="phase" value="afterplayoffs">After Playoffs</label>
           <label class="done"><input type="radio" name="phase" value="draft">Draft</label>
@@ -155,6 +155,16 @@ const LOGO_ERAS = /*__LOGO_ERAS__*/null;
   $('season').value = '1966';
 
   const phase = () => document.querySelector('input[name=phase]:checked').value;
+  // Week-by-week real data (1999 on), fetched next to the master file the first time a later week is picked
+  const FIRST_WEEKLY = 1999;
+  const WEEKLY = {};
+  const weeklyBase = () => { const m = new URLSearchParams(location.search).get('master'); return (m ? m.replace(/[^/]*$/, '') : 'data/') + 'weekly/'; };
+  async function loadWeekly(S) {
+    if (S < FIRST_WEEKLY || WEEKLY[S] !== undefined) return WEEKLY[S];
+    try { const r = await fetch(weeklyBase() + S + '.json'); WEEKLY[S] = r.ok ? await r.json() : null; } catch (e) { WEEKLY[S] = null; }
+    return WEEKLY[S];
+  }
+  const week = () => (phase() === 'regular' ? +$('week').value || 1 : 1);
   const setStatus = (msg, cls) => { $('status').textContent = msg; $('status').className = 'status' + (cls ? ' ' + cls : ''); };
   const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const money = (k) => k >= 1000 ? '$' + (k / 1000).toFixed(1) + 'M' : '$' + k + 'K';
@@ -190,9 +200,9 @@ const LOGO_ERAS = /*__LOGO_ERAS__*/null;
   // Slice once per season/phase and reuse it for roster views and the download.
   let sliceCache = { key: null, league: null };
   function getSlice() {
-    const S = +$('season').value, ph = phase();
-    const key = S + '|' + ph;
-    if (sliceCache.key !== key) sliceCache = { key, league: SL.sliceLeague(master, E, { season: S, phase: ph, schedules: SCHEDULES, hofYears: HOF_YEARS, logos: LOGOS, logosProcessed: LOGOS_PROCESSED, logoEras: LOGO_ERAS }) };
+    const S = +$('season').value, ph = phase(), w = WEEKLY[S] ? week() : 1;
+    const key = S + '|' + ph + '|' + w;
+    if (sliceCache.key !== key) sliceCache = { key, league: SL.sliceLeague(master, E, { season: S, phase: ph, week: w, weekly: WEEKLY[S] || undefined, schedules: SCHEDULES, hofYears: HOF_YEARS, logos: LOGOS, logosProcessed: LOGOS_PROCESSED, logoEras: LOGO_ERAS }) };
     return sliceCache.league;
   }
   const POS_ORDER = ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S', 'K', 'P'];
@@ -253,6 +263,16 @@ const LOGO_ERAS = /*__LOGO_ERAS__*/null;
     if (liveInput.disabled && liveInput.checked) document.querySelector('input[value=regular]').checked = true;
     // Playoffs / After Playoffs / Draft need a season that has finished
     for (const l of document.querySelectorAll('#phases label.done')) { const i = l.querySelector('input'); i.disabled = S >= 2026; l.classList.toggle('disabled', i.disabled); if (i.disabled && i.checked) document.querySelector('input[value=regular]').checked = true; }
+    // Weeks: every week of the real schedule where weekly data exists (the live season: up to the next week to play)
+    const wsel = $('week'), keep = +wsel.value || 1;
+    const days = (SCHEDULES[S] || []).map(g => g.day);
+    let maxWeek = S >= FIRST_WEEKLY && days.length ? Math.max(...days) : 1;
+    if (WEEKLY[S] && S >= 2026) maxWeek = Math.min(maxWeek, Math.max(0, ...WEEKLY[S].games.map(g => g[0])) + 1);
+    if (WEEKLY[S] === null) maxWeek = 1;
+    wsel.innerHTML = Array.from({ length: maxWeek }, (_, i) => '<option value="' + (i + 1) + '">Week ' + (i + 1) + '</option>').join('');
+    wsel.value = String(Math.min(keep, maxWeek));
+    wsel.disabled = maxWeek === 1;
+    if (S === 2026 && WEEKLY[S] === undefined) loadWeekly(S).then(render);
     const ph = phase();
     const r = E.getRules(S);
     const a = E.getAlignment(S);
@@ -277,7 +297,9 @@ const LOGO_ERAS = /*__LOGO_ERAS__*/null;
       : '<div>' + (ph === 'live' ? 'The live 2027 file keeps its current state; all history events are in the past.' : 'No upcoming events.') + '</div>';
     const notes = {
       preseason: 'Starts before Week 1. Rosters are each team\'s opening-day roster for that season; Football GM builds the schedule when the regular season begins.',
-      regular: (S === 1982 || S === 1987) ? 'Starts at Week 1 with the real strike-shortened ' + (S + 1) + ' schedule.' : 'Starts at Week 1 with the real NFL schedule for that season.',
+      regular: week() > 1 ? 'Starts at Week ' + week() + '. Weeks 1-' + (week() - 1) + ' are already played from the real games: standings, every player\'s stats, team stats and head-to-head records.'
+        : S < FIRST_WEEKLY ? 'Starts at Week 1 with the real NFL schedule. (Starting at a later week needs week-by-week stats, which exist from ' + (FIRST_WEEKLY + 1) + ' on.)'
+        : (S === 1982 || S === 1987) ? 'Starts at Week 1 with the real strike-shortened ' + (S + 1) + ' schedule.' : 'Starts at Week 1 with the real NFL schedule. Pick a later week to start mid-season.',
       playoffs: 'The real ' + (S + 1) + ' regular season is in the books: real records, stats and standings. Hit play and the playoffs begin.',
       afterplayoffs: 'The real ' + (S + 1) + ' season is complete: champion crowned, awards handed out, real retirements done. The draft is next.',
       draft: 'Draft day ' + (S + 1) + ', with the real draft order. You are on the clock.',
@@ -390,11 +412,13 @@ const LOGO_ERAS = /*__LOGO_ERAS__*/null;
     catch (e) { console.error(e); setStatus('Failed: ' + e.message, 'err'); }
   });
 
-  $('season').addEventListener('change', render);
+  $('season').addEventListener('change', async () => { if (week() > 1) { setStatus('Loading week-by-week stats…'); await loadWeekly(+$('season').value); setStatus(''); } render(); });
   $('phases').addEventListener('change', render);
+  $('week').addEventListener('change', async () => { setStatus('Loading week-by-week stats…'); await loadWeekly(+$('season').value); setStatus(''); render(); });
 
   $('go').addEventListener('click', async () => {
     const S = +$('season').value, ph = phase();
+    if (week() > 1) await loadWeekly(S);
     $('go').disabled = true;
     setStatus('Building league…');
     await new Promise(r => setTimeout(r, 30));
@@ -408,7 +432,7 @@ const LOGO_ERAS = /*__LOGO_ERAS__*/null;
       const blob = new Blob(SL.toJsonChunks(league), { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = ph === 'live' ? 'NFL_2027_Week9_FBGM.json' : `NFL_${S + 1}_${ph === 'regular' ? 'Week1' : 'Preseason'}_FBGM.json`;
+      a.download = ph === 'live' ? 'NFL_2027_Live_FBGM.json' : `NFL_${S + 1}_${ph === 'regular' ? 'Week' + (WEEKLY[S] ? week() : 1) : { preseason: 'Preseason', playoffs: 'Playoffs', afterplayoffs: 'AfterPlayoffs', draft: 'Draft' }[ph]}_FBGM.json`;
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(a.href), 60000);
       const nEv = (league.scheduledEvents || []).length;
