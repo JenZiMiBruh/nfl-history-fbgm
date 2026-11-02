@@ -1,0 +1,11 @@
+name: "💬 Something else"
+description: Wrong stats, a missing player, a crash, an idea
+title: ""
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What's going on
+      description: Include the player/team, season and which file you used if it's about the data
+    validations:
+      required: true

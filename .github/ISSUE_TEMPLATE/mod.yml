@@ -1,0 +1,33 @@
+name: "🛠️ The mod won't install or start"
+description: Install_and_Play stopped with an error, or the game won't open
+title: "[Mod] What happened"
+labels: ["mod"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        First try running Install_and_Play again: it picks up where it stopped. Still stuck? Fill this in.
+  - type: dropdown
+    id: os
+    attributes:
+      label: Computer
+      options:
+        - Windows
+        - Mac
+        - Linux
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you clicked, and the last few lines the window showed
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: install_log.txt
+      description: Drag the install_log.txt file from the mod folder here (or paste its last 30 lines)
+    validations:
+      required: true

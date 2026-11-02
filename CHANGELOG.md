@@ -6,6 +6,12 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.5 · Nov 2, 2026
+
+- **The mod updates itself.** Every time you start it, it checks for a new version, downloads it, re-applies the mod and shows what's new before the game opens. No more re-downloading. (If you're on v1.4 or earlier, download the mod one last time to get the updater.)
+- **Report a wrong rating or logo in one tap.** Every player card on the site has a "Rating look wrong? Report it" link and every team page a "Logo or uniform wrong?" link; they open a GitHub form already filled in with the player, season and rating. There are forms for mod problems too, which ask for install_log.txt.
+- **The Mac/Linux mod zip works.** The zip stored its folders with Windows backslashes, so unzipping on a Mac didn't create the mod folder. Fixed.
+
 ## v1.4 · Nov 2, 2026
 
 - **Draft classes restored.** v1.2 and v1.3 accidentally flattened all three real draft classes (2027-2029) to the same 40 overall / 59 potential: a ratings rebuild treated prospects with no NFL games like nobodies. Their real scouting-based ratings are back (top potentials 77-79), and the audit now checks that draft classes keep their spread.

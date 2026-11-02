@@ -1,0 +1,45 @@
+name: "🎨 A logo, uniform or team detail looks wrong"
+description: Wrong logo, colors, jersey, name or city for a team and season
+title: "[Look] Team, season"
+labels: ["logos"]
+body:
+  - type: input
+    id: team
+    attributes:
+      label: Team
+      placeholder: Tennessee Titans
+    validations:
+      required: true
+  - type: input
+    id: season
+    attributes:
+      label: Season
+      description: The season as Football GM shows it (named by the year it ends)
+      placeholder: "2027"
+    validations:
+      required: true
+  - type: dropdown
+    id: what
+    attributes:
+      label: What's wrong
+      multiple: true
+      options:
+        - Logo
+        - See-through or broken logo image
+        - Colors
+        - Jersey
+        - Team name or city
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: What the game shows, and what it should be
+      description: A link to the real logo or uniform (Wikipedia, Logopedia) helps a lot
+    validations:
+      required: true
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot
+      description: Paste or drag an image here

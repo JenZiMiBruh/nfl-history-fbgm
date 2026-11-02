@@ -1,0 +1,61 @@
+name: "📊 A rating looks wrong"
+description: A player's overall or a skill (speed, pass rush, ...) doesn't match how good he really was
+title: "[Rating] Player, season"
+labels: ["ratings"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks! Specific reports get fixed fastest: several fixes so far came straight from reports like this (Chris Olave, quarterback speed, Maxx Crosby's pass rush).
+  - type: input
+    id: player
+    attributes:
+      label: Player
+      placeholder: Jonathan Taylor
+    validations:
+      required: true
+  - type: input
+    id: season
+    attributes:
+      label: Season
+      description: The season as Football GM shows it (named by the year it ends, so the 2026-27 season is 2027)
+      placeholder: "2027"
+    validations:
+      required: true
+  - type: input
+    id: shown
+    attributes:
+      label: What the game shows
+      placeholder: "49 overall, RB2 on the Colts"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you'd expect, and why
+      description: Stats, honors, where he ranked that year. Numbers help the most.
+      placeholder: "He led the league with 1,585 rushing yards last season and is the Colts' starter."
+    validations:
+      required: true
+  - type: dropdown
+    id: file
+    attributes:
+      label: Which file or start point
+      options:
+        - Play today (live file)
+        - Phone-friendly live file
+        - A season from the selector / Build a league
+        - The mod
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version (if you know it)
+      description: The release you downloaded, e.g. v1.5. Started before a fix? Start a new league with the latest file.
+      placeholder: v1.5
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot (optional)
+      description: Paste or drag an image here
