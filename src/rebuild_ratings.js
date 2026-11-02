@@ -193,9 +193,13 @@ const gsSeasons = new Set();
   for (const x of rows) if (x.t && x.t.gp > 0) { const b = by.get(x.season) || [0, 0]; b[0]++; if (x.t.gs > 0) b[1]++; by.set(x.season, b); }
   for (const [season, [n, g]] of by) if (g / n > 0.4) gsSeasons.add(season); // 2025-26 starts come from snap counts
 }
-// Played a lot without starting (special teams, deep backup): capped near the position's middle, so one big
-// special-teams year doesn't make him a 76 one season and a 43 the next
-const stCap = (x) => x.t && gsSeasons.has(x.season) && x.pos !== 'K' && x.pos !== 'P' && x.t.gp >= 6 && x.t.gs <= x.t.gp / 3 ? 0.55 : 1;
+// A special-teamer: barely started and did little at his position. His Pro Bowl / All-Pro honors were for special
+// teams, so they don't lift his rating at his position (Matthew Adams). Few starts alone mean nothing: rookies in a
+// committee and pass-rush specialists (Tony Dorsett 1977, Fred Dean 1981) start few games and are still stars.
+// (positions without stats to judge by, like offensive linemen, are never treated as special-teamers)
+const specialTeamer = (x) => x.t && gsSeasons.has(x.season) && x.t.gs <= 3 && positionWork(x.pos, x.t) !== undefined && positionWork(x.pos, x.t) < 15;
+// A fullback's Pro Bowls don't make him a star running back (Kyle Juszczyk): honors at RB need real carries and catches
+const fullback = (x) => x.pos === 'RB' && x.t && x.t.rus + x.t.rec < 60;
 
 // ------------------------------------------------------------------ step 1: how good (percentile)
 for (const [, list] of groups) {
@@ -229,21 +233,22 @@ for (const [pid, list] of byPlayer) {
   const raw = list.map(x => x.pct);
   list.forEach((x, i) => {
     if (raw[i] === undefined) return;
-    // A short season counts by how much of it he played (an injured star leans on the seasons around him); the season
-    // still being played counts by how much of it is done, and leans on last season
+    // A short season counts by how much of it he played, and the rest leans on his previous season (an injured star
+    // stays a star: Brady 2008). Never on the next one: a 1998 league can't know Kurt Warner's 1999 is coming. The
+    // season still being played works the same way.
     const full = x.season >= 2021 ? 17 : x.season >= 1978 ? 16 : 14;
     const g = x.t ? Math.min(1, (x.t.gp || 0) / (x.season === LIVE_SEASON ? 17 : full / 2)) : 1;
-    const hasNeighbor = raw[i - 1] !== undefined || raw[i + 1] !== undefined;
-    let sum = raw[i] * 0.6 * g, w = 0.6 * g;
-    const lean = hasNeighbor ? 0.6 * (1 - g) : 0;
-    if (!hasNeighbor) { sum = raw[i] * 0.6; w = 0.6; }
-    if (raw[i - 1] !== undefined) { const k = 0.2 + (raw[i + 1] !== undefined ? lean / 2 : lean); sum += raw[i - 1] * k; w += k; }
-    if (raw[i + 1] !== undefined && x.season !== LIVE_SEASON) { const k = 0.2 + (raw[i - 1] !== undefined ? lean / 2 : lean); sum += raw[i + 1] * k; w += k; }
+    const hasPrev = raw[i - 1] !== undefined;
+    // (not for offensive linemen: their game counts are unreliable in the sources, e.g. Larry Allen 2003 listed with 2)
+    const lean = hasPrev && x.pos !== 'OL' ? 0.6 * (1 - g) : 0;
+    let sum = raw[i] * (0.6 - lean), w = 0.6 - lean;
+    if (hasPrev) { sum += raw[i - 1] * (0.2 + lean); w += 0.2 + lean; }
+    if (raw[i + 1] !== undefined && x.season !== LIVE_SEASON) { sum += raw[i + 1] * 0.2; w += 0.2; }
     const fl = floors.get(pid + '|' + x.season) || 0;
-    const ret = returnerOnly(x), cap = stCap(x);
-    x.ps = Math.min(Math.max(sum / w, ret ? 0 : fl), cap);
+    const ret = returnerOnly(x) || specialTeamer(x) || fullback(x);
+    x.ps = Math.max(sum / w, ret ? 0 : fl);
     // Rows these rules change are rewritten even below RATE_FROM
-    if ((ret && fl > sum / w) || (cap < 1 && Math.max(sum / w, fl) > cap) || (g < 1 && hasNeighbor)) x.stFixed = true;
+    if ((ret && fl > sum / w) || lean > 0) x.stFixed = true;
   });
   // Seasons with no games: nearest real season, minus a little per year past 30
   list.forEach((x, i) => {
@@ -319,7 +324,7 @@ const clamp = (v) => Math.max(1, Math.min(99, Math.round(v)));
 let n = 0;
 for (const x of rows) {
   const { p, r, pos } = x;
-  if (x.season < RATE_FROM && !x.posFixed && !x.stFixed && pos !== 'QB') continue;
+  // Seasons not being rebuilt keep their overall exactly (below); only the skill mix is rebuilt from his stats
   const target0 = pos === 'K' || pos === 'P' ? curve(x.ps) / 0.75 : curve(x.ps);
   const base = { hgt: r.hgt };
   for (const k of KEYS) base[k] = tmpl[pos][k];
@@ -340,7 +345,7 @@ for (const x of rows) {
     if (run !== undefined) { base.spd = 45 + 15 * run; base.elu = 38 + 14 * run; }
     skills = skills.filter(k => !['spd', 'elu', 'stre', 'bsc'].includes(k));
   }
-  // Quarterbacks from seasons not being rebuilt keep their overall exactly; only the skill mix changes
+  // Rows from seasons not being rebuilt keep their overall exactly; only the skill mix changes
   const target = x.season < RATE_FROM && !x.posFixed && !x.stFixed ? r.ovr : target0;
   const build = (shift) => {
     const out = { ...base };
@@ -353,7 +358,17 @@ for (const x of rows) {
     const mid = (lo + hi) / 2;
     if (R.computeOvr(build(mid), pos) < Math.min(99, target)) lo = mid; else hi = mid;
   }
-  const out = build((lo + hi) / 2);
+  let out = build((lo + hi) / 2);
+  // The bisection lands within a point; step through nearby shifts for the exact overall
+  if (R.computeOvr(out, pos) !== Math.round(Math.min(99, target))) {
+    const want = Math.round(Math.min(99, target));
+    let best = out, bestD = Math.abs(R.computeOvr(out, pos) - want);
+    for (let d = -6; d <= 6 && bestD; d += 0.25) {
+      const c = build((lo + hi) / 2 + d), dd = Math.abs(R.computeOvr(c, pos) - want);
+      if (dd < bestD) { best = c; bestD = dd; }
+    }
+    out = best;
+  }
   for (const k of KEYS) r[k] = out[k];
   r.pos = pos;
   r.ovrs = {};

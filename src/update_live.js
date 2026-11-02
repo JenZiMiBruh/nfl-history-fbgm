@@ -12,6 +12,8 @@
  *
  * Then rebuild what depends on the new games, and export:
  *   node src/build_head_to_head.js && node src/build_live_games.js && node src/build_weekly.js 2026 2026
+ *   node src/starts_from_snaps.js && node src/estimate_av.js && RATE_FROM=2025 node src/rebuild_ratings.js && node src/starter_floor.js
+ *   node src/audit_ratings.js <baseline master>   (every check must pass before releasing)
  *   node src/export_vanilla.js "Week N"   (and copy data_cache/weekly/2026.json to the site's data/weekly/)
  *   node src/build_selector_master.js   (the slim master: the site's data/NFL_Selector_Master.json.gz, also uploaded
  *   to the release as NFL_Master_1966_2026.json.gz)
