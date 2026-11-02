@@ -63,7 +63,7 @@ The features at the top of the list, in rough order:
 
 | | Feature | What it does |
 |---|---|---|
-| 🏆 | **Named Super Bowls, forever** | Every title game gets its real name: Super Bowl I in January 1967 through LX, then the numbering keeps going in your league (LXI, LXII … C) with Roman numerals, a host city and a date. Pre-1966 and AFL-era games keep their real names too. |
+| 🏆 | **Named Super Bowls, forever** | Every title game gets its real name: Super Bowl I in January 1967 through LX, then the numbering keeps going in your league (LXI, LXII … C) with Roman numerals, a host city and a date. The 1966–69 AFL and NFL Championship Games keep their real names too. |
 | 📅 | **A real NFL calendar** | Games land on real days and dates, not just “Week 9”: Thursday, Sunday and Monday, Thanksgiving, Christmas, Saturdays late in the season and the playoffs on their real weekends. |
 | 🌙 | **Named game slots** | Monday Night Football (from 1970), Sunday Night Football, Thursday Night Football, Thanksgiving in Detroit and Dallas, the Christmas games, Saturday doubleheaders. Each era only has the slots it really had. |
 | 🕐 | **Kickoff times** | Early (1:00 ET), late afternoon (4:05/4:25), primetime (8:15) and London morning games, so you can see whether a game is midday, under the lights or at breakfast. |
