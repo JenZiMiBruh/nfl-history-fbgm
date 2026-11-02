@@ -140,14 +140,17 @@ nav .links a.on{color:var(--ink);box-shadow:inset 0 -2px 0 var(--accent)}
 .block .hint{font-size:14px;color:var(--muted);margin:0 0 18px}
 
 /* looks timeline */
-.looks{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
-.look{flex:0 0 200px;scroll-snap-align:start;background:var(--soft);border-radius:16px;padding:16px;display:flex;flex-direction:column;align-items:center;text-align:center;border-top:6px solid var(--c)}
-.look .pair{display:flex;align-items:center;justify-content:center;gap:10px;height:104px}
-.look .pair img{width:92px;height:92px;object-fit:contain;background:radial-gradient(circle,rgba(255,255,255,.10),transparent 70%);filter:drop-shadow(0 2px 6px rgba(0,0,0,.35))}
-.look .pair svg{width:78px;height:auto}
-.look .yrs{font-family:Oswald;font-size:20px;margin-top:10px}
-.look .nm{font-size:13px;color:var(--muted);min-height:20px}
-.sw{display:flex;gap:4px;margin-top:8px}.sw i{width:18px;height:10px;border-radius:3px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.looks{display:flex;gap:16px;overflow-x:auto;padding:6px 2px 14px;scroll-snap-type:x mandatory;align-items:stretch}
+.look{flex:0 0 232px;scroll-snap-align:start;background:var(--soft);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;text-align:center;position:relative}
+.look .stage{position:relative;height:150px;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 14px;background:radial-gradient(120% 90% at 50% 0%,color-mix(in srgb,var(--c) 55%,transparent),transparent 75%),linear-gradient(180deg,color-mix(in srgb,var(--c) 22%,transparent),transparent)}
+.look .stage img{width:104px;height:104px;object-fit:contain;filter:drop-shadow(0 6px 12px rgba(0,0,0,.45))}
+.look .stage svg{width:84px;height:auto;filter:drop-shadow(0 6px 10px rgba(0,0,0,.4))}
+.look .info{padding:12px 14px 16px;display:flex;flex-direction:column;align-items:center;gap:2px;flex:1}
+.look .yrs{font-family:Oswald;font-size:26px;line-height:1.1}
+.look .nm{font-size:13.5px;color:var(--muted)}
+.look .who{font-size:12.5px;color:var(--muted);margin-top:6px;min-height:18px}.look .who b{color:var(--ink)}
+.look .now{position:absolute;top:10px;right:10px;font:800 10px Inter;letter-spacing:1.5px;text-transform:uppercase;background:#f5c542;color:#05100a;padding:3px 8px;border-radius:999px}
+.sw{display:flex;gap:6px;margin-top:auto;padding-top:10px}.sw i{width:26px;height:12px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(127,127,127,.35)}
 
 /* seasons chart */
 .chart{position:relative}
@@ -387,7 +390,10 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;
 
 // A jersey in a team's colors: body, numbers, trim.
 function jersey(c, num = '', w = 80) {
-  const [body, numc, trim] = c || ['#555', '#fff', '#999'];
+  let [body, numc, trim] = c || ['#555', '#fff', '#999'];
+  // Numbers must read on the jersey: if the number color is too close to the body, use the trim color instead
+  const lum = h => { const n = parseInt(h.slice(1), 16); return ((n >> 16) * 299 + (n >> 8 & 255) * 587 + (n & 255) * 114) / 1000; };
+  if (Math.abs(lum(body) - lum(numc)) < 90 && Math.abs(lum(body) - lum(trim)) > Math.abs(lum(body) - lum(numc))) [numc, trim] = [trim, numc];
   return `<svg viewBox="0 0 100 106" width="${w}" aria-hidden="true">
     <path d="M30 2 L40 8 Q50 13 60 8 L70 2 L98 15 L90 41 L79 37 L79 104 L21 104 L21 37 L10 41 L2 15 Z" fill="${body}" stroke="rgba(0,0,0,.25)" stroke-width="1.2" stroke-linejoin="round"/>
     <path d="M2 15 L30 2 M70 2 L98 15" stroke="${trim}" stroke-width="4" fill="none" stroke-linecap="round"/>
@@ -507,12 +513,15 @@ function renderTeam(T) {
       <h3>Every look</h3>
       <p class="hint">Logo and jersey for each era. In the game these switch on the real date as you sim.</p>
       <div class="lookwrap"><button class="arr l" aria-label="Earlier looks" onclick="this.parentNode.querySelector('.looks').scrollBy({left:-430,behavior:'smooth'})">‹</button><button class="arr r" aria-label="Later looks" onclick="this.parentNode.querySelector('.looks').scrollBy({left:430,behavior:'smooth'})">›</button><div class="looks">${T.looks.map(l => `
-        <div class="look" style="--c:${l.colors[0]}">
-          <div class="pair">${l.logo ? `<img src="${l.logo}" alt="">` : ''}${jersey(l.colors, num(T, l))}</div>
-          <div class="yrs">${range(l.from, l.to)}</div>
-          <div class="nm">${esc(l.region)} ${esc(l.name)}</div>
-          <div class="sw">${l.colors.map(c => `<i style="background:${c}"></i>`).join('')}</div></div>
-        </div>`).join('')}</div>
+        ${(() => { const k = num(T, l); return `<div class="look" style="--c:${l.colors[0]}">${l.to >= 2026 ? '<span class="now">Now</span>' : ''}
+          <div class="stage">${l.logo ? `<img src="${l.logo}" alt="">` : ''}${jersey(l.colors, k.n)}</div>
+          <div class="info">
+            <div class="yrs">${range(l.from, l.to)}</div>
+            <div class="nm">${esc(l.region)} ${esc(l.name)}</div>
+            <div class="who">${k.who ? `#${esc(k.n)} <b>${esc(k.who)}</b>` : ''}</div>
+            <div class="sw">${l.colors.map(c => `<i style="background:${c}" title="${c}"></i>`).join('')}</div>
+          </div>
+        </div>`; })()}`).join('')}</div></div>
     </div>
 
     <div class="block chart">
@@ -608,10 +617,10 @@ const defaultIdx = T => { const n = T.seasons.length, last = T.seasons[n - 1]; r
 
 // The jersey number to show on a look: the franchise's best player's number in that era.
 function num(T, l) {
-  if (T.tid === 0 && l.from <= 2022 && l.to >= 2004) return '11'; // Larry Fitzgerald's years in Arizona
-  let best = null;
-  for (const p of T.players) for (const x of p.s) if (x[0] >= l.from && x[0] <= l.to && x[4] && (!best || x[1] > best[1])) best = x;
-  return best ? best[4] : '';
+  if (T.tid === 0 && l.from <= 2022 && l.to >= 2004) return { n: '11', who: 'Larry Fitzgerald' }; // Larry's years in Arizona
+  let best = null, who = '';
+  for (const p of T.players) for (const x of p.s) if (x[0] >= l.from && x[0] <= l.to && x[4] && (!best || x[1] > best[1])) { best = x; who = p.n; }
+  return best ? { n: best[4], who } : { n: '', who: '' };
 }
 const statText = x => { if (x[2] === 'OL') return x[3] + ' games'; const out = []; for (let i = 5; i < x.length; i += 2) out.push(`${Number(x[i]).toLocaleString()} ${x[i + 1]}`); return out.join(' · '); };
 
