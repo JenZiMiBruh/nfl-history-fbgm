@@ -727,7 +727,7 @@ async function shotMode() {
 shotMode();
 // Community numbers: GoatCounter visits + GitHub release downloads and stars. A number only shows once it is above zero.
 (async () => {
-  const GC = 'nfl-history-fbgm';
+  const GC = 'galloade';
   const show = (id, n) => { if (!(n > 0)) return; const el = document.getElementById(id); el.hidden = false; document.getElementById('fFirst').hidden = true; const b = el.querySelector('b'), t0 = performance.now(); const tick = t => { const k = Math.min(1, (t - t0) / 1200); b.textContent = Math.round(n * (1 - Math.pow(1 - k, 3))).toLocaleString(); if (k < 1) requestAnimationFrame(tick); }; requestAnimationFrame(tick); };
   fetch('https://' + GC + '.goatcounter.com/counter/TOTAL.json').then(r => r.ok ? r.json() : null).then(j => j && show('fVisits', +String(j.count).replace(/[^0-9]/g, ''))).catch(() => {});
   fetch('https://api.github.com/repos/JenZiMiBruh/nfl-history-fbgm/releases').then(r => r.ok ? r.json() : null).then(rs => rs && show('fDl', rs.reduce((n, r) => n + r.assets.reduce((m, a) => m + a.download_count, 0), 0))).catch(() => {});
@@ -800,6 +800,6 @@ if ('IntersectionObserver' in window) {
 </script>
 
 <!-- Visitor stats (GoatCounter: no cookies, no personal data) -->
-<script data-goatcounter="https://nfl-history-fbgm.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script data-goatcounter="https://galloade.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
