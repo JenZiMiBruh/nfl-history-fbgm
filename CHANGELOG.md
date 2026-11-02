@@ -6,7 +6,7 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
-## Nov 2, 2026
+## v1.1 · Nov 2, 2026
 
 ### Ratings fixes (thanks, r/Football_GM)
 
@@ -35,6 +35,6 @@ Your reports found real bugs. All fixed:
 - **Logo fixes:** the 2026 Titans Shield and Rams logos now show in the current season; see-through Seahawks, Dolphins, Bengals and Broncos logos filled in.
 - **Site:** new look, team search and switcher, redesigned uniform cards, roadmap with every update date, direct downloads, a few Cardinals Easter eggs.
 
-## Nov 1, 2026
+## v1.0 · Nov 1, 2026
 
 - **v1.0 released:** every NFL season since 1966, 28,700+ real players with real ratings, 178 logo and uniform eras, real schedules and drafts, the season selector and the mod.

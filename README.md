@@ -5,7 +5,7 @@
   <img src="https://img.shields.io/badge/seasons-1966%E2%80%932027-0f3d22?style=for-the-badge" alt="Seasons 1966 to 2027">
   <img src="https://img.shields.io/badge/real%20players-28%2C700%2B-0f3d22?style=for-the-badge" alt="28,700+ real players">
   <img src="https://img.shields.io/badge/Football%20GM-ready-c8102e?style=for-the-badge" alt="Football GM ready">
-  <img src="https://img.shields.io/github/downloads/JenZiMiBruh/nfl-history-fbgm/total?style=for-the-badge&label=downloads&color=f5c542" alt="Total downloads">
+  <img src="https://img.shields.io/github/downloads/JenZiMiBruh/nfl-history-fbgm/total?style=for-the-badge&label=total%20downloads&color=f5c542" alt="Total downloads, all versions">
 </p>
 
 <h2 align="center"><a href="https://jenzimibruh.github.io/nfl-history-fbgm/">🌐 Open the NFL History site →</a></h2>
@@ -46,7 +46,7 @@ Three ways in. Pick the one that sounds like you; every step is below with exact
 
 ### ⚡ Play today
 
-<img src="https://img.shields.io/github/downloads/JenZiMiBruh/nfl-history-fbgm/latest/NFL_2027_Live_FBGM.json.gz?style=for-the-badge&label=downloads&color=1f9d55" alt="downloads downloads">
+<img src="https://img.shields.io/github/downloads/JenZiMiBruh/nfl-history-fbgm/latest/NFL_2027_Live_FBGM.json.gz?style=for-the-badge&label=downloads%20this%20version&color=1f9d55" alt="Downloads of this version">
 
 The real 2026 season as of Sunday, Nov 1: standings, stats, rosters and injuries, with all of NFL history since 1966 behind it. Regular Football GM, nothing to install.
 
@@ -61,7 +61,7 @@ The real 2026 season as of Sunday, Nov 1: standings, stats, rosters and injuries
 
 ### 📅 Pick any season
 
-<img src="https://img.shields.io/github/downloads/JenZiMiBruh/nfl-history-fbgm/latest/NFL_Master_1966_2026.json.gz?style=for-the-badge&label=downloads&color=1f9d55" alt="downloads downloads">
+<img src="https://img.shields.io/github/downloads/JenZiMiBruh/nfl-history-fbgm/latest/NFL_Master_1966_2026.json.gz?style=for-the-badge&label=downloads%20this%20version&color=1f9d55" alt="Downloads of this version">
 
 Start in 1985, 2007, any season from 1967 on, at any of five start points, just like Basketball GM: **preseason**, **week 1**, **the playoffs** (real regular season already played), **after the playoffs** (real champion and awards) or **draft day** (real draft order). The season selector is one page that runs in your browser, even offline.
 
@@ -76,7 +76,7 @@ Start in 1985, 2007, any season from 1967 on, at any of five start points, just 
 
 ### 🏈 Full experience (the mod)
 
-<img src="https://img.shields.io/github/downloads/JenZiMiBruh/nfl-history-fbgm/latest/NFL_History_Mod.zip?style=for-the-badge&label=downloads&color=1f9d55" alt="downloads downloads">
+<img src="https://img.shields.io/github/downloads/JenZiMiBruh/nfl-history-fbgm/latest/NFL_History_Mod.zip?style=for-the-badge&label=downloads%20this%20version&color=1f9d55" alt="Downloads of this version">
 
 Everything above, plus history that keeps happening: the real schedule every season, real drafts, careers that follow the real one, real retirements and comebacks, and settings for all of it.
 

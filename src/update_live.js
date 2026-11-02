@@ -15,8 +15,12 @@
  *   node src/starts_from_snaps.js && node src/estimate_av.js && RATE_FROM=2025 node src/rebuild_ratings.js && node src/starter_floor.js
  *   node src/audit_ratings.js <baseline master>   (every check must pass before releasing)
  *   node src/export_vanilla.js "Week N"   (and copy data_cache/weekly/2026.json to the site's data/weekly/)
- *   node src/build_selector_master.js   (the slim master: the site's data/NFL_Selector_Master.json.gz, also uploaded
- *   to the release as NFL_Master_1966_2026.json.gz)
+ *   node src/build_selector_master.js   (the slim master: the site's data/NFL_Selector_Master.json.gz, also released
+ *   as NFL_Master_1966_2026.json.gz)
+ *
+ * Release every update as a NEW GitHub release (gh release create v1.2 ... --latest) with all five files, and add a
+ * dated entry to CHANGELOG.md and the site's What's new. Never replace files in an existing release (gh release
+ * upload --clobber): GitHub deletes the old file and its download count with it.
  *
  * Usage: node --max-old-space-size=14000 src/update_live.js [season=2026]
  */
