@@ -7,7 +7,7 @@ What's out, how it stays current, and what's coming. Like Madden, the league get
 | Date | Version | What |
 |---|---|---|
 | Nov 1, 2026 | **v1.0** | 1966 to today: 28,700+ real players, ratings, 178 logo & jersey eras, real schedules, 121 real events, the real 2027–2029 draft classes, the season selector and the mod |
-| Nov 2, 2026 | **v1.0.1** | Real-roster leagues fixed: AI teams no longer trade with each other or sign players who weren't really theirs; strays are released each preseason. New site look, faster season slider |
+| Nov 2, 2026 | **Update** | Real-roster leagues fixed: AI teams no longer trade with each other or sign players who weren't really theirs; strays are released each preseason. New site look, faster season slider |
 
 ## The yearly update cycle
 
