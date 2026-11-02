@@ -167,6 +167,8 @@ const LOGO_ERAS = /*__LOGO_ERAS__*/null;
     return WEEKLY[S];
   }
   const week = () => (phase() === 'regular' ? +$('week').value || 1 : 1);
+  // Phones and low-memory devices start with phone-friendly leagues
+  if (/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (navigator.deviceMemory && navigator.deviceMemory <= 4)) $('lite').checked = true;
   const setStatus = (msg, cls) => { $('status').textContent = msg; $('status').className = 'status' + (cls ? ' ' + cls : ''); };
   const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const money = (k) => k >= 1000 ? '$' + (k / 1000).toFixed(1) + 'M' : '$' + k + 'K';

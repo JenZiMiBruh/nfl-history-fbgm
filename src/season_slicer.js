@@ -25,7 +25,7 @@
   function buildDepth(roster) {
     const depth = {};
     for (const pos of DEPTH_POS) {
-      depth[pos] = roster.map(p => ({ pid: p.pid, v: ((p.ratings[p.ratings.length - 1] || {}).ovrs || {})[pos] || 0, own: (p.ratings[p.ratings.length - 1] || {}).pos === pos }))
+      depth[pos] = roster.map(p => ({ pid: p.pid, v: ovrAt(p.ratings[p.ratings.length - 1] || {}, pos), own: (p.ratings[p.ratings.length - 1] || {}).pos === pos }))
         .sort((a, b) => (b.own - a.own) * (pos === 'KR' || pos === 'PR' ? 0 : 1) || b.v - a.v).map(x => x.pid);
     }
     return depth;
@@ -60,8 +60,13 @@
    * @param opts    { season, phase, schedules, hofYears, logos }
    */
 const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', 'elu', 'rtr', 'hnd', 'rbk', 'pbk', 'pcv', 'tck', 'prs', 'rns', 'kpw', 'kac', 'ppw', 'pac'];
+  // The slim selector master stores per-position overalls as lists in master.ratingPos order
+  let RATING_POS = null;
+  const ovrAt = (r, pos) => (Array.isArray(r.ovrs) ? r.ovrs[RATING_POS.indexOf(pos)] : (r.ovrs || {})[pos]) || 0;
+
   function sliceLeague(master, E, opts) {
     const S = opts.season;
+    RATING_POS = master.ratingPos || null;
     const phaseName = opts.phase;
     if (opts.logos) E.setLogos(opts.logos, opts.logosProcessed, opts.logoEras);
     // The live file is the master itself, renamed by end year (2026-27 -> 2027). The master is shifted in place to
@@ -468,6 +473,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     shiftSeasons(league, 1);
     // From the slim selector master (zero stats left out): toJsonChunks puts the zeros back while writing
     if (master.statKeys) Object.defineProperty(league, '__statKeys', { value: master.statKeys, enumerable: false });
+    if (master.ratingPos) Object.defineProperty(league, '__ratingPos', { value: master.ratingPos, enumerable: false });
     return league;
   }
 
@@ -523,8 +529,14 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     // lines never all sit in memory at once
     const keys = league.__statKeys;
     const filled = (rows, list) => (rows || []).map(r => { const o = {}; for (const k of list) o[k] = 0; return Object.assign(o, r); });
+    const rp = league.__ratingPos;
+    const expand = (ratings) => !rp ? ratings : (ratings || []).map(r => {
+      const o = Object.assign({}, r);
+      for (const k of ['ovrs', 'pots']) if (Array.isArray(r[k])) o[k] = Object.fromEntries(rp.map((q, i) => [q, r[k][i]]));
+      return o;
+    });
     const write = (k, x) => !keys ? JSON.stringify(x)
-      : k === 'players' ? JSON.stringify(Object.assign({}, x, { stats: filled(x.stats, keys.player) }))
+      : k === 'players' ? JSON.stringify(Object.assign({}, x, { stats: filled(x.stats, keys.player), ratings: expand(x.ratings) }))
       : k === 'teams' ? JSON.stringify(Object.assign({}, x, { stats: filled(x.stats, keys.team) }))
       : JSON.stringify(x);
     Object.keys(league).forEach((k, i) => {
