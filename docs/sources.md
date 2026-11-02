@@ -12,7 +12,7 @@ No single source covers 60 years of the NFL, so every player is matched across s
 | Logopedia, Wikimedia Commons | Logos | 146 era looks, rebuilt at high resolution from vector originals where they exist |
 | Wikidata | Deaths, photos | 2,229 dates of death and 4,700 player photos |
 | ESPN | College football | Rosters, recruiting grades, the 2027 draft board and headshots for the draft classes |
-| spreadspoke, nflverse games | Scores 1966+, schedules 1978+ | Team results and real schedules |
+| spreadspoke, nflverse games | Scores and schedules 1966+ | Team results and real schedules |
 | OverTheCap | Contracts 2000+ | Real salaries; earlier ones are estimates scaled to each era |
 | Madden | 2001+ | Cross-checks for the ratings, not their source |
 

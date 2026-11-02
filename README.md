@@ -147,7 +147,7 @@ Sim past today and you're not drafting made-up players. The 2027, 2028 and 2029 
 | ⭐ **Ratings for everyone** | Built from real production, including the players with almost no stats ([how](docs/ratings.md)) |
 | 🏆 **Awards & honors** | MVP, OPOY/DPOY, rookies, Super Bowl MVP, All-Pro, Pro Bowl, Hall of Fame with induction years, retired numbers |
 | 🎨 **Logos & jerseys by era** | 146 looks in high resolution, built into the file, with today's uniforms matched to the real 2026 ones |
-| 🗓️ **Real schedules** | Every game 1978 on, in order |
+| 🗓️ **Real schedules** | Every game since 1966, in order |
 | 📰 **121 real-life events** | Each with the reason: Sanders and Luck retiring, Brady's 40 days, Favre's returns, Vick's prison term, Deflategate |
 | 🔴 **Live 2027** | Standings, stats, rosters, injured reserve and injuries through Sunday, Nov 1 (Week 8) |
 | 📸 **Player photos** | Real headshots for 4,000+ players and every draft prospect |
@@ -160,7 +160,7 @@ The league file works anywhere, but stock Football GM forgets history the moment
 | | |
 |---|---|
 | 📈 **RPD** | Real Player Determinism: careers follow the real one, one slider from random to exactly real |
-| 🗓️ **Real schedules** | Every real game, in order, from 1978 on |
+| 🗓️ **Real schedules** | Every real game, in order, since 1966 |
 | 🎯 **Real drafts** | The real players go to the teams that really took them |
 | 📰 **Real events** | Retirements, comebacks to the real team, suspensions for the real number of games |
 | 🔁 **Rosters & moves** | Historical rosters, mid-season trades on the real week, real jersey numbers and retirements |
@@ -176,7 +176,7 @@ Turn Real Player Determinism up and Jerry Rice still plays into his 40s and Barr
 
 ### Real schedules: every real game, in order
 
-From 1978 on, every season plays its real schedule: same opponents, same weeks, same byes. Strike seasons included.
+Every season since 1966 plays its real schedule: same opponents, same weeks, same byes. The AFL and NFL schedules before the 1970 merger, the 14-game seasons and the strike seasons included.
 
 <p align="center"><img src="assets/schedule.svg" alt="The 2007 Patriots' real schedule, game by game" width="100%"></p>
 
