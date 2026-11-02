@@ -9,6 +9,7 @@ html,body{margin:0;width:1280px;height:640px;overflow:hidden;background:#05100a;
   transform:rotateY(-24deg) rotateX(6deg) rotateZ(-4deg);transform-origin:0 50%}
 .j{position:relative;filter:drop-shadow(0 8px 10px rgba(0,0,0,.55))}
 .j svg{width:100%;height:auto;display:block}
+.fitz{z-index:2;transform:scale(1.35) translateZ(40px);filter:drop-shadow(0 0 18px rgba(255,255,255,.35)) drop-shadow(0 14px 16px rgba(0,0,0,.7))}
 .j small{position:absolute;left:0;right:0;bottom:-15px;text-align:center;font:600 10px Inter;color:rgba(255,255,255,.4);letter-spacing:1px}
 .shade{position:absolute;inset:0;background:
   linear-gradient(90deg,#05100a 0%,#05100a 30%,rgba(5,16,10,.88) 44%,rgba(5,16,10,.25) 66%,rgba(5,16,10,0) 80%),
@@ -57,7 +58,8 @@ function jersey([body, numc, trim], num) {
   let html = '', k = 0;
   for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
     const l = looks[Math.min(looks.length - 1, Math.floor(c * per + (r / rows) * per))];
-    html += `<div class="j">${jersey(l.colors, nums[(r * 5 + c * 7 + k++) % nums.length])}${r === rows - 1 ? '' : ''}</div>`;
+    const fitz = r === 4 && c === 6; // Larry Fitzgerald, Cardinals #11, front and center
+    html += fitz ? `<div class="j fitz">${jersey(["#97233F", "#FFFFFF", "#000000"], 11)}</div>` : `<div class="j">${jersey(l.colors, nums[(r * 5 + c * 7 + k++) % nums.length].toString().replace(/^11$/, "17"))}</div>`;
   }
   document.getElementById('wall').innerHTML = html;
 })();
