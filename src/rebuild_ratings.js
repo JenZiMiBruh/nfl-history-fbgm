@@ -136,8 +136,15 @@ for (const p of master.players) {
   const tot = seasonTotals(p);
   totalsByPid.set(p.pid, tot);
   for (const r of p.ratings || []) {
-    const pos = MAIN.includes(r.pos) ? r.pos : (MAIN.includes(p.pos) ? p.pos : 'WR');
-    rows.push({ p, r, pos, season: r.season, t: tot.get(r.season), oldOvr: r.ovr ?? 0 });
+    let pos = MAIN.includes(r.pos) ? r.pos : (MAIN.includes(p.pos) ? p.pos : 'WR');
+    // Listed at QB but barely threw: rate him where he actually played that season (Briscoe at WR, Dave Lewis at P)
+    const t = tot.get(r.season);
+    let posFixed = false;
+    if (pos === 'QB' && t && t.gp > 0 && t.pss < 10) {
+      const alt = t.pnt >= 10 ? 'P' : t.fga >= 5 ? 'K' : t.rec >= 5 ? 'WR' : t.rus >= 10 ? 'RB' : t.gp >= 4 ? 'WR' : null;
+      if (alt) { pos = alt; posFixed = true; }
+    }
+    rows.push({ p, r, pos, posFixed, season: r.season, t, oldOvr: r.ovr ?? 0 });
   }
 }
 const groups = new Map(); // `${season}|${pos}` -> rows
@@ -276,7 +283,7 @@ const clamp = (v) => Math.max(1, Math.min(99, Math.round(v)));
 let n = 0;
 for (const x of rows) {
   const { p, r, pos } = x;
-  if (x.season < RATE_FROM) continue;
+  if (x.season < RATE_FROM && !x.posFixed) continue;
   const target = pos === 'K' || pos === 'P' ? curve(x.ps) / 0.75 : curve(x.ps);
   const base = { hgt: r.hgt };
   for (const k of KEYS) base[k] = tmpl[pos][k];
