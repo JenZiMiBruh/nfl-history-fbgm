@@ -5,7 +5,7 @@
  * it was computed (every value is 0), and the live season has none at all. Without it, those seasons ranked players
  * almost at random: Mahomes and Herbert fell into the 40s while rookies kept their draft-prospect ratings.
  *
- * For each position, a least-squares fit of AV on the season's counting stats (games started, yards, touchdowns,
+ * For each position, a least-squares fit of AV on the season's counting stats (games, yards, touchdowns,
  * sacks, interceptions, ...) is trained on 2019-2024, where real AV and stats both exist, then applied to every
  * regular-season row in ESTIMATE_SEASONS. Partial seasons simply get less AV; the ratings use AV per game.
  *
@@ -21,15 +21,17 @@ const TRAIN = [2019, 2024];
 const tck = s => (s.defTckSolo || 0) + 0.5 * (s.defTckAst || 0);
 const fg = s => (s.fg0 || 0) + (s.fg20 || 0) + (s.fg30 || 0) + (s.fg40 || 0) + (s.fg50 || 0);
 const FEATURES = {
-  QB: s => [s.gs || 0, (s.pssYds || 0) / 100, s.pssTD || 0, s.pssInt || 0, (s.rusYds || 0) / 100, s.rusTD || 0],
-  RB: s => [s.gs || 0, (s.rusYds || 0) / 100, s.rusTD || 0, (s.recYds || 0) / 100, s.recTD || 0],
-  WR: s => [s.gs || 0, s.rec || 0, (s.recYds || 0) / 100, s.recTD || 0],
-  TE: s => [s.gs || 0, s.rec || 0, (s.recYds || 0) / 100, s.recTD || 0],
+  // Skill players: games and production. Linemen and defenders: games started too, which for 2025-26 come from snap
+  // counts (starts_from_snaps.js; the live feed's own start counts are wrong, e.g. Ja'Marr Chase 2 starts in 7 games)
+  QB: s => [s.gp || 0, (s.pssYds || 0) / 100, s.pssTD || 0, s.pssInt || 0, (s.rusYds || 0) / 100, s.rusTD || 0],
+  RB: s => [s.gp || 0, (s.rusYds || 0) / 100, s.rusTD || 0, (s.recYds || 0) / 100, s.recTD || 0],
+  WR: s => [s.gp || 0, s.rec || 0, (s.recYds || 0) / 100, s.recTD || 0],
+  TE: s => [s.gp || 0, s.rec || 0, (s.recYds || 0) / 100, s.recTD || 0],
   OL: s => [s.gs || 0, s.gp || 0],
-  DL: s => [s.gs || 0, s.defSk || 0, tck(s), s.defFmbFrc || 0],
-  LB: s => [s.gs || 0, tck(s), s.defSk || 0, s.defInt || 0, s.defPssDef || 0],
-  CB: s => [s.gs || 0, tck(s), s.defInt || 0, s.defPssDef || 0],
-  S: s => [s.gs || 0, tck(s), s.defInt || 0, s.defPssDef || 0],
+  DL: s => [s.gs || 0, s.gp || 0, s.defSk || 0, tck(s), s.defFmbFrc || 0],
+  LB: s => [s.gs || 0, s.gp || 0, tck(s), s.defSk || 0, s.defInt || 0, s.defPssDef || 0],
+  CB: s => [s.gs || 0, s.gp || 0, tck(s), s.defInt || 0, s.defPssDef || 0],
+  S: s => [s.gs || 0, s.gp || 0, tck(s), s.defInt || 0, s.defPssDef || 0],
   K: s => [fg(s), s.xp || 0],
   P: s => [s.pnt || 0, s.pntIn20 || 0],
 };

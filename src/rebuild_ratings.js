@@ -66,7 +66,8 @@ DRIVERS.TE = DRIVERS.WR;
 DRIVERS.S = DRIVERS.CB;
 // Volume a stat needs to count fully (and to be in the season's average)
 const QUAL = { QB: 150, RB: 60, WR: 20, TE: 20, DL: 8, LB: 8, CB: 8, S: 8, K: 10, P: 20 };
-const QUAL_BY_DRIVER = { catchPct: 30, ypr: 15, longPct: 3, xpPct: 10, ypc: 50 };
+// Per-game drivers are measured in games played, so they qualify at 4 games (not the position's attempts threshold)
+const QUAL_BY_DRIVER = { catchPct: 30, ypr: 15, longPct: 3, xpPct: 10, ypc: 50, rushPg: 4, recPg: 4, ydsPg: 4, tdPg: 4 };
 // skill rating -> [driver, weight]
 const SKILLS = {
   QB: { tha: [['cmpPct', 2], ['intPct', -1]], thp: [['ypa', 1], ['ypc', 1]], thv: [['tdPct', 1], ['intPct', -1], ['skPct', -1]], elu: [['rushPg', 1]], spd: [['rushPg', 0.7]], bsc: [['fmbPt', -1]] },
@@ -190,7 +191,7 @@ const gsSeasons = new Set();
 {
   const by = new Map();
   for (const x of rows) if (x.t && x.t.gp > 0) { const b = by.get(x.season) || [0, 0]; b[0]++; if (x.t.gs > 0) b[1]++; by.set(x.season, b); }
-  for (const [season, [n, g]] of by) if (g / n > 0.4) gsSeasons.add(season);
+  for (const [season, [n, g]] of by) if (g / n > 0.4) gsSeasons.add(season); // 2025-26 starts come from snap counts
 }
 // Played a lot without starting (special teams, deep backup): capped near the position's middle, so one big
 // special-teams year doesn't make him a 76 one season and a 43 the next
@@ -318,13 +319,29 @@ const clamp = (v) => Math.max(1, Math.min(99, Math.round(v)));
 let n = 0;
 for (const x of rows) {
   const { p, r, pos } = x;
-  if (x.season < RATE_FROM && !x.posFixed && !x.stFixed) continue;
-  const target = pos === 'K' || pos === 'P' ? curve(x.ps) / 0.75 : curve(x.ps);
+  if (x.season < RATE_FROM && !x.posFixed && !x.stFixed && pos !== 'QB') continue;
+  const target0 = pos === 'K' || pos === 'P' ? curve(x.ps) / 0.75 : curve(x.ps);
   const base = { hgt: r.hgt };
   for (const k of KEYS) base[k] = tmpl[pos][k];
   if (p.weight) base.stre = tmpl[pos].stre + (p.weight - weightMean[pos]) * 0.4;
   for (const [skill, raw] of Object.entries(x.rawS || {})) base[skill] = tmpl[pos][skill] + SPREAD * raw;
-  const skills = POS_SKILLS[pos];
+  let skills = POS_SKILLS[pos];
+  if (pos === 'QB') {
+    // A quarterback's speed and elusiveness come from how much he runs, on a wide scale (Lamar Jackson fast, Matthew
+    // Stafford slow), and his strength from his weight; only his passing moves to match his overall
+    // Athleticism is his best running of the seasons so far, fading a little each year since: a quarterback who ran
+    // less for a season or two (an injury, a new offense) hasn't lost his speed
+    let run;
+    for (const y of byPlayer.get(p.pid) || []) {
+      if (y.season > x.season || y.pos !== 'QB' || y.rawS?.spd === undefined) continue;
+      const v = y.rawS.spd - 0.08 * (x.season - y.season);
+      if (run === undefined || v > run) run = v;
+    }
+    if (run !== undefined) { base.spd = 45 + 15 * run; base.elu = 38 + 14 * run; }
+    skills = skills.filter(k => !['spd', 'elu', 'stre', 'bsc'].includes(k));
+  }
+  // Quarterbacks from seasons not being rebuilt keep their overall exactly; only the skill mix changes
+  const target = x.season < RATE_FROM && !x.posFixed && !x.stFixed ? r.ovr : target0;
   const build = (shift) => {
     const out = { ...base };
     for (const k of KEYS) out[k] = clamp(base[k] + (skills.includes(k) ? shift : 0));
