@@ -22,8 +22,9 @@ const PROCESSED = path.join(ROOT, 'data_cache', 'logos_processed.json');
 const MASTER = path.join(ROOT, 'NFL_Master_1966_2026.json');
 
 // tid -> primary logo era indexes to fill
-const TARGETS = { 18: [0, 1, 2], 30: [1] };
-const GAP = 5; // pixels of outline thickening when deciding what's enclosed
+// Override with LOGO_TARGETS='{"28":[0]}' to fix one logo; LOGO_GAP for logos whose gaps open to the edge; LOGO_PREVIEW=<dir> writes PNGs instead of saving
+const TARGETS = process.env.LOGO_TARGETS ? JSON.parse(process.env.LOGO_TARGETS) : { 18: [0, 1, 2], 30: [1] } // gap 8: { 28: [0], 6: [0], 9: [0] };
+const GAP = +process.env.LOGO_GAP || 5; // pixels of outline thickening when deciding what's enclosed
 
 async function fill(dataUri) {
   const img = await Jimp.read(Buffer.from(dataUri.split(',')[1], 'base64'));
@@ -85,10 +86,12 @@ async function fill(dataUri) {
       const era = eras.primary[tid][i];
       const { uri, filled, total } = await fill(era.data);
       console.log(`tid ${tid} ${era.from}-${era.to}: filled ${(100 * filled / total).toFixed(1)}% of the image`);
+      if (process.env.LOGO_PREVIEW) { fs.writeFileSync(path.join(process.env.LOGO_PREVIEW, tid + '-' + i + '.png'), Buffer.from(uri.split(',')[1], 'base64')); continue; }
       swaps.push([era.data, uri]);
       era.data = uri;
     }
   }
+  if (process.env.LOGO_PREVIEW) return;
   for (const k of Object.keys(processed)) for (const [a, b] of swaps) if (processed[k] === a) { processed[k] = b; console.log('processed', k); }
   for (const list of Object.values(eras.secondary || {})) for (const e of list) for (const [a, b] of swaps) if (e.data === a) e.data = b;
   fs.writeFileSync(ERAS, JSON.stringify(eras));
