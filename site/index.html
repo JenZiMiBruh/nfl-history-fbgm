@@ -103,6 +103,15 @@ nav .links a.on{color:var(--ink);box-shadow:inset 0 -2px 0 var(--accent)}
 .feats{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:20px}
 .feats div{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
 .feats i{font-style:normal;font-size:26px}.feats b{display:block;font:700 19px Oswald,sans-serif;text-transform:uppercase;margin:6px 0 4px}.feats span{font-size:14.5px;color:var(--muted);line-height:1.5}
+.fans{background:linear-gradient(90deg,rgba(126,224,161,.08),rgba(245,197,66,.08));border-bottom:1px solid var(--line)}
+.fans .wrap{display:flex;align-items:center;gap:28px;flex-wrap:wrap;padding-top:22px;padding-bottom:22px}
+.fans .lbl{font:800 12px Inter;letter-spacing:3px;text-transform:uppercase;color:var(--accent)}
+.fans .nums{display:flex;gap:30px;flex-wrap:wrap}
+.fans .nums div[hidden]{display:none}
+.fans .nums b{display:block;font:700 30px/1 Oswald,sans-serif;color:#f5c542}.fans .nums span{font-size:12.5px;color:var(--muted)}
+.fans .first{font:600 16px Inter}
+.fans .acts{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+.fans .acts a{text-decoration:none;font:700 14px Inter;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--panel)}
 /* story */
 .story{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
 @media(max-width:860px){.story{grid-template-columns:1fr}}
@@ -287,6 +296,16 @@ footer small{display:block;opacity:.7;margin-top:8px;max-width:520px}
     </div>
   </div></div>
 </header>
+<section class="fans" id="fans" style="padding:0"><div class="wrap">
+  <div class="lbl">The community</div>
+  <div class="nums">
+    <div id="fVisits" hidden><b>0</b><span>fans have visited</span></div>
+    <div id="fDl" hidden><b>0</b><span>downloads</span></div>
+    <div id="fStars" hidden><b>0</b><span>stars on GitHub</span></div>
+    <div class="first" id="fFirst">🏈 Just launched. Be one of the first fans.</div>
+  </div>
+  <div class="acts"><a href="https://github.com/JenZiMiBruh/nfl-history-fbgm" data-goatcounter-click="star">⭐ Star it on GitHub</a><a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/issues" data-goatcounter-click="suggest">💬 Suggest or report something</a></div>
+</div></section>
 
 <section id="story"><div class="wrap story">
   <div>
@@ -706,6 +725,15 @@ async function shotMode() {
   document.body.appendChild(root);
 }
 shotMode();
+// Community numbers: GoatCounter visits + GitHub release downloads and stars. A number only shows once it is above zero.
+(async () => {
+  const GC = 'nfl-history-fbgm';
+  const show = (id, n) => { if (!(n > 0)) return; const el = document.getElementById(id); el.hidden = false; document.getElementById('fFirst').hidden = true; const b = el.querySelector('b'), t0 = performance.now(); const tick = t => { const k = Math.min(1, (t - t0) / 1200); b.textContent = Math.round(n * (1 - Math.pow(1 - k, 3))).toLocaleString(); if (k < 1) requestAnimationFrame(tick); }; requestAnimationFrame(tick); };
+  fetch('https://' + GC + '.goatcounter.com/counter/TOTAL.json').then(r => r.ok ? r.json() : null).then(j => j && show('fVisits', +String(j.count).replace(/[^0-9]/g, ''))).catch(() => {});
+  fetch('https://api.github.com/repos/JenZiMiBruh/nfl-history-fbgm/releases').then(r => r.ok ? r.json() : null).then(rs => rs && show('fDl', rs.reduce((n, r) => n + r.assets.reduce((m, a) => m + a.download_count, 0), 0))).catch(() => {});
+  fetch('https://api.github.com/repos/JenZiMiBruh/nfl-history-fbgm').then(r => r.ok ? r.json() : null).then(j => j && show('fStars', j.stargazers_count)).catch(() => {});
+})();
+
 // Highlight the nav link for the section on screen
 if ('IntersectionObserver' in window) {
   const links = [...document.querySelectorAll('nav .links a[href^="#"]')];
