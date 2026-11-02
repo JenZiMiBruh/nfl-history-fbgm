@@ -1908,6 +1908,9 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       allStars: (master.allStars || []).filter(a => a.season < S || (DONE && a.season === S)),
       playoffSeries: (master.playoffSeries || []).filter(s => s.season < S || (DONE === 2 && s.season === S)),
       events: (master.events || []).filter(e => e.season < S || (DONE && e.season === S)),
+      // Real head-to-head records for the seasons already played (this season's once its games are done)
+      headToHeads: (master.headToHeads || []).filter(h => h.season < S || (DONE && h.season === S))
+        .map(h => h.season === S && DONE !== 2 ? { ...h, playoffs: {} } : h),
       releasedPlayers: []
     };
     shiftSeasons(league, 1);
@@ -1944,7 +1947,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       if (p.realJerseys) p.realJerseys = rekey(p.realJerseys);
       if (p.realMoves) for (const m of p.realMoves) m.season += d;
     }
-    for (const k of ['draftPicks', 'scheduledEvents', 'awards', 'allStars', 'playoffSeries', 'events']) bumpAll(league[k], 'season');
+    for (const k of ['draftPicks', 'scheduledEvents', 'awards', 'allStars', 'playoffSeries', 'events', 'headToHeads', 'games']) bumpAll(league[k], 'season');
   }
 
   /** Serialize in chunks so very large leagues don't need one giant string. */
