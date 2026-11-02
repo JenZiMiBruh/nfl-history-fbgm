@@ -1,6 +1,6 @@
 # The mod
 
-A patch against Football GM's open source code ([zengm](https://github.com/zengm-games/zengm)). It touches 36 files, about 2,200 lines.
+A patch against Football GM's open source code ([zengm](https://github.com/zengm-games/zengm)). It touches 39 files, about 2,300 lines.
 
 The roster file works in stock Football GM. The mod is what makes history *behave* like history: real schedules, real drafts, real retirements, ratings that follow real careers, and settings for all of it.
 

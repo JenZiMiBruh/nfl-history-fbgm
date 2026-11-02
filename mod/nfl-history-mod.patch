@@ -1135,6 +1135,32 @@ index 260dbbd..d2514cd 100644
  
  			const pid = selection.pid;
  			await selectPlayer(dp, pid);
+diff --git a/src/worker/core/freeAgents/autoSign.ts b/src/worker/core/freeAgents/autoSign.ts
+index 26983ab..f0b1006 100644
+--- a/src/worker/core/freeAgents/autoSign.ts
++++ b/src/worker/core/freeAgents/autoSign.ts
+@@ -5,6 +5,7 @@ import { idb } from "../../db/index.ts";
+ import { g, local } from "../../util/index.ts";
+ import { orderBy } from "../../../common/utils.ts";
+ import { shuffle } from "../../../common/random.ts";
++import { nflCanJoin } from "../nflRealRosters.ts";
+ 
+ /**
+  * AI teams sign free agents.
+@@ -72,7 +73,12 @@ const autoSign = async () => {
+ 
+ 		// Ignore roster size, will drop bad player if necessary in checkRosterSizes, and getBest won't sign min contract player unless under the roster limit
+ 		const payroll = await team.getPayroll(t.tid);
+-		const p = getBest(playersOnRoster, playersSorted, payroll);
++		// NFL history mod: real players only sign with a team they really played for that season
++		const p = getBest(
++			playersOnRoster,
++			playersSorted.filter((p2) => nflCanJoin(p2 as any, t.tid)),
++			payroll,
++		);
+ 		if (p) {
+ 			// Remove from list of free agents
+ 			playersSorted = playersSorted.filter((p2) => p2 !== p);
 diff --git a/src/worker/core/game/nflRealMoves.ts b/src/worker/core/game/nflRealMoves.ts
 new file mode 100644
 index 0000000..7284102
@@ -1299,11 +1325,45 @@ index 517f4c6..655faf0 100644
  	// Avoid IDB upgrade
  	if ((g.get("draftType") as any) === "nba") {
  		g.setWithoutSavingToDB("draftType", "nba2019");
+diff --git a/src/worker/core/nflRealRosters.ts b/src/worker/core/nflRealRosters.ts
+new file mode 100644
+index 0000000..3730cc5
+--- /dev/null
++++ b/src/worker/core/nflRealRosters.ts
+@@ -0,0 +1,28 @@
++import { PHASE } from "../../common/constants.ts";
++import { g } from "../util/index.ts";
++
++// NFL history mod: keep real players on their real teams while the league is inside the real data.
++// With Historical Rosters on, AI teams don't trade with each other, only sign real players who really played for
++// them that season, and release real players who aren't theirs each preseason. The user's own team is never touched.
++
++// The season a roster move counts for: after the draft, moves are for next season
++export const nflRosterSeason = () =>
++	g.get("phase") >= PHASE.AFTER_DRAFT ? g.get("season") + 1 : g.get("season");
++
++export const nflRealRostersActive = (season: number = nflRosterSeason()) =>
++	__SPORT === "football" &&
++	!!g.get("nflHistoricalRosters") &&
++	Object.hasOwn(g, "nflRealDataLastSeason") &&
++	season <= (g as any).nflRealDataLastSeason;
++
++// May this player join this team? Players without real data (generated ones) can go anywhere.
++export const nflCanJoin = (
++	p: { realTeams?: Record<string, number> },
++	tid: number,
++	season: number = nflRosterSeason(),
++) => {
++	if (!nflRealRostersActive(season) || !p.realTeams) {
++		return true;
++	}
++	return p.realTeams[season] === tid;
++};
 diff --git a/src/worker/core/phase/newPhasePreseason.ts b/src/worker/core/phase/newPhasePreseason.ts
-index 22a2023..bf73f3c 100644
+index 22a2023..64ffa90 100644
 --- a/src/worker/core/phase/newPhasePreseason.ts
 +++ b/src/worker/core/phase/newPhasePreseason.ts
-@@ -409,6 +409,60 @@ const newPhasePreseason = async (
+@@ -409,6 +409,71 @@ const newPhasePreseason = async (
  		}
  	}
  
@@ -1346,6 +1406,17 @@ index 22a2023..bf73f3c 100644
 +			moved.add(target);
 +			await idb.cache.players.put(p);
 +		}
++		// Real players on an AI team they never played for this season (a leftover trade or signing) go to free agency
++		for (const p of players) {
++			if (p.tid < 0 || !(p as any).realTeams || g.get("userTids").includes(p.tid)) {
++				continue;
++			}
++			if ((p as any).realTeams[newSeason] !== p.tid) {
++				moved.add(p.tid);
++				player.addToFreeAgents(p, {});
++				await idb.cache.players.put(p);
++			}
++		}
 +		// Real jersey numbers for this season (conflicts with teammates are sorted out below)
 +		for (const p of players) {
 +			const num: string | undefined = (p as any).realJerseys?.[newSeason];
@@ -1364,7 +1435,7 @@ index 22a2023..bf73f3c 100644
  	// Again, so updateValues can happen after new mean/std is calculated
  	local.playerOvrMeanStdStale = true;
  	for (const p of players) {
-@@ -429,6 +483,23 @@ const newPhasePreseason = async (
+@@ -429,6 +494,23 @@ const newPhasePreseason = async (
  
  	local.minFractionDiffs = undefined;
  
@@ -1388,7 +1459,7 @@ index 22a2023..bf73f3c 100644
  	// Handle jersey number conflicts
  	const playersByTeam = Map.groupBy(
  		players.filter((p) => p.tid >= 0),
-@@ -460,10 +531,11 @@ const newPhasePreseason = async (
+@@ -460,10 +542,11 @@ const newPhasePreseason = async (
  				);
  				if (conflicts.length > 1) {
  					// Conflict! Who gets to keep the number? The one with the highest career peak ovr!
@@ -1753,10 +1824,18 @@ index 5959814..6a5d64d 100644
  		if (tids) {
  			return tids;
 diff --git a/src/worker/core/team/checkRosterSizes.ts b/src/worker/core/team/checkRosterSizes.ts
-index 8dd6738..2c60a32 100644
+index 8dd6738..301c12c 100644
 --- a/src/worker/core/team/checkRosterSizes.ts
 +++ b/src/worker/core/team/checkRosterSizes.ts
-@@ -64,7 +64,13 @@ const dropPlayers = async (players: Player[], numToDrop: number) => {
+@@ -5,6 +5,7 @@ import { idb } from "../../db/index.ts";
+ import { g, helpers, local } from "../../util/index.ts";
+ import type { Player } from "../../../common/types.ts";
+ import { KEY_POSITIONS_NEEDED } from "../freeAgents/getBest.ts";
++import { nflCanJoin } from "../nflRealRosters.ts";
+ import { bySport } from "../../../common/sportFunctions.ts";
+ import { last } from "../../../common/utils.ts";
+ 
+@@ -64,7 +65,13 @@ const dropPlayers = async (players: Player[], numToDrop: number) => {
  		}
  	}
  
@@ -1771,7 +1850,7 @@ index 8dd6738..2c60a32 100644
  
  	const releasedPIDs = [];
  	for (const p of players) {
-@@ -135,7 +141,17 @@ const checkRosterSizes = async (
+@@ -135,7 +142,17 @@ const checkRosterSizes = async (
  		const players = await idb.cache.players.indexGetAll("playersByTid", tid);
  		let numPlayersOnRoster = players.length;
  
@@ -1790,7 +1869,7 @@ index 8dd6738..2c60a32 100644
  			if (userTeamAndActive) {
  				if (g.get("userTids").length <= 1) {
  					userTeamSizeError = "Your team has ";
-@@ -145,17 +161,15 @@ const checkRosterSizes = async (
+@@ -145,17 +162,15 @@ const checkRosterSizes = async (
  					} have `;
  				}
  
@@ -1812,6 +1891,17 @@ index 8dd6738..2c60a32 100644
  				);
  				releasedPIDs.push(...releasedPIDsTemp);
  			}
+@@ -184,7 +199,9 @@ const checkRosterSizes = async (
+ 				// Auto-add players
+ 				while (numPlayersOnRoster < g.get("minRosterSize")) {
+ 					// See also core.phase
+-					let p = minFreeAgents.shift();
++					// NFL history mod: skip real players who never played for this team that season
++					const idx = minFreeAgents.findIndex((p2) => nflCanJoin(p2 as any, tid));
++					let p = idx >= 0 ? minFreeAgents.splice(idx, 1)[0] : undefined;
+ 
+ 					if (!p) {
+ 						p = await player.genRandomFreeAgent();
 diff --git a/src/worker/core/team/genDepth.football.ts b/src/worker/core/team/genDepth.football.ts
 index 8536f14..df471d0 100644
 --- a/src/worker/core/team/genDepth.football.ts
@@ -1848,6 +1938,28 @@ index 9b41516..05ec36f 100644
  		disabled: t.disabled,
  		imgURL: t.imgURL,
  		imgURLSmall: t.imgURLSmall,
+diff --git a/src/worker/core/trade/betweenAiTeams.ts b/src/worker/core/trade/betweenAiTeams.ts
+index 1e4f265..2df520e 100644
+--- a/src/worker/core/trade/betweenAiTeams.ts
++++ b/src/worker/core/trade/betweenAiTeams.ts
+@@ -7,6 +7,7 @@ import summary from "./summary.ts";
+ import type { TradeTeams } from "../../../common/types.ts";
+ import { choice } from "../../../common/random.ts";
+ import { ValueChangeCalculator } from "../team/ValueChangeCalculator.ts";
++import { nflRealRostersActive } from "../nflRealRosters.ts";
+ 
+ const getAITids = async () => {
+ 	const teams = await idb.cache.teams.getAll();
+@@ -143,7 +144,8 @@ const attempt = async (valueChangeCalculator: ValueChangeCalculator) => {
+ const DEFAULT_NUM_TEAMS = 30;
+ 
+ const betweenAiTeams = async () => {
+-	if (g.get("forceHistoricalRosters")) {
++	// NFL history mod: no AI-to-AI trades while real rosters are in effect (real trades happen on schedule)
++	if (g.get("forceHistoricalRosters") || nflRealRostersActive()) {
+ 		return false;
+ 	}
+ 
 diff --git a/src/worker/views/newLeague.ts b/src/worker/views/newLeague.ts
 index 3000371..05fbef5 100644
 --- a/src/worker/views/newLeague.ts
@@ -2116,10 +2228,10 @@ index 0000000..69253eb
 +import "../../src/worker/index.ts";
 diff --git a/tools/native/harness.mjs b/tools/native/harness.mjs
 new file mode 100644
-index 0000000..797e575
+index 0000000..4dc92ad
 --- /dev/null
 +++ b/tools/native/harness.mjs
-@@ -0,0 +1,125 @@
+@@ -0,0 +1,126 @@
 +// Runs build/native/engine.js in an empty V8 context (no browser, no Node APIs, no Intl), playing the part the
 +// Android app will: timers, messages, file reads. Proves the engine works headless before porting this to Kotlin.
 +// Usage: node --max-old-space-size=8000 tools/native/harness.mjs <league.json> [tid]
@@ -2233,6 +2345,7 @@ index 0000000..797e575
 +try { const st = await call("native", "standings"); log("standings rows", st.length, JSON.stringify(st[0])); } catch (e) { log("standings failed", e?.message ?? e); }
 +try { log("status", JSON.stringify(await call("native", "status"))); } catch (e) { log("status failed", e?.message ?? e); }
 +
++if (process.env.PLAY) { for (const action of process.env.PLAY.split(",")) { const done = simDone(); await call("playMenu", action, undefined); await Promise.race([done, new Promise((r) => setTimeout(r, 30000))]); log(action, JSON.stringify(await call("native", "status"))); } }
 +if (process.env.TO_REGULAR) { const done = simDone(); await call("playMenu", "untilRegularSeason", undefined); await Promise.race([done, new Promise((r) => setTimeout(r, 3000))]); log("status", JSON.stringify(await call("native", "status"))); }
 +for (let week = 1; week <= (Number(process.env.WEEKS) || 2); week++) {
 +	const done = simDone();
