@@ -16,6 +16,29 @@ const { shiftSeasons } = require('./season_slicer');
 const ROOT = path.join(__dirname, '..');
 const label = process.argv[2] || 'Live';
 const m = JSON.parse(fs.readFileSync(path.join(ROOT, 'NFL_Master_1966_2026.json'), 'utf8'));
+// The master keeps every scheduled event since 1966 for slicing. A league that starts today has already passed them:
+// apply each passed team change (logos, colors, jerseys, names) so the teams show today's look, then queue only
+// future events. Without this, changes like the 2026 Titans Shield never fire.
+{
+  const S = m.gameAttributes.season, P = m.gameAttributes.phase;
+  const passed = e => e.season < S || (e.season === S && e.phase <= P);
+  const KEYS = ['region', 'name', 'abbrev', 'imgURL', 'imgURLSmall', 'colors', 'jersey', 'pop', 'stadiumCapacity'];
+  let applied = 0;
+  for (const e of m.scheduledEvents.filter(passed).sort((x, y) => x.season - y.season || x.phase - y.phase)) {
+    if (e.type !== 'teamInfo') continue;
+    const t = m.teams.find(t => t.tid === e.info.tid);
+    for (const k of KEYS) if (e.info[k] !== undefined) t[k] = e.info[k];
+    applied++;
+  }
+  // This season's team records carry the look too (the standings, roster and power rankings pages read them)
+  for (const t of m.teams) {
+    const ts = (t.seasons || []).find(x => x.season === S);
+    if (ts) for (const k of KEYS) if (t[k] !== undefined && k in ts) ts[k] = t[k];
+  }
+  const before = m.scheduledEvents.length;
+  m.scheduledEvents = m.scheduledEvents.filter(e => !passed(e)).map((e, i) => Object.assign({}, e, { id: i + 1 }));
+  console.log(`applied ${applied} passed team changes; events ${before} -> ${m.scheduledEvents.length}`);
+}
 shiftSeasons(m, 1);
 m.meta = Object.assign({}, m.meta, { name: `NFL 2026-27 (${label})` });
 delete m.liveCounted;

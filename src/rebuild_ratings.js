@@ -22,6 +22,10 @@ const R = require('./ratings_engine');
 
 const ROOT = path.join(__dirname, '..');
 const FILE = path.join(ROOT, 'NFL_Master_1966_2026.json');
+// RATE_FROM=2025 rewrites only seasons from 2025 on (everything is still computed, for smoothing), and ranks those
+// seasons on value alone instead of blending in the previous ratings
+const RATE_FROM = +process.env.RATE_FROM || 0;
+const LIVE_SEASON = 2026; // the season in progress
 const KEYS = ['stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', 'elu', 'rtr', 'hnd', 'rbk', 'pbk', 'pcv', 'tck', 'prs', 'rns', 'kpw', 'kac', 'ppw', 'pac'];
 const MAIN = ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S', 'K', 'P'];
 
@@ -173,9 +177,11 @@ for (const [, list] of groups) {
   rankOf(avRows, 'avpg');
   rankOf(list, 'oldOvr');
   for (const x of list) {
-    if (x.p_avpg !== undefined) x.pct = 0.75 * x.p_avpg + 0.25 * x.p_oldOvr;
+    if (x.p_avpg !== undefined) x.pct = RATE_FROM && x.season >= RATE_FROM ? x.p_avpg : 0.75 * x.p_avpg + 0.25 * x.p_oldOvr;
     else if (x.t && x.t.gp > 0) x.pct = x.p_oldOvr;
     else x.pct = undefined; // no games this season: filled from his other seasons below
+    // Offensive linemen have no stat lines, so the live feed misses most of their games: carry their last full season
+    if (RATE_FROM && x.season >= RATE_FROM && x.pos === 'OL') x.pct = undefined;
   }
 }
 // Smooth across each player's seasons, apply honors, fill seasons without games
@@ -189,8 +195,10 @@ for (const [pid, list] of byPlayer) {
   const raw = list.map(x => x.pct);
   list.forEach((x, i) => {
     if (raw[i] === undefined) return;
-    let sum = raw[i] * 0.6, w = 0.6;
-    if (raw[i - 1] !== undefined) { sum += raw[i - 1] * 0.2; w += 0.2; }
+    // A season still being played counts by how much of it is done (7 of 17 games: 41%); the rest leans on last season
+    const g = x.season === LIVE_SEASON && x.t ? Math.min(1, (x.t.gp || 0) / 17) : 1;
+    let sum = raw[i] * 0.6 * g, w = 0.6 * g;
+    if (raw[i - 1] !== undefined) { sum += raw[i - 1] * (0.2 + 0.6 * (1 - g)); w += 0.2 + 0.6 * (1 - g); }
     if (raw[i + 1] !== undefined) { sum += raw[i + 1] * 0.2; w += 0.2; }
     x.ps = Math.max(sum / w, floors.get(pid + '|' + x.season) || 0);
   });
@@ -203,7 +211,10 @@ for (const [pid, list] of byPlayer) {
       else if (list[i + d]?.ps !== undefined) best = list[i + d].ps;
     }
     const age = x.season - (x.p.born?.year ?? x.season - 25);
-    x.ps = Math.max(0, (best ?? 0.3) - (age > 30 ? 0.03 * (age - 30) : 0));
+    // A player who has never played starts from where he was drafted: a top-10 pick near a starter, undrafted near the bottom
+    const d = x.p.draft, pick = d && d.round > 0 ? (d.round - 1) * 32 + (d.pick || 16) : undefined;
+    const prior = pick === undefined ? 0.25 : Math.max(0.25, 0.62 - pick * 0.0016);
+    x.ps = Math.max(0, (best ?? prior) - (age > 30 ? 0.03 * (age - 30) : 0));
   });
 }
 
@@ -265,6 +276,7 @@ const clamp = (v) => Math.max(1, Math.min(99, Math.round(v)));
 let n = 0;
 for (const x of rows) {
   const { p, r, pos } = x;
+  if (x.season < RATE_FROM) continue;
   const target = pos === 'K' || pos === 'P' ? curve(x.ps) / 0.75 : curve(x.ps);
   const base = { hgt: r.hgt };
   for (const k of KEYS) base[k] = tmpl[pos][k];
