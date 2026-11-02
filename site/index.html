@@ -131,7 +131,7 @@ nav .links a{text-decoration:none;color:var(--muted)}nav .links a:hover{color:va
 .seasonbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .seasonbar input{flex:1;min-width:200px;accent-color:var(--team3)}
 .seasonbar .yr{font-family:Oswald;font-size:34px;min-width:90px}
-.seasonbar .rec{font-size:15px;color:var(--muted)}
+.seasonbar .rec{font-size:15px;color:var(--muted);flex-basis:100%;order:3} /* own line, so the slider never resizes mid-drag */
 .roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));grid-auto-rows:76px;gap:12px;margin-top:16px;min-height:352px;align-content:start}
 .seasonbar input{touch-action:pan-y}
 .pc{display:flex;gap:12px;align-items:center;background:var(--soft);border-radius:14px;padding:12px;cursor:pointer;border:1px solid transparent}
