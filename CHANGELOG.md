@@ -6,6 +6,10 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.6 · Nov 2, 2026
+
+- **1966-69 St. Louis Cardinals logo cleaned up.** A patch of the scan's white background was left between the Gateway Arch and the cardinal (and by its head), so it showed as a white block on colored backgrounds. It's see-through now, like the rest of the logo. Thanks for the report!
+
 ## v1.5 · Nov 2, 2026
 
 - **The mod updates itself.** Every time you start it, it checks for a new version, downloads it, re-applies the mod and shows what's new before the game opens. No more re-downloading. (If you're on v1.4 or earlier, download the mod one last time to get the updater.)
