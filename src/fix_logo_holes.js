@@ -23,7 +23,7 @@ const MASTER = path.join(ROOT, 'NFL_Master_1966_2026.json');
 
 // tid -> primary logo era indexes to fill
 // Override with LOGO_TARGETS='{"28":[0]}' to fix one logo; LOGO_GAP for logos whose gaps open to the edge; LOGO_PREVIEW=<dir> writes PNGs instead of saving
-const TARGETS = process.env.LOGO_TARGETS ? JSON.parse(process.env.LOGO_TARGETS) : { 18: [0, 1, 2], 30: [1] } // gap 8: { 28: [0], 6: [0], 9: [0] };
+const TARGETS = process.env.LOGO_TARGETS ? JSON.parse(process.env.LOGO_TARGETS) : { 18: [0, 1, 2], 30: [1] } // gap 8: { 28: [0], 6: [0], 9: [0], 19: [0, 1, 2, 3, 4, 5] };
 const GAP = +process.env.LOGO_GAP || 5; // pixels of outline thickening when deciding what's enclosed
 
 async function fill(dataUri) {
