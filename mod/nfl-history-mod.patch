@@ -1,0 +1,2874 @@
+diff --git a/package.json b/package.json
+index 16a2fbe..2e19f9f 100644
+--- a/package.json
++++ b/package.json
+@@ -124,6 +124,7 @@
+ 		"typescript": "npm:@typescript/typescript6@6.0.2",
+ 		"typescript-7": "npm:typescript@7.0.2",
+ 		"vitest": "5.0.5",
++		"web-streams-polyfill": "^4.3.0",
+ 		"workbox-build": "7.4.1"
+ 	},
+ 	"engines": {
+diff --git a/src/common/defaultGameAttributes.ts b/src/common/defaultGameAttributes.ts
+index 1127385..baf892a 100644
+--- a/src/common/defaultGameAttributes.ts
++++ b/src/common/defaultGameAttributes.ts
+@@ -81,7 +81,6 @@ const gameAttributesKeysSportSpecific = {
+ 		"turnoverFactor",
+ 		"orbFactor",
+ 		"assistFactor",
+-		"realPlayerDeterminism",
+ 		"rpdPot",
+ 		"foulRateFactor",
+ 		"foulsNeededToFoulOut",
+@@ -585,7 +584,16 @@ export const defaultGameAttributes: GameAttributesLeagueWithHistory = {
+ 	thanosCooldownEnd: undefined,
+ 	repeatSeason: undefined,
+ 	equalizeRegions: false,
+-	realPlayerDeterminism: 0,
++	// NFL history mod: football follows stored real ratings by default
++	realPlayerDeterminism: __SPORT === "football" ? 1 : 0,
++	useRealSchedules: true,
++	useRealDrafts: true,
++	nflRetirements: true,
++	nflComebacks: true,
++	nflComebackDestination: "team",
++	nflSuspensions: true,
++	nflRealRetirements: true,
++	nflHistoricalRosters: true,
+ 	spectator: false,
+ 	elam: false,
+ 	elamASG: false,
+diff --git a/src/common/types.ts b/src/common/types.ts
+index 2116af8..37511b3 100644
+--- a/src/common/types.ts
++++ b/src/common/types.ts
+@@ -720,6 +720,14 @@ export type GameAttributesLeague = {
+ 	randomDebutsForever?: number;
+ 	realDraftRatings?: RealDraftRatingsSetting;
+ 	realPlayerDeterminism: number;
++	useRealSchedules: boolean;
++	useRealDrafts: boolean;
++	nflRetirements: boolean;
++	nflComebacks: boolean;
++	nflComebackDestination: "team" | "freeAgency";
++	nflSuspensions: boolean;
++	nflRealRetirements: boolean;
++	nflHistoricalRosters: boolean;
+ 	repeatSeason:
+ 		| undefined
+ 		| {
+diff --git a/src/ui/components/Controller/TeamTheme.tsx b/src/ui/components/Controller/TeamTheme.tsx
+new file mode 100644
+index 0000000..3a5e35c
+--- /dev/null
++++ b/src/ui/components/Controller/TeamTheme.tsx
+@@ -0,0 +1,95 @@
++import { useEffect, useState } from "react";
++import { toWorker } from "../../util/toWorker.ts";
++import { useLocal } from "../../util/local.ts";
++
++// NFL history mod: color the interface with the user's team colors (primary, secondary, accent)
++const luminance = (hex: string) => {
++	const n = Number.parseInt(
++		hex.replace("#", "").padEnd(6, "0").slice(0, 6),
++		16,
++	);
++	const channel = (c: number) => {
++		const v = c / 255;
++		return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
++	};
++	return (
++		0.2126 * channel((n >> 16) & 255) +
++		0.7152 * channel((n >> 8) & 255) +
++		0.0722 * channel(n & 255)
++	);
++};
++
++const textOn = (hex: string) => (luminance(hex) > 0.4 ? "#111111" : "#ffffff");
++
++export const TeamTheme = () => {
++	const { lid, phase, season, teamInfoCache, userTid } = useLocal([
++		"lid",
++		"phase",
++		"season",
++		"teamInfoCache",
++		"userTid",
++	]);
++	const [colors, setColors] = useState<[string, string, string] | undefined>();
++
++	// Ask the worker for the user's team colors whenever the league, team or season changes (colors can change by era)
++	useEffect(() => {
++		let cancelled = false;
++		if (lid === undefined) {
++			setColors(undefined);
++			return;
++		}
++		toWorker("main", "getUserTeamColors", undefined)
++			.then((result) => {
++				if (!cancelled) {
++					setColors(result ?? teamInfoCache[userTid]?.colors);
++				}
++			})
++			.catch(() => {
++				if (!cancelled) {
++					setColors(teamInfoCache[userTid]?.colors);
++				}
++			});
++		return () => {
++			cancelled = true;
++		};
++	}, [lid, phase, season, teamInfoCache, userTid]);
++
++	useEffect(() => {
++		let style = document.getElementById(
++			"team-theme",
++		) as HTMLStyleElement | null;
++		if (!colors) {
++			style?.remove();
++			return;
++		}
++		if (!style) {
++			style = document.createElement("style");
++			style.id = "team-theme";
++			document.head.append(style);
++		}
++		const [primary, secondary, accent] = colors;
++		// Use whichever of secondary/accent stands out more against the primary color for highlights
++		const highlight =
++			Math.abs(luminance(secondary) - luminance(primary)) >=
++			Math.abs(luminance(accent) - luminance(primary))
++				? secondary
++				: accent;
++		const text = textOn(primary);
++		style.textContent = `
++:root { --team-primary: ${primary}; --team-secondary: ${secondary}; --team-accent: ${accent}; }
++.navbar.fixed-top { background: ${primary} !important; border-bottom: 4px solid ${highlight} !important; }
++.navbar.fixed-top .navbar-brand, .navbar.fixed-top .nav-link, .navbar.fixed-top .navbar-text, .navbar.fixed-top .dropdown-toggle { color: ${text} !important; }
++.navbar.fixed-top .navbar-toggler { border-color: ${text}; }
++.navbar.fixed-top .navbar-toggler-icon { filter: ${text === "#ffffff" ? "invert(1)" : "none"}; }
++.btn-primary { background-color: ${primary} !important; border-color: ${highlight} !important; color: ${text} !important; }
++.nav-tabs .nav-link.active, .nav-pills .nav-link.active { border-top: 3px solid ${primary}; }
++.nav-pills .nav-link.active { background-color: ${primary}; color: ${text}; }
++.progress-bar { background-color: ${primary}; }
++.sidebar .nav-link.active, .sidebar .active > .nav-link { border-left: 4px solid ${primary}; }
++h1 { border-bottom: 3px solid ${primary}; padding-bottom: 4px; display: inline-block; }
++table.table thead th { border-bottom: 2px solid ${primary}; }
++`;
++	}, [colors?.join(",")]);
++
++	return null;
++};
+diff --git a/src/ui/components/Controller/index.tsx b/src/ui/components/Controller/index.tsx
+index fc14a9f..51cbcae 100644
+--- a/src/ui/components/Controller/index.tsx
++++ b/src/ui/components/Controller/index.tsx
+@@ -12,6 +12,7 @@ import { Notifications } from "./Notifications.tsx";
+ import { SideBar } from "./SideBar.tsx";
+ import { Skyscraper } from "./Skyscraper.tsx";
+ import { TitleBar } from "./TitleBar.tsx";
++import { TeamTheme } from "./TeamTheme.tsx";
+ import { useViewData } from "../../util/viewManager.tsx";
+ import api from "../../api/index.ts";
+ import { ErrorBoundary } from "../ErrorBoundary.tsx";
+@@ -120,6 +121,7 @@ export const Controller = () => {
+ 							</div>
+ 							<Skyscraper />
+ 						</div>
++						<TeamTheme />
+ 						<CommandPalette />
+ 						<NagModal close={closeNagModal} show={showNagModal} />
+ 					</div>
+diff --git a/src/ui/components/LeagueFileUpload.tsx b/src/ui/components/LeagueFileUpload.tsx
+index 5694d6d..62730e8 100644
+--- a/src/ui/components/LeagueFileUpload.tsx
++++ b/src/ui/components/LeagueFileUpload.tsx
+@@ -109,13 +109,333 @@ class LeagueFileVersionError extends Error {
+ 	}
+ }
+ 
++// NFL history mod: build a league for any season straight from the NFL master file
++let nflScriptPromise: Promise<void> | undefined;
++const loadNflScript = () => {
++	if (!nflScriptPromise) {
++		nflScriptPromise = new Promise((resolve, reject) => {
++			const script = document.createElement("script");
++			// Cache-busted so a rebuilt picker (new league data) is always picked up
++			script.src = `/nfl/nfl_mod.js?v=${Date.now()}`;
++			script.onload = () => resolve();
++			script.onerror = () => {
++				nflScriptPromise = undefined;
++				reject(
++					new Error("Could not load /nfl/nfl_mod.js (run build_mod_assets.js)"),
++				);
++			};
++			document.head.append(script);
++		});
++	}
++	return nflScriptPromise;
++};
++let nflMaster: any;
++
++const NflHistoryPicker = ({
++	disabled,
++	onFile,
++}: {
++	disabled: boolean;
++	onFile: (file: File) => void;
++}) => {
++	const [loaded, setLoaded] = useState(nflMaster !== undefined);
++	const [status, setStatus] = useState("");
++	const [season, setSeason] = useState(2026);
++	const [phase, setPhase] = useState("regular");
++
++	const loadMaster = async (event: ChangeEvent<HTMLInputElement>) => {
++		const file = event.currentTarget.files?.[0];
++		if (!file) {
++			return;
++		}
++		try {
++			setStatus("Reading master file...");
++			await loadNflScript();
++			nflMaster = JSON.parse(await file.text());
++			setLoaded(true);
++			setStatus("");
++		} catch (error) {
++			setStatus(`Error: ${(error as Error).message}`);
++		}
++	};
++
++	// The built league waits here while the user picks which scheduled events to keep
++	const [league, setLeague] = useState<any>();
++	const [kept, setKept] = useState<Set<number>>(new Set());
++
++	const build = async () => {
++		setStatus(`Building NFL ${season + 1}...`);
++		setLeague(undefined);
++		// Let the status render before the slow synchronous slice
++		await new Promise((resolve) => setTimeout(resolve, 50));
++		try {
++			const w = window as any;
++			const data = w.NFL_DATA;
++			const built = w.SEASON_SLICER.sliceLeague(nflMaster, w.NFL_ERAS, {
++				season,
++				phase,
++				...data,
++			});
++			setLeague(built);
++			setKept(new Set(built.scheduledEvents.map((e: any) => e.id)));
++			setStatus("");
++		} catch (error) {
++			setStatus(`Error: ${(error as Error).message}`);
++		}
++	};
++
++	const loadLeague = () => {
++		const w = window as any;
++		const filtered = w.SEASON_SLICER.keepEvents({ ...league }, [...kept]);
++		const file = new File(
++			w.SEASON_SLICER.toJsonChunks(filtered),
++			`NFL_${season + 1}_${phase}.json`,
++			{ type: "application/json" },
++		);
++		onFile(file);
++	};
++
++	const setMany = (ids: number[], on: boolean) => {
++		const next = new Set(kept);
++		for (const id of ids) {
++			if (on) {
++				next.add(id);
++			} else {
++				next.delete(id);
++			}
++		}
++		setKept(next);
++	};
++
++	let eventList = null;
++	if (league) {
++		const w = window as any;
++		const nameByPid: Record<number, string> = {};
++		const pidsInEvents = new Set(
++			league.scheduledEvents.map(
++				(e: any) => e.info.pid ?? e.info.nflSuspension?.pid,
++			),
++		);
++		for (const p of league.players) {
++			if (pidsInEvents.has(p.pid)) {
++				nameByPid[p.pid] = `${p.firstName} ${p.lastName}`;
++			}
++		}
++		const PHASE_NAMES: Record<number, string> = {
++			0: "Preseason",
++			1: "Regular season",
++			3: "Playoffs",
++			4: "After playoffs",
++			5: "Draft",
++			8: "Free agency",
++		};
++		eventList = (
++			<div className="mt-3">
++				<div className="d-flex flex-wrap gap-2 align-items-center mb-2">
++					<b>
++						Scheduled events: {kept.size} of {league.scheduledEvents.length}{" "}
++						kept
++					</b>
++					<button
++						type="button"
++						className="btn btn-sm btn-light"
++						onClick={() => {
++							setMany(
++								league.scheduledEvents.map((e: any) => e.id),
++								true,
++							);
++						}}
++					>
++						All
++					</button>
++					<button
++						type="button"
++						className="btn btn-sm btn-light"
++						onClick={() => {
++							setKept(new Set());
++						}}
++					>
++						None
++					</button>
++					<button
++						className="btn btn-primary ms-auto"
++						type="button"
++						onClick={loadLeague}
++						disabled={disabled}
++					>
++						Load this league
++					</button>
++				</div>
++				{w.SEASON_SLICER.EVENT_CATEGORIES.map(
++					([category, label]: [string, string]) => {
++						const events = league.scheduledEvents.filter(
++							(e: any) => w.SEASON_SLICER.eventCategory(e) === category,
++						);
++						if (events.length === 0) {
++							return null;
++						}
++						const ids = events.map((e: any) => e.id);
++						const numKept = ids.filter((id: number) => kept.has(id)).length;
++						return (
++							<details key={category} className="mb-1">
++								<summary>
++									<input
++										type="checkbox"
++										className="form-check-input me-2"
++										checked={numKept === ids.length}
++										ref={(el) => {
++											if (el) {
++												el.indeterminate = numKept > 0 && numKept < ids.length;
++											}
++										}}
++										onChange={(event) => {
++											setMany(ids, event.target.checked);
++										}}
++										onClick={(event) => {
++											event.stopPropagation();
++										}}
++									/>
++									{label} ({numKept}/{ids.length})
++								</summary>
++								<div
++									className="ms-4"
++									style={{ maxHeight: 300, overflowY: "auto" }}
++								>
++									{events.map((e: any) => (
++										<div key={e.id} className="form-check">
++											<input
++												type="checkbox"
++												className="form-check-input"
++												id={`nfl-event-${e.id}`}
++												checked={kept.has(e.id)}
++												onChange={(event) => {
++													setMany([e.id], event.target.checked);
++												}}
++											/>
++											<label
++												className="form-check-label"
++												htmlFor={`nfl-event-${e.id}`}
++											>
++												<span className="text-body-secondary">
++													{e.season}{" "}
++													{PHASE_NAMES[e.phase] ?? `phase ${e.phase}`}:
++												</span>{" "}
++												{w.SEASON_SLICER.describeEvent(
++													e,
++													w.NFL_ERAS,
++													nameByPid,
++												)}
++											</label>
++										</div>
++									))}
++								</div>
++							</details>
++						);
++					},
++				)}
++			</div>
++		);
++	}
++
++	const seasons = [];
++	for (let i = 2026; i >= 1966; i--) {
++		seasons.push(i);
++	}
++
++	return (
++		<div className="card mb-3">
++			<div className="card-body">
++				<h3 className="card-title">NFL History</h3>
++				{!loaded ? (
++					<>
++						<p className="mb-2">
++							Choose <code>NFL_Master_1966_2026.json</code> to start in any
++							season.
++						</p>
++						<input
++							type="file"
++							accept=".json,application/json"
++							onChange={loadMaster}
++							disabled={disabled}
++						/>
++					</>
++				) : (
++					<div className="d-flex flex-wrap gap-2 align-items-center">
++						<select
++							className="form-select w-auto"
++							value={season}
++							onChange={(event) => {
++								setSeason(Number.parseInt(event.target.value));
++								setLeague(undefined);
++								// Live is only for the current season; Playoffs / After Playoffs / Draft need a finished one
++								if (
++									(event.target.value !== "2026" && phase === "live") ||
++									(event.target.value === "2026" &&
++										["playoffs", "afterplayoffs", "draft"].includes(phase))
++								) {
++									setPhase("regular");
++								}
++							}}
++						>
++							{seasons.map((y) => (
++								<option key={y} value={y}>
++									{/* Seasons are named by the year they end (2009 = 2008-09) */}
++									{y + 1} ({y}-{String(y + 1).slice(2)})
++								</option>
++							))}
++						</select>
++						<select
++							className="form-select w-auto"
++							value={phase}
++							onChange={(event) => {
++								setPhase(event.target.value);
++								setLeague(undefined);
++							}}
++						>
++							<option value="preseason">Preseason</option>
++							<option value="regular">Regular Season, Week 1</option>
++							{season < 2026 ? (
++								<>
++									<option value="playoffs">Playoffs</option>
++									<option value="afterplayoffs">After Playoffs</option>
++									<option value="draft">Draft</option>
++								</>
++							) : null}
++							{season === 2026 ? (
++								<option value="live">Live (2027, through Week 8)</option>
++							) : null}
++						</select>
++						<button
++							className="btn btn-primary"
++							type="button"
++							onClick={build}
++							disabled={disabled}
++						>
++							Build league
++						</button>
++					</div>
++				)}
++				{status ? <p className="mt-2 mb-0">{status}</p> : null}
++				{loaded && (window as any).NFL_MOD_BUILT ? (
++					<p className="mt-2 mb-0 text-body-secondary small">
++						NFL data built {(window as any).NFL_MOD_BUILT}
++					</p>
++				) : null}
++				{eventList}
++			</div>
++		</div>
++	);
++};
++
+ export const LeagueFileUpload = ({
+ 	disabled,
+ 	enterURL,
+ 	includePlayersInBasicInfo,
++	nflHistory,
+ 	onDone,
+ 	onLoading,
+ }: {
++	nflHistory?: boolean;
+ 	onDone: (b: Error | LeagueFileUploadOutput) => void;
+ 	disabled?: boolean;
+ 	enterURL?: boolean;
+@@ -257,8 +577,10 @@ export const LeagueFileUpload = ({
+ 
+ 	const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+ 		beforeFile();
+-		const file = event.currentTarget.files?.[0];
++		await checkFile(event.currentTarget.files?.[0]);
++	};
+ 
++	const checkFile = async (file: File | undefined) => {
+ 		if (!file) {
+ 			dispatch({
+ 				type: "init",
+@@ -327,13 +649,24 @@ export const LeagueFileUpload = ({
+ 					</button>
+ 				</div>
+ 			) : (
+-				<input
+-					type="file"
+-					accept=".json,.gz,application/json,application/gzip"
+-					onClick={resetFileInput}
+-					onChange={handleFileUpload}
+-					disabled={disabled || state.status === "checking"}
+-				/>
++				<>
++					{nflHistory ? (
++						<NflHistoryPicker
++							disabled={disabled || state.status === "checking"}
++							onFile={(file) => {
++								beforeFile();
++								checkFile(file);
++							}}
++						/>
++					) : null}
++					<input
++						type="file"
++						accept=".json,.gz,application/json,application/gzip"
++						onClick={resetFileInput}
++						onChange={handleFileUpload}
++						disabled={disabled || state.status === "checking"}
++					/>
++				</>
+ 			)}
+ 			<div style={styleStatus}>
+ 				{state.status === "error" ? (
+diff --git a/src/ui/views/NewLeague/index.tsx b/src/ui/views/NewLeague/index.tsx
+index 949d2ba..a6c6f88 100644
+--- a/src/ui/views/NewLeague/index.tsx
++++ b/src/ui/views/NewLeague/index.tsx
+@@ -1765,6 +1765,7 @@ const NewLeague = (props: View<"newLeague">) => {
+ 											state.customize === "custom-url" ? (
+ 												<div className="my-3">
+ 													<LeagueFileUpload
++														nflHistory
+ 														onLoading={() => {
+ 															dispatch({ type: "loadingLeagueFile" });
+ 														}}
+diff --git a/src/ui/views/Settings/settings.tsx b/src/ui/views/Settings/settings.tsx
+index 4e86c44..a6bde36 100644
+--- a/src/ui/views/Settings/settings.tsx
++++ b/src/ui/views/Settings/settings.tsx
+@@ -2311,10 +2311,19 @@ export const settings: Setting[] = (
+ 			category: "Real Players",
+ 			key: "realPlayerDeterminism",
+ 			name: "Real Player Determinism",
+-			godModeRequired: "existingLeagueOnly",
++			godModeRequired:
++				__SPORT === "football" ? undefined : "existingLeagueOnly",
+ 			type: "rangePercent",
+ 			descriptionLong: (
+ 				<>
++					{__SPORT === "football" ? (
++						<p>
++							NFL history mod: players from the NFL history league file follow
++							their real ratings for every later season. 100% copies the real
++							ratings exactly, 0% uses Football GM's normal random development,
++							and anything in between is a mix.
++						</p>
++					) : null}
+ 					<p>
+ 						By default, BBGM's player development algorithm does not take into
+ 						account what we know about a real player's future performance. That
+@@ -2338,6 +2347,74 @@ export const settings: Setting[] = (
+ 				}
+ 			},
+ 		},
++		{
++			category: "Real Players",
++			key: "useRealSchedules",
++			name: "Real NFL Schedules",
++			type: "bool",
++			description:
++				"NFL history mod: each new season uses that year's real NFL schedule when the league file has it (1966-2026). Later seasons use the normal schedule generator.",
++		},
++		{
++			category: "Real Players",
++			key: "useRealDrafts",
++			name: "Real NFL Draft Picks",
++			type: "bool",
++			description:
++				"NFL history mod: in each draft, teams take the players they really drafted that year when those players are available. Your own picks are still yours to make (auto draft follows the real picks too).",
++		},
++		{
++			category: "Real Players",
++			key: "nflRetirements",
++			name: "Scheduled Retirements",
++			type: "bool",
++			description:
++				"NFL history mod: players retire when they really did (Barry Sanders, Andrew Luck, Brady...), with the real reason in the news. Off: those events are skipped and the game decides retirements itself.",
++		},
++		{
++			category: "Real Players",
++			key: "nflComebacks",
++			name: "Scheduled Comebacks",
++			type: "bool",
++			description:
++				"NFL history mod: retired players come back when they really did (Favre, Brady, Gronkowski, Aaron Donald...).",
++		},
++		{
++			category: "Real Players",
++			key: "nflComebackDestination",
++			name: "Comeback Destination",
++			type: "string",
++			values: [
++				{ key: "team", value: "Real team (e.g. Manning to Denver)" },
++				{ key: "freeAgency", value: "Free agency (any team can sign him)" },
++			],
++			description:
++				"NFL history mod: where a player goes when he comes out of retirement.",
++		},
++		{
++			category: "Real Players",
++			key: "nflSuspensions",
++			name: "Scheduled Suspensions",
++			type: "bool",
++			description:
++				"NFL history mod: real suspensions (Deflategate, Adrian Peterson 2014...) keep the player out for the real number of games, shown like an injury.",
++		},
++		{
++			category: "Real Players",
++			key: "nflRealRetirements",
++			name: "Real Retirements",
++			type: "bool",
++			description:
++				"NFL history mod: real players never retire before their real last season (Brady plays into his 40s) and retire right after it. Seasons they really sat out are skipped and they come back when they really did. After the real data ends, the game decides.",
++		},
++		{
++			category: "Real Players",
++			key: "nflHistoricalRosters",
++			name: "Historical Rosters",
++			type: "bool",
++			description:
++				"NFL history mod: every preseason, real players move to the team they really played for that season, so team strength follows real history. Off: rosters change only through the game's own moves.",
++		},
+ 		{
+ 			category: "Real Players",
+ 			key: "rpdPot",
+diff --git a/src/ui/views/Settings/types.ts b/src/ui/views/Settings/types.ts
+index 8ac606a..68e546d 100644
+--- a/src/ui/views/Settings/types.ts
++++ b/src/ui/views/Settings/types.ts
+@@ -58,6 +58,14 @@ export type Key =
+ 	| "challengeSisyphusMode"
+ 	| "challengeThanosMode"
+ 	| "realPlayerDeterminism"
++	| "useRealSchedules"
++	| "useRealDrafts"
++	| "nflRetirements"
++	| "nflComebacks"
++	| "nflComebackDestination"
++	| "nflSuspensions"
++	| "nflRealRetirements"
++	| "nflHistoricalRosters"
+ 	| "repeatSeason"
+ 	| "maxOvertimes"
+ 	| "maxOvertimesPlayoffs"
+diff --git a/src/worker/api/index.ts b/src/worker/api/index.ts
+index 12dd36b..2c33f22 100644
+--- a/src/worker/api/index.ts
++++ b/src/worker/api/index.ts
+@@ -159,6 +159,7 @@ import { formatScheduleForEditor } from "../views/scheduleEditor.ts";
+ import type { KeyboardShortcutsLocal } from "../../ui/util/keyboardShortcuts.ts";
+ import { getNumPlayoffTeamsRaw } from "../core/season/getNumPlayoffTeams.ts";
+ import type { NewLeagueSettings } from "../views/newLeague.ts";
++import { makeCreateLeagueFromFile } from "./native.ts";
+ import { getNumPlayersTradedAwayNormalizedAll } from "../core/player/getNumPlayersTradedAwayNormalized.ts";
+ import { getAdjustedTicketPrice } from "../../common/getAdjustedTicketPrice.ts";
+ import { gameAttributesArrayToObject } from "../../common/gameAttributesArrayToObject.ts";
+@@ -4871,6 +4872,17 @@ const upgrade65 = async () => {
+ 	console.timeEnd("upgrade65");
+ };
+ 
++// NFL history mod: the user's team colors, for the team-color interface
++const getUserTeamColors = async (): Promise<
++	[string, string, string] | undefined
++> => {
++	if (g.get("lid") === undefined) {
++		return undefined;
++	}
++	const t = await idb.cache.teams.get(g.get("userTid"));
++	return t?.colors;
++};
++
+ const upsertCustomizedPlayer = async (
+ 	{
+ 		p,
+@@ -4920,6 +4932,17 @@ const upsertCustomizedPlayer = async (
+ 
+ 	p.imgURL = helpers.stripBbcode(p.imgURL);
+ 
++	// NFL history mod: keep the player's stored real ratings if the edit form didn't send them
++	if (
++		typeof (p as any).pid === "number" &&
++		(p as any).realRatings === undefined
++	) {
++		const existing = await idb.cache.players.get((p as any).pid);
++		if ((existing as any)?.realRatings) {
++			(p as any).realRatings = (existing as any).realRatings;
++		}
++	}
++
+ 	// Fix draft and ratings season
+ 	if (p.tid === PLAYER.UNDRAFTED) {
+ 		if (p.draft.year < season) {
+@@ -5381,8 +5404,82 @@ const whileWorkerBusy =
+ 	(...args: Args) =>
+ 		lock.whileWorkerBusy(() => cb(...args));
+ 
++// Gridiron Almanac native app calls
++const native = {
++	createLeagueFromFile: makeCreateLeagueFromFile(
++		createLeague,
++		leagueFileUpload.initialCheck as any,
++	),
++	// Where the league stands: season, phase and the user's team
++	status: async () =>
++		g.get("lid") === undefined || !Object.hasOwn(g, "season")
++			? { lid: null }
++			: {
++					lid: g.get("lid"),
++					season: g.get("season"),
++					phase: g.get("phase"),
++					phaseText: PHASE_TEXT[g.get("phase") as keyof typeof PHASE_TEXT],
++					userTid: g.get("userTid"),
++				},
++	// Everything needed to compare a simmed league with real history (players, team seasons and stats, playoffs)
++	dumpLeague: async () => {
++		await idb.cache.flush();
++		const db = idb.league;
++		const [players, teams, teamSeasons, teamStats, playoffSeries] =
++			await Promise.all([
++				db.getAll("players"),
++				db.getAll("teams"),
++				db.getAll("teamSeasons"),
++				db.getAll("teamStats"),
++				db.getAll("playoffSeries"),
++			]);
++		return {
++			players,
++			teams: (teams as any[]).map((t) => ({
++				...t,
++				seasons: (teamSeasons as any[]).filter((x) => x.tid === t.tid),
++				stats: (teamStats as any[]).filter((x) => x.tid === t.tid),
++			})),
++			playoffSeries,
++		};
++	},
++	// Is a sim running right now?
++	isSimming: async () => lock.get("gameSim"),
++	// Current standings, one row per active team
++	standings: async () => {
++		const season = g.get("season");
++		const teams = await idb.cache.teams.getAll();
++		const teamSeasons = await idb.cache.teamSeasons.indexGetAll(
++			"teamSeasonsBySeasonTid",
++			[[season], [season, "Z"]],
++		);
++		return teams
++			.filter((t) => !t.disabled)
++			.map((t) => {
++				const ts = teamSeasons.find((row) => row.tid === t.tid);
++				return {
++					tid: t.tid,
++					region: ts?.region ?? t.region,
++					name: ts?.name ?? t.name,
++					abbrev: ts?.abbrev ?? t.abbrev,
++					colors: ts?.colors ?? t.colors,
++					won: ts?.won ?? 0,
++					lost: ts?.lost ?? 0,
++					tied: ts?.tied ?? 0,
++					cid: ts?.cid ?? t.cid,
++					did: ts?.did ?? t.did,
++				};
++			});
++	},
++	// Load a league for play, like opening its page in the web UI
++	openLeague: async ({ lid }: { lid: number }, conditions: Conditions) => {
++		await beforeLeague(lid, conditions);
++	},
++};
++
+ const api = {
+ 	actions,
++	native,
+ 	awardSettings,
+ 	eightyTwoZeroDraft,
+ 	exhibitionGame,
+@@ -5531,6 +5628,7 @@ const api = {
+ 		updateTrade,
+ 		upgrade65,
+ 		upgrade65Estimate,
++		getUserTeamColors,
+ 		upsertCustomizedPlayer,
+ 		upsertScheduledEvent,
+ 		validatePointsFormula,
+diff --git a/src/worker/api/native.ts b/src/worker/api/native.ts
+new file mode 100644
+index 0000000..eee4085
+--- /dev/null
++++ b/src/worker/api/native.ts
+@@ -0,0 +1,96 @@
++// Gridiron Almanac native app: engine calls made by the Kotlin app instead of Football GM's own web UI.
++import { getDefaultSettings } from "../views/newLeague.ts";
++import { unwrapGameAttribute } from "../../common/unwrapGameAttribute.ts";
++import { gameAttributesArrayToObject } from "../../common/gameAttributesArrayToObject.ts";
++import { helpers } from "../util/index.ts";
++import { DEFAULT_CONFS, DEFAULT_DIVS } from "../../common/constants.ts";
++import type { Conditions } from "../../common/types.ts";
++
++type CreateLeague = (params: any, conditions: Conditions) => Promise<number>;
++type InitialCheck = (
++	params: { file: unknown; includePlayersInBasicInfo?: boolean; leagueCreationID?: string },
++	conditions: Conditions,
++) => Promise<{ basicInfo: any; schemaErrors: unknown[] }>;
++
++// Settings from the league file over the defaults, the way the New League screen does it.
++const settingsFromFile = (gameAttributes: Record<string, unknown> | undefined) => {
++	const settings: any = helpers.deepCopy(getDefaultSettings());
++	if (gameAttributes) {
++		for (const key of Object.keys(settings)) {
++			if (key === "noStartingInjuries" || key === "randomization" || key === "realStats" || key === "giveMeWorstRoster") {
++				continue;
++			}
++			const value = unwrapGameAttribute(gameAttributes as any, key as any);
++			if (value !== undefined) {
++				settings[key] = key === "repeatSeason" ? (value as any)?.type : value;
++			}
++		}
++	}
++	return settings;
++};
++
++/**
++ * Creates a league from a league file on the phone (path to a .json file), like New League → Upload league file.
++ * Returns the new league's id.
++ */
++export const makeCreateLeagueFromFile =
++	(createLeague: CreateLeague, initialCheck: InitialCheck) =>
++	async (
++		{ path, tid, name }: { path: string; tid?: number; name?: string },
++		conditions: Conditions,
++	) => {
++		const HostFile = (globalThis as any).__HostFile;
++		const file = new HostFile(path);
++		const leagueCreationID = `native-${Date.now()}`;
++		const { basicInfo } = await initialCheck({ file, leagueCreationID }, conditions);
++
++		if (Array.isArray(basicInfo.gameAttributes)) {
++			basicInfo.gameAttributes = gameAttributesArrayToObject(basicInfo.gameAttributes);
++		}
++		const ga = basicInfo.gameAttributes ?? {};
++
++		let teams = helpers.deepCopy(basicInfo.teams ?? []);
++		for (const t of teams) {
++			if (!Object.hasOwn(t, "pop") && t.seasons?.length > 0) {
++				t.pop = t.seasons.at(-1).pop;
++			}
++			if (typeof t.pop !== "number" || Number.isNaN(t.pop)) {
++				t.pop = 1;
++			}
++		}
++		teams = helpers.addPopRank(teams);
++
++		let userTid = tid;
++		if (userTid === undefined) {
++			const fromFile = Array.isArray(ga.userTid) ? ga.userTid.at(-1)?.value : ga.userTid;
++			userTid = typeof fromFile === "number" ? fromFile : 0;
++		}
++
++		return createLeague(
++			{
++				name: name ?? basicInfo.meta?.name ?? "NFL League",
++				tid: userTid,
++				file,
++				url: undefined,
++				keptKeys: Array.from(basicInfo.keys),
++				shuffleRosters: false,
++				importLid: undefined,
++				getLeagueOptions: undefined,
++				confs: ga.confs ? unwrapGameAttribute(ga, "confs") : DEFAULT_CONFS,
++				divs: ga.divs ? unwrapGameAttribute(ga, "divs") : DEFAULT_DIVS,
++				teamsFromInput: teams,
++				settings: settingsFromFile(ga),
++				fromFile: {
++					gameAttributes: ga,
++					maxGid: basicInfo.maxGid,
++					hasRookieContracts: basicInfo.hasRookieContracts ?? true,
++					startingSeason: basicInfo.startingSeason,
++					teams: basicInfo.teams,
++					version: basicInfo.version,
++				},
++				startingSeasonFromInput: undefined,
++				leagueCreationID,
++			},
++			conditions,
++		);
++	};
+diff --git a/src/worker/core/GameSim.football/index.ts b/src/worker/core/GameSim.football/index.ts
+index ccdc4ee..7d4e0a6 100644
+--- a/src/worker/core/GameSim.football/index.ts
++++ b/src/worker/core/GameSim.football/index.ts
+@@ -10,6 +10,18 @@ import {
+ } from "./getCompositeFactor.ts";
+ import getPlayers from "./getPlayers.ts";
+ import formations from "./formations.ts";
++
++const REAL_POSITION_FIRST = new Set([
++	"QB",
++	"RB",
++	"WR",
++	"TE",
++	"OL",
++	"DL",
++	"LB",
++	"CB",
++	"S",
++]);
+ import { penaltiesByPlayType } from "./penalties.ts";
+ import type { Position } from "../../../common/types.football.ts";
+ import type {
+@@ -1430,9 +1442,18 @@ class GameSim extends GameSimBase {
+ 				const numPlayers = formation[side][pos]!;
+ 
+ 				// Not sure why this adjustment is needed, but without it, basically only the top 3 WR play. Maybe because formations with fewer than 3 WR let some of them rest, so you'd need 3 WR sets called very frequently to ever get them all tired.
+-				const FATIGUE_MODIFIER = pos === "WR" ? 0.75 : 1;
+-
+-				const depth = this.team[t].depth[pos];
++				// NFL history mod: the lead back rests less often (1.3), so workhorse backs get workhorse carries
++				const FATIGUE_MODIFIER = pos === "WR" ? 0.75 : pos === "RB" ? 1.3 : 1;
++
++				// NFL history mod: on offense and defense, players who really play this position go first (in depth chart
++				// order), then everyone else, so a receiver listed on the running back depth chart only plays there if needed
++				const depthRaw = this.team[t].depth[pos];
++				const depth = REAL_POSITION_FIRST.has(pos)
++					? [
++							...depthRaw.filter((p) => p.pos === pos),
++							...depthRaw.filter((p) => p.pos !== pos),
++						]
++					: depthRaw;
+ 				const players: PlayerGameSim[] = [];
+ 				if (FATIGUE_POS.has(pos)) {
+ 					for (let depthIndex = 0; depthIndex < depth.length; depthIndex++) {
+@@ -2259,7 +2280,8 @@ class GameSim extends GameSimBase {
+ 	) {
+ 		const { d } = this.currentPlay.state.initial;
+ 
+-		const p = this.pickPlayer(d, "passRushing", undefined, 5);
++		// NFL history mod: sacks come from the front seven
++		const p = this.pickPlayer(d, "passRushing", ["DL", "LB"], 5);
+ 		const ydsRaw = randInt(-1, -12);
+ 		const yds = this.currentPlay.boundedYds(ydsRaw);
+ 
+@@ -2461,7 +2483,8 @@ class GameSim extends GameSimBase {
+ 			o,
+ 			Math.random() < 0.2 ? "catching" : "gettingOpen",
+ 			["WR", "TE", "RB"],
+-			1.5,
++			// NFL history mod: top receivers get a real share of targets (was 1.5)
++			2.5,
+ 		);
+ 
+ 		// RB passes are often short, so 50% chance of a decrease in yardage, which is more severe for players with low gettingOpen
+@@ -2506,7 +2529,16 @@ class GameSim extends GameSimBase {
+ 
+ 		const yds = this.boundedYdsBallCarrier(ydsRaw);
+ 
+-		const defender = this.pickPlayer(d, "passCoverage", undefined, 2);
++		// NFL history mod: interceptions come from the secondary and linebackers, mostly the best cover men (was all 11, power 2)
++		// Safeties' coverage ratings run lower than cornerbacks', but safeties make plenty of real interceptions
++		// (Ed Reed, Ronnie Lott), so they get a boost here.
++		const defender = choice(
++			getPlayers(this.playersOnField[d], ["CB", "S", "LB"]),
++			(p) =>
++				(p.compositeRating.passCoverage * fatigue(p.stat.energy, p.injured)) **
++					4 *
++				(p.pos === "S" ? 1.8 : 1),
++		);
+ 		const complete = Math.random() < this.probComplete(qb, target, defender);
+ 		const interception = Math.random() < this.probInt(qb, defender);
+ 
+@@ -2611,8 +2643,7 @@ class GameSim extends GameSimBase {
+ 		const d = this.d;
+ 
+ 		let rbw:
+-			| Map<PlayerGameSim, { type: "OL" | "Other"; won: boolean }>
+-			| undefined;
++			Map<PlayerGameSim, { type: "OL" | "Other"; won: boolean }> | undefined;
+ 		const rbCounts = { aOL: 0, aOther: 0, wOL: 0, wOther: 0 };
+ 
+ 		// Usually do normal run, but sometimes do special stuff
+@@ -2627,7 +2658,8 @@ class GameSim extends GameSimBase {
+ 
+ 			if (rand < 0.5 || rbs.length === 0) {
+ 				positions.push("QB");
+-			} else if (rand < 0.57 || rbs.length === 0) {
++			} else if (rand < 0.53 || rbs.length === 0) {
++				// NFL history mod: end-arounds on 3% of runs (was 7%), closer to how often receivers really carry
+ 				positions.push("WR");
+ 			}
+ 
+@@ -2642,7 +2674,20 @@ class GameSim extends GameSimBase {
+ 		// Scrambles tend to be longer runs
+ 		const scrambleModifier = qbScramble ? 3 : 1;
+ 
+-		const p = this.pickPlayer(o, "rushing", positions);
++		// NFL history mod: with two backs on the field the better one gets most carries (was power 1)
++		// NFL history mod: the lead back (first on the field, from the depth chart) carries most of the time. In two-back
++		// sets the second back is usually a fullback, who rarely gets the ball. Among the rest, better runners are favored.
++		const leadBack = this.playersOnField[o].RB?.[0];
++		// x4: lead backs get ~68% of carries in a game (18 a game), like real workhorse backs
++		const LEAD_BACK = 4;
++		const rushPower = positions.includes("WR") ? 1 : 3;
++		const p = choice(
++			getPlayers(this.playersOnField[o], positions),
++			(pl) =>
++				(pl.compositeRating.rushing * fatigue(pl.stat.energy, pl.injured)) **
++					rushPower *
++				(pl === leadBack ? LEAD_BACK : 1),
++		);
+ 
+ 		if (!qbScramble) {
+ 			rbw = new Map();
+@@ -2708,20 +2753,24 @@ class GameSim extends GameSimBase {
+ 			names: p === qb ? [qb.name] : [qb.name, p.name],
+ 		});
+ 
++		// NFL history mod: the runner counts for more than his blocking (60/40, was 50/50), and ability above the
++		// starter-average level counts extra, so elite backs gain real separation (Sanders: a yard a carry over
++		// the league). An average back gets the same yards as before; era calibration keeps league totals right.
++		const RUSH_AVG = 0.63; // average starting back (1990-2025 ratings)
++		const rusher = RUSH_AVG + (p.compositeRating.rushing - RUSH_AVG) * 1.8;
+ 		// Bound is so (in extreme contrived cases like 0 ovr teams) meanYds can't go too far above/below the truncGauss limits
+ 		const meanYds = helpers.bound(
+ 			(scrambleModifier *
+ 				(3.5 *
+-					0.5 *
+-					(p.compositeRating.rushing +
+-						this.team[o].compositeRating.runBlocking))) /
++					(0.6 * rusher + 0.4 * this.team[o].compositeRating.runBlocking))) /
+ 				this.team[d].compositeRating.runStopping,
+ 			-5,
+ 			15,
+ 		);
+ 		let ydsRaw = Math.round(truncGauss(meanYds, 6, -5, 15));
+ 
+-		if (Math.random() < 0.01) {
++		// Breakaway runs: better runners break more of them (1% for an average back)
++		if (Math.random() < 0.01 * helpers.bound(rusher / RUSH_AVG, 0.5, 2) ** 2) {
+ 			ydsRaw += randInt(0, 109);
+ 		}
+ 
+@@ -3067,7 +3116,10 @@ class GameSim extends GameSimBase {
+ 		positions: Position[] = POSITIONS,
+ 		power: number = 1,
+ 	) {
+-		const players = getPlayers(this.playersOnField[t], positions);
++		let players = getPlayers(this.playersOnField[t], positions);
++		if (players.length === 0) {
++			players = getPlayers(this.playersOnField[t], POSITIONS);
++		}
+ 		const weightFunc =
+ 			rating !== undefined
+ 				? (p: PlayerGameSim) =>
+diff --git a/src/worker/core/draft/runPicks.ts b/src/worker/core/draft/runPicks.ts
+index 260dbbd..d2514cd 100644
+--- a/src/worker/core/draft/runPicks.ts
++++ b/src/worker/core/draft/runPicks.ts
+@@ -198,7 +198,29 @@ const runPicks = async (
+ 			}
+ 			console.log(sum);*/
+ 
+-			const selection = choice(playersAll, score);
++			// NFL history mod: the team takes the player it really drafted this year, if he's still there. With none
++			// left, it takes the earliest real pick whose real team has no picks left in this draft. Then normal logic.
++			let selection: Player | undefined;
++			if (__SPORT === "football" && g.get("useRealDrafts")) {
++				const season = g.get("season");
++				const real = playersAll.filter(
++					(p) => (p as any).realDraft?.year === season,
++				);
++				const order = (p: Player) =>
++					(p as any).realDraft.round * 1000 + (p as any).realDraft.pick;
++				const byOrder = (a: Player, b: Player) => order(a) - order(b);
++				const own = real.filter((p) => (p as any).realDraft.tid === dp.tid);
++				if (own.length > 0) {
++					selection = own.sort(byOrder)[0];
++				} else {
++					const tidsWithPicksLeft = new Set(draftPicks.map((dp2) => dp2.tid));
++					const orphans = real.filter(
++						(p) => !tidsWithPicksLeft.has((p as any).realDraft.tid),
++					);
++					selection = orphans.sort(byOrder)[0];
++				}
++			}
++			selection ??= choice(playersAll, score);
+ 
+ 			const pid = selection.pid;
+ 			await selectPlayer(dp, pid);
+diff --git a/src/worker/core/game/nflRealMoves.ts b/src/worker/core/game/nflRealMoves.ts
+new file mode 100644
+index 0000000..7284102
+--- /dev/null
++++ b/src/worker/core/game/nflRealMoves.ts
+@@ -0,0 +1,81 @@
++// NFL history mod: real moves during a season (Jerry Rice to Seattle after 3 games in 2004). Each player's
++// realMoves lists [season, games played with his first team, new team, jersey]; after each day of games, players
++// whose team has played that many games move to the new team.
++import { PHASE, PLAYER } from "../../../common/constants.ts";
++import { idb } from "../../db/index.ts";
++import { g } from "../../util/index.ts";
++import { player, team } from "../index.ts";
++
++type RealMove = {
++	season: number;
++	afterGames: number;
++	tid: number;
++	jerseyNumber?: string;
++	done?: boolean;
++};
++
++export const applyNflRealMoves = async () => {
++	if (
++		__SPORT !== "football" ||
++		!Object.hasOwn(g, "nflHistoricalRosters") ||
++		!g.get("nflHistoricalRosters")
++	) {
++		return false;
++	}
++	const season = g.get("season");
++	const players = await idb.cache.players.indexGetAll("playersByTid", [
++		PLAYER.FREE_AGENT,
++		Infinity,
++	]);
++	const teamSeasons = await idb.cache.teamSeasons.indexGetAll(
++		"teamSeasonsBySeasonTid",
++		[[season], [season, "Z"]],
++	);
++	const gamesPlayed = (tid: number) => {
++		const ts = teamSeasons.find((row) => row.tid === tid);
++		return ts ? ts.won + ts.lost + ts.tied + (ts.otl ?? 0) : 0;
++	};
++	const teams = await idb.cache.teams.getAll();
++
++	const moved = new Set<number>();
++	for (const p of players) {
++		const moves = (p as any).realMoves as RealMove[] | undefined;
++		if (!moves) {
++			continue;
++		}
++		for (const m of moves) {
++			if (m.season !== season || m.done) {
++				continue;
++			}
++			// Count games for the team he's on now (or, for a free agent, the team he joins)
++			const from = p.tid >= 0 ? p.tid : m.tid;
++			if (gamesPlayed(from) < m.afterGames) {
++				break;
++			}
++			m.done = true;
++			const t = teams.find((t2) => t2.tid === m.tid);
++			if (!t || t.disabled || p.tid === m.tid) {
++				continue;
++			}
++			if (p.tid >= 0) {
++				moved.add(p.tid);
++			}
++			const contract =
++				p.contract.exp >= season
++					? p.contract
++					: { amount: player.genContract(p).amount, exp: season };
++			await player.sign(p, m.tid, contract, PHASE.REGULAR_SEASON);
++			if (m.jerseyNumber !== undefined) {
++				p.jerseyNumber = m.jerseyNumber;
++			}
++			moved.add(m.tid);
++			await idb.cache.players.put(p);
++		}
++	}
++	for (const tid of moved) {
++		if (!g.get("userTids").includes(tid)) {
++			await team.rosterAutoSort(tid);
++		}
++	}
++	return moved.size > 0;
++};
+diff --git a/src/worker/core/game/play.ts b/src/worker/core/game/play.ts
+index 03277b0..e066ae5 100644
+--- a/src/worker/core/game/play.ts
++++ b/src/worker/core/game/play.ts
+@@ -10,6 +10,7 @@ import {
+ 	trade,
+ } from "../index.ts";
+ import loadTeams from "./loadTeams.ts";
++import { applyNflRealMoves } from "./nflRealMoves.ts";
+ import updatePlayoffSeries from "./updatePlayoffSeries.ts";
+ import writeGameStats from "./writeGameStats.ts";
+ import writePlayerStats, {
+@@ -301,6 +302,15 @@ const play = async (
+ 			if (phase === PHASE.REGULAR_SEASON) {
+ 				await trade.betweenAiTeams();
+ 			}
++			// NFL history mod: real mid-season trades and signings
++			if (
++				phase === PHASE.REGULAR_SEASON ||
++				phase === PHASE.AFTER_TRADE_DEADLINE
++			) {
++				if (await applyNflRealMoves()) {
++					updateEvents.push("playerMovement");
++				}
++			}
+ 		}
+ 
+ 		// More stuff for LeagueTopBar - update ovrs based on injuries, and (if user just played a game) update the score of the user's last game and add their next game
+diff --git a/src/worker/core/league/createGameAttributes.ts b/src/worker/core/league/createGameAttributes.ts
+index a23718b..60e3937 100644
+--- a/src/worker/core/league/createGameAttributes.ts
++++ b/src/worker/core/league/createGameAttributes.ts
+@@ -285,7 +285,8 @@ const createGameAttributes = async (
+ 		throw new Error("numDraftRounds must be a positive number");
+ 	}
+ 
+-	{
++	// NFL history mod: real schedules don't use these settings, so skip the check and its "settings were reset" message
++	if (!(gameAttributesInput as any)?.realSchedules) {
+ 		const info = getInitialNumGamesConfDivSettings(teamInfos, {
+ 			divs: unwrapGameAttribute(gameAttributes, "divs"),
+ 			numGames: unwrapGameAttribute(gameAttributes, "numGames"),
+diff --git a/src/worker/core/league/createStream.ts b/src/worker/core/league/createStream.ts
+index 864aaa0..680dc3a 100644
+--- a/src/worker/core/league/createStream.ts
++++ b/src/worker/core/league/createStream.ts
+@@ -1334,6 +1334,7 @@ const beforeDBStream = async ({
+ 	// Update after applying real team info and any other changes in processTeamInfos
+ 	gameAttributes.teamInfoCache = teams.map((t) => ({
+ 		abbrev: t.abbrev,
++		colors: t.colors,
+ 		disabled: t.disabled,
+ 		imgURL: t.imgURL,
+ 		imgURLSmall: t.imgURLSmall,
+diff --git a/src/worker/core/league/loadGameAttributes.ts b/src/worker/core/league/loadGameAttributes.ts
+index 517f4c6..655faf0 100644
+--- a/src/worker/core/league/loadGameAttributes.ts
++++ b/src/worker/core/league/loadGameAttributes.ts
+@@ -101,6 +101,18 @@ const loadGameAttributes = async () => {
+ 		}
+ 	}
+ 
++	// NFL history mod: make sure team colors are in teamInfoCache (for the team-color interface), including leagues made before the mod
++	{
++		const teams = await idb.cache.teams.getAll();
++		g.setWithoutSavingToDB(
++			"teamInfoCache",
++			g.get("teamInfoCache").map((t, tid) => ({
++				...t,
++				colors: teams.find((t2) => t2.tid === tid)?.colors,
++			})),
++		);
++	}
++
+ 	// Avoid IDB upgrade
+ 	if ((g.get("draftType") as any) === "nba") {
+ 		g.setWithoutSavingToDB("draftType", "nba2019");
+diff --git a/src/worker/core/phase/newPhasePreseason.ts b/src/worker/core/phase/newPhasePreseason.ts
+index 22a2023..bf73f3c 100644
+--- a/src/worker/core/phase/newPhasePreseason.ts
++++ b/src/worker/core/phase/newPhasePreseason.ts
+@@ -409,6 +409,60 @@ const newPhasePreseason = async (
+ 		}
+ 	}
+ 
++	// NFL history mod: historical rosters. Real players move to the team they really played for this season
++	// (p.realTeams), including last draft's prospects nobody picked. Rosters are trimmed to size before Week 1.
++	if (
++		__SPORT === "football" &&
++		g.get("nflHistoricalRosters") &&
++		Object.hasOwn(g, "nflRealDataLastSeason") &&
++		newSeason <= (g as any).nflRealDataLastSeason
++	) {
++		const undrafted = await idb.cache.players.indexGetAll(
++			"playersByTid",
++			PLAYER.UNDRAFTED,
++		);
++		for (const p of undrafted) {
++			if ((p as any).realTeams?.[newSeason] !== undefined) {
++				players.push(p);
++			}
++		}
++		const moved = new Set<number>();
++		for (const p of players) {
++			const target: number | undefined = (p as any).realTeams?.[newSeason];
++			// -1: on a real roster that season, team unknown (camp and practice-squad players): leave him be
++			if (target === undefined || target < 0 || p.tid === target) {
++				continue;
++			}
++			const t = teamsByTid[target];
++			if (!t || t.disabled) {
++				continue;
++			}
++			if (p.tid >= 0) {
++				moved.add(p.tid);
++			}
++			const contract =
++				p.contract.exp >= newSeason
++					? p.contract
++					: { amount: player.genContract(p).amount, exp: newSeason };
++			await player.sign(p, target, contract, PHASE.PRESEASON);
++			moved.add(target);
++			await idb.cache.players.put(p);
++		}
++		// Real jersey numbers for this season (conflicts with teammates are sorted out below)
++		for (const p of players) {
++			const num: string | undefined = (p as any).realJerseys?.[newSeason];
++			if (num !== undefined && p.tid >= 0 && p.jerseyNumber !== num) {
++				player.setJerseyNumber(p, num, { phase: PHASE.PRESEASON });
++				await idb.cache.players.put(p);
++			}
++		}
++		for (const tid of moved) {
++			if (!g.get("userTids").includes(tid) || local.autoPlayUntil) {
++				await team.rosterAutoSort(tid);
++			}
++		}
++	}
++
+ 	// Again, so updateValues can happen after new mean/std is calculated
+ 	local.playerOvrMeanStdStale = true;
+ 	for (const p of players) {
+@@ -429,6 +483,23 @@ const newPhasePreseason = async (
+ 
+ 	local.minFractionDiffs = undefined;
+ 
++	// NFL history mod: real jersey retirements happen when they really did (Fitzgerald's #11 in 2026)
++	if (Object.hasOwn(g, "nflRetiredNumbers")) {
++		for (const j of (g as any).nflRetiredNumbers as any[]) {
++			const t = teamsByTid[j.tid];
++			if (!t || j.seasonRetired > newSeason) {
++				continue;
++			}
++			t.retiredJerseyNumbers ??= [];
++			if (t.retiredJerseyNumbers.some((row) => row.number === j.number)) {
++				continue;
++			}
++			const { tid, ...row } = j;
++			t.retiredJerseyNumbers.push(row);
++			await idb.cache.teams.put(t);
++		}
++	}
++
+ 	// Handle jersey number conflicts
+ 	const playersByTeam = Map.groupBy(
+ 		players.filter((p) => p.tid >= 0),
+@@ -460,10 +531,11 @@ const newPhasePreseason = async (
+ 				);
+ 				if (conflicts.length > 1) {
+ 					// Conflict! Who gets to keep the number? The one with the highest career peak ovr!
+-					const playerWhoKeepsIt = maxBy(
+-						conflicts,
+-						(p) => maxBy(p.ratings, "ovr")!.ovr,
+-					);
++					// NFL history mod: the player who really wore this number this season keeps it
++					const playerWhoKeepsIt =
++						conflicts.find(
++							(p) => (p as any).realJerseys?.[newSeason] === jerseyNumber,
++						) ?? maxBy(conflicts, (p) => maxBy(p.ratings, "ovr")!.ovr);
+ 
+ 					for (const p of conflicts) {
+ 						if (p !== playerWhoKeepsIt) {
+diff --git a/src/worker/core/phase/newPhaseResignPlayers.ts b/src/worker/core/phase/newPhaseResignPlayers.ts
+index e9d89db..24ca44d 100644
+--- a/src/worker/core/phase/newPhaseResignPlayers.ts
++++ b/src/worker/core/phase/newPhaseResignPlayers.ts
+@@ -148,6 +148,27 @@ const newPhaseResignPlayers = async (
+ 
+ 	await contractNegotiation.cancelAll();
+ 
++	// NFL history mod: value of each team's ~24th best player (starter level). AI teams keep expiring players at or
++	// above it whenever the cap allows, like real teams using the franchise tag or restructures to keep their core.
++	const starterValueByTid = new Map<number, number>();
++	if (__SPORT === "football") {
++		const valuesByTid = new Map<number, number[]>();
++		for (const p of players) {
++			if (p.tid >= 0) {
++				const values = valuesByTid.get(p.tid) ?? [];
++				values.push(p.value);
++				valuesByTid.set(p.tid, values);
++			}
++		}
++		for (const [tid, values] of valuesByTid) {
++			values.sort((a, b) => b - a);
++			starterValueByTid.set(
++				tid,
++				values[Math.min(23, values.length - 1)] ?? Infinity,
++			);
++		}
++	}
++
+ 	const valueChangeCalculator = new ValueChangeCalculator();
+ 	for (const pid of expiringPids) {
+ 		// Re-fetch players, because normalizeContractDemands might have changed some objects
+@@ -247,7 +268,23 @@ const newPhaseResignPlayers = async (
+ 				}
+ 			}
+ 
+-			if (reSignPlayer) {
++			const corePlayer = p.value >= (starterValueByTid.get(p.tid) ?? Infinity);
++
++			if (reSignPlayer && corePlayer) {
++				await player.sign(p, p.tid, contract, PHASE.RESIGN_PLAYERS);
++				if (positionInfo !== undefined && positionInfo[pos] !== undefined) {
++					positionInfo[pos].count -= 1;
++					if (p.value > positionInfo[pos].maxValue) {
++						positionInfo[pos].maxValue = p.value;
++					}
++				}
++				if (payroll !== undefined) {
++					payrollsByTid.set(p.tid, contract.amount + payroll);
++				}
++				await valueChangeCalculator.invalidateCache({
++					teams: [p.tid],
++				});
++			} else if (reSignPlayer) {
+ 				const mood = await player.moodInfo(p, p.tid, {
+ 					contractAmount: p.contract.amount,
+ 				});
+diff --git a/src/worker/core/phase/processScheduledEvents.ts b/src/worker/core/phase/processScheduledEvents.ts
+index 9d9e5a5..0625cae 100644
+--- a/src/worker/core/phase/processScheduledEvents.ts
++++ b/src/worker/core/phase/processScheduledEvents.ts
+@@ -543,7 +543,15 @@ const processContraction = async (
+ 	return [text];
+ };
+ 
+-const processRetirePlayer = async (pid: number, conditions: Conditions) => {
++// reason (NFL history mod): why he retired, shown in the news
++const processRetirePlayer = async (
++	pid: number,
++	conditions: Conditions,
++	reason?: string,
++) => {
++	if (Object.hasOwn(g, "nflRetirements") && !g.get("nflRetirements")) {
++		return [];
++	}
+ 	const p = await idb.merged.players.get(pid);
+ 
+ 	// Player might be deleted or already retired
+@@ -558,11 +566,11 @@ const processRetirePlayer = async (pid: number, conditions: Conditions) => {
+ 	await player.retire(p, conditions);
+ 	await idb.cache.players.put(p);
+ 
+-	// Only show notification if it's an above average player or a player on the user's team
+-	if (ovr > local.playerOvrMean || userTeam) {
++	// Only show notification if it's an above average player or a player on the user's team (or there's a story)
++	if (ovr > local.playerOvrMean || userTeam || reason) {
+ 		const text = `<a href="${helpers.leagueUrl(["player", p.pid])}">${
+ 			p.firstName
+-		} ${p.lastName}</a> has retired.`;
++		} ${p.lastName}</a> ${reason ? `${reason}.` : "has retired."}`;
+ 
+ 		return [text];
+ 	}
+@@ -570,8 +578,48 @@ const processRetirePlayer = async (pid: number, conditions: Conditions) => {
+ 	return [];
+ };
+ 
++// NFL history mod: a real suspension keeps the player out for that many games, shown like an injury
++const processSuspension = async ({
++	pid,
++	games,
++	reason,
++}: {
++	pid: number;
++	games: number;
++	reason: string;
++}) => {
++	if (Object.hasOwn(g, "nflSuspensions") && !g.get("nflSuspensions")) {
++		return [];
++	}
++	const p = await idb.cache.players.get(pid);
++	if (!p || p.tid < 0) {
++		return [];
++	}
++	p.injury = {
++		type: reason,
++		gamesRemaining: Math.max(games, p.injury.gamesRemaining),
++	};
++	await idb.cache.players.put(p);
++	return [
++		`<a href="${helpers.leagueUrl(["player", p.pid])}">${p.firstName} ${p.lastName}</a>: ${reason.replace("Suspended", "suspended")} for ${games} games.`,
++	];
++};
++
+ // Returns undefined when nothing happened
+-const processUnretirePlayer = async (pid: number) => {
++// tid (NFL history mod): the team the player returns to. Without it, he becomes a free agent.
++const processUnretirePlayer = async (
++	pid: number,
++	tidInput?: number,
++	reason?: string,
++) => {
++	if (Object.hasOwn(g, "nflComebacks") && !g.get("nflComebacks")) {
++		return;
++	}
++	const tid =
++		Object.hasOwn(g, "nflComebackDestination") &&
++		g.get("nflComebackDestination") === "freeAgency"
++			? undefined
++			: tidInput;
+ 	const p = await idb.merged.players.get(pid);
+ 
+ 	// Player might have been deleted or might not be retired. In both of those cases, there is nothing to do.
+@@ -605,16 +653,27 @@ const processUnretirePlayer = async (pid: number) => {
+ 
+ 	p.retiredYear = Infinity;
+ 	player.addToFreeAgents(p, await getNumPlayersTradedAwayNormalizedAll());
++
++	const t = tid !== undefined ? await idb.cache.teams.get(tid) : undefined;
++	if (t && !t.disabled) {
++		await player.sign(p, t.tid, p.contract, g.get("phase"));
++	}
+ 	await idb.cache.players.put(p);
+ 
+ 	const ratings = last(p.ratings);
+ 	const ovr = player.fuzzRating(ratings.ovr, ratings.fuzz);
+ 
++	if (t && !t.disabled) {
++		return [
++			`<a href="${helpers.leagueUrl(["player", p.pid])}">${p.firstName} ${p.lastName}</a> ${reason ?? "has come out of retirement"} and signs with the <a href="${helpers.leagueUrl(["roster", `${t.abbrev}_${t.tid}`, g.get("season")])}">${t.region} ${t.name}</a>.`,
++		];
++	}
++
+ 	// Only show notification if it's an above average player
+-	if (ovr > local.playerOvrMean) {
++	if (ovr > local.playerOvrMean || reason) {
+ 		const text = `<a href="${helpers.leagueUrl(["player", p.pid])}">${
+ 			p.firstName
+-		} ${p.lastName}</a> has come out of retirement and is now a free agent.`;
++		} ${p.lastName}</a> ${reason ?? "has come out of retirement"} and is now a free agent.`;
+ 
+ 		return [text];
+ 	}
+@@ -675,6 +734,15 @@ export const processScheduledEvents = async (
+ 					confsDivsDids,
+ 				)),
+ 			);
++		} else if (
++			scheduledEvent.type === "gameAttributes" &&
++			(scheduledEvent.info as any).nflSuspension
++		) {
++			eventLogTexts.push(
++				...(await processSuspension(
++					(scheduledEvent.info as any).nflSuspension,
++				)),
++			);
+ 		} else if (scheduledEvent.type === "gameAttributes") {
+ 			eventLogTexts.push(...(await processGameAttributes(scheduledEvent.info)));
+ 		} else if (scheduledEvent.type === "awards") {
+@@ -700,10 +768,18 @@ export const processScheduledEvents = async (
+ 			eventLogTexts.push(...(await processContraction(scheduledEvent.info)));
+ 		} else if (scheduledEvent.type === "retirePlayer") {
+ 			eventLogTexts.push(
+-				...(await processRetirePlayer(scheduledEvent.info.pid, conditions)),
++				...(await processRetirePlayer(
++					scheduledEvent.info.pid,
++					conditions,
++					(scheduledEvent.info as any).reason,
++				)),
+ 			);
+ 		} else if (scheduledEvent.type === "unretirePlayer") {
+-			const texts = await processUnretirePlayer(scheduledEvent.info.pid);
++			const texts = await processUnretirePlayer(
++				scheduledEvent.info.pid,
++				(scheduledEvent.info as any).tid,
++				(scheduledEvent.info as any).reason,
++			);
+ 			if (texts) {
+ 				unretiredPids.push(scheduledEvent.info.pid);
+ 				eventLogTexts.push(...texts);
+diff --git a/src/worker/core/player/develop.ts b/src/worker/core/player/develop.ts
+index 324e001..e0bfca5 100644
+--- a/src/worker/core/player/develop.ts
++++ b/src/worker/core/player/develop.ts
+@@ -142,6 +142,7 @@ const develop = async (
+ 		tid: number;
+ 		weight: number;
+ 		srID?: string;
++		realRatings?: Record<string, Record<string, number>>;
+ 	},
+ 	years: number = 1,
+ 	newPlayer: boolean = false,
+@@ -162,6 +163,20 @@ const develop = async (
+ 		}
+ 	}
+ 
++	// NFL history mod: follow the player's stored real ratings for this season when the league file has them
++	const real = p.realRatings?.[ratings.season];
++	if (real && !ratings.locked && years > 0) {
++		const blend = helpers.bound(g.get("realPlayerDeterminism"), 0, 1);
++		for (const [key, value] of Object.entries(real)) {
++			const current = (ratings as any)[key];
++			if (typeof value === "number" && typeof current === "number") {
++				(ratings as any)[key] = Math.round(
++					blend * value + (1 - blend) * current,
++				);
++			}
++		}
++	}
++
+ 	// years===0 condition is so editing locked player in God Mode will update ovr and pot
+ 	if (!ratings.locked || years === 0) {
+ 		// Run these even for players developing 0 seasons
+diff --git a/src/worker/core/player/shouldRetire.ts b/src/worker/core/player/shouldRetire.ts
+index 1b49050..b787c92 100644
+--- a/src/worker/core/player/shouldRetire.ts
++++ b/src/worker/core/player/shouldRetire.ts
+@@ -91,7 +91,52 @@ const checkForceRetireRealPlayers = async (
+ 	return active ? "noRetire" : "retire";
+ };
+ 
++// NFL history mod: retire real players exactly when their real careers end. p.realTeams lists each later season
++// he really played (season -> team). Returns undefined past the real data, so the normal logic decides.
++const checkNflRealRetirement = async (
++	p: Player,
++): Promise<boolean | undefined> => {
++	const realTeams = (p as any).realTeams as Record<string, number> | undefined;
++	const lastSeason = Object.hasOwn(g, "nflRealDataLastSeason")
++		? ((g as any).nflRealDataLastSeason as number)
++		: undefined;
++	if (
++		__SPORT !== "football" ||
++		realTeams === undefined ||
++		lastSeason === undefined ||
++		!g.get("nflRealRetirements")
++	) {
++		return undefined;
++	}
++	const next = g.get("season") + 1;
++	if (next > lastSeason) {
++		return undefined;
++	}
++	if (realTeams[next] !== undefined) {
++		return false;
++	}
++	// Sat out next season: retire now, and come back for his next real season
++	const later = Object.keys(realTeams)
++		.map(Number)
++		.filter((s) => s > next)
++		.sort((a, b) => a - b)[0];
++	if (later !== undefined) {
++		await idb.cache.scheduledEvents.add({
++			type: "unretirePlayer",
++			season: later - 1,
++			phase: PHASE.DRAFT_LOTTERY,
++			info: { pid: p.pid, tid: realTeams[later] } as any,
++		});
++	}
++	return true;
++};
++
+ const shouldRetire = async (p: Player): Promise<boolean> => {
++	const nflReal = await checkNflRealRetirement(p);
++	if (nflReal !== undefined) {
++		return nflReal;
++	}
++
+ 	const season = g.get("season");
+ 	const forceRetireAge = g.get("forceRetireAge");
+ 
+diff --git a/src/worker/core/season/newSchedule.ts b/src/worker/core/season/newSchedule.ts
+index 5959814..6a5d64d 100644
+--- a/src/worker/core/season/newSchedule.ts
++++ b/src/worker/core/season/newSchedule.ts
+@@ -15,6 +15,43 @@ const newSchedule = (
+ 	conditions?: Conditions,
+ ) => {
+ 	if (__SPORT === "football") {
++		// NFL history mod: use this season's real schedule when the league file includes it
++		const real: [number, number, number][] | undefined = (
++			Object.hasOwn(g, "realSchedules") && g.get("useRealSchedules")
++				? (g.get as any)("realSchedules")
++				: undefined
++		)?.[g.get("season")];
++		if (real && real.length > 0) {
++			const activeTids = new Set(teams.map((t) => t.tid));
++			const games = real.filter(
++				([homeTid, awayTid]) =>
++					activeTids.has(homeTid) && activeTids.has(awayTid),
++			);
++			if (games.length > 0) {
++				games.sort((a, b) => a[2] - b[2]);
++				const tids: [number, number][] = [];
++				const numDays = games.at(-1)![2];
++				const tradeDeadline = g.get("tradeDeadline");
++				const tradeDeadlineDay =
++					tradeDeadline < 1
++						? Math.round(tradeDeadline * numDays) + 1
++						: undefined;
++				let lastDay = 0;
++				for (const [homeTid, awayTid, day] of games) {
++					if (
++						tradeDeadlineDay !== undefined &&
++						lastDay < tradeDeadlineDay &&
++						day >= tradeDeadlineDay
++					) {
++						tids.push([-3, -3]);
++					}
++					lastDay = day;
++					tids.push([homeTid, awayTid]);
++				}
++				return tids;
++			}
++		}
++
+ 		const tids = getRealSchedule(teams);
+ 		if (tids) {
+ 			return tids;
+diff --git a/src/worker/core/team/checkRosterSizes.ts b/src/worker/core/team/checkRosterSizes.ts
+index 8dd6738..2c60a32 100644
+--- a/src/worker/core/team/checkRosterSizes.ts
++++ b/src/worker/core/team/checkRosterSizes.ts
+@@ -64,7 +64,13 @@ const dropPlayers = async (players: Player[], numToDrop: number) => {
+ 		}
+ 	}
+ 
+-	players.sort((a, b) => a.value - b.value); // Lowest first
++	// NFL history mod: players who really were on this team this season are cut last (Vinny Testaverde at 43 was
++	// a real backup, not a cut). Everyone else goes first, lowest value first.
++	const season = g.get("season");
++	const realHere = (p: any) => p.realTeams?.[season] === p.tid;
++	players.sort(
++		(a, b) => Number(realHere(a)) - Number(realHere(b)) || a.value - b.value,
++	);
+ 
+ 	const releasedPIDs = [];
+ 	for (const p of players) {
+@@ -135,7 +141,17 @@ const checkRosterSizes = async (
+ 		const players = await idb.cache.players.indexGetAll("playersByTid", tid);
+ 		let numPlayersOnRoster = players.length;
+ 
+-		if (numPlayersOnRoster > g.get("maxRosterSize")) {
++		// NFL history mod: a real team used 60-80 players over a season (injured reserve, call-ups, mid-season
++		// signings). Every player who really was on this team this season stays, even past the limit; only players
++		// who weren't really there get cut.
++		const season = g.get("season");
++		const numReal =
++			Object.hasOwn(g, "nflHistoricalRosters") && g.get("nflHistoricalRosters")
++				? players.filter((p: any) => p.realTeams?.[season] === tid).length
++				: 0;
++		const maxRosterSize = Math.max(g.get("maxRosterSize"), numReal);
++
++		if (numPlayersOnRoster > maxRosterSize) {
+ 			if (userTeamAndActive) {
+ 				if (g.get("userTids").length <= 1) {
+ 					userTeamSizeError = "Your team has ";
+@@ -145,17 +161,15 @@ const checkRosterSizes = async (
+ 					} have `;
+ 				}
+ 
+-				userTeamSizeError += `more than the maximum number of players (${g.get(
+-					"maxRosterSize",
+-				)}). You must remove players (by <a href="${helpers.leagueUrl([
+-					"roster",
+-				])}">releasing them from your roster</a> or through <a href="${helpers.leagueUrl(
++				userTeamSizeError += `more than the maximum number of players (${maxRosterSize}). You must remove players (by <a href="${helpers.leagueUrl(
++					["roster"],
++				)}">releasing them from your roster</a> or through <a href="${helpers.leagueUrl(
+ 					["trade"],
+ 				)}">trades</a>) before continuing.`;
+ 			} else {
+ 				const releasedPIDsTemp = await dropPlayers(
+ 					players,
+-					numPlayersOnRoster - g.get("maxRosterSize"),
++					numPlayersOnRoster - maxRosterSize,
+ 				);
+ 				releasedPIDs.push(...releasedPIDsTemp);
+ 			}
+diff --git a/src/worker/core/team/genDepth.football.ts b/src/worker/core/team/genDepth.football.ts
+index 8536f14..df471d0 100644
+--- a/src/worker/core/team/genDepth.football.ts
++++ b/src/worker/core/team/genDepth.football.ts
+@@ -20,8 +20,10 @@ type PlayerForDepth = {
+ const score = (p: PlayerForDepth, pos: Position) => {
+ 	let tempScore = p.ratings.ovrs[pos];
+ 
++	// NFL history mod: much stronger preference for a player's real position (was +15), so fast receivers with
++	// high running back ratings stay at receiver instead of taking the running back carries
+ 	if (p.ratings.pos === pos) {
+-		tempScore += 15;
++		tempScore += 40;
+ 	}
+ 
+ 	return tempScore;
+diff --git a/src/worker/core/team/getTeamInfoCache.ts b/src/worker/core/team/getTeamInfoCache.ts
+index 9b41516..05ec36f 100644
+--- a/src/worker/core/team/getTeamInfoCache.ts
++++ b/src/worker/core/team/getTeamInfoCache.ts
+@@ -3,6 +3,7 @@ import type { GameAttributesLeague } from "../../../common/types.ts";
+ export const getTeamInfoCache = (
+ 	teams: {
+ 		abbrev: string;
++		colors?: [string, string, string];
+ 		disabled?: boolean;
+ 		imgURL?: string;
+ 		imgURLSmall?: string;
+@@ -12,6 +13,7 @@ export const getTeamInfoCache = (
+ ): GameAttributesLeague["teamInfoCache"] => {
+ 	return teams.map((t) => ({
+ 		abbrev: t.abbrev,
++		colors: t.colors,
+ 		disabled: t.disabled,
+ 		imgURL: t.imgURL,
+ 		imgURLSmall: t.imgURLSmall,
+diff --git a/src/worker/views/newLeague.ts b/src/worker/views/newLeague.ts
+index 3000371..05fbef5 100644
+--- a/src/worker/views/newLeague.ts
++++ b/src/worker/views/newLeague.ts
+@@ -433,6 +433,15 @@ export const getDefaultSettings = () => {
+ 		),
+ 		neutralSite: unwrapGameAttribute(defaultGameAttributes, "neutralSite"),
+ 		rpdPot: unwrapGameAttribute(defaultGameAttributes, "rpdPot"),
++		// NFL history mod settings
++		useRealSchedules: unwrapGameAttribute(defaultGameAttributes, "useRealSchedules"),
++		useRealDrafts: unwrapGameAttribute(defaultGameAttributes, "useRealDrafts"),
++		nflRetirements: unwrapGameAttribute(defaultGameAttributes, "nflRetirements"),
++		nflComebacks: unwrapGameAttribute(defaultGameAttributes, "nflComebacks"),
++		nflComebackDestination: unwrapGameAttribute(defaultGameAttributes, "nflComebackDestination"),
++		nflSuspensions: unwrapGameAttribute(defaultGameAttributes, "nflSuspensions"),
++		nflRealRetirements: unwrapGameAttribute(defaultGameAttributes, "nflRealRetirements"),
++		nflHistoricalRosters: unwrapGameAttribute(defaultGameAttributes, "nflHistoricalRosters"),
+ 		saveOldBoxScores: unwrapGameAttribute(
+ 			defaultGameAttributes,
+ 			"saveOldBoxScores",
+diff --git a/src/worker/views/settings.ts b/src/worker/views/settings.ts
+index 7656605..e1853f9 100644
+--- a/src/worker/views/settings.ts
++++ b/src/worker/views/settings.ts
+@@ -73,6 +73,14 @@ type Key =
+ 	| "challengeSisyphusMode"
+ 	| "challengeThanosMode"
+ 	| "realPlayerDeterminism"
++	| "useRealSchedules"
++	| "useRealDrafts"
++	| "nflRetirements"
++	| "nflComebacks"
++	| "nflComebackDestination"
++	| "nflSuspensions"
++	| "nflRealRetirements"
++	| "nflHistoricalRosters"
+ 	| "repeatSeason"
+ 	| "maxOvertimes"
+ 	| "maxOvertimesPlayoffs"
+@@ -290,6 +298,14 @@ export const getInitialSettings = (): Settings => {
+ 		challengeSisyphusMode: g.get("challengeSisyphusMode"),
+ 		challengeThanosMode: g.get("challengeThanosMode"),
+ 		realPlayerDeterminism: g.get("realPlayerDeterminism"),
++		useRealSchedules: g.get("useRealSchedules"),
++		useRealDrafts: g.get("useRealDrafts"),
++		nflRetirements: g.get("nflRetirements"),
++		nflComebacks: g.get("nflComebacks"),
++		nflComebackDestination: g.get("nflComebackDestination"),
++		nflSuspensions: g.get("nflSuspensions"),
++		nflRealRetirements: g.get("nflRealRetirements"),
++		nflHistoricalRosters: g.get("nflHistoricalRosters"),
+ 		repeatSeason: g.get("repeatSeason")?.type ?? "disabled",
+ 		maxOvertimes: g.get("maxOvertimes"),
+ 		maxOvertimesPlayoffs: g.get("maxOvertimesPlayoffs"),
+diff --git a/tools/lib/server.ts b/tools/lib/server.ts
+index dd727b3..9ae2ee1 100644
+--- a/tools/lib/server.ts
++++ b/tools/lib/server.ts
+@@ -115,6 +115,7 @@ const PREFIXES_STATIC = [
+ 	"/gen/",
+ 	"/ico/",
+ 	"/img/",
++	"/nfl/",
+ 	"/manifest",
+ 
+ 	// Not worth the confusion unless the service worker is being worked on
+diff --git a/tools/native/RecordStore.js b/tools/native/RecordStore.js
+new file mode 100644
+index 0000000..4293303
+--- /dev/null
++++ b/tools/native/RecordStore.js
+@@ -0,0 +1,137 @@
++// Gridiron Almanac native engine: fake-indexeddb's RecordStore (v6.2.6) with a fast deleteByValue.
++// The original scans the whole index on every write to remove a row's old index entries, which makes saving a
++// league quadratic. This keeps a lookup from each value (the row's primary key, in an index) to its records.
++import FDBKeyRange from "../../node_modules/fake-indexeddb/build/esm/FDBKeyRange.js";
++import { cmpKeys } from "../../node_modules/fake-indexeddb/build/esm/lib/cmp.js";
++import BinarySearchTree from "../../node_modules/fake-indexeddb/build/esm/lib/binarySearchTree.js";
++
++// A string that is equal for equal IndexedDB keys (numbers, strings, dates, binary, arrays of those)
++const keyId = (k) => {
++	if (typeof k === "number") return "n" + k;
++	if (typeof k === "string") return "s" + k;
++	if (k instanceof Date) return "d" + k.getTime();
++	if (Array.isArray(k)) return "a[" + k.map(keyId).join(",") + "]";
++	if (ArrayBuffer.isView(k)) return "b" + Array.from(new Uint8Array(k.buffer, k.byteOffset, k.byteLength)).join(".");
++	if (k instanceof ArrayBuffer) return "b" + Array.from(new Uint8Array(k)).join(".");
++	return "o" + String(k);
++};
++
++class RecordStore {
++	constructor(keysAreUnique) {
++		this.keysAreUnique = keysAreUnique;
++		this.records = new BinarySearchTree(this.keysAreUnique);
++		// value id -> records with that value (only meaningful for indexes, where value is the primary key)
++		this.byValue = new Map();
++	}
++	_track(record) {
++		if (this.keysAreUnique) return;
++		const id = keyId(record.value);
++		let list = this.byValue.get(id);
++		if (!list) {
++			list = [];
++			this.byValue.set(id, list);
++		}
++		list.push(record);
++	}
++	_untrack(record) {
++		if (this.keysAreUnique) return;
++		const id = keyId(record.value);
++		const list = this.byValue.get(id);
++		if (!list) return;
++		const i = list.indexOf(record);
++		if (i >= 0) list.splice(i, 1);
++		if (list.length === 0) this.byValue.delete(id);
++	}
++	get(key) {
++		const range = key instanceof FDBKeyRange ? key : FDBKeyRange.only(key);
++		return this.records.getRecords(range).next().value;
++	}
++	put(newRecord, noOverwrite = false) {
++		const overwritten = this.records.put(newRecord, noOverwrite);
++		if (overwritten) this._untrack(overwritten);
++		this._track(newRecord);
++		return overwritten;
++	}
++	delete(key) {
++		const range = key instanceof FDBKeyRange ? key : FDBKeyRange.only(key);
++		const deletedRecords = [...this.records.getRecords(range)];
++		for (const record of deletedRecords) {
++			this.records.delete(record);
++			this._untrack(record);
++		}
++		return deletedRecords;
++	}
++	deleteByValue(key) {
++		if (!this.keysAreUnique && !(key instanceof FDBKeyRange && (key.lower === undefined || key.upper === undefined || cmpKeys(key.lower, key.upper) !== 0 || key.lowerOpen || key.upperOpen))) {
++			// Exact key: look its records up directly
++			const exact = key instanceof FDBKeyRange ? key.lower : key;
++			const list = this.byValue.get(keyId(exact));
++			if (!list) return [];
++			const deletedRecords = list.slice();
++			for (const record of deletedRecords) this.records.delete(record);
++			this.byValue.delete(keyId(exact));
++			return deletedRecords;
++		}
++		const range = key instanceof FDBKeyRange ? key : FDBKeyRange.only(key);
++		const deletedRecords = [];
++		for (const record of this.records.getAllRecords()) {
++			if (range.includes(record.value)) {
++				deletedRecords.push(record);
++			}
++		}
++		for (const record of deletedRecords) {
++			this.records.delete(record);
++			this._untrack(record);
++		}
++		return deletedRecords;
++	}
++	clear() {
++		const deletedRecords = [...this.records.getAllRecords()];
++		this.records = new BinarySearchTree(this.keysAreUnique);
++		this.byValue = new Map();
++		return deletedRecords;
++	}
++	values(range, direction = "next") {
++		const descending = direction === "prev" || direction === "prevunique";
++		const records = range ? this.records.getRecords(range, descending) : this.records.getAllRecords(descending);
++		return {
++			[Symbol.iterator]: () => {
++				const next = () => records.next();
++				if (direction === "next" || direction === "prev") {
++					return { next };
++				}
++				if (direction === "nextunique") {
++					let previousValue = undefined;
++					return {
++						next: () => {
++							let current = next();
++							while (!current.done && previousValue !== undefined && cmpKeys(previousValue.key, current.value.key) === 0) {
++								current = next();
++							}
++							previousValue = current.value;
++							return current;
++						},
++					};
++				}
++				let current = next();
++				let nextResult = next();
++				return {
++					next: () => {
++						while (!nextResult.done && cmpKeys(current.value.key, nextResult.value.key) === 0) {
++							current = nextResult;
++							nextResult = next();
++						}
++						const result = current;
++						current = nextResult;
++						nextResult = next();
++						return result;
++					},
++				};
++			},
++		};
++	}
++	size() {
++		return this.records.size();
++	}
++}
++export default RecordStore;
+diff --git a/tools/native/build.ts b/tools/native/build.ts
+new file mode 100644
+index 0000000..1a5bdfd
+--- /dev/null
++++ b/tools/native/build.ts
+@@ -0,0 +1,40 @@
++// Builds build/native/engine.js: Football GM's worker as one classic script for V8 (no modules, no dynamic imports).
++// Usage: SPORT=football node tools/native/build.ts
++import path from "node:path";
++import { build } from "rolldown";
++import { rolldownConfig } from "../lib/rolldownConfig.ts";
++import { getSport } from "../lib/getSport.ts";
++import fs from "node:fs";
++import { removeUnicodePropertyEscapes } from "./noIntlRegex.ts";
++
++const sport = getSport();
++const config = rolldownConfig(sport, "worker", { nodeEnv: "test" });
++config.input = "tools/native/entry.ts";
++// Use our faster copy of fake-indexeddb's RecordStore (see tools/native/RecordStore.js)
++const fastRecordStore = path.resolve("tools/native/RecordStore.js");
++config.plugins = [
++	{
++		name: "fast-record-store",
++		resolveId(source: string, importer: string | undefined) {
++			if (importer && importer.includes("fake-indexeddb") && source.endsWith("/RecordStore.js")) {
++				return fastRecordStore;
++			}
++			return null;
++		},
++	},
++	...((config.plugins as any[]) ?? []),
++];
++config.platform = "browser";
++config.output = {
++	file: "build/native/engine.js",
++	format: "iife",
++	codeSplitting: false,
++	minify: true,
++	comments: false,
++	sourcemap: false,
++};
++config.transform!.define = { ...config.transform!.define, __NODE_ENV: JSON.stringify("production") };
++await build(config);
++const out = "build/native/engine.js";
++fs.writeFileSync(out, removeUnicodePropertyEscapes(fs.readFileSync(out, "utf8")));
++console.log("wrote build/native/engine.js");
+diff --git a/tools/native/entry.ts b/tools/native/entry.ts
+new file mode 100644
+index 0000000..69253eb
+--- /dev/null
++++ b/tools/native/entry.ts
+@@ -0,0 +1,5 @@
++// Gridiron Almanac native engine: Football GM's worker, run in a bare V8 inside the Android app.
++// Order matters: browser stand-ins first, then the in-memory database, then the game.
++import "./shims.ts";
++import "fake-indexeddb/auto";
++import "../../src/worker/index.ts";
+diff --git a/tools/native/harness.mjs b/tools/native/harness.mjs
+new file mode 100644
+index 0000000..797e575
+--- /dev/null
++++ b/tools/native/harness.mjs
+@@ -0,0 +1,125 @@
++// Runs build/native/engine.js in an empty V8 context (no browser, no Node APIs, no Intl), playing the part the
++// Android app will: timers, messages, file reads. Proves the engine works headless before porting this to Kotlin.
++// Usage: node --max-old-space-size=8000 tools/native/harness.mjs <league.json> [tid]
++import vm from "node:vm";
++import fs from "node:fs";
++import path from "node:path";
++
++const leaguePath = process.argv[2];
++const tid = process.argv[3] !== undefined ? Number(process.argv[3]) : undefined;
++const t0 = Date.now();
++const log = (...a) => console.log(`[${((Date.now() - t0) / 1000).toFixed(1)}s]`, ...a);
++
++const ctx = vm.createContext({});
++vm.runInContext("delete globalThis.Intl;", ctx);
++const CtxUint8Array = vm.runInContext("Uint8Array", ctx);
++
++// ---- host: what the Kotlin app will implement
++const timers = new Map();
++const delayHist = {};
++const hostCalls = { setTimer: 0, post: 0, readBytes: 0 };
++let onMessage = () => {};
++ctx.__host = {
++	setTimer(id, ms) {
++		hostCalls.setTimer++;
++		delayHist[ms] = (delayHist[ms] ?? 0) + 1;
++		// Zero-delay timers run right away (Node's setTimeout waits at least 1 ms; the database queues thousands)
++		const fire = () => {
++			timers.delete(id);
++			ctx.__engine.fireTimer(id);
++		};
++		timers.set(id, ms <= 0 ? { immediate: setImmediate(fire) } : { timeout: setTimeout(fire, ms) });
++	},
++	clearTimer(id) {
++		const t = timers.get(id);
++		if (t?.immediate) clearImmediate(t.immediate);
++		else if (t) clearTimeout(t.timeout);
++		timers.delete(id);
++	},
++	post(json) {
++		hostCalls.post++;
++		onMessage(JSON.parse(json));
++	},
++	log(level, text) {
++		if (level !== "debug") console.log(`  engine ${level}:`, text.slice(0, 400));
++	},
++	readText(p) {
++		// Name lists and other bundled files come from the web build
++		const file = path.join("build", p.replace(/^\//, ""));
++		if (fs.existsSync(file)) return fs.readFileSync(file, "utf8");
++		const dir = path.dirname(file);
++		const base = path.basename(file).replace(/\.json$/, "");
++		const match = fs.existsSync(dir) && fs.readdirSync(dir).find((f) => f.startsWith(base + "-") && f.endsWith(".json"));
++		return match ? fs.readFileSync(path.join(dir, match), "utf8") : null;
++	},
++	fileSize(p) {
++		return fs.statSync(p).size;
++	},
++	readBytes(p, offset, length) {
++		const fd = fs.openSync(p, "r");
++		const buf = Buffer.alloc(length);
++		fs.readSync(fd, buf, 0, length, offset);
++		fs.closeSync(fd);
++		// Hand the engine a Uint8Array from its own realm
++		const u8 = new CtxUint8Array(length);
++		u8.set(buf);
++		return u8;
++	},
++};
++
++// ---- message protocol (promise-worker-bi)
++let nextId = 0;
++const pending = new Map();
++const uiCalls = new Map();
++onMessage = (m) => {
++	if (m[0] === 1) {
++		const p = pending.get(m[1]);
++		pending.delete(m[1]);
++		if (p) m[2] ? p.reject(m[2]) : p.resolve(m[3]);
++	} else if (m[0] === 0) {
++		// The engine asking the UI to do something: count it and say "done"
++		const name = m[2]?.[0];
++		uiCalls.set(name, (uiCalls.get(name) ?? 0) + 1);
++		if (name === "updateLocal" && m[2][1]?.[0]?.gameSimInProgress === false) gameSimDone?.();
++		ctx.__engine.receive(JSON.stringify([1, m[1], null, undefined]));
++	} else if (m[0] === 5) {
++		log("engine error:", m[1]);
++	}
++};
++const call = (type, name, param) =>
++	new Promise((resolve, reject) => {
++		const id = nextId++;
++		pending.set(id, { resolve, reject });
++		ctx.__engine.receive(JSON.stringify([0, id, [type, name, param], 0]));
++	});
++let gameSimDone;
++const simDone = () => new Promise((r) => (gameSimDone = r));
++
++// ---- run
++const engine = fs.readFileSync("build/native/engine.js", "utf8");
++vm.runInContext(engine, ctx, { filename: "engine.js" });
++log("engine loaded", (engine.length / 1e6).toFixed(1) + " MB");
++
++await call("main", "init", { bbgmVersion: "native", enableLogging: false, heartbeatID: "native", mobile: true, useSharedWorker: false });
++log("init done");
++
++const lid = await call("native", "createLeagueFromFile", { path: leaguePath, tid });
++log("host calls so far", JSON.stringify(hostCalls));
++log("league created, lid", lid, "heap", Math.round(process.memoryUsage().heapUsed / 1e6), "MB");
++await call("native", "openLeague", { lid });
++log("league opened");
++try { const st = await call("native", "standings"); log("standings rows", st.length, JSON.stringify(st[0])); } catch (e) { log("standings failed", e?.message ?? e); }
++try { log("status", JSON.stringify(await call("native", "status"))); } catch (e) { log("status failed", e?.message ?? e); }
++
++if (process.env.TO_REGULAR) { const done = simDone(); await call("playMenu", "untilRegularSeason", undefined); await Promise.race([done, new Promise((r) => setTimeout(r, 3000))]); log("status", JSON.stringify(await call("native", "status"))); }
++for (let week = 1; week <= (Number(process.env.WEEKS) || 2); week++) {
++	const done = simDone();
++	const ts = Date.now();
++	await call("playMenu", "week", undefined);
++	await Promise.race([done, new Promise((r) => setTimeout(r, 1000))]);
++	log(`simmed week ${week} in ${((Date.now() - ts) / 1000).toFixed(1)}s`);
++}
++if (process.env.DUMP) { const json = await call("native", "dumpLeague"); fs.writeFileSync(process.env.DUMP, typeof json === "string" ? json : JSON.stringify(json)); log("dumped league to", process.env.DUMP); }
++log("timer delays (ms: count)", JSON.stringify(delayHist));
++log("UI calls seen:", JSON.stringify(Object.fromEntries(uiCalls)));
++process.exit(0);
+diff --git a/tools/native/noIntlRegex.ts b/tools/native/noIntlRegex.ts
+new file mode 100644
+index 0000000..e0d9ed0
+--- /dev/null
++++ b/tools/native/noIntlRegex.ts
+@@ -0,0 +1,31 @@
++// The Android V8 build has no ICU, so regexes with Unicode property escapes (\p{...}) don't compile. Swap the
++// three the engine uses for plain character ranges. Each replacement must match, so a library update that changes
++// them fails the build instead of shipping a broken engine.
++const REPLACEMENTS: [from: string, to: string][] = [
++	// Award prefixes: first letter of each word ("Most Valuable Player" -> "MVP")
++	[String.raw`/\b\p{L}/gu`, String.raw`/\b[A-Za-zÀ-ÖØ-öø-ɏ]/g`],
++	// Search: strip accents after NFD splits them off as combining marks
++	[String.raw`/\p{Diacritic}/gu`, String.raw`/[̀-ͯ]/g`],
++	// Library check for non-ASCII text
++	[String.raw`/\P{ASCII}/u`, String.raw`/[^\x00-\x7F]/`],
++	// Emoji check (built from a string, so the backslashes are doubled)
++	[String.raw`\\p{Extended_Pictographic}`, String.raw`\\u{1F000}-\\u{1FAFF}\\u2600-\\u27BF\\u2B00-\\u2BFF`],
++	[String.raw`\\p{Regional_Indicator}`, String.raw`\\u{1F1E6}-\\u{1F1FF}`],
++	[String.raw`\\p{Emoji_Component}`, String.raw`\\u{1F3FB}-\\u{1F3FF}\\u200D\\uFE0F\\u20E3#*0-9\\u{E0020}-\\u{E007F}\\u{1F1E6}-\\u{1F1FF}`],
++];
++
++export const removeUnicodePropertyEscapes = (code: string) => {
++	let out = code;
++	for (const [from, to] of REPLACEMENTS) {
++		if (!out.includes(from)) {
++			throw new Error(`noIntlRegex: pattern not found: ${from}`);
++		}
++		out = out.split(from).join(to);
++	}
++	// \p{...} and \P{...} (negated), in regex literals or strings
++	const left = out.match(/\\\\?[pP]\{[A-Za-z_=]+\}/);
++	if (left) {
++		throw new Error(`noIntlRegex: unhandled Unicode property escape: ${left[0]}`);
++	}
++	return out;
++};
+diff --git a/tools/native/shims.ts b/tools/native/shims.ts
+new file mode 100644
+index 0000000..10d8eec
+--- /dev/null
++++ b/tools/native/shims.ts
+@@ -0,0 +1,584 @@
++// Gridiron Almanac native engine: browser features Football GM's worker needs, for a bare V8 with no browser.
++// The app (Kotlin, or tools/native/harness.ts on a PC) provides globalThis.__host:
++//   setTimer(id, ms) / clearTimer(id)     the app calls __engine.fireTimer(id) when a timer is due
++//   post(json)                            a message from the engine to the app
++//   log(level, text)
++//   readText(path) -> string | null       bundled files (name lists)
++//   fileSize(path) -> number, readBytes(path, offset, length) -> Uint8Array   league files
++// and calls __engine.receive(json) to send the engine a message.
++import {
++	ReadableStream,
++	TransformStream,
++	WritableStream,
++	ByteLengthQueuingStrategy,
++	CountQueuingStrategy,
++} from "web-streams-polyfill";
++
++type Host = {
++	setTimer(id: number, ms: number): void;
++	clearTimer(id: number): void;
++	post(json: string): void;
++	log(level: string, text: string): void;
++	readText(path: string): string | null;
++	fileSize(path: string): number;
++	readBytes(path: string, offset: number, length: number): Uint8Array;
++};
++
++const g = globalThis as any;
++const host: Host = g.__host;
++
++g.self = g;
++g.window = undefined;
++
++// ---------------------------------------------------------------- console
++const fmt = (args: unknown[]) =>
++	args
++		.map((a) => {
++			if (typeof a === "string") return a;
++			if (a instanceof Error || (a && typeof a === "object" && "message" in (a as any))) {
++				const e = a as any;
++				return `${e.name ?? e.constructor?.name}: ${e.message}\n${e.stack ?? ""}`;
++			}
++			if (a && typeof a === "object") {
++				const o = a as any;
++				const keys = Object.getOwnPropertyNames(o);
++				if (keys.length === 0 || o.constructor?.name !== "Object") {
++					return `[${o.constructor?.name ?? "object"}] ${keys.map((k) => k + "=" + String(o[k])).join(" ")}`;
++				}
++			}
++			try {
++				return JSON.stringify(a);
++			} catch {
++				return String(a);
++			}
++		})
++		.join(" ");
++g.console = {
++	log: (...a: unknown[]) => host.log("log", fmt(a)),
++	info: (...a: unknown[]) => host.log("info", fmt(a)),
++	debug: () => {},
++	warn: (...a: unknown[]) => host.log("warn", fmt(a)),
++	error: (...a: unknown[]) => host.log("error", fmt(a)),
++	time: () => {},
++	timeEnd: () => {},
++	trace: () => {},
++	table: () => {},
++};
++
++// ---------------------------------------------------------------- timers
++let nextTimer = 1;
++const timers = new Map<number, { fn: () => void; ms: number; repeat: boolean }>();
++g.setTimeout = (fn: any, ms = 0, ...args: unknown[]) => {
++	const id = nextTimer++;
++	timers.set(id, { fn: () => fn(...args), ms, repeat: false });
++	host.setTimer(id, Math.max(0, ms | 0));
++	return id;
++};
++g.setInterval = (fn: any, ms = 0, ...args: unknown[]) => {
++	const id = nextTimer++;
++	timers.set(id, { fn: () => fn(...args), ms, repeat: true });
++	host.setTimer(id, Math.max(0, ms | 0));
++	return id;
++};
++g.clearTimeout = g.clearInterval = (id: number) => {
++	if (timers.delete(id)) host.clearTimer(id);
++};
++g.setImmediate = (fn: any, ...args: unknown[]) => g.setTimeout(fn, 0, ...args);
++g.clearImmediate = g.clearTimeout;
++g.queueMicrotask ??= (fn: () => void) => {
++	Promise.resolve().then(fn);
++};
++g.requestIdleCallback = (fn: any) =>
++	g.setTimeout(() => fn({ didTimeout: false, timeRemaining: () => 50 }), 1);
++g.cancelIdleCallback = g.clearTimeout;
++
++const start = Date.now();
++g.performance ??= { now: () => Date.now() - start, mark() {}, measure() {} };
++
++// ---------------------------------------------------------------- events
++class Event {
++	type: string;
++	defaultPrevented = false;
++	target: unknown = null;
++	constructor(type: string, init?: any) {
++		this.type = type;
++		Object.assign(this, init);
++	}
++	preventDefault() {
++		this.defaultPrevented = true;
++	}
++	stopPropagation() {}
++	stopImmediatePropagation() {}
++}
++class ErrorEvent extends Event {}
++class MessageEvent extends Event {}
++class CustomEvent extends Event {
++	detail: unknown;
++	constructor(type: string, init?: any) {
++		super(type, init);
++		this.detail = init?.detail;
++	}
++}
++class EventTarget {
++	#listeners = new Map<string, Set<any>>();
++	addEventListener(type: string, fn: any) {
++		if (!fn) return;
++		if (!this.#listeners.has(type)) this.#listeners.set(type, new Set());
++		this.#listeners.get(type)!.add(fn);
++	}
++	removeEventListener(type: string, fn: any) {
++		this.#listeners.get(type)?.delete(fn);
++	}
++	dispatchEvent(e: any) {
++		e.target ??= this;
++		for (const fn of [...(this.#listeners.get(e.type) ?? [])]) {
++			if (typeof fn === "function") fn.call(this, e);
++			else fn.handleEvent(e);
++		}
++		return !e.defaultPrevented;
++	}
++}
++g.Event ??= Event;
++g.ErrorEvent ??= ErrorEvent;
++g.MessageEvent ??= MessageEvent;
++g.CustomEvent ??= CustomEvent;
++g.EventTarget ??= EventTarget;
++
++// The database throws and catches these as normal control flow (e.g. a row missing an index field), so skip the
++// costly stack trace.
++class DOMException extends Error {
++	code = 0;
++	constructor(message = "", name = "Error") {
++		const limit = (Error as any).stackTraceLimit;
++		(Error as any).stackTraceLimit = 0;
++		super(message);
++		(Error as any).stackTraceLimit = limit;
++		this.name = name;
++	}
++}
++g.DOMException ??= DOMException;
++
++// The global scope is an event target, like a worker's
++const globalTarget = new g.EventTarget();
++g.addEventListener = globalTarget.addEventListener.bind(globalTarget);
++g.removeEventListener = globalTarget.removeEventListener.bind(globalTarget);
++g.dispatchEvent = globalTarget.dispatchEvent.bind(globalTarget);
++
++// ---------------------------------------------------------------- messages
++// JSON can't carry Errors, undefined in objects, or non-finite numbers: tag them.
++const replacer = (_key: string, value: any) => {
++	if (value instanceof Error || (value && typeof value === "object" && typeof value.message === "string" && typeof value.stack === "string")) {
++		return { __type: "Error", name: value.name, message: value.message, stack: value.stack };
++	}
++	if (typeof value === "number" && !Number.isFinite(value)) {
++		return { __type: "Number", value: String(value) };
++	}
++	if (value instanceof Map) return { __type: "Map", value: [...value] };
++	if (value instanceof Set) return { __type: "Set", value: [...value] };
++	return value;
++};
++const reviver = (_key: string, value: any) => {
++	if (value && typeof value === "object" && typeof value.__type === "string") {
++		if (value.__type === "Error") {
++			const e = new Error(value.message);
++			e.name = value.name;
++			return e;
++		}
++		if (value.__type === "Number") return Number(value.value);
++		if (value.__type === "Map") return new Map(value.value);
++		if (value.__type === "Set") return new Set(value.value);
++	}
++	return value;
++};
++g.postMessage = (message: unknown) => {
++	host.post(JSON.stringify(message, replacer));
++};
++
++g.__engine = {
++	fireTimer(id: number) {
++		const t = timers.get(id);
++		if (!t) return;
++		if (t.repeat) host.setTimer(id, Math.max(0, t.ms | 0));
++		else timers.delete(id);
++		t.fn();
++	},
++	receive(json: string) {
++		g.dispatchEvent(new g.MessageEvent("message", { data: JSON.parse(json, reviver) }));
++	},
++};
++
++// ---------------------------------------------------------------- structuredClone (used by the database)
++const clone = (v: any, seen: Map<any, any>): any => {
++	if (v === null || typeof v !== "object") return v;
++	if (seen.has(v)) return seen.get(v);
++	if (v instanceof Date) return new Date(v.getTime());
++	if (v instanceof RegExp) return new RegExp(v.source, v.flags);
++	if (ArrayBuffer.isView(v)) return (v as any).slice();
++	if (v instanceof ArrayBuffer) return v.slice(0);
++	if (v instanceof Map) {
++		const m = new Map();
++		seen.set(v, m);
++		for (const [k, x] of v) m.set(clone(k, seen), clone(x, seen));
++		return m;
++	}
++	if (v instanceof Set) {
++		const s = new Set();
++		seen.set(v, s);
++		for (const x of v) s.add(clone(x, seen));
++		return s;
++	}
++	if (typeof v === "function") throw new g.DOMException("function could not be cloned", "DataCloneError");
++	const out: any = Array.isArray(v) ? [] : {};
++	seen.set(v, out);
++	for (const k of Object.keys(v)) {
++		const x = v[k];
++		if (typeof x === "function") throw new g.DOMException(`${k} could not be cloned`, "DataCloneError");
++		out[k] = clone(x, seen);
++	}
++	return out;
++};
++// Fast path for plain data (what the game stores): no loop tracking. Anything else, or very deep data, falls back
++// to the full clone above.
++const fastClone = (v: any, depth: number): any => {
++	if (v === null || typeof v !== "object") {
++		if (typeof v === "function") throw new g.DOMException("function could not be cloned", "DataCloneError");
++		return v;
++	}
++	if (depth > 64) throw fastClone;
++	if (Array.isArray(v)) {
++		const n = v.length;
++		const out = new Array(n);
++		for (let i = 0; i < n; i++) out[i] = fastClone(v[i], depth + 1);
++		return out;
++	}
++	const proto = Object.getPrototypeOf(v);
++	if (proto !== Object.prototype && proto !== null) {
++		if (v instanceof Date) return new Date(v.getTime());
++		throw fastClone;
++	}
++	const out: any = {};
++	for (const k in v) out[k] = fastClone(v[k], depth + 1);
++	return out;
++};
++g.structuredClone = (v: unknown) => {
++	try {
++		return fastClone(v, 0);
++	} catch (e) {
++		if (e !== fastClone) throw e;
++		return clone(v, new Map());
++	}
++};
++
++// ---------------------------------------------------------------- text encoding
++class TextEncoder {
++	encoding = "utf-8";
++	encode(s = "") {
++		const out: number[] = [];
++		for (let i = 0; i < s.length; i++) {
++			let c = s.charCodeAt(i);
++			if (c >= 0xd800 && c < 0xdc00 && i + 1 < s.length) {
++				const d = s.charCodeAt(i + 1);
++				if (d >= 0xdc00 && d < 0xe000) {
++					c = 0x10000 + ((c - 0xd800) << 10) + (d - 0xdc00);
++					i++;
++				}
++			}
++			if (c < 0x80) out.push(c);
++			else if (c < 0x800) out.push(0xc0 | (c >> 6), 0x80 | (c & 63));
++			else if (c < 0x10000) out.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
++			else out.push(0xf0 | (c >> 18), 0x80 | ((c >> 12) & 63), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
++		}
++		return new Uint8Array(out);
++	}
++}
++// Streaming UTF-8 decoder: keeps an incomplete multi-byte sequence for the next chunk.
++class TextDecoder {
++	encoding = "utf-8";
++	#pending: number[] = [];
++	decode(input?: ArrayBuffer | ArrayBufferView, options?: { stream?: boolean }) {
++		let bytes: Uint8Array;
++		if (input === undefined) bytes = new Uint8Array(0);
++		else if (input instanceof ArrayBuffer) bytes = new Uint8Array(input);
++		else bytes = new Uint8Array(input.buffer, input.byteOffset, input.byteLength);
++		if (this.#pending.length) {
++			const merged = new Uint8Array(this.#pending.length + bytes.length);
++			merged.set(this.#pending);
++			merged.set(bytes, this.#pending.length);
++			bytes = merged;
++			this.#pending = [];
++		}
++		let end = bytes.length;
++		if (options?.stream) {
++			// Back up over a trailing incomplete sequence
++			let i = end - 1;
++			let n = 0;
++			while (i >= 0 && n < 4 && (bytes[i]! & 0xc0) === 0x80) {
++				i--;
++				n++;
++			}
++			if (i >= 0) {
++				const b = bytes[i]!;
++				const need = b >= 0xf0 ? 4 : b >= 0xe0 ? 3 : b >= 0xc0 ? 2 : 1;
++				if (need > n + 1) end = i;
++			}
++			for (let j = end; j < bytes.length; j++) this.#pending.push(bytes[j]!);
++		}
++		let s = "";
++		const CHUNK = 8192;
++		const codes: number[] = [];
++		for (let i = 0; i < end; ) {
++			const b = bytes[i]!;
++			let c: number;
++			if (b < 0x80) {
++				c = b;
++				i += 1;
++			} else if (b < 0xe0) {
++				c = ((b & 31) << 6) | (bytes[i + 1]! & 63);
++				i += 2;
++			} else if (b < 0xf0) {
++				c = ((b & 15) << 12) | ((bytes[i + 1]! & 63) << 6) | (bytes[i + 2]! & 63);
++				i += 3;
++			} else {
++				c = ((b & 7) << 18) | ((bytes[i + 1]! & 63) << 12) | ((bytes[i + 2]! & 63) << 6) | (bytes[i + 3]! & 63);
++				i += 4;
++			}
++			if (c >= 0x10000) {
++				c -= 0x10000;
++				codes.push(0xd800 + (c >> 10), 0xdc00 + (c & 1023));
++			} else {
++				codes.push(c);
++			}
++			if (codes.length >= CHUNK) {
++				s += String.fromCharCode(...codes);
++				codes.length = 0;
++			}
++		}
++		if (codes.length) s += String.fromCharCode(...codes);
++		return s;
++	}
++}
++g.TextEncoder ??= TextEncoder;
++g.TextDecoder ??= TextDecoder;
++
++// ---------------------------------------------------------------- streams
++g.ReadableStream ??= ReadableStream;
++g.TransformStream ??= TransformStream;
++g.WritableStream ??= WritableStream;
++g.ByteLengthQueuingStrategy ??= ByteLengthQueuingStrategy;
++g.CountQueuingStrategy ??= CountQueuingStrategy;
++g.TextDecoderStream ??= class TextDecoderStream extends g.TransformStream {
++	constructor() {
++		const decoder = new g.TextDecoder();
++		super({
++			transform(chunk: Uint8Array, controller: any) {
++				const s = decoder.decode(chunk, { stream: true });
++				if (s) controller.enqueue(s);
++			},
++			flush(controller: any) {
++				const s = decoder.decode();
++				if (s) controller.enqueue(s);
++			},
++		});
++	}
++};
++g.TextEncoderStream ??= class TextEncoderStream extends g.TransformStream {
++	constructor() {
++		const encoder = new g.TextEncoder();
++		super({
++			transform(chunk: string, controller: any) {
++				controller.enqueue(encoder.encode(chunk));
++			},
++		});
++	}
++};
++
++// ---------------------------------------------------------------- files and fetch
++// A league file on the phone: read in 1 MB pieces as the game streams it.
++class HostFile {
++	name: string;
++	path: string;
++	size: number;
++	type = "application/json";
++	constructor(path: string, name?: string) {
++		this.path = path;
++		this.name = name ?? path.split(/[\\/]/).pop()!;
++		this.size = host.fileSize(path);
++	}
++	stream() {
++		const { path, size } = this;
++		let offset = 0;
++		return new g.ReadableStream({
++			pull(controller: any) {
++				if (offset >= size) {
++					controller.close();
++					return;
++				}
++				const n = Math.min(1 << 20, size - offset);
++				controller.enqueue(host.readBytes(path, offset, n));
++				offset += n;
++			},
++		});
++	}
++	async text() {
++		return new g.TextDecoder().decode(host.readBytes(this.path, 0, this.size));
++	}
++}
++g.__HostFile = HostFile;
++g.File ??= HostFile;
++g.Blob ??= class Blob {
++	parts: unknown[];
++	type: string;
++	constructor(parts: unknown[] = [], opts: { type?: string } = {}) {
++		this.parts = parts;
++		this.type = opts.type ?? "";
++	}
++};
++
++const makeResponse = (text: string | null, url: string) => ({
++	ok: text !== null,
++	status: text !== null ? 200 : 404,
++	url,
++	json: async () => JSON.parse(text ?? "null"),
++	text: async () => text ?? "",
++	body: null,
++});
++g.fetch = async (input: string | { url: string }) => {
++	const url = typeof input === "string" ? input : input.url;
++	// file:// paths are league files on the phone, streamed like a download
++	if (url.startsWith("file://")) {
++		const f = new HostFile(decodeURIComponent(url.slice("file://".length)));
++		return {
++			ok: true,
++			status: 200,
++			url,
++			headers: { get: (h: string) => (h.toLowerCase() === "content-length" ? String(f.size) : null) },
++			body: f.stream(),
++			json: async () => JSON.parse(await f.text()),
++			text: () => f.text(),
++		};
++	}
++	return makeResponse(host.readText(url.replace(/^https?:\/\/[^/]+/, "")), url);
++};
++
++// ---------------------------------------------------------------- Intl
++// The Android V8 build has no Intl. The engine only needs number formatting with commas (formatList falls back
++// on its own without Intl.ListFormat).
++if (typeof g.Intl === "undefined") {
++	class NumberFormat {
++		#max: number;
++		#min: number;
++		constructor(_locale?: string, opts: { maximumFractionDigits?: number; minimumFractionDigits?: number } = {}) {
++			this.#min = opts.minimumFractionDigits ?? 0;
++			this.#max = Math.max(this.#min, opts.maximumFractionDigits ?? 3);
++		}
++		format(n: number) {
++			if (!Number.isFinite(n)) return String(n);
++			const fixed = Math.abs(n).toFixed(this.#max);
++			let [int, frac = ""] = fixed.split(".");
++			frac = frac.replace(/0+$/, "");
++			while (frac.length < this.#min) frac += "0";
++			int = int!.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
++			const sign = n < 0 && Number(fixed) !== 0 ? "-" : "";
++			return sign + int + (frac ? "." + frac : "");
++		}
++	}
++	g.Intl = { NumberFormat };
++}
++
++g.URLSearchParams ??= class URLSearchParams {
++	#pairs: [string, string][] = [];
++	constructor(init?: string | Record<string, string>) {
++		if (typeof init === "string") {
++			for (const part of init.replace(/^\?/, "").split("&").filter(Boolean)) {
++				const [k, v = ""] = part.split("=");
++				this.#pairs.push([decodeURIComponent(k!), decodeURIComponent(v)]);
++			}
++		} else if (init) {
++			for (const [k, v] of Object.entries(init)) this.#pairs.push([k, String(v)]);
++		}
++	}
++	append(k: string, v: string) {
++		this.#pairs.push([k, String(v)]);
++	}
++	set(k: string, v: string) {
++		this.#pairs = this.#pairs.filter(([x]) => x !== k);
++		this.#pairs.push([k, String(v)]);
++	}
++	get(k: string) {
++		return this.#pairs.find(([x]) => x === k)?.[1] ?? null;
++	}
++	has(k: string) {
++		return this.#pairs.some(([x]) => x === k);
++	}
++	toString() {
++		return this.#pairs.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join("&");
++	}
++};
++g.FormData ??= class FormData {
++	#data = new Map<string, unknown>();
++	append(k: string, v: unknown) {
++		this.#data.set(k, v);
++	}
++	get(k: string) {
++		return this.#data.get(k);
++	}
++};
++
++// ---------------------------------------------------------------- misc
++g.navigator ??= {
++	userAgent: "GridironAlmanac (V8)",
++	hardwareConcurrency: 1,
++	language: "en-US",
++	languages: ["en-US"],
++	onLine: false,
++	storage: undefined,
++	locks: undefined,
++};
++g.location ??= {
++	href: "https://gridironalmanac.local/",
++	origin: "https://gridironalmanac.local",
++	protocol: "https:",
++	host: "gridironalmanac.local",
++	hostname: "gridironalmanac.local",
++	pathname: "/",
++	search: "",
++	hash: "",
++};
++g.crypto ??= {
++	getRandomValues(arr: any) {
++		for (let i = 0; i < arr.length; i++) arr[i] = Math.floor(Math.random() * 2 ** (8 * (arr.BYTES_PER_ELEMENT ?? 1)));
++		return arr;
++	},
++	randomUUID() {
++		const h = "0123456789abcdef";
++		let s = "";
++		for (let i = 0; i < 36; i++) s += [8, 13, 18, 23].includes(i) ? "-" : i === 14 ? "4" : h[Math.floor(Math.random() * 16)];
++		return s;
++	},
++};
++g.atob ??= (s: string) => {
++	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
++	let out = "";
++	let bits = 0;
++	let value = 0;
++	for (const ch of s.replace(/=+$/, "")) {
++		value = (value << 6) | chars.indexOf(ch);
++		bits += 6;
++		if (bits >= 8) {
++			bits -= 8;
++			out += String.fromCharCode((value >> bits) & 255);
++		}
++	}
++	return out;
++};
++g.btoa ??= (s: string) => {
++	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
++	let out = "";
++	for (let i = 0; i < s.length; i += 3) {
++		const a = s.charCodeAt(i);
++		const b = s.charCodeAt(i + 1);
++		const c = s.charCodeAt(i + 2);
++		out += chars[a >> 2]! + chars[((a & 3) << 4) | (b >> 4 || 0)]! + (Number.isNaN(b) ? "=" : chars[((b & 15) << 2) | (c >> 6 || 0)]!) + (Number.isNaN(c) ? "=" : chars[c & 63]!);
++	}
++	return out;
++};

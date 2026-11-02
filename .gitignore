@@ -1,0 +1,12 @@
+# Big files ship in GitHub Releases, not git
+*.json
+!package.json
+*.zip
+*.bin
+*.gz
+nfl_season_selector.html
+data_cache/
+_old/
+node_modules/
+football-gm/
+!data/prospect_overrides.json

@@ -1,0 +1,478 @@
+/**
+ * season_slicer.js - turns the master league (NFL_Master_1966_2026.json) into a
+ * Football GM league file that starts at any season 1966-2026.
+ *
+ * Shared by nfl_season_selector.html (browser) and the CLI below (Node):
+ *   node --max-old-space-size=12000 src/season_slicer.js --season 1986 --phase regular   (the 1985-86 season)
+ *
+ * phase: "preseason" (FBGM phase 0) | "regular" (phase 1, real schedule, week 1)
+ *        | "live" (2026 only: the master as-is, Week 9 with real results)
+ */
+(function (root) {
+  'use strict';
+
+  // Start points, like Basketball GM's real-player leagues. The last three start after season S has really been played:
+  //   playoffs       regular season done (real records, stats, standings), no games left: the playoffs are next
+  //   afterplayoffs  playoffs done too (real champion, awards), heading into the draft
+  //   draft          draft day, with the real draft order
+  const PHASES = { preseason: 0, regular: 1, playoffs: 1, afterplayoffs: 4, draft: 5 };
+  const PHASE_LABELS = { preseason: 'Preseason', regular: 'Regular Season', playoffs: 'Playoffs', afterplayoffs: 'After Playoffs', draft: 'Draft' };
+
+  const DEPTH_POS = ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S', 'K', 'P', 'KR', 'PR'];
+  /** Football GM depth chart: every roster player at every slot, best rating first. */
+  function buildDepth(roster) {
+    const depth = {};
+    for (const pos of DEPTH_POS) {
+      depth[pos] = roster.map(p => ({ pid: p.pid, v: ((p.ratings[p.ratings.length - 1] || {}).ovrs || {})[pos] || 0, own: (p.ratings[p.ratings.length - 1] || {}).pos === pos }))
+        .sort((a, b) => (b.own - a.own) * (pos === 'KR' || pos === 'PR' ? 0 : 1) || b.v - a.v).map(x => x.pid);
+    }
+    return depth;
+  }
+
+  /**
+   * Scale each team's contracts so payroll fits under the cap with room to sign players
+   * (about 92% of the cap), keeping each player's pay relative to his teammates. Without
+   * this, teams start over a hard cap and good free agents never get signed.
+   */
+  function fitPayrolls(players, rules) {
+    const target = rules.salaryCap * 0.92;
+    const byTeam = {};
+    for (const p of players) if (p.tid >= 0 && p.contract) (byTeam[p.tid] = byTeam[p.tid] || []).push(p);
+    for (const roster of Object.values(byTeam)) {
+      const total = roster.reduce((a, p) => a + p.contract.amount, 0);
+      if (total <= target) continue;
+      const atMin = roster.filter(p => p.contract.amount <= rules.minContract);
+      const rest = roster.filter(p => p.contract.amount > rules.minContract);
+      const room = target - atMin.length * rules.minContract;
+      const restTotal = rest.reduce((a, p) => a + p.contract.amount, 0);
+      const k = restTotal > 0 ? Math.max(0, room) / restTotal : 1;
+      for (const p of rest) p.contract = Object.assign({}, p.contract, { amount: Math.max(rules.minContract, Math.round(p.contract.amount * k)) });
+    }
+  }
+
+  function hashInt(n) { let x = (n * 2654435761) >>> 0; x ^= x >>> 13; return x >>> 0; }
+
+  /**
+   * @param master  parsed master league object (left unmodified)
+   * @param E       nfl_eras module
+   * @param opts    { season, phase, schedules, hofYears, logos }
+   */
+const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', 'elu', 'rtr', 'hnd', 'rbk', 'pbk', 'pcv', 'tck', 'prs', 'rns', 'kpw', 'kac', 'ppw', 'pac'];
+  function sliceLeague(master, E, opts) {
+    const S = opts.season;
+    const phaseName = opts.phase;
+    if (opts.logos) E.setLogos(opts.logos, opts.logosProcessed, opts.logoEras);
+    // The live file is the master itself, renamed by end year (2026-27 -> 2027). The master is shifted in place to
+    // save memory (it is 300+ MB) and flagged, then shifted back before any other season is sliced from it.
+    if (master.__shifted) { shiftSeasons(master, -1); delete master.__shifted; }
+    if (phaseName === 'live') {
+      if (S !== 2026) throw new Error('Live mode is only available for 2026.');
+      shiftSeasons(master, 1);
+      Object.defineProperty(master, '__shifted', { value: true, configurable: true, enumerable: false });
+      master.meta = Object.assign({}, master.meta, { name: 'NFL 2026-27 (Week 9)' });
+      master.gameAttributes.realPlayerDeterminism = 1;
+      master.gameAttributes.useRealSchedules = true;
+      return master;
+    }
+    const P = PHASES[phaseName];
+    if (P === undefined) throw new Error('Unknown phase ' + phaseName);
+    // How much of season S has really happened: 0 nothing, 1 regular season, 2 regular season and playoffs
+    const DONE = phaseName === 'playoffs' ? 1 : (phaseName === 'afterplayoffs' || phaseName === 'draft') ? 2 : 0;
+    const keepStat = s => s.season < S || (DONE && s.season === S && (DONE === 2 || !s.playoffs));
+    const rules = E.getRules(S);
+    const align = E.getAlignment(S);
+    const hofYears = opts.hofYears || {};
+
+    // ------------------------------------------------------------------ players
+    const players = [];
+    const rosterByTid = {};
+    for (const src of master.players) {
+      const reg = (src.stats || []).filter(s => !s.playoffs);
+      if (!reg.length && !(src.ratings || []).length) continue;
+      const seasons = reg.map(s => s.season);
+      // Draft prospects (no NFL seasons yet) debut the season after their draft year
+      const debut = seasons.length ? Math.min(...seasons)
+        : src.tid === -2 && src.draft ? src.draft.year + 1 : Math.min(...src.ratings.map(r => r.season));
+      const last = seasons.length ? Math.max(...seasons) : debut;
+      const p = Object.assign({}, src);
+      // Real ratings for later seasons, followed by the NFL history mod as the league is simmed.
+      const realRatings = {};
+      for (const r of src.ratings || []) {
+        if (r.season <= S) continue;
+        const row = {};
+        for (const k of RATING_KEYS) if (typeof r[k] === 'number') row[k] = r[k];
+        realRatings[r.season] = row;
+      }
+      if (Object.keys(realRatings).length) p.realRatings = realRatings; else delete p.realRatings;
+      // The team he really played for in each later season (first team that season), for the mod's real retirements
+      // and historical rosters. A season missing from the list is a season he didn't play.
+      const realTeams = {};
+      // His real jersey number each later season, and moves during a season: after N games with his first team he
+      // joins the next one (mid-season trades and signings).
+      const realJerseys = {};
+      const realMoves = [];
+      const bySeason = new Map();
+      for (const st of src.stats || []) {
+        if (st.playoffs || st.season <= S) continue;
+        if (realTeams[st.season] === undefined) realTeams[st.season] = st.tid;
+        if (st.jerseyNumber !== undefined && realJerseys[st.season] === undefined) realJerseys[st.season] = String(st.jerseyNumber);
+        if (!bySeason.has(st.season)) bySeason.set(st.season, []);
+        bySeason.get(st.season).push(st);
+      }
+      for (const [season, rows] of bySeason) {
+        let games = 0;
+        for (let i = 0; i < rows.length - 1; i++) {
+          games += rows[i].gp;
+          if (rows[i + 1].tid !== rows[i].tid) realMoves.push({ season, afterGames: games, tid: rows[i + 1].tid, jerseyNumber: rows[i + 1].jerseyNumber !== undefined ? String(rows[i + 1].jerseyNumber) : undefined });
+        }
+      }
+      for (const r of src.ratings || []) {
+        if (r.season > S && realTeams[r.season] === undefined) realTeams[r.season] = -1;
+      }
+      if (Object.keys(realJerseys).length) p.realJerseys = realJerseys; else delete p.realJerseys;
+      if (realMoves.length) p.realMoves = realMoves; else delete p.realMoves;
+      // Kept even when empty: an empty list means his real career ends here.
+      p.realTeams = realTeams;
+      p.injury = { type: 'Healthy', gamesRemaining: 0 };
+      delete p.gamesUntilTradable;
+
+      if (debut > S) {
+        // Future player: draft prospect in the class drafted after season debut-1.
+        const r0 = src.ratings.find(r => r.season === debut) || src.ratings[0];
+        p.tid = -2;
+        p.ratings = [Object.assign({}, r0, { season: debut - 1 })];
+        p.stats = []; p.awards = []; p.transactions = []; p.salaries = []; p.statsTids = []; p.injuries = []; delete p.diedYear;
+        p.draft = Object.assign({}, src.draft, { year: debut - 1, round: 0, pick: 0, tid: -1, originalTid: -1 });
+        // Where he was really drafted, so the NFL history mod can have that team pick him.
+        if (src.draft && src.draft.round > 0 && src.draft.tid >= 0) p.realDraft = { year: debut - 1, round: src.draft.round, pick: src.draft.pick, tid: src.draft.tid };
+        else delete p.realDraft;
+        p.contract = { amount: rules.minContract, exp: debut + 2 };
+        delete p.retiredYear;
+        if (realJerseys[debut] !== undefined) p.jerseyNumber = realJerseys[debut]; else delete p.jerseyNumber;
+        p.hof = false;
+        players.push(p);
+        continue;
+      }
+
+      const rowsS = reg.filter(s => s.season === S);
+      p.stats = (src.stats || []).filter(keepStat);
+      p.awards = (src.awards || []).filter(a => a.season < S || (DONE === 2 && a.season === S));
+      p.transactions = (src.transactions || []).filter(t => t.season < S || (t.season === S && (DONE || (t.phase !== undefined && t.phase <= P))));
+      p.salaries = (src.salaries || []).filter(s => s.season <= S);
+      p.injuries = (src.injuries || []).filter(i => i.season < S || (DONE && i.season === S));
+      if (p.diedYear !== undefined && p.diedYear >= S) delete p.diedYear;
+      p.ratings = src.ratings.filter(r => r.season <= S);
+      if (!p.ratings.length) p.ratings = [Object.assign({}, src.ratings[0], { season: S })];
+      p.statsTids = [...new Set(p.stats.map(s => s.tid))];
+      delete p.retiredYear;
+      p.hof = !!(hofYears[p.pid] && hofYears[p.pid] <= S);
+
+      if (rowsS.length) {
+        // Starting team = first team listed that season (later rows are mid-season moves).
+        const row = rowsS[0];
+        p.tid = row.tid;
+        if (row.jerseyNumber) p.jerseyNumber = row.jerseyNumber;
+        p._gp = rowsS.reduce((a, s) => a + (s.gp || 0), 0);
+        p._ovr = p.ratings[p.ratings.length - 1].ovr;
+        (rosterByTid[p.tid] = rosterByTid[p.tid] || []).push(p);
+      } else if (last < S) {
+        p.tid = -3;
+        p.retiredYear = last + 1;
+      } else {
+        p.tid = -1; // between stints: free agent
+      }
+
+      // Contract for the starting season.
+      if (p.tid >= -1) {
+        const sal = (src.salaries || []).find(s => s.season === S);
+        const ovr = p.ratings[p.ratings.length - 1].ovr;
+        const scaled = Math.round(rules.minContract + Math.max(0, ovr - 45) / 45 * (rules.maxContract - rules.minContract) * 0.6);
+        const amount = Math.max(rules.minContract, Math.min(rules.maxContract, sal ? sal.amount : scaled));
+        const yearsLeft = Math.min(Math.max(last - S, 0), 1 + (hashInt(p.pid + S) % 4));
+        p.contract = { amount, exp: S + yearsLeft };
+      } else {
+        p.contract = { amount: rules.minContract, exp: Math.max(S - 1, last) };
+      }
+      // Starting after the playoffs: players whose real career ended this season have retired
+      if (DONE === 2 && p.tid >= -1 && last <= S && !(src.ratings || []).some(r => r.season > S)) {
+        p.tid = -3; p.retiredYear = S;
+      }
+      players.push(p);
+    }
+
+    // Era roster limit: extras (fewest games, then lowest OVR) start as free agents.
+    for (const tid of Object.keys(rosterByTid)) {
+      const roster = rosterByTid[tid];
+      if (roster.length > rules.maxRosterSize) {
+        roster.sort((a, b) => (b._gp - a._gp) || (b._ovr - a._ovr));
+        for (const p of roster.slice(rules.maxRosterSize)) p.tid = -1;
+      }
+    }
+    for (const p of players) { delete p._gp; delete p._ovr; }
+    fitPayrolls(players, rules);
+
+    // -------------------------------------------------------------------- teams
+    const teams = master.teams.map(src => {
+      const b = E.getTeamBranding(src.tid, S);
+      const a = align.teamDiv[src.tid];
+      const t = Object.assign({}, src, {
+        region: b.region, name: b.name, abbrev: b.abbrev, imgURL: b.imgURL, imgURLSmall: b.imgURLSmall, colors: b.colors, jersey: b.jersey,
+        pop: b.pop, stadiumCapacity: b.stadiumCapacity, cid: a.cid, did: a.did, disabled: b.disabled
+      });
+      // srID would make Football GM replace this branding with its own built-in team info.
+      delete t.srID;
+      t.depth = buildDepth(players.filter(p => p.tid === src.tid)); delete t.keepRosterSorted;
+      t.seasons = (src.seasons || []).filter(s => s.season < S).map(s => {
+        const sb = E.getTeamBranding(src.tid, s.season);
+        return Object.assign({}, s, { region: sb.region, name: sb.name, abbrev: sb.abbrev, imgURL: sb.imgURL, imgURLSmall: sb.imgURLSmall, colors: sb.colors, jersey: sb.jersey });
+      });
+      const realS = DONE ? (src.seasons || []).find(s => s.season === S) : null;
+      if (!b.disabled && realS) {
+        // The season really played: real record and standings (and playoff result once the playoffs are done)
+        t.seasons.push(Object.assign({}, realS, { region: b.region, name: b.name, abbrev: b.abbrev, imgURL: b.imgURL, imgURLSmall: b.imgURLSmall,
+          colors: b.colors, jersey: b.jersey, cid: a.cid, did: a.did, playoffRoundsWon: DONE === 2 ? realS.playoffRoundsWon : -1 }));
+      } else if (!b.disabled) {
+        t.seasons.push({ tid: src.tid, cid: a.cid, did: a.did, region: b.region, name: b.name, abbrev: b.abbrev, imgURL: b.imgURL, imgURLSmall: b.imgURLSmall,
+          colors: b.colors, jersey: b.jersey, pop: b.pop, stadiumCapacity: b.stadiumCapacity, season: S, gp: 0, gpHome: 0, att: 0, cash: 25000,
+          won: 0, lost: 0, tied: 0, otl: 0, wonHome: 0, lostHome: 0, tiedHome: 0, otlHome: 0, wonAway: 0, lostAway: 0, tiedAway: 0, otlAway: 0,
+          wonDiv: 0, lostDiv: 0, tiedDiv: 0, otlDiv: 0, wonConf: 0, lostConf: 0, tiedConf: 0, otlConf: 0, pts: 0, oppPts: 0, lastTen: [], streak: 0, playoffRoundsWon: -1 });
+      }
+      t.stats = (src.stats || []).filter(keepStat);
+      t.retiredJerseyNumbers = (src.retiredJerseyNumbers || []).filter(j => j.seasonRetired < S);
+      return t;
+    });
+
+    // ----------------------------------------------------------- game attributes
+    const timeline = (fn) => {
+      const out = []; let prev;
+      for (let y = Math.min(E.FIRST_SEASON, S); y <= S; y++) {
+        const v = fn(y);
+        if (JSON.stringify(v) !== JSON.stringify(prev)) out.push({ start: out.length ? y : null, value: v });
+        prev = v;
+      }
+      return out;
+    };
+    const ga = Object.assign({}, master.gameAttributes, {
+      season: S, phase: P, startingSeason: E.FIRST_SEASON,
+      numGames: timeline(y => E.getRules(y).numGames),
+      numGamesPlayoffSeries: timeline(y => E.getRules(y).numGamesPlayoffSeries),
+      numPlayoffByes: timeline(y => E.getRules(y).numPlayoffByes),
+      confs: timeline(y => E.getAlignment(y).confs),
+      divs: timeline(y => E.getAlignment(y).divs),
+      numDraftRounds: rules.numDraftRounds, maxRosterSize: rules.maxRosterSize, minRosterSize: rules.minRosterSize, salaryCap: rules.salaryCap, salaryCapType: rules.salaryCapType,
+      minPayroll: rules.minPayroll, minContract: rules.minContract, maxContract: rules.maxContract,
+      leagueName: `NFL ${S}`
+    });
+    // Every other rule (overtime, two-point tries, kickoffs, schedule shape, rookie deals) at its season-S value.
+    const timed = new Set(['numGames', 'numGamesPlayoffSeries', 'numPlayoffByes', 'maxOvertimes']);
+    for (const k of E.RULE_KEYS) if (!timed.has(k)) ga[k] = rules[k];
+    ga.maxOvertimes = timeline(y => E.getRules(y).maxOvertimes);
+    ga.overtimeLengthPlayoffs = rules.overtimeLengthPlayoffs;
+    delete ga.userTid; delete ga.userTids;
+    // Real schedules from season S on ([home, away, week]), used by the NFL history mod, including the strike-shortened 1982 and 1987 seasons.
+    ga.realPlayerDeterminism = 1;
+    ga.useRealSchedules = true;
+    // Last season with real data: after it, real retirements and historical rosters leave players to the game.
+    ga.nflRealDataLastSeason = E.LAST_SEASON;
+    // Real jersey retirements after the start season, applied by the mod on schedule (Fitzgerald's #11, 2026); the
+    // game's own invented retirements are off.
+    ga.aiJerseyRetirement = false;
+    ga.nflRetiredNumbers = [];
+    for (const src of master.teams) for (const j of src.retiredJerseyNumbers || []) if (j.seasonRetired >= S) ga.nflRetiredNumbers.push(Object.assign({ tid: src.tid }, j));
+    if (opts.schedules) {
+      ga.realSchedules = {};
+      for (const [season, games] of Object.entries(opts.schedules)) {
+        if (+season < S) continue;
+        ga.realSchedules[season] = games.map(g => [g.homeTid, g.awayTid, g.day]);
+      }
+    }
+
+    // ------------------------------------------------------------- draft picks
+    const draftPicks = [];
+    let dpid = 0;
+    // After the playoffs, this season's draft uses the real order: every real pick, held by the team that made it
+    // (pick numbers are within the round, as Football GM stores them)
+    const realOrder = DONE === 2 ? master.players.filter(p => p.draft && p.draft.year === S && p.draft.round > 0 && p.draft.pick > 0 && p.draft.tid >= 0 && !teams[p.draft.tid].disabled)
+      .map(p => ({ round: p.draft.round, overall: p.draft.pick, tid: p.draft.tid })).sort((a, b) => a.overall - b.overall) : [];
+    if (realOrder.length) {
+      const inRound = {};
+      for (const r of realOrder) {
+        if (r.round > rules.numDraftRounds) continue;
+        inRound[r.round] = (inRound[r.round] || 0) + 1;
+        draftPicks.push({ dpid: dpid++, tid: r.tid, originalTid: r.tid, round: r.round, pick: phaseName === 'draft' ? inRound[r.round] : 0, season: S });
+      }
+    }
+    for (let season = realOrder.length ? S + 1 : S; season <= S + 3; season++) {
+      for (const t of teams) {
+        if (!E.isActive(t.tid, Math.min(season, 2026))) continue;
+        for (let round = 1; round <= rules.numDraftRounds; round++) draftPicks.push({ dpid: dpid++, tid: t.tid, originalTid: t.tid, round, pick: 0, season });
+      }
+    }
+
+    // ---------------------------------------------------------------- schedule
+    let schedule = [];
+    const real = opts.schedules && opts.schedules[S];
+    if (P === PHASES.regular && !DONE && real) {
+      schedule = real.filter(g => !teams[g.homeTid].disabled && !teams[g.awayTid].disabled).map((g, gid) => ({ gid, day: g.day, homeTid: g.homeTid, awayTid: g.awayTid }));
+    }
+
+    // ---------------------------------------------------------- scheduled events
+    const pidByName = new Map();
+    for (const p of players) {
+      const k = `${p.firstName} ${p.lastName}`.toLowerCase();
+      if (!pidByName.has(k)) pidByName.set(k, []);
+      pidByName.get(k).push(p);
+    }
+    const resolvePid = (name, born) => {
+      const key = name.toLowerCase().replace(/s+(jr.?|sr.?|ii|iii|iv)$/, '');
+      const c = (pidByName.get(key) || []).filter(p => !born || Math.abs(p.born.year - born) <= 1)
+        .sort((x, y) => Math.abs(x.born.year - born) - Math.abs(y.born.year - born));
+      return c.length ? c[0].pid : undefined;
+    };
+    const scheduledEvents = E.buildScheduledEvents(S, P, resolvePid);
+
+    const league = {
+      version: master.version,
+      startingSeason: E.FIRST_SEASON,
+      meta: { name: `NFL ${S}-${String(S + 1).slice(2)} (${PHASE_LABELS[phaseName] || phaseName})` },
+      gameAttributes: ga,
+      teams,
+      players,
+      draftPicks,
+      schedule,
+      scheduledEvents,
+      awards: (master.awards || []).filter(a => a.season < S || (DONE === 2 && a.season === S)),
+      allStars: (master.allStars || []).filter(a => a.season < S || (DONE && a.season === S)),
+      playoffSeries: (master.playoffSeries || []).filter(s => s.season < S || (DONE === 2 && s.season === S)),
+      events: (master.events || []).filter(e => e.season < S || (DONE && e.season === S)),
+      releasedPlayers: []
+    };
+    shiftSeasons(league, 1);
+    return league;
+  }
+
+  /**
+   * Names each season by the year it ends, the way Basketball GM does: the 2008-09 season becomes 2009,
+   * so the draft held after it is the 2009 draft, and the season that starts in fall 2026 is 2027.
+   * The master and nfl_eras keep the NFL's own naming (the year a season starts); this is applied last.
+   * Birth years stay real, so ages are as of the year a season ends.
+   */
+  function shiftSeasons(league, d) {
+    const bump = (o, k) => { if (o && typeof o[k] === 'number' && Number.isFinite(o[k])) o[k] += d; };
+    const bumpAll = (arr, k) => { for (const x of arr || []) bump(x, k); };
+    const rekey = (obj) => { const out = {}; for (const [k, v] of Object.entries(obj || {})) out[/^\d{4}$/.test(k) ? String(+k + d) : k] = v; return out; };
+
+    bump(league, 'startingSeason');
+    const ga = league.gameAttributes;
+    bump(ga, 'season'); bump(ga, 'startingSeason'); bump(ga, 'nflRealDataLastSeason');
+    bumpAll(ga.nflRetiredNumbers, 'seasonRetired'); bumpAll(ga.nflRetiredNumbers, 'seasonTeamInfo');
+    for (const v of Object.values(ga)) if (Array.isArray(v)) bumpAll(v, 'start');
+    if (ga.realSchedules) ga.realSchedules = rekey(ga.realSchedules);
+
+    for (const t of league.teams) {
+      bumpAll(t.seasons, 'season'); bumpAll(t.stats, 'season');
+      bumpAll(t.retiredJerseyNumbers, 'seasonRetired'); bumpAll(t.retiredJerseyNumbers, 'seasonTeamInfo');
+    }
+    for (const p of [...league.players, ...(league.releasedPlayers || [])]) {
+      for (const k of ['stats', 'ratings', 'awards', 'transactions', 'salaries', 'injuries']) bumpAll(p[k], 'season');
+      bump(p.contract, 'exp'); bump(p.draft, 'year'); bump(p.realDraft, 'year'); bump(p, 'retiredYear'); bump(p, 'diedYear');
+      if (p.realRatings) p.realRatings = rekey(p.realRatings);
+      if (p.realTeams) p.realTeams = rekey(p.realTeams);
+      if (p.realJerseys) p.realJerseys = rekey(p.realJerseys);
+      if (p.realMoves) for (const m of p.realMoves) m.season += d;
+    }
+    for (const k of ['draftPicks', 'scheduledEvents', 'awards', 'allStars', 'playoffSeries', 'events']) bumpAll(league[k], 'season');
+  }
+
+  /** Serialize in chunks so very large leagues don't need one giant string. */
+  function toJsonChunks(league) {
+    const parts = ['{'];
+    Object.keys(league).forEach((k, i) => {
+      parts.push((i ? ',' : '') + JSON.stringify(k) + ':');
+      const v = league[k];
+      if (Array.isArray(v) && v.length > 500) {
+        parts.push('[');
+        for (let j = 0; j < v.length; j += 500) parts.push((j ? ',' : '') + v.slice(j, j + 500).map(x => JSON.stringify(x)).join(','));
+        parts.push(']');
+      } else parts.push(JSON.stringify(v));
+    });
+    parts.push('}');
+    return parts;
+  }
+
+  // ------------------------------------------------------- event descriptions
+  // For the event checklists in the selector and the mod's season picker. Events here come from a sliced
+  // league, so their seasons are end-year names; nfl_eras is looked up with the season's start year.
+  const EVENT_CATEGORIES = [
+    ['rules', 'Rule changes'], ['realignment', 'Realignment'], ['expansion', 'Expansion and folding'],
+    ['relocation', 'Relocations and renames'], ['branding', 'Logos, colors, jerseys, markets'],
+    ['retire', 'Retirements'], ['comeback', 'Comebacks'], ['suspension', 'Suspensions']
+  ];
+  function eventCategory(e) {
+    if (e.type === 'gameAttributes') return e.info.nflSuspension ? 'suspension' : 'rules';
+    if (e.type === 'confsDivs') return 'realignment';
+    if (e.type === 'expansionDraft' || e.type === 'contraction') return 'expansion';
+    if (e.type === 'teamInfo') return e.info.region || e.info.name ? 'relocation' : 'branding';
+    if (e.type === 'retirePlayer') return 'retire';
+    if (e.type === 'unretirePlayer') return 'comeback';
+    return 'rules';
+  }
+  function describeEvent(e, E, nameByPid) {
+    const i = e.info;
+    const y = e.season - 1;
+    const team = (tid) => { const b = E.getTeamBranding(tid, y); return b.region + ' ' + b.name; };
+    if (e.type === 'teamInfo') {
+      const before = E.getTeamBranding(i.tid, y - 1);
+      const what = [i.imgURL && 'logo', i.colors && 'colors', i.jersey && 'jersey', i.pop && 'market size', i.stadiumCapacity && 'stadium'].filter(Boolean);
+      const move = i.region || i.name ? before.region + ' ' + before.name + ' become the ' + team(i.tid) : team(i.tid);
+      return move + (what.length ? (i.region || i.name ? ' (also ' : ': ') + what.join(', ') + (i.region || i.name ? ')' : '') : '');
+    }
+    if (e.type === 'expansionDraft') return 'Expansion draft: ' + i.teams.map(t => t.region + ' ' + t.name).join(', ');
+    if (e.type === 'contraction') return team(i.tid) + ' suspend operations';
+    if (e.type === 'confsDivs') return 'Realignment: ' + i.confs.map(c => c.name).join(' / ') + ', ' + i.divs.length + ' divisions';
+    if (e.type === 'gameAttributes' && i.nflSuspension) {
+      const n = (nameByPid && nameByPid[i.nflSuspension.pid]) || 'Player ' + i.nflSuspension.pid;
+      return n + ': ' + i.nflSuspension.reason + ', ' + i.nflSuspension.games + ' games';
+    }
+    if (e.type === 'gameAttributes') return 'Rules: ' + Object.entries(i).map(([k, v]) => k + ' ' + (Array.isArray(v) ? '[' + v + ']' : v)).join(', ');
+    const name = (nameByPid && nameByPid[i.pid]) || 'Player ' + i.pid;
+    if (e.type === 'retirePlayer') return name + ' ' + (i.reason || 'retires');
+    if (e.type === 'unretirePlayer') return name + ' ' + (i.reason || 'comes out of retirement') + (i.tid !== undefined ? ' (' + team(i.tid) + ')' : '');
+    return e.type;
+  }
+  // Keep only the chosen events (ids), renumbered.
+  function keepEvents(league, keepIds) {
+    const keep = new Set(keepIds);
+    league.scheduledEvents = league.scheduledEvents.filter(e => keep.has(e.id)).map((e, n) => Object.assign({}, e, { id: n + 1 }));
+    return league;
+  }
+
+  const api = { sliceLeague, shiftSeasons, toJsonChunks, buildDepth, fitPayrolls, PHASES, PHASE_LABELS, EVENT_CATEGORIES, eventCategory, describeEvent, keepEvents };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.SEASON_SLICER = api;
+
+  // ------------------------------------------------------------------ CLI
+  if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module) {
+    const fs = require('fs');
+    const path = require('path');
+    const args = process.argv.slice(2);
+    const arg = (n, d) => { const i = args.indexOf('--' + n); return i >= 0 ? args[i + 1] : d; };
+    // --season is the year the season ends (2009 = the 2008-09 season), matching the generated files.
+    const seasonName = parseInt(arg('season', '1967'), 10);
+    const season = seasonName - 1;
+    const phase = arg('phase', 'regular');
+    const ROOT = path.join(__dirname, '..');
+    const E = require('./nfl_eras');
+    const read = (f) => JSON.parse(fs.readFileSync(path.join(ROOT, f), 'utf8'));
+    const master = read(arg('master', 'NFL_Master_1966_2026.json'));
+    const out = sliceLeague(master, E, {
+      season, phase, schedules: read('data_cache/real_schedules.json'), hofYears: read('data_cache/hof_years.json'),
+      logos: fs.existsSync(path.join(ROOT, 'data_cache/logos.json')) ? read('data_cache/logos.json') : {},
+      logosProcessed: fs.existsSync(path.join(ROOT, 'data_cache/logos_processed.json')) ? read('data_cache/logos_processed.json') : {},
+      logoEras: fs.existsSync(path.join(ROOT, 'data_cache/logos_eras_final.json')) ? read('data_cache/logos_eras_final.json') : null
+    });
+    const file = arg('out', path.join(ROOT, `NFL_${seasonName}_${phase}_FBGM.json`));
+    fs.writeFileSync(file, toJsonChunks(out).join(''));
+    console.log('wrote', file, 'players', out.players.length, 'events', out.scheduledEvents.length);
+  }
+})(typeof window !== 'undefined' ? window : globalThis);

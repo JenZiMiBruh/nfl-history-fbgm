@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 440" width="1000" height="440" font-family="'Segoe UI',Helvetica,Arial,sans-serif">
+  <style>
+    .bg{fill:#ffffff}.t{fill:#10241a;font-size:22px;font-weight:800}.s{fill:#5b7064;font-size:14px}.ax{fill:#5b7064;font-size:12px}.grid{stroke:#e3e9e5}
+    .real{stroke:#10241a;stroke-width:3.5;fill:none}.r0{stroke:#c98b2b;stroke-width:2;fill:none;stroke-dasharray:6 5;opacity:.85}.r5{stroke:#3c8dbc;stroke-width:2.5;fill:none}
+    .lab{font-size:13px;font-weight:700}.pill{fill:#eef4f0}.pt{fill:#10241a;font-size:13px}
+    @media (prefers-color-scheme: dark){.bg{fill:#0d1117}.t,.pt{fill:#e6edf3}.s,.ax{fill:#9da7b1}.grid{stroke:#21262d}.real{stroke:#e6edf3}.pill{fill:#161b22}}
+  </style>
+  <rect class="bg" width="1000" height="440" rx="12"/>
+  <text class="t" x="36" y="48">Real Player Determinism: careers that follow the real one</text>
+  <text class="s" x="36" y="72">One player's overall by age under three settings. Illustration of how the RPD slider works.</text>
+  <g transform="translate(80 100)">
+    <g class="grid"><line x1="0" y1="0" x2="600" y2="0"/><line x1="0" y1="70" x2="600" y2="70"/><line x1="0" y1="140" x2="600" y2="140"/><line x1="0" y1="210" x2="600" y2="210"/><line x1="0" y1="280" x2="600" y2="280"/></g>
+    <g class="ax" text-anchor="end"><text x="-10" y="4">90</text><text x="-10" y="74">80</text><text x="-10" y="144">70</text><text x="-10" y="214">60</text><text x="-10" y="284">50</text></g>
+    <g class="ax" text-anchor="middle"><text x="0" y="302">22</text><text x="100" y="302">24</text><text x="200" y="302">26</text><text x="300" y="302">28</text><text x="400" y="302">30</text><text x="500" y="302">32</text><text x="600" y="302">34</text></g>
+    <!-- RPD 0: random development, three runs -->
+    <path class="r0" d="M0 196 L50 168 L100 175 L150 154 L200 161 L250 182 L300 175 L350 196 L400 217 L450 238 L500 266 L550 280"/>
+    <path class="r0" d="M0 196 L50 154 L100 126 L150 98 L200 105 L250 84 L300 98 L350 112 L400 147 L450 182 L500 224"/>
+    <path class="r0" d="M0 196 L50 189 L100 203 L150 196 L200 217 L250 224 L300 245 L350 266"/>
+    <!-- RPD 0.5 -->
+    <path class="r5" d="M0 196 L50 154 L100 119 L150 91 L200 70 L250 63 L300 56 L350 63 L400 77 L450 91 L500 112 L550 133 L600 161"/>
+    <!-- real -->
+    <path class="real" d="M0 196 L50 140 L100 98 L150 70 L200 49 L250 35 L300 28 L350 35 L400 42 L450 56 L500 70 L550 91 L600 119"/>
+  </g>
+  <g transform="translate(720 120)">
+    <rect class="pill" width="244" height="84" rx="10"/>
+    <line class="real" x1="16" y1="28" x2="52" y2="28"/><text class="lab pt" x="62" y="33">RPD 1 · the real career</text>
+    <text class="s" x="62" y="54" font-size="12">peaks, decline, retirement</text><text class="s" x="62" y="70" font-size="12">exactly when they happened</text>
+    <rect class="pill" y="100" width="244" height="68" rx="10"/>
+    <line class="r5" x1="16" y1="126" x2="52" y2="126"/><text class="lab pt" x="62" y="131">RPD 0.5 · blended</text>
+    <text class="s" x="62" y="152" font-size="12">real shape, room to surprise</text>
+    <rect class="pill" y="184" width="244" height="84" rx="10"/>
+    <line class="r0" x1="16" y1="210" x2="52" y2="210"/><text class="lab pt" x="62" y="215">RPD 0 · stock Football GM</text>
+    <text class="s" x="62" y="236" font-size="12">random every year: busts,</text><text class="s" x="62" y="252" font-size="12">breakouts, early exits</text>
+  </g>
+</svg>

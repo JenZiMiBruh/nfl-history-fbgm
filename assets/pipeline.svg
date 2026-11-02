@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 430" width="1200" height="430" font-family="'Segoe UI',Helvetica,Arial,sans-serif">
+  <style>
+    .bg{fill:#ffffff}.card{fill:#f3f6f4;stroke:#c9d6cd}.t{fill:#10241a;font-weight:700;font-size:17px}.s{fill:#4b5d53;font-size:13.5px}.h{fill:#5b7064;font-size:13px;font-weight:700;letter-spacing:2px}.ar{stroke:#6e7781;stroke-width:2;fill:none}.hl{fill:#0f3d22}.hlt{fill:#fff;font-weight:700;font-size:17px}.hls{fill:#cfe7d6;font-size:13.5px}
+    @media (prefers-color-scheme: dark){.bg{fill:#0d1117}.card{fill:#161b22;stroke:#30363d}.t{fill:#e6edf3}.s,.h{fill:#9da7b1}}
+  </style>
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#6e7781"/></marker></defs>
+  <rect class="bg" width="1200" height="430" rx="12"/>
+  <text class="h" x="40" y="44">SOURCES</text><text class="h" x="330" y="44">BUILD</text><text class="h" x="620" y="44">CLEAN &amp; RATE</text><text class="h" x="910" y="44">PLAY</text>
+  <rect class="card" x="40" y="62" width="250" height="70" rx="10"/><text class="t" x="58" y="92">nflverse</text><text class="s" x="58" y="114">rosters, games, stats 1999+</text>
+  <rect class="card" x="40" y="146" width="250" height="70" rx="10"/><text class="t" x="58" y="176">Pro-Football-Reference</text><text class="s" x="58" y="198">1966–98 via Internet Archive, AV</text>
+  <rect class="card" x="40" y="230" width="250" height="70" rx="10"/><text class="t" x="58" y="260">Wikipedia &amp; Commons</text><text class="s" x="58" y="282">awards, drafts, HOF, uniforms, logos</text>
+  <rect class="card" x="40" y="314" width="250" height="70" rx="10"/><text class="t" x="58" y="344">OverTheCap · Madden</text><text class="s" x="58" y="366">contracts, ratings cross-checks</text>
+  <rect class="card" x="330" y="146" width="250" height="154" rx="10"/>
+  <text class="t" x="348" y="178">build_master.js</text>
+  <text class="s" x="348" y="202">players matched across sources</text><text class="s" x="348" y="222">team seasons &amp; playoff brackets</text><text class="s" x="348" y="242">logos &amp; jerseys by era</text><text class="s" x="348" y="262">rules, expansion, relocations</text><text class="s" x="348" y="282">121 real-life events</text>
+  <rect class="card" x="620" y="62" width="250" height="100" rx="10"/><text class="t" x="638" y="92">fix_player_records.js</text><text class="s" x="638" y="114">merges, splits, positions, ages</text><text class="s" x="638" y="134">the details stat heads notice</text>
+  <rect class="card" x="620" y="176" width="250" height="100" rx="10"/><text class="t" x="638" y="206">rebuild_ratings.js</text><text class="s" x="638" y="228">how good: AV per game rank</text><text class="s" x="638" y="248">what kind: stats vs his era</text>
+  <rect class="card" x="620" y="290" width="250" height="94" rx="10"/><text class="t" x="638" y="320">calibrate_eras.js</text><text class="s" x="638" y="342">sim vs real, per season</text><text class="s" x="638" y="362">completion, INT, sack, yards</text>
+  <rect class="hl" x="910" y="62" width="250" height="100" rx="10"/><text class="hlt" x="928" y="92">Master league</text><text class="hls" x="928" y="114">every season in one file</text><text class="hls" x="928" y="134">imports at the current week</text>
+  <rect class="card" x="910" y="176" width="250" height="100" rx="10"/><text class="t" x="928" y="206">Season selector</text><text class="s" x="928" y="228">any season, any phase</text><text class="s" x="928" y="248">offline, one HTML file</text>
+  <rect class="card" x="910" y="290" width="250" height="94" rx="10"/><text class="t" x="928" y="320">FBGM mod</text><text class="s" x="928" y="342">history behaves like history</text><text class="s" x="928" y="362">settings for everything</text>
+  <g class="ar" marker-end="url(#a)">
+    <path d="M290 97 C310 97 310 190 328 200"/><path d="M290 181 C305 181 310 200 328 205"/><path d="M290 265 C305 265 310 230 328 225"/><path d="M290 349 C310 349 310 250 328 245"/>
+    <path d="M580 210 C600 210 600 112 618 112"/><path d="M580 224 L618 224"/><path d="M580 238 C600 238 600 336 618 336"/>
+    <path d="M870 112 L908 112"/><path d="M870 226 C890 226 890 120 908 120"/><path d="M870 336 C890 336 890 140 908 140"/>
+    <path d="M1035 162 L1035 174"/><path d="M1035 276 L1035 288"/>
+  </g>
+</svg>

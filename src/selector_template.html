@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NFL Season Selector</title>
+<style>
+  :root {
+    --bg: #f4f5f7; --panel: #ffffff; --ink: #14171c; --muted: #5d6673; --line: #dde1e6;
+    --accent: #013369; --accent-ink: #ffffff; --warn: #9a5b00; --ok: #1d6b3a; --err: #b42318;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #0f1216; --panel: #181c22; --ink: #e8ebef; --muted: #9aa3ae; --line: #2a3038; --accent: #4f8fe8; --accent-ink: #0b1220; --warn: #e3a64a; --ok: #5fc58a; --err: #f2766b; }
+  }
+  :root[data-theme="dark"] { --bg: #0f1216; --panel: #181c22; --ink: #e8ebef; --muted: #9aa3ae; --line: #2a3038; --accent: #4f8fe8; --accent-ink: #0b1220; --warn: #e3a64a; --ok: #5fc58a; --err: #f2766b; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+  .panel h2 { font-size: 15px; margin: 0 0 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .drop { border: 2px dashed var(--line); border-radius: 10px; padding: 22px; text-align: center; cursor: pointer; }
+  .drop.over { border-color: var(--accent); }
+  .row { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+  label { display: block; font-weight: 600; margin-bottom: 6px; }
+  select, input[type=range] { font: inherit; }
+  select { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); min-width: 140px; }
+  .phases { display: flex; flex-wrap: wrap; gap: 8px; }
+  .phases label { font-weight: 500; border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; cursor: pointer; margin: 0; }
+  .phases input { margin-right: 6px; }
+  .phases label.disabled { opacity: .45; cursor: not-allowed; }
+  button { font: inherit; font-weight: 700; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 8px; padding: 12px 18px; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .status { margin-top: 12px; color: var(--muted); min-height: 1.5em; }
+  .status.ok { color: var(--ok); } .status.err { color: var(--err); }
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+  .fact { border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+  .fact b { display: block; font-size: 18px; }
+  .fact span { color: var(--muted); font-size: 13px; }
+  .teams { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+  .team { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+  .team img { width: 34px; height: 34px; object-fit: contain; }
+  .team .sw { display: flex; gap: 2px; margin-top: 3px; }
+  .team .sw i { width: 14px; height: 10px; border-radius: 2px; border: 1px solid var(--line); }
+  .team small { color: var(--muted); }
+  .team.off { opacity: .4; }
+  .team.clickable { cursor: pointer; }
+  .team.clickable:hover { border-color: var(--accent); }
+  dialog.roster { width: min(1100px, 96vw); max-height: 90vh; border: 1px solid var(--line); border-radius: 12px; padding: 0; background: var(--panel); color: var(--ink); }
+  dialog.roster::backdrop { background: rgba(0,0,0,.55); }
+  .rhead { display: flex; gap: 16px; align-items: center; padding: 16px 18px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .rhead img.logo { width: 64px; height: 64px; object-fit: contain; }
+  .rhead h3 { margin: 0; font-size: 20px; }
+  .rhead .meta { color: var(--muted); font-size: 13px; }
+  .rhead .close { margin-left: auto; background: transparent; color: var(--ink); border: 1px solid var(--line); padding: 6px 12px; }
+  .rbody { overflow: auto; max-height: calc(90vh - 110px); }
+  table.rt { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.rt th { position: sticky; top: 0; background: var(--panel); text-align: left; padding: 8px; border-bottom: 1px solid var(--line); cursor: pointer; white-space: nowrap; }
+  table.rt td { padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  table.rt td.num, table.rt th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  table.rt tr.grp td { background: var(--bg); font-weight: 700; color: var(--muted); font-size: 12px; letter-spacing: .04em; }
+  .ovr { display: inline-block; min-width: 28px; text-align: center; border-radius: 6px; padding: 1px 4px; font-weight: 700; color: #fff; }
+  .inj { color: var(--err); }
+  .hof { color: var(--warn); font-weight: 700; }
+  .events { max-height: 260px; overflow: auto; font-size: 13px; border-top: 1px solid var(--line); }
+  .events div { padding: 4px 0; border-bottom: 1px solid var(--line); }
+  .events code { color: var(--muted); }
+  .events details { padding: 4px 0; border-bottom: 1px solid var(--line); }
+  .events details div { border: 0; padding: 2px 0 2px 22px; }
+  .events summary { cursor: pointer; font-weight: 600; }
+  .small-btn { font-size: 12px; margin-left: 8px; padding: 2px 8px; cursor: pointer; }
+  .note { font-size: 13px; color: var(--muted); }
+  @media (max-width: 600px) { .row { flex-direction: column; align-items: stretch; } select { width: 100%; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>NFL Season Selector for Football GM</h1>
+  <p class="sub">Pick a starting season (1967–2027, named by the year it ends, so 2009 is the 2008-09 season) and a point in that year, then download a league file to import into Football GM. Team relocations, renames, logos, jerseys, colors, expansions, realignments, rule changes and famous comebacks happen on schedule as you sim forward.</p>
+
+  <section class="panel">
+    <h2>1 · Load the master league</h2>
+    <div class="drop" id="drop">
+      <b>Drop <code>NFL_Master_1966_2026.json</code> here</b> or click to choose it.
+      <input type="file" id="file" accept=".json,.gz,application/json,application/gzip" hidden>
+      <div class="note" id="fileInfo">The master file holds every player, stat, record, team season, award and scheduled event.</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>2 · Choose the starting point</h2>
+    <div class="row">
+      <div>
+        <label for="season">Season</label>
+        <select id="season"></select>
+      </div>
+      <div>
+        <label>Point in the year</label>
+        <div class="phases" id="phases">
+          <label><input type="radio" name="phase" value="preseason">Preseason</label>
+          <label><input type="radio" name="phase" value="regular" checked>Regular Season, Week 1</label>
+          <label class="done"><input type="radio" name="phase" value="playoffs">Playoffs</label>
+          <label class="done"><input type="radio" name="phase" value="afterplayoffs">After Playoffs</label>
+          <label class="done"><input type="radio" name="phase" value="draft">Draft</label>
+          <label id="liveLabel"><input type="radio" name="phase" value="live">2027 Live (through Week 8)</label>
+        </div>
+      </div>
+    </div>
+    <p class="note" id="phaseNote"></p>
+  </section>
+
+  <section class="panel">
+    <h2>3 · Preview</h2>
+    <div class="facts" id="facts"></div>
+    <h2 style="margin-top:16px">Teams <span class="note" style="text-transform:none;letter-spacing:0">(load the master, then click a team for its roster)</span></h2>
+    <div class="teams" id="teams"></div>
+    <h2 style="margin-top:16px">Upcoming scheduled events <button type="button" id="chooseEv" class="small-btn">Choose events…</button></h2>
+    <div class="events" id="events"></div>
+  </section>
+
+  <section class="panel">
+    <h2>4 · Generate</h2>
+    <button id="go" disabled>Generate &amp; download league file</button>
+    <div class="status" id="status">Load the master league first.</div>
+    <p class="note">Import in Football GM: <b>New League → Customize → Upload league file</b>, pick the downloaded file, choose your team, create.</p>
+  </section>
+</main>
+
+<dialog class="roster" id="rosterDlg">
+  <div class="rhead" id="rosterHead"></div>
+  <div class="rbody"><table class="rt" id="rosterTable"></table></div>
+</dialog>
+
+<script>/*__NFL_ERAS__*/</script>
+<script>/*__SEASON_SLICER__*/</script>
+<script>
+const SCHEDULES = /*__SCHEDULES__*/{};
+const HOF_YEARS = /*__HOF__*/{};
+const LOGOS = /*__LOGOS__*/{};
+const LOGOS_PROCESSED = /*__LOGOS_PROCESSED__*/{};
+const LOGO_ERAS = /*__LOGO_ERAS__*/null;
+</script>
+<script>
+(function () {
+  const E = window.NFL_ERAS, SL = window.SEASON_SLICER;
+  E.setLogos(LOGOS, LOGOS_PROCESSED, LOGO_ERAS);
+  const $ = (id) => document.getElementById(id);
+  let master = null;
+
+  for (let y = E.LAST_SEASON; y >= E.FIRST_SEASON; y--) {
+    const o = document.createElement('option'); o.value = y; o.textContent = `${y + 1} (${y}-${String(y + 1).slice(2)})`; $('season').appendChild(o);
+  }
+  $('season').value = '1966';
+
+  const phase = () => document.querySelector('input[name=phase]:checked').value;
+  const setStatus = (msg, cls) => { $('status').textContent = msg; $('status').className = 'status' + (cls ? ' ' + cls : ''); };
+  const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const money = (k) => k >= 1000 ? '$' + (k / 1000).toFixed(1) + 'M' : '$' + k + 'K';
+
+  function describe(e) {
+    const i = e.info;
+    if (e.type === 'teamInfo') {
+      const b = E.getTeamBranding(i.tid, e.season);
+      const what = [i.region && 'relocation', i.name && 'rename', i.imgURL && 'logo', i.colors && 'colors', i.jersey && 'jersey', i.pop && 'market', i.stadiumCapacity && 'stadium'].filter(Boolean);
+      return `${b.region} ${b.name}: ${what.join(', ')}`;
+    }
+    if (e.type === 'expansionDraft') return `Expansion draft: ${i.teams.map(t => t.region + ' ' + t.name).join(', ')}`;
+    if (e.type === 'contraction') { const b = E.getTeamBranding(i.tid, e.season); return `${b.region} ${b.name} suspend operations`; }
+    if (e.type === 'confsDivs') return `Realignment: ${i.confs.map(c => c.name).join(' / ')}, ${i.divs.length} divisions`;
+    if (e.type === 'gameAttributes') return 'Rules: ' + Object.entries(i).map(([k, v]) => `${k}=${Array.isArray(v) ? '[' + v + ']' : v}`).join(', ');
+    if (e.type === 'retirePlayer' || e.type === 'unretirePlayer') {
+      const p = master && master.players.find(x => x.pid === i.pid);
+      return `${p ? p.firstName + ' ' + p.lastName : 'Player ' + i.pid} ${e.type === 'retirePlayer' ? 'retires' : 'comes out of retirement'}`;
+    }
+    return e.type;
+  }
+  const PHASE_NAMES = { 0: 'Preseason', 1: 'Regular season', 3: 'Playoffs', 4: 'After playoffs', 5: 'Draft', 8: 'Free agency' };
+
+  // Home jersey drawing: body color, number color, sleeve-stripe/trim color.
+  function jerseySvg(colors, size, number) {
+    const [body, num, trim] = colors;
+    const n = number !== undefined && number !== '' ? `<text x="32" y="48" text-anchor="middle" font-size="22" font-weight="800" font-family="system-ui" fill="${num}" stroke="${trim}" stroke-width=".8">${esc(number)}</text>` : '';
+    return `<svg width="${size}" height="${size}" viewBox="0 0 64 64" aria-hidden="true"><path d="M20 6 L8 12 L2 26 L12 30 L14 24 L14 60 L50 60 L50 24 L52 30 L62 26 L56 12 L44 6 Q32 14 20 6 Z" fill="${body}" stroke="rgba(0,0,0,.35)" stroke-width="1.2"/>` +
+      `<path d="M5 21 L13 24 M4 24 L12 27" stroke="${trim}" stroke-width="2.4"/><path d="M59 21 L51 24 M60 24 L52 27" stroke="${trim}" stroke-width="2.4"/>` +
+      `<path d="M20 6 Q32 14 44 6" fill="none" stroke="${trim}" stroke-width="2"/>${n}</svg>`;
+  }
+
+  // Slice once per season/phase and reuse it for roster views and the download.
+  let sliceCache = { key: null, league: null };
+  function getSlice() {
+    const S = +$('season').value, ph = phase();
+    const key = S + '|' + ph;
+    if (sliceCache.key !== key) sliceCache = { key, league: SL.sliceLeague(master, E, { season: S, phase: ph, schedules: SCHEDULES, hofYears: HOF_YEARS, logos: LOGOS, logosProcessed: LOGOS_PROCESSED, logoEras: LOGO_ERAS }) };
+    return sliceCache.league;
+  }
+  const POS_ORDER = ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S', 'K', 'P'];
+  let rosterSort = { key: 'depth', dir: 1 };
+  const ovrColor = (v) => (v >= 80 ? '#1d6b3a' : v >= 70 ? '#3a8f4f' : v >= 60 ? '#8a7b16' : v >= 50 ? '#9a5b00' : '#8a2c2c');
+  function showRoster(tid) {
+    if (!master) return;
+    const league = getSlice();
+    const S = league.gameAttributes.season;
+    const team = league.teams[tid];
+    const depthIndex = new Map();
+    for (const pos of POS_ORDER) ((team.depth && team.depth[pos]) || []).forEach((pid, i) => { if (!depthIndex.has(pid + pos)) depthIndex.set(pid + pos, i); });
+    const rows = league.players.filter(p => p.tid === tid).map(p => {
+      const r = p.ratings[p.ratings.length - 1];
+      return { p, name: p.lastName + ' ' + p.firstName, pos: r.pos, ovr: r.ovr, pot: r.pot, age: S - p.born.year, num: p.jerseyNumber || '', hgt: p.hgt, wt: p.weight,
+        college: p.college || '', amount: p.contract ? p.contract.amount : 0, exp: p.contract ? p.contract.exp : '',
+        yrs: new Set(p.stats.filter(s => !s.playoffs).map(s => s.season)).size,
+        inj: p.injury && p.injury.gamesRemaining > 0 ? p.injury.type + ' (' + p.injury.gamesRemaining + ')' : '', depth: depthIndex.get(p.pid + r.pos) ?? 99 };
+    });
+    if (rosterSort.key === 'depth') rows.sort((a, b) => POS_ORDER.indexOf(a.pos) - POS_ORDER.indexOf(b.pos) || a.depth - b.depth || b.ovr - a.ovr);
+    else rows.sort((a, b) => { const x = a[rosterSort.key], y = b[rosterSort.key]; return (typeof x === 'string' ? String(x).localeCompare(String(y), undefined, { numeric: true }) : x - y) * rosterSort.dir; });
+    const prev = (team.seasons || []).find(x => x.season === S - 1);
+    const b = E.getTeamBranding(tid, S);
+    const star = rows.slice().sort((x, y) => y.ovr - x.ovr)[0];
+    const swatch = (c) => '<span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:' + c + ';border:1px solid var(--line);vertical-align:-2px"></span> ' + c;
+    $('rosterHead').innerHTML = jerseySvg(b.colors, 64, star ? star.num : '') + '<img class="logo" src="' + esc(b.imgURL) + '" alt=""><div><h3>' + S + ' ' + esc(b.region) + ' ' + esc(b.name) + '</h3>' +
+      '<div class="meta">' + rows.length + ' players · ' + (prev ? 'last season ' + prev.won + '-' + prev.lost + (prev.tied ? '-' + prev.tied : '') : 'first season') +
+      ' · jersey style ' + esc(b.jersey) + ' · ' + b.colors.map(swatch).join(' ') + '</div></div><button class="close" id="rosterClose">Close</button>';
+    const cols = [['num', '#', 1], ['name', 'Player'], ['pos', 'Pos'], ['age', 'Age', 1], ['ovr', 'OVR', 1], ['pot', 'POT', 1], ['hgt', 'Ht', 1], ['wt', 'Wt', 1],
+      ['college', 'College'], ['amount', 'Contract', 1], ['yrs', 'Seasons', 1], ['inj', 'Injury']];
+    const head = '<tr>' + cols.map(([k, l, n]) => '<th data-k="' + k + '" class="' + (n ? 'num' : '') + '">' + l + '</th>').join('') + '</tr>';
+    let lastPos = null;
+    const body = rows.map(x => {
+      const grp = rosterSort.key === 'depth' && x.pos !== lastPos ? '<tr class="grp"><td colspan="' + cols.length + '">' + x.pos + '</td></tr>' : '';
+      lastPos = x.pos;
+      const ht = x.hgt ? Math.floor(x.hgt / 12) + "'" + (x.hgt % 12) + '"' : '';
+      return grp + '<tr><td class="num">' + esc(x.num) + '</td><td>' + esc(x.p.firstName + ' ' + x.p.lastName) + (x.p.hof ? ' <span class="hof" title="Hall of Fame">HOF</span>' : '') + '</td><td>' + x.pos +
+        '</td><td class="num">' + x.age + '</td><td class="num"><span class="ovr" style="background:' + ovrColor(x.ovr) + '">' + x.ovr + '</span></td><td class="num">' + x.pot +
+        '</td><td class="num">' + ht + '</td><td class="num">' + (x.wt || '') + '</td><td>' + esc(x.college) + '</td><td class="num">' + money(x.amount) + ' thru ' + x.exp +
+        '</td><td class="num">' + x.yrs + '</td><td class="inj">' + esc(x.inj) + '</td></tr>';
+    }).join('');
+    $('rosterTable').innerHTML = '<thead>' + head + '</thead><tbody>' + body + '</tbody>';
+    $('rosterTable').querySelectorAll('th').forEach(th => th.addEventListener('click', () => {
+      const k = th.dataset.k;
+      rosterSort = { key: k === 'pos' ? 'depth' : k, dir: rosterSort.key === k ? -rosterSort.dir : (['ovr', 'pot', 'amount', 'yrs'].includes(k) ? -1 : 1) };
+      showRoster(tid);
+    }));
+    $('rosterClose').addEventListener('click', () => $('rosterDlg').close());
+    if (!$('rosterDlg').open) $('rosterDlg').showModal();
+  }
+
+  function render() {
+    const S = +$('season').value;
+    const live = $('liveLabel');
+    const liveInput = live.querySelector('input');
+    liveInput.disabled = S !== 2026;
+    live.classList.toggle('disabled', S !== 2026);
+    if (liveInput.disabled && liveInput.checked) document.querySelector('input[value=regular]').checked = true;
+    // Playoffs / After Playoffs / Draft need a season that has finished
+    for (const l of document.querySelectorAll('#phases label.done')) { const i = l.querySelector('input'); i.disabled = S >= 2026; l.classList.toggle('disabled', i.disabled); if (i.disabled && i.checked) document.querySelector('input[value=regular]').checked = true; }
+    const ph = phase();
+    const r = E.getRules(S);
+    const a = E.getAlignment(S);
+    const active = E.TEAMS.filter(t => E.isActive(t.tid, S));
+    const pt = 2 ** r.numGamesPlayoffSeries.length - r.numPlayoffByes;
+    $('facts').innerHTML = [
+      [active.length, 'teams'], [r.numGames, 'regular-season games'], [pt, 'playoff teams'],
+      [a.confs.map(c => c.name).join(' / '), `${a.divs.length} divisions`],
+      [r.salaryCapType === 'none' ? 'No cap' : money(r.salaryCap), r.salaryCapType === 'none' ? 'pre-1994 (payroll scale ' + money(r.salaryCap) + ')' : 'hard salary cap'],
+      [r.maxRosterSize, 'roster limit'], [r.numDraftRounds, 'draft rounds (in game)']
+    ].map(([b, s]) => `<div class="fact"><b>${esc(b)}</b><span>${esc(s)}</span></div>`).join('');
+    $('teams').innerHTML = E.TEAMS.map(t => {
+      const b = E.getTeamBranding(t.tid, S);
+      const div = a.divs.find(d => d.did === a.teamDiv[t.tid].did);
+      const prev = master && (master.teams[t.tid].seasons || []).find(x => x.season === S - 1);
+      const rec = prev ? `${S - 1}: ${prev.won}-${prev.lost}${prev.tied ? '-' + prev.tied : ''}` : '';
+      return `<div class="team${b.disabled ? ' off' : ''}${master && !b.disabled ? ' clickable' : ''}" data-tid="${t.tid}">${jerseySvg(b.colors, 34)}<img src="${esc(b.imgURL)}" alt="" loading="lazy"><div><div><b>${esc(b.abbrev)}</b> ${esc(b.region)} ${esc(b.name)}</div>
+        <small>${b.disabled ? 'not active yet' : esc(div.name)}${rec ? ' · ' + esc(rec) : ''}</small><div class="sw">${b.colors.map(c => `<i style="background:${esc(c)}"></i>`).join('')}</div></div></div>`;
+    }).join('');
+    const evs = ph === 'live' ? [] : E.buildScheduledEvents(S, SL.PHASES[ph], () => 0);
+    $('events').innerHTML = evs.length ? evs.slice(0, 400).map(e => `<div><code>${e.season + 1} · ${PHASE_NAMES[e.phase] || 'phase ' + e.phase}</code> — ${esc(describe(e))}</div>`).join('')
+      : '<div>' + (ph === 'live' ? 'The live 2027 file keeps its current state; all history events are in the past.' : 'No upcoming events.') + '</div>';
+    const notes = {
+      preseason: 'Starts before Week 1. Rosters are each team\'s opening-day roster for that season; Football GM builds the schedule when the regular season begins.',
+      regular: (S === 1982 || S === 1987) ? 'Starts at Week 1 with the real strike-shortened ' + (S + 1) + ' schedule.' : 'Starts at Week 1 with the real NFL schedule for that season.',
+      playoffs: 'The real ' + (S + 1) + ' regular season is in the books: real records, stats and standings. Hit play and the playoffs begin.',
+      afterplayoffs: 'The real ' + (S + 1) + ' season is complete: champion crowned, awards handed out, real retirements done. The draft is next.',
+      draft: 'Draft day ' + (S + 1) + ', with the real draft order. You are on the clock.',
+      live: '2027 standings and stats through Sunday, Nov 1 (Week 8), real remaining schedule.'
+    };
+    $('phaseNote').textContent = notes[ph];
+  }
+
+  async function loadFile(f) {
+    setStatus(`Reading ${f.name} (${(f.size / 1e6).toFixed(0)} MB)…`);
+    $('go').disabled = true;
+    try {
+      // .json.gz downloads are a quarter of the size; the browser decompresses them natively
+      const text = /\.gz$/i.test(f.name)
+        ? await new Response(f.stream().pipeThrough(new DecompressionStream('gzip'))).text()
+        : await f.text();
+      setStatus('Parsing…');
+      await new Promise(r => setTimeout(r, 30));
+      master = JSON.parse(text);
+      if (!master.players || !master.teams) throw new Error('This does not look like the master league file.');
+      $('fileInfo').textContent = `${f.name}: ${master.players.length.toLocaleString()} players, ${master.teams.length} franchises, ${(master.awards || []).length} award seasons.`;
+      setStatus('Master league loaded. Pick a season and generate.', 'ok');
+      $('go').disabled = false;
+      render();
+    } catch (e) {
+      master = null;
+      setStatus('Could not read file: ' + e.message, 'err');
+    }
+  }
+
+  $('drop').addEventListener('click', () => $('file').click());
+  $('file').addEventListener('change', (e) => e.target.files[0] && loadFile(e.target.files[0]));
+  $('drop').addEventListener('dragover', (e) => { e.preventDefault(); $('drop').classList.add('over'); });
+  $('drop').addEventListener('dragleave', () => $('drop').classList.remove('over'));
+  $('drop').addEventListener('drop', (e) => { e.preventDefault(); $('drop').classList.remove('over'); if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+  $('teams').addEventListener('click', (e) => {
+    const card = e.target.closest('.team.clickable');
+    if (!card) return;
+    setStatus('Building roster…');
+    setTimeout(() => {
+      try { showRoster(+card.dataset.tid); setStatus('Master league loaded. Pick a season and generate.', 'ok'); }
+      catch (err) { console.error(err); setStatus('Roster failed: ' + err.message, 'err'); }
+    }, 20);
+  });
+  $('rosterDlg').addEventListener('click', (e) => { if (e.target === $('rosterDlg')) $('rosterDlg').close(); });
+  // Event checklist: unchecked event ids for the current season/phase slice (null = keep everything).
+  let eventChoice = null;
+  function showEventChoices() {
+    const league = getSlice();
+    const key = sliceCache.key;
+    if (!eventChoice || eventChoice.key !== key) eventChoice = { key, off: new Set() };
+    const names = {};
+    const pids = new Set(league.scheduledEvents.map(e => e.info.pid ?? (e.info.nflSuspension && e.info.nflSuspension.pid)));
+    for (const p of league.players) if (pids.has(p.pid)) names[p.pid] = p.firstName + ' ' + p.lastName;
+    const groups = SL.EVENT_CATEGORIES.map(([cat, label]) => {
+      const evs = league.scheduledEvents.filter(e => SL.eventCategory(e) === cat);
+      if (!evs.length) return '';
+      const on = evs.filter(e => !eventChoice.off.has(e.id)).length;
+      return '<details><summary><input type="checkbox" data-cat="' + cat + '"' + (on === evs.length ? ' checked' : '') + '> ' + esc(label) + ' (' + on + '/' + evs.length + ')</summary>' +
+        evs.map(e => '<div><label><input type="checkbox" data-id="' + e.id + '"' + (eventChoice.off.has(e.id) ? '' : ' checked') + '> <code>' + e.season + ' · ' + (PHASE_NAMES[e.phase] || 'phase ' + e.phase) + '</code> ' + esc(SL.describeEvent(e, E, names)) + '</label></div>').join('') + '</details>';
+    }).join('');
+    const kept = league.scheduledEvents.length - eventChoice.off.size;
+    $('events').innerHTML = '<div><b>' + kept + ' of ' + league.scheduledEvents.length + ' events kept</b> <button type="button" class="small-btn" data-all="1">All</button><button type="button" class="small-btn" data-all="0">None</button></div>' + (groups || '<div>No upcoming events.</div>');
+    $('events').querySelectorAll('input[data-cat]').forEach(el => {
+      const evs = league.scheduledEvents.filter(e => SL.eventCategory(e) === el.dataset.cat);
+      const on = evs.filter(e => !eventChoice.off.has(e.id)).length;
+      el.indeterminate = on > 0 && on < evs.length;
+    });
+  }
+  $('events').addEventListener('click', (ev) => {
+    const t = ev.target;
+    if (!eventChoice || !(t instanceof HTMLElement)) return;
+    const league = getSlice();
+    const open = [...$('events').querySelectorAll('details')].map(d => d.open);
+    if (t.dataset.all !== undefined) {
+      eventChoice.off = t.dataset.all === '1' ? new Set() : new Set(league.scheduledEvents.map(e => e.id));
+    } else if (t.dataset.cat) {
+      ev.stopPropagation();
+      for (const e of league.scheduledEvents) if (SL.eventCategory(e) === t.dataset.cat) { if (t.checked) eventChoice.off.delete(e.id); else eventChoice.off.add(e.id); }
+    } else if (t.dataset.id) {
+      const id = +t.dataset.id;
+      if (t.checked) eventChoice.off.delete(id); else eventChoice.off.add(id);
+    } else return;
+    showEventChoices();
+    $('events').querySelectorAll('details').forEach((d, n) => { d.open = !!open[n]; });
+  });
+  $('chooseEv').addEventListener('click', async () => {
+    if (!master) { setStatus('Load the master file first.', 'err'); return; }
+    setStatus('Building league to list its events…');
+    await new Promise(r => setTimeout(r, 30));
+    try { showEventChoices(); setStatus('Untick any events you don\'t want, then generate.', 'ok'); }
+    catch (e) { console.error(e); setStatus('Failed: ' + e.message, 'err'); }
+  });
+
+  $('season').addEventListener('change', render);
+  $('phases').addEventListener('change', render);
+
+  $('go').addEventListener('click', async () => {
+    const S = +$('season').value, ph = phase();
+    $('go').disabled = true;
+    setStatus('Building league…');
+    await new Promise(r => setTimeout(r, 30));
+    try {
+      let league = getSlice();
+      if (eventChoice && eventChoice.key === sliceCache.key && eventChoice.off.size) {
+        league = SL.keepEvents(Object.assign({}, league), league.scheduledEvents.map(e => e.id).filter(id => !eventChoice.off.has(id)));
+      }
+      setStatus('Writing file…');
+      await new Promise(r => setTimeout(r, 30));
+      const blob = new Blob(SL.toJsonChunks(league), { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = ph === 'live' ? 'NFL_2027_Week9_FBGM.json' : `NFL_${S + 1}_${ph === 'regular' ? 'Week1' : 'Preseason'}_FBGM.json`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+      const nEv = (league.scheduledEvents || []).length;
+      setStatus(`Downloaded ${a.download} (${(blob.size / 1e6).toFixed(0)} MB, ${league.players.length.toLocaleString()} players, ${nEv} scheduled events).`, 'ok');
+    } catch (e) {
+      console.error(e);
+      setStatus('Failed: ' + e.message, 'err');
+    }
+    $('go').disabled = false;
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NFL History for Football GM</title>
+<meta name="description" content="Every NFL season from 1966 to 2027 for Football GM: real players, real ratings, real schedules, every logo and jersey. A passion project by JenZiMiBruh.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f8f6;--panel:#ffffff;--ink:#0e1f16;--muted:#5d6f64;--line:#dfe7e2;--soft:#eef3ef;
+  --turf:#0f3d22;--turf2:#062012;--accent:#1f9d55;--gold:#d4a017;
+  --team1:#0f3d22;--team2:#ffffff;--team3:#1f9d55;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b0f0d;--panel:#121915;--ink:#e8efe9;--muted:#93a39a;--line:#223029;--soft:#18211c}}
+:root[data-theme="dark"]{--bg:#0b0f0d;--panel:#121915;--ink:#e8efe9;--muted:#93a39a;--line:#223029;--soft:#18211c}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+h1,h2,h3{font-family:Oswald,Inter,sans-serif;letter-spacing:.2px;line-height:1.1;margin:0}
+h2{font-size:clamp(28px,4vw,40px);text-transform:uppercase}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--accent)}
+.muted{color:var(--muted)}
+section{padding:72px 0}
+
+/* nav */
+nav{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;gap:20px;height:58px}
+nav .brand{font-family:Oswald;font-weight:700;font-size:20px;text-decoration:none;display:flex;align-items:center;gap:10px}
+nav .brand i{display:inline-block;width:26px;height:16px;border-radius:50%;background:#7a3b16;transform:rotate(-25deg);box-shadow:inset 0 0 0 2px #4a210a}
+nav .links{margin-left:auto;display:flex;gap:18px;font-size:14px;font-weight:600}
+nav .links a{text-decoration:none;color:var(--muted)}nav .links a:hover{color:var(--ink)}
+@media(max-width:700px){nav .links a:not(.cta){display:none}}
+.cta{background:var(--accent);color:#fff!important;padding:8px 14px;border-radius:999px}
+
+/* hero */
+.hero{position:relative;overflow:hidden;background:radial-gradient(1200px 500px at 80% -10%,#1b6b3c 0,transparent 60%),linear-gradient(180deg,var(--turf),var(--turf2));color:#fff;padding:90px 0 70px}
+.hero .yard{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 119px,rgba(255,255,255,.07) 119px 121px);pointer-events:none}
+.hero .wall{position:absolute;right:-40px;top:0;bottom:0;width:58%;display:grid;grid-template-columns:repeat(8,1fr);gap:10px;padding:20px;opacity:.55;transform:rotate(-8deg) scale(1.15);mask-image:linear-gradient(90deg,transparent,#000 40%)}
+.hero .wall svg{width:100%;height:auto;animation:float 6s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-6px)}}
+@media(prefers-reduced-motion:reduce){.hero .wall svg{animation:none}}
+.hero .inner{position:relative;max-width:640px}
+.hero h1{font-size:clamp(52px,9vw,104px);text-transform:uppercase;line-height:.92}
+.hero h1 span{color:#7fe0a5}
+.hero .sub{font-size:clamp(18px,2.2vw,22px);color:#d6eadc;margin:18px 0 6px}
+.hero .by{font-size:14px;color:#a8d5b7;margin-bottom:28px}
+.hero .by b{color:#fff}
+.btns{display:flex;flex-wrap:wrap;gap:12px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 20px;border-radius:12px;font-weight:700;text-decoration:none;border:0;cursor:pointer;font-size:15px}
+.btn.primary{background:#fff;color:var(--turf)}
+.btn.ghost{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:46px;max-width:640px}
+.stats div{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:14px}
+.stats b{display:block;font-family:Oswald;font-size:30px;line-height:1}
+.stats span{font-size:12px;color:#b9dcc5}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}.hero .wall{width:100%;opacity:.18}}
+
+/* story */
+.story{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
+@media(max-width:860px){.story{grid-template-columns:1fr}}
+.story p{font-size:18px;margin:0 0 16px}
+.story .big{font-family:Oswald;font-size:clamp(34px,5vw,54px);text-transform:uppercase;line-height:1;margin:22px 0}
+.compare{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.compare table{width:100%;border-collapse:collapse;font-size:15px}
+.compare th,.compare td{padding:12px 16px;border-bottom:1px solid var(--line);text-align:center}
+.compare th:first-child,.compare td:first-child{text-align:left}
+.compare thead th{background:var(--soft);font-size:12px;letter-spacing:1px;text-transform:uppercase}
+.compare td.y{color:var(--accent);font-weight:800}.compare td.n{color:#c0392b;font-weight:800}
+
+/* team picker */
+.picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:12px;margin-top:28px}
+.tp{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 8px 12px;text-align:center;cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s;position:relative;overflow:hidden}
+.tp:hover,.tp:focus-visible{transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,.12);border-color:var(--c);outline:none}
+.tp::before{content:"";position:absolute;inset:0 0 auto;height:5px;background:var(--c)}
+.tp img{width:64px;height:64px;object-fit:contain}
+.tp b{display:block;font-size:13px;margin-top:6px}
+.tp small{color:var(--muted);font-size:11px}
+
+/* team view */
+#team{display:none}
+#team.on{display:block}
+.thead{background:linear-gradient(120deg,var(--team1) 0%,color-mix(in srgb,var(--team1) 70%,#000) 100%);color:#fff;border-radius:22px;padding:28px;display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center;position:relative;overflow:hidden}
+.thead::after{content:"";position:absolute;right:0;top:0;bottom:0;width:10px;background:var(--teamc)}
+.thead img{width:110px;height:110px;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(0,0,0,.35));position:relative;z-index:1}
+.thead h2{font-size:clamp(30px,5vw,50px)}
+.thead .meta{opacity:.85;font-size:14px;margin-top:6px}
+.thead .back{position:relative;z-index:1}
+.kpis{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.kpi{background:rgba(255,255,255,.14);border-radius:12px;padding:8px 12px;font-size:13px}
+.kpi b{font-family:Oswald;font-size:22px;display:block;line-height:1}
+@media(max-width:700px){.thead{grid-template-columns:1fr;text-align:left}.thead img{width:80px;height:80px}}
+
+.block{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:24px;margin-top:20px}
+.block h3{font-size:22px;text-transform:uppercase;margin-bottom:4px}
+.block .hint{font-size:14px;color:var(--muted);margin:0 0 18px}
+
+/* looks timeline */
+.looks{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
+.look{flex:0 0 200px;scroll-snap-align:start;background:var(--soft);border-radius:16px;padding:16px;display:flex;flex-direction:column;align-items:center;text-align:center;border-top:6px solid var(--c)}
+.look .pair{display:flex;align-items:center;justify-content:center;gap:10px;height:104px}
+.look .pair img{width:92px;height:92px;object-fit:contain;background:radial-gradient(circle,rgba(255,255,255,.10),transparent 70%);filter:drop-shadow(0 2px 6px rgba(0,0,0,.35))}
+.look .pair svg{width:78px;height:auto}
+.look .yrs{font-family:Oswald;font-size:20px;margin-top:10px}
+.look .nm{font-size:13px;color:var(--muted);min-height:20px}
+.sw{display:flex;gap:4px;margin-top:8px}.sw i{width:18px;height:10px;border-radius:3px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+
+/* seasons chart */
+.chart{position:relative}
+.bars{display:flex;align-items:flex-end;gap:2px;height:180px;border-bottom:1px solid var(--line);position:relative}
+.bars .b{flex:1;min-width:3px;background:color-mix(in srgb,var(--muted) 55%,transparent);border-radius:3px 3px 0 0;position:relative;cursor:pointer;opacity:.85;transition:opacity .1s}
+.bars .b.po{background:var(--teamc)}
+.bars .b:hover,.bars .b.sel{opacity:1;outline:2px solid var(--ink)}
+.bars .b.ch::after{content:"🏆";position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:14px}
+.bars .half{position:absolute;left:0;right:0;border-top:1px dashed var(--muted);opacity:.5;pointer-events:none}
+.axis{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:6px}
+.legend{display:flex;gap:16px;font-size:13px;color:var(--muted);margin-top:10px;flex-wrap:wrap}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:6px}
+.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);padding:8px 10px;border-radius:10px;font-size:13px;z-index:50;display:none;max-width:240px}
+
+/* season roster */
+.seasonbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.seasonbar input{flex:1;min-width:200px;accent-color:var(--team3)}
+.seasonbar .yr{font-family:Oswald;font-size:34px;min-width:90px}
+.seasonbar .rec{font-size:15px;color:var(--muted)}
+.roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:16px}
+.pc{display:flex;gap:12px;align-items:center;background:var(--soft);border-radius:14px;padding:12px;cursor:pointer;border:1px solid transparent}
+.pc:hover{border-color:var(--team3)}
+.ovr{flex:0 0 52px;height:52px;border-radius:12px;display:grid;place-items:center;font-family:Oswald;font-size:24px;color:#fff}
+.pc b{display:block;font-size:15px}
+.pc small{color:var(--muted);font-size:12.5px}
+
+/* legends table */
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.tools input,.tools select{background:var(--soft);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:9px 12px;font:inherit;font-size:14px}
+.tools input{flex:1;min-width:180px}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap}
+.tbl td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr{cursor:pointer}.tbl tbody tr:hover{background:var(--soft)}
+.tbl .num{text-align:right;font-variant-numeric:tabular-nums}
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--soft);margin:1px 2px 1px 0;white-space:nowrap}
+.badge.hof{background:var(--gold);color:#2b1d00}
+.spark{display:block}
+@media(max-width:700px){.hide-sm{display:none}}
+
+/* retired */
+.retired{display:flex;gap:10px;flex-wrap:wrap}
+.rj{display:flex;align-items:center;gap:10px;background:var(--soft);border-radius:14px;padding:8px 14px 8px 8px}
+.rj svg{width:40px;height:auto}
+.rj b{font-size:14px;display:block}.rj small{color:var(--muted);font-size:12px}
+
+/* player drawer */
+.drawer{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:40;align-items:flex-end;justify-content:center}
+.drawer.on{display:flex}
+.drawer .card{background:var(--panel);width:min(760px,100%);max-height:88vh;overflow:auto;border-radius:22px 22px 0 0;padding:24px}
+@media(min-width:800px){.drawer{align-items:center}.drawer .card{border-radius:22px}}
+.drawer .top{display:flex;gap:16px;align-items:center}
+.drawer h3{font-size:30px}
+.close{margin-left:auto;background:var(--soft);border:0;border-radius:50%;width:38px;height:38px;font-size:20px;cursor:pointer;color:var(--ink)}
+
+/* draft classes */
+.dtabs{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 14px}
+.dtab{background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:9px 18px;font:600 15px Inter;cursor:pointer}
+.dtab.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.dfilters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.dfilters button{background:var(--soft);border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:6px 10px;font:600 12px Inter;cursor:pointer}
+.dfilters button.on{color:var(--ink);border-color:var(--ink)}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.pros{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;position:relative;transition:transform .15s,box-shadow .15s}
+.pros:hover{transform:translateY(-3px);box-shadow:0 12px 26px rgba(0,0,0,.15)}
+.pros .ph{height:138px;background:linear-gradient(160deg,var(--soft),var(--panel));display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+.pros .ph img{height:132px;width:auto;object-fit:cover}
+.pros .rk{position:absolute;top:10px;left:10px;background:var(--ink);color:var(--bg);font:700 13px Oswald;border-radius:8px;padding:3px 8px;z-index:1}
+.pros .ps{position:absolute;top:10px;right:10px;background:var(--accent);color:#fff;font:700 12px Inter;border-radius:8px;padding:3px 8px;z-index:1}
+.pros .bd{padding:12px 14px 14px}
+.pros b{font-size:15px;display:block}
+.pros small{color:var(--muted);font-size:12.5px;display:block;min-height:17px}
+.bar{height:7px;border-radius:4px;background:var(--soft);margin-top:7px;position:relative;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px}
+.barlab{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:8px}
+.more{margin:18px auto 0;display:block}
+
+/* features */
+.feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:28px}
+.f{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px}
+.f .ico{font-size:28px}
+.f h3{font-size:22px;margin:10px 0 6px;text-transform:uppercase}
+.f p{margin:0;color:var(--muted);font-size:15px}
+
+/* paths */
+.paths{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:28px}
+.path{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:24px;display:flex;flex-direction:column}
+.path .tag{font-size:12px;font-weight:800;letter-spacing:2px;color:var(--accent)}
+.path h3{font-size:26px;margin:6px 0 10px;text-transform:uppercase}
+.path ol{padding-left:20px;margin:0 0 16px;color:var(--muted);font-size:15px}
+.path .btn{margin-top:auto;background:var(--turf);color:#fff;justify-content:center}
+
+footer{background:var(--turf2);color:#cfe7d6;padding:48px 0;margin-top:40px}
+footer .wrap{display:flex;gap:30px;flex-wrap:wrap;justify-content:space-between}
+footer b{color:#fff}
+footer small{display:block;opacity:.7;margin-top:8px;max-width:520px}
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <a class="brand" href="#top"><i></i>NFL History</a>
+  <div class="links"><a href="#story">Why</a><a href="#teams">Your team</a><a href="#draft">Drafts</a><a href="#mod">The mod</a><a href="guide.html">How to play</a><a class="cta" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest">Download</a></div>
+</div></nav>
+
+<header class="hero" id="top">
+  <div class="yard"></div>
+  <div class="wall" id="wall" aria-hidden="true"></div>
+  <div class="wrap"><div class="inner">
+    <div class="eyebrow" style="color:#7fe0a5">For Football GM</div>
+    <h1>NFL <span>History</span></h1>
+    <p class="sub">Every season from 1966 to today. Real players, real ratings, real schedules, and every logo and jersey, switching on the real date.</p>
+    <p class="by">A passion project by <b>JenZiMiBruh</b></p>
+    <div class="btns">
+      <a class="btn primary" href="#teams">Explore your team's history →</a>
+      <a class="btn ghost" href="guide.html">How to play →</a>
+    </div>
+    <div class="stats">
+      <div><b id="sPlayers">28,700+</b><span>real players</span></div>
+      <div><b>61</b><span>seasons</span></div>
+      <div><b id="sLooks">146</b><span>logo &amp; jersey eras</span></div>
+      <div><b>121</b><span>real events</span></div>
+    </div>
+  </div></div>
+</header>
+
+<section id="story"><div class="wrap story">
+  <div>
+    <div class="eyebrow">Why this exists</div>
+    <p style="margin-top:14px">I've played Football GM since 2020. Basketball GM is what got me into NBA history and stats. It has real players, real ratings, portraits, logos and jersey history going back decades. You can start in 1985 and see if you'd have drafted Jordan.</p>
+    <p>Football GM had none of that.</p>
+    <div class="big">So, I changed that.</div>
+    <p>Every NFL season since 1966, rebuilt from real data. Start in any year. See if the Patriots can really go 19-0. See what happens if Barry Sanders doesn't retire.</p>
+    <p class="muted" style="font-size:15px">— JenZiMiBruh</p>
+  </div>
+  <div class="compare">
+    <table>
+      <thead><tr><th></th><th>Stock FBGM</th><th>NFL History</th></tr></thead>
+      <tbody>
+        <tr><td>Real players &amp; stats since 1966</td><td class="n">✕</td><td class="y">✓</td></tr>
+        <tr><td>Ratings built from real careers</td><td class="n">✕</td><td class="y">✓</td></tr>
+        <tr><td>Logos &amp; jerseys by era</td><td class="n">✕</td><td class="y">✓</td></tr>
+        <tr><td>Real schedules, game for game</td><td class="n">✕</td><td class="y">✓</td></tr>
+        <tr><td>Real drafts</td><td class="n">✕</td><td class="y">✓</td></tr>
+        <tr><td>Retirements, comebacks, suspensions</td><td class="n">✕</td><td class="y">✓</td></tr>
+        <tr><td>Era-accurate game sim</td><td class="n">✕</td><td class="y">✓</td></tr>
+        <tr><td>Pick any season to start</td><td class="n">✕</td><td class="y">✓</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div></section>
+
+<section id="teams" style="background:var(--soft)"><div class="wrap">
+  <div id="pickerView">
+    <div class="eyebrow">Your team, 1966 to today</div>
+    <h2>Pick a team</h2>
+    <p class="muted" style="max-width:640px">Every logo and jersey they wore, every season's record, and every notable player with the rating they have in the league, season by season. All of it straight from the league file.</p>
+    <div class="picker" id="picker"></div>
+  </div>
+  <div id="team"></div>
+</div></section>
+
+<section id="draft"><div class="wrap">
+  <div class="eyebrow">Sim past today</div>
+  <h2>The real next three drafts</h2>
+  <p class="muted" style="max-width:700px">1,020 real college players, ranked from their production, recruiting pedigree and where their position really goes. The top of 2027 follows ESPN's big board. Draft them in your league.</p>
+  <div class="dtabs" id="dtabs"></div>
+  <div class="dfilters" id="dfilters"></div>
+  <div class="dgrid" id="dgrid"></div>
+  <button class="btn ghost more" id="dmore" style="color:var(--ink);border-color:var(--line)">Show more</button>
+</div></section>
+
+<section id="mod"><div class="wrap">
+  <div class="eyebrow">The mod · settings for everything</div>
+  <h2>History that behaves like history</h2>
+  <p class="muted" style="max-width:680px">The league file works in stock Football GM. The mod keeps it real after day one, and every piece is a setting you can turn off.</p>
+  <div class="feat">
+    <div class="f"><div class="ico">📈</div><h3>RPD</h3><p>Real Player Determinism. Careers follow the real one: Jerry Rice plays into his 40s, Barry Sanders walks away. One slider from random to exactly real.</p></div>
+    <div class="f"><div class="ico">🗓️</div><h3>Real schedules</h3><p>From 1978 on, every season plays its real schedule: same opponents, same weeks, same byes. Strike seasons included.</p></div>
+    <div class="f"><div class="ico">🎯</div><h3>Real drafts</h3><p>Elway, Manning, Stafford. The real players go to the teams that really took them.</p></div>
+    <div class="f"><div class="ico">📰</div><h3>121 real events</h3><p>Retirements, comebacks to the real team, suspensions for the real number of games, each with the real reason.</p></div>
+    <div class="f"><div class="ico">🔁</div><h3>Rosters &amp; moves</h3><p>Historical rosters every preseason, mid-season trades on the real week, real jersey numbers, numbers retired when they really were.</p></div>
+    <div class="f"><div class="ico">⚙️</div><h3>Era calibration</h3><p>Seven sim factors retuned every season, measured against a full 60-season sim. 1972 plays like 1972.</p></div>
+    <div class="f"><div class="ico">🎨</div><h3>Your team's colors</h3><p>The whole interface takes your team's colors, and changes when theirs do.</p></div>
+    <div class="f"><div class="ico">🕹️</div><h3>Pick any season</h3><p>Choose the year, the phase and which events you want, right in New League.</p></div>
+  </div>
+</div></section>
+
+<section id="play" style="background:var(--soft)"><div class="wrap">
+  <div class="eyebrow">Play it</div>
+  <h2>Pick your path</h2>
+  <div class="paths">
+    <div class="path"><span class="tag">⚡ QUICK START</span><h3>This season</h3><ol><li>Download the master league file</li><li>Football GM → New League → Upload league file</li></ol><p class="muted" style="font-size:14px">Works on phone and computer, no install.</p><a class="btn" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest">Download</a></div>
+    <div class="path"><span class="tag">📅 ANY SEASON</span><h3>Pick a year</h3><ol><li>Open the season selector</li><li>Load the master file, pick a season and phase</li><li>Upload your league to Football GM</li></ol><p class="muted" style="font-size:14px">Runs in any browser, offline.</p><a class="btn" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest">Get the selector</a></div>
+    <div class="path"><span class="tag">🏈 FULL EXPERIENCE</span><h3>With the mod</h3><ol><li>Download the release zip</li><li>Double-click Install_and_Play</li><li>Play on your computer, or your phone over Wi-Fi</li></ol><p class="muted" style="font-size:14px">The first run sets up in about 5–10 minutes.</p><a class="btn" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/tree/main/mod">Install guide</a></div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <div><b>NFL History for Football GM</b><br>A passion project by <b>JenZiMiBruh</b>
+    <small>Team names and logos belong to the NFL and its teams. Unofficial fan project, not affiliated with or endorsed by the NFL or Football GM. Data: nflverse, Pro-Football-Reference via the Internet Archive, Wikipedia, OverTheCap.</small>
+  </div>
+  <div><a href="https://github.com/JenZiMiBruh/nfl-history-fbgm">GitHub</a><br><br><b>Thank you, dumbmatter.</b></div>
+</div></footer>
+
+<div class="drawer" id="drawer" role="dialog" aria-modal="true"><div class="card" id="dcard"></div></div>
+<div class="tip" id="tip"></div>
+
+<script src="data/all.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// A jersey in a team's colors: body, numbers, trim.
+function jersey(c, num = '', w = 80) {
+  const [body, numc, trim] = c || ['#555', '#fff', '#999'];
+  return `<svg viewBox="0 0 100 106" width="${w}" aria-hidden="true">
+    <path d="M30 2 L40 8 Q50 13 60 8 L70 2 L98 15 L90 41 L79 37 L79 104 L21 104 L21 37 L10 41 L2 15 Z" fill="${body}" stroke="rgba(0,0,0,.25)" stroke-width="1.2" stroke-linejoin="round"/>
+    <path d="M2 15 L30 2 M70 2 L98 15" stroke="${trim}" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M90 41 L79 37 M10 41 L21 37" stroke="${trim}" stroke-width="5" stroke-linecap="round"/>
+    <path d="M40 8 Q50 13 60 8" stroke="${trim}" stroke-width="3" fill="none"/>
+    ${num !== '' ? `<text x="50" y="78" text-anchor="middle" font-family="Oswald,Arial Black,sans-serif" font-weight="700" font-size="40" fill="${numc}" stroke="${trim}" stroke-width="1.2" paint-order="stroke">${esc(num)}</text>` : ''}
+  </svg>`;
+}
+const ovrColor = o => o >= 80 ? '#1f9d55' : o >= 70 ? '#4a9e2f' : o >= 60 ? '#a3a32a' : o >= 50 ? '#c98b2b' : '#b5523b';
+const range = (a, b) => a === b ? `${a}` : `${a}–${b === 2026 ? 'now' : b}`;
+
+let TEAMS = [];
+const cache = {};
+
+async function init() {
+  TEAMS = window.SITE_DATA ? window.SITE_DATA.teams : await (await fetch('data/teams.json')).json();
+  $('#sLooks').textContent = TEAMS.reduce((n, t) => n + t.looks, 0);
+  $('#picker').innerHTML = TEAMS.map(t => `
+    <div class="tp" tabindex="0" style="--c:${t.colors[0]}" data-tid="${t.tid}">
+      <img src="${t.logo}" alt="" loading="lazy"><b>${esc(t.region)} ${esc(t.name)}</b><small>${t.looks} looks${t.champs ? ` · ${'🏆'.repeat(Math.min(t.champs, 6))}` : ''}</small>
+    </div>`).join('');
+  $('#picker').addEventListener('click', e => { const el = e.target.closest('.tp'); if (el) location.hash = 'team/' + el.dataset.tid; });
+  $('#picker').addEventListener('keydown', e => { if (e.key === 'Enter') { const el = e.target.closest('.tp'); if (el) location.hash = 'team/' + el.dataset.tid; } });
+  // Hero wall: one jersey per look from across the league.
+  const all = [];
+  for (const t of TEAMS) all.push(t.colors);
+  $('#wall').innerHTML = Array.from({ length: 48 }, (_, i) => `<div style="animation-delay:${(i % 7) * .4}s">${jersey(all[(i * 5) % all.length])}</div>`).join('');
+  initDraft();
+  route();
+}
+
+// Draft classes
+let DRAFT = null, dYear = null, dPos = '', dShow = 24;
+async function initDraft() {
+  DRAFT = window.SITE_DATA && window.SITE_DATA.draft ? window.SITE_DATA.draft : await (await fetch('data/draft.json')).json();
+  const years = Object.keys(DRAFT).sort();
+  const qs = new URLSearchParams(location.search);
+  dYear = qs.get('dyear') && DRAFT[qs.get('dyear')] ? qs.get('dyear') : years[0];
+  dPos = qs.get('dpos') || '';
+  $('#dtabs').innerHTML = years.map(y => `<button class="dtab" data-y="${y}">${y} draft</button>`).join('');
+  $('#dfilters').innerHTML = ['', 'QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S'].map(p => `<button data-p="${p}">${p || 'All'}</button>`).join('');
+  $('#dtabs').onclick = e => { const b = e.target.closest('.dtab'); if (b) { dYear = b.dataset.y; dShow = 24; drawDraft(); } };
+  $('#dfilters').onclick = e => { const b = e.target.closest('button'); if (b) { dPos = b.dataset.p; dShow = 24; drawDraft(); } };
+  $('#dmore').onclick = () => { dShow += 48; drawDraft(); };
+  drawDraft();
+}
+function drawDraft() {
+  document.querySelectorAll('.dtab').forEach(b => b.classList.toggle('on', b.dataset.y === dYear));
+  document.querySelectorAll('#dfilters button').forEach(b => b.classList.toggle('on', b.dataset.p === dPos));
+  const list = DRAFT[dYear].filter(p => !dPos || p.pos === dPos);
+  const inch = v => v ? `${Math.floor(v / 12)}'${v % 12}"` : '';
+  $('#dgrid').innerHTML = list.slice(0, dShow).map(p => `
+    <div class="pros"><div class="rk">#${p.rank}</div><div class="ps">${p.pos}</div>
+      <div class="ph">${p.img ? `<img src="${p.img}" alt="" loading="lazy" onerror="this.remove()">` : ''}</div>
+      <div class="bd"><b>${esc(p.n)}</b><small>${esc(p.college)}</small><small>${inch(p.hgt)} · ${p.wgt || ''} lbs${p.home ? ' · ' + esc(p.home) : ''}</small>
+        <div class="barlab"><span>Rating ${p.ovr}</span><span>Upside ${p.pot}</span></div>
+        <div class="bar"><i style="width:${p.pot}%;background:color-mix(in srgb,var(--accent) 35%,transparent)"></i><i style="width:${p.ovr}%;background:var(--accent)"></i></div>
+      </div></div>`).join('');
+  $('#dmore').style.display = list.length > dShow ? '' : 'none';
+}
+
+async function loadTeam(tid) {
+  if (!cache[tid]) cache[tid] = window.SITE_DATA ? window.SITE_DATA.team[tid] : await (await fetch(`data/team-${tid}.json`)).json();
+  return cache[tid];
+}
+
+window.addEventListener('hashchange', route);
+async function route() {
+  const m = location.hash.match(/^#team\/(\d+)/);
+  if (!m) { $('#team').classList.remove('on'); $('#pickerView').style.display = ''; return; }
+  const T = await loadTeam(+m[1]);
+  renderTeam(T);
+  $('#pickerView').style.display = 'none';
+  $('#team').classList.add('on');
+  document.getElementById('teams').scrollIntoView({ behavior: 'smooth' });
+}
+
+function renderTeam(T) {
+  const r = document.documentElement.style;
+  const [c1, c2, c3] = T.colors;
+  const dark = hex => { const n = parseInt(hex.slice(1), 16); return ((n >> 16) * 299 + ((n >> 8 & 255) * 587) + ((n & 255) * 114)) / 1000 < 150; };
+  const team1 = dark(c1) ? c1 : (dark(c3) ? c3 : '#1d2b24');
+  const team3 = c3 && c3.toLowerCase() !== '#ffffff' ? c3 : (c2.toLowerCase() !== '#ffffff' ? c2 : '#1f9d55');
+  r.setProperty('--team1', team1); r.setProperty('--team3', team3);
+  const vivid = [c1, c3, c2].find(c => { const n = parseInt(c.slice(1), 16), R = n >> 16, G = n >> 8 & 255, B = n & 255; return Math.max(R, G, B) - Math.min(R, G, B) > 60 && (R * 299 + G * 587 + B * 114) / 1000 > 55; }) || '#1f9d55';
+  r.setProperty('--teamc', vivid);
+
+  const W = T.seasons.reduce((n, s) => n + s.w, 0), L = T.seasons.reduce((n, s) => n + s.l, 0);
+  const po = T.seasons.filter(s => s.po >= 0).length;
+  const players = T.players;
+  const byId = Object.fromEntries(players.map(p => [p.id, p]));
+  const years = T.seasons.map(s => s.y);
+
+  $('#team').innerHTML = `
+    <div class="thead">
+      <img src="${T.logo}" alt="">
+      <div style="position:relative;z-index:1">
+        <div class="eyebrow" style="color:rgba(255,255,255,.75)">${T.looks.length} looks · since ${T.looks[0].from}</div>
+        <h2>${esc(T.region)} ${esc(T.name)}</h2>
+        <div class="kpis">
+          <div class="kpi"><b>${W}–${L}</b>record since ${T.seasons[0]?.y}</div>
+          <div class="kpi"><b>${po}</b>playoff seasons</div>
+          <div class="kpi"><b>${T.champs.length}</b>${T.champs.length === 1 ? 'title' : 'titles'}${T.champs.length ? ' · ' + T.champs.join(', ') : ''}</div>
+          <div class="kpi"><b>${T.retired.length}</b>retired numbers</div>
+        </div>
+      </div>
+      <button class="btn ghost back" onclick="location.hash='teams'">← All teams</button>
+    </div>
+
+    <div class="block">
+      <h3>Every look</h3>
+      <p class="hint">Logo and jersey for each era. In the game these switch on the real date as you sim.</p>
+      <div class="looks">${T.looks.map(l => `
+        <div class="look" style="--c:${l.colors[0]}">
+          <div class="pair">${l.logo ? `<img src="${l.logo}" alt="">` : ''}${jersey(l.colors, num(T, l))}</div>
+          <div class="yrs">${range(l.from, l.to)}</div>
+          <div class="nm">${esc(l.region)} ${esc(l.name)}</div>
+          <div class="sw">${l.colors.map(c => `<i style="background:${c}"></i>`).join('')}</div>
+        </div>`).join('')}</div>
+    </div>
+
+    <div class="block chart">
+      <h3>Season by season</h3>
+      <p class="hint">Win percentage every season. Click a bar to see that year's best players below.</p>
+      <div class="bars" id="bars"><div class="half" style="bottom:50%"></div>${T.seasons.map(s => {
+        const pct = (s.w + s.t / 2) / Math.max(1, s.w + s.l + s.t);
+        return `<div class="b ${s.po >= 0 ? 'po' : ''} ${T.champs.includes(s.y) ? 'ch' : ''}" data-y="${s.y}" style="height:${Math.max(3, pct * 100)}%"></div>`;
+      }).join('')}</div>
+      <div class="axis"><span>${years[0]}</span><span>${years[Math.floor(years.length / 2)]}</span><span>${years[years.length - 1]}</span></div>
+      <div class="legend"><span><i style="background:color-mix(in srgb,var(--muted) 55%,transparent)"></i>Missed the playoffs</span><span><i style="background:var(--teamc)"></i>Made the playoffs</span><span>🏆 Champions</span><span>- - .500</span></div>
+    </div>
+
+    <div class="block">
+      <h3>Best players by season</h3>
+      <p class="hint">Their rating in the league that season, built from what they really did.</p>
+      <div class="seasonbar">
+        <div class="yr" id="syr"></div>
+        <input type="range" id="srange" min="0" max="${years.length - 1}" value="${defaultIdx(T)}" aria-label="Season">
+        <div class="rec" id="srec"></div>
+      </div>
+      <div class="roster" id="roster"></div>
+    </div>
+
+    <div class="block">
+      <h3>Franchise legends</h3>
+      <p class="hint">Everyone notable who played here, ranked by career value with the team. Tap a player for his season-by-season ratings.</p>
+      <div class="tools">
+        <input id="q" placeholder="Search players…" aria-label="Search players">
+        <select id="pos" aria-label="Position"><option value="">All positions</option>${['QB','RB','WR','TE','OL','DL','LB','CB','S','K','P'].map(p => `<option>${p}</option>`).join('')}</select>
+        <select id="sort" aria-label="Sort"><option value="av">Career value</option><option value="peak">Peak rating</option><option value="yrs">Seasons</option></select>
+      </div>
+      <table class="tbl"><thead><tr><th>Player</th><th>Pos</th><th class="hide-sm">Years</th><th class="num">Peak</th><th class="hide-sm">Rating by season</th><th class="hide-sm">Honors</th></tr></thead><tbody id="legends"></tbody></table>
+    </div>
+
+    ${T.retired.length ? `<div class="block"><h3>Retired numbers</h3><p class="hint">With the mod, numbers retired after your start season are retired when they really were.</p>
+      <div class="retired">${T.retired.sort((a, b) => a.season - b.season).map(x => `<div class="rj">${jersey(T.colors, x.num, 40)}<div><b>${esc(x.text)}</b><small>#${esc(x.num)} · retired ${x.season || ''}</small></div></div>`).join('')}</div></div>` : ''}
+  `;
+
+  // season roster slider
+  const sr = $('#srange');
+  const showSeason = i => {
+    const y = years[i], s = T.seasons[i];
+    $('#syr').textContent = y;
+    $('#srec').innerHTML = `${esc(s.n)} · ${s.w}–${s.l}${s.t ? '–' + s.t : ''}${T.champs.includes(y) ? ' · 🏆 Champions' : s.po >= 0 ? ' · Playoffs' : ''}`;
+    const ids = T.seasonBest[y] || [];
+    $('#roster').innerHTML = ids.map(id => {
+      const p = byId[id]; const x = p.s.find(r => r[0] === y);
+      return `<div class="pc" data-id="${id}"><div class="ovr" style="background:${ovrColor(x[1])}">${x[1]}</div><div><b>${esc(p.n)}</b><small>${x[2]}${x[4] ? ' · #' + esc(x[4]) : ''} · ${statText(x)}</small></div></div>`;
+    }).join('') || '<p class="muted">No rated players this season.</p>';
+    document.querySelectorAll('.bars .b').forEach(b => b.classList.toggle('sel', +b.dataset.y === y));
+  };
+  sr.oninput = () => showSeason(+sr.value);
+  showSeason(+sr.value);
+  $('#roster').onclick = e => { const el = e.target.closest('.pc'); if (el) openPlayer(byId[el.dataset.id], T); };
+
+  // bars: tooltip + select
+  const tip = $('#tip');
+  $('#bars').addEventListener('mousemove', e => {
+    const b = e.target.closest('.b'); if (!b) { tip.style.display = 'none'; return; }
+    const s = T.seasons.find(x => x.y === +b.dataset.y);
+    tip.innerHTML = `<b>${s.y}</b> · ${s.w}–${s.l}${s.t ? '–' + s.t : ''}<br>${esc(s.n)}${T.champs.includes(s.y) ? '<br>🏆 Champions' : s.po >= 0 ? '<br>Playoffs' : ''}`;
+    tip.style.display = 'block'; tip.style.left = Math.min(e.clientX + 14, innerWidth - 250) + 'px'; tip.style.top = e.clientY + 14 + 'px';
+  });
+  $('#bars').addEventListener('mouseleave', () => tip.style.display = 'none');
+  $('#bars').addEventListener('click', e => {
+    const b = e.target.closest('.b'); if (!b) return;
+    sr.value = years.indexOf(+b.dataset.y); showSeason(+sr.value);
+    $('#roster').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+
+  // legends table
+  const draw = () => {
+    const q = $('#q').value.toLowerCase(), pos = $('#pos').value, sort = $('#sort').value;
+    const list = players.filter(p => (!q || p.n.toLowerCase().includes(q)) && (!pos || p.pos === pos))
+      .sort((a, b) => sort === 'peak' ? b.peak - a.peak : sort === 'yrs' ? b.s.length - a.s.length : b.av - a.av).slice(0, 60);
+    $('#legends').innerHTML = list.map(p => {
+      const ys = p.s.map(x => x[0]);
+      return `<tr data-id="${p.id}"><td><b>${esc(p.n)}</b></td><td>${p.pos}</td><td class="hide-sm">${range(Math.min(...ys), Math.max(...ys))}</td>
+        <td class="num"><b style="color:${ovrColor(p.peak)}">${p.peak}</b></td><td class="hide-sm">${spark(p.s)}</td>
+        <td class="hide-sm">${p.hof ? '<span class="badge hof">Hall of Fame</span>' : ''}${Object.entries(p.aw).map(([k, v]) => `<span class="badge">${v > 1 ? v + '× ' : ''}${k}</span>`).join('')}</td></tr>`;
+    }).join('');
+  };
+  ['q', 'pos', 'sort'].forEach(id => $('#' + id).addEventListener('input', draw));
+  draw();
+  $('#legends').onclick = e => { const el = e.target.closest('tr'); if (el) openPlayer(byId[el.dataset.id], T); };
+}
+
+// Start on the last complete season (the current one is still in progress).
+const defaultIdx = T => { const n = T.seasons.length, last = T.seasons[n - 1]; return last && last.w + last.l + last.t < 14 && n > 1 ? n - 2 : n - 1; };
+
+// The jersey number to show on a look: the franchise's best player's number in that era.
+function num(T, l) {
+  let best = null;
+  for (const p of T.players) for (const x of p.s) if (x[0] >= l.from && x[0] <= l.to && x[4] && (!best || x[1] > best[1])) best = x;
+  return best ? best[4] : '';
+}
+const statText = x => { if (x[2] === 'OL') return x[3] + ' games'; const out = []; for (let i = 5; i < x.length; i += 2) out.push(`${Number(x[i]).toLocaleString()} ${x[i + 1]}`); return out.join(' · '); };
+
+function spark(s, w = 140, h = 30) {
+  const pts = s.map(x => x[1]); if (pts.length < 2) return `<svg class="spark" width="${w}" height="${h}"><circle cx="4" cy="${h - (pts[0] - 30) / 60 * h}" r="3" fill="var(--team3)"/></svg>`;
+  const xs = i => 3 + i * (w - 6) / (pts.length - 1), ys = v => h - 3 - (Math.max(30, Math.min(90, v)) - 30) / 60 * (h - 6);
+  return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><polyline fill="none" stroke="var(--teamc)" stroke-width="2" stroke-linejoin="round" points="${pts.map((v, i) => xs(i) + ',' + ys(v)).join(' ')}"/><circle cx="${xs(pts.indexOf(Math.max(...pts)))}" cy="${ys(Math.max(...pts))}" r="3" fill="var(--team1)"/></svg>`;
+}
+
+function openPlayer(p, T) {
+  const W = 680, H = 200, pad = 30, s = p.s;
+  const xs = i => pad + i * (W - pad * 2) / Math.max(1, s.length - 1), ys = v => H - pad - (Math.max(30, Math.min(90, v)) - 30) / 60 * (H - pad * 2);
+  const grid = [40, 50, 60, 70, 80, 90].map(v => `<line x1="${pad}" x2="${W - pad}" y1="${ys(v)}" y2="${ys(v)}" stroke="var(--line)"/><text x="${pad - 6}" y="${ys(v) + 4}" text-anchor="end" font-size="11" fill="var(--muted)">${v}</text>`).join('');
+  const chart = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Rating by season">${grid}
+    <polyline fill="none" stroke="var(--teamc)" stroke-width="3" stroke-linejoin="round" points="${s.map((x, i) => xs(i) + ',' + ys(x[1])).join(' ')}"/>
+    ${s.map((x, i) => `<circle cx="${xs(i)}" cy="${ys(x[1])}" r="4.5" fill="${ovrColor(x[1])}" stroke="var(--panel)" stroke-width="2"><title>${x[0]}: ${x[1]}</title></circle>`).join('')}
+    ${s.map((x, i) => (s.length < 14 || i % 2 === 0) ? `<text x="${xs(i)}" y="${H - 8}" text-anchor="middle" font-size="11" fill="var(--muted)">${String(x[0]).slice(2)}</text>` : '').join('')}
+  </svg>`;
+  const lastNum = [...s].reverse().find(x => x[4]);
+  $('#dcard').innerHTML = `
+    <div class="top">${jersey(T.colors, lastNum ? lastNum[4] : '', 64)}
+      <div><div class="eyebrow">${esc(T.region)} ${esc(T.name)} · ${p.pos}</div><h3>${esc(p.n)}</h3>
+      <div>${p.hof ? '<span class="badge hof">Hall of Fame</span>' : ''}${Object.entries(p.aw).map(([k, v]) => `<span class="badge">${v > 1 ? v + '× ' : ''}${k}</span>`).join('')}</div></div>
+      <button class="close" aria-label="Close" onclick="closeDrawer()">×</button></div>
+    <p class="muted" style="font-size:14px;margin:16px 0 4px">Rating by season with the ${esc(T.name)}</p>
+    ${chart}
+    <table class="tbl" style="margin-top:10px"><thead><tr><th>Season</th><th class="num">Rating</th><th>Pos</th><th class="num">GP</th><th>Stats</th></tr></thead>
+    <tbody>${s.map(x => `<tr style="cursor:default"><td>${x[0]}</td><td class="num"><b style="color:${ovrColor(x[1])}">${x[1]}</b></td><td>${x[2]}</td><td class="num">${x[3]}</td><td>${statText(x)}</td></tr>`).join('')}</tbody></table>`;
+  $('#drawer').classList.add('on');
+}
+function closeDrawer() { $('#drawer').classList.remove('on'); }
+$('#drawer').addEventListener('click', e => { if (e.target.id === 'drawer') closeDrawer(); });
+addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+// Capture mode for README images: ?shot=<block>&teams=29,30 renders just that block.
+async function shotMode() {
+  const q = new URLSearchParams(location.search), mode = q.get('shot');
+  if (!mode) return init();
+  document.documentElement.setAttribute('data-theme', q.get('theme') || 'dark');
+  TEAMS = window.SITE_DATA ? window.SITE_DATA.teams : await (await fetch('data/teams.json')).json();
+  const root = document.createElement('div');
+  root.style.cssText = 'padding:28px;display:flex;flex-direction:column;gap:18px';
+  const tids = (q.get('teams') || '29').split(',').map(Number);
+  const fresh = () => { document.body.innerHTML = '<div id="team" class="on"></div><div id="pickerView"></div><div class="tip" id="tip"></div><div class="drawer" id="drawer"><div class="card" id="dcard"></div></div>'; };
+  if (mode === 'draft') { await init(); document.querySelectorAll('nav,header,section:not(#draft),footer').forEach(e => e.remove()); return; }
+  if (mode === 'hero') { await init(); document.querySelectorAll('nav,section,footer').forEach(e => e.remove()); document.querySelector('.hero .btns').remove(); return; }
+  if (mode === 'looks') {
+    const st = document.createElement('style'); st.textContent = '.looks{flex-wrap:wrap;overflow:visible}.look{flex:0 0 190px}'; document.head.appendChild(st);
+    for (const tid of tids) {
+      const T = await loadTeam(tid);
+      fresh(); renderTeam(T);
+      const blk = document.querySelector('#team .block');
+      blk.querySelector('h3').innerHTML = `<span style="display:flex;align-items:center;gap:12px"><img src="${T.logo}" style="width:38px;height:38px;object-fit:contain">${esc(T.region)} ${esc(T.name)}</span>`;
+      blk.querySelector('.hint').remove();
+      root.appendChild(blk);
+    }
+  } else {
+    const T = await loadTeam(tids[0]);
+    fresh(); renderTeam(T);
+    if (mode === 'header') { document.querySelector('.thead .back').remove(); root.appendChild(document.querySelector('.thead')); }
+    else if (mode === 'chart') { document.querySelectorAll('.bars .sel').forEach(b => b.classList.remove('sel')); root.appendChild(document.querySelector('.chart')); }
+    else if (mode === 'roster') {
+      const s = q.get('season'); if (s) { const sr = document.querySelector('#srange'); sr.value = T.seasons.findIndex(x => x.y === +s); sr.oninput(); }
+      root.appendChild(document.querySelector('#roster').closest('.block'));
+    } else if (mode === 'legends') root.appendChild(document.querySelector('#legends').closest('.block'));
+    else if (mode === 'player') {
+      const p = T.players.find(x => x.n === q.get('name')) || T.players[0];
+      openPlayer(p, T);
+      const card = document.querySelector('#dcard'); card.style.cssText += ';max-height:none;border-radius:22px;background:var(--panel);border:1px solid var(--line)';
+      card.querySelector('.close').remove();
+      card.querySelectorAll('tbody tr').forEach((r, i) => { if (i >= 8) r.remove(); });
+      const wrap = document.createElement('div'); wrap.className = 'drawer on'; wrap.style.cssText = 'position:static;background:none;display:block'; wrap.appendChild(card); root.appendChild(wrap);
+    }
+  }
+  root.querySelectorAll('.block').forEach(b => b.style.margin = '0');
+  document.body.innerHTML = '';
+  document.body.appendChild(root);
+}
+shotMode();
+</script>
+</body>
+</html>
