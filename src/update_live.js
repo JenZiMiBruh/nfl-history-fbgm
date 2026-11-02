@@ -10,6 +10,10 @@
  * Then rosters, injured reserve and injuries are refreshed from nflverse's latest weekly roster and injury report.
  * Games still to be played (tonight's, Monday's) stay on the schedule.
  *
+ * Then rebuild what depends on the new games, and export:
+ *   node src/build_head_to_head.js && node src/build_live_games.js && node src/build_weekly.js 2026 2026
+ *   node src/export_vanilla.js "Week N"   (and copy data_cache/weekly/2026.json to the site's data/weekly/)
+ *
  * Usage: node --max-old-space-size=14000 src/update_live.js [season=2026]
  */
 const fs = require('fs');
