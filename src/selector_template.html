@@ -316,7 +316,7 @@ const LOGO_ERAS = /*__LOGO_ERAS__*/null;
       e.stopPropagation();
       $('loadHosted').disabled = true;
       setStatus('Downloading NFL history (92 MB)…');
-      const funny = ['Downloading NFL history (92 MB)…','Asking Taysom Hill what position he plays…','Hiding the 1-15 seasons…','Re-reviewing the Tuck Rule (still wrong)…','Teaching 1970s quarterbacks to throw interceptions…','Stretching Larry Fitzgerald's hands…','Counting the Cardinals' Super Bowl trophies (this part is fast)…','Loading 28,700 players. Most of them are punters…']; let fi = 0; const fiv = setInterval(() => setStatus(funny[++fi % funny.length]), 2600);
+      const funny = ['Downloading NFL history (92 MB)…','Asking Taysom Hill what position he plays…','Hiding the 1-15 seasons…','Re-reviewing the Tuck Rule (still wrong)…','Teaching 1970s quarterbacks to throw interceptions…','Stretching Larry Fitzgerald’s hands…','Counting the Cardinals’ Super Bowl trophies (this part is fast)…','Loading 28,700 players. Most of them are punters…']; let fi = 0; const fiv = setInterval(() => setStatus(funny[++fi % funny.length]), 2600);
       try {
         const res = await fetch(hostedMaster);
         if (!res.ok) throw new Error('HTTP ' + res.status);
