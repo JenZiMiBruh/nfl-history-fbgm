@@ -24,9 +24,7 @@
 
 I've played Football GM since 2020. Basketball GM is what got me into NBA history and stats, and BBGM has everything: real players, real ratings, portraits, team logos and jersey history going back decades. You can start in 1985 and see if you'd have drafted Jordan.
 
-Football GM had none of that.
-
-**So, I changed that.**
+Football GM didn't have any of that, so I built it.
 
 — <b>JenZiMiBruh</b>
 
