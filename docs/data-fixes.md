@@ -1,5 +1,7 @@
 # Fixing the data
 
+<p align="center"><img src="../assets/docs/fixes.png" alt="Before and after: real data errors and how each was fixed" width="100%"></p>
+
 Combining sources means combining their mistakes. Stat heads *will* notice, so [`fix_player_records.js`](../src/fix_player_records.js) and [`fix_namesake_awards.js`](../src/fix_namesake_awards.js) fix them before ratings are built.
 
 | Problem | Example | Fix |
@@ -10,6 +12,9 @@ Combining sources means combining their mistakes. Stat heads *will* notice, so [
 | Awards on the wrong namesake | Reggie White honors landing on the other Reggie White | Match awards by team and season; Hall of Fame years fixed too |
 | Impossible ages | Players younger than 18 or older than 50 | Checked against debut year (George Blanda really did play at 48) |
 | Wrong jersey numbers | Carson Beck wearing #6 | Real numbers per season from rosters; the real owner keeps his number in a clash |
+| Deaths | 4 deaths recorded; Khyree Jackson, Marshawn Kneeland and Rondale Moore still signable | 2,229 dates of death from Wikidata (by Pro-Football-Reference ID, then name and birth year); deceased players retired |
+| Co-MVPs | 1997 and 2003 MVP awards listed one winner | Barry Sanders and Steve McNair added as co-MVPs |
+| Starters in free agency | Pat Surtain II and Mike Hall Jr. unmatched by name, left unsigned | Matching through nicknames and suffixes; both back on their teams |
 | Draft years | Undrafted players listed as drafted in their debut year | Normalized per player |
 | Positions and weights | One source's typo | Taken from the source with the most games |
 

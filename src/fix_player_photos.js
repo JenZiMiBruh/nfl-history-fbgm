@@ -125,6 +125,8 @@ async function pool(items, n, fn) {
   };
   let nfl = 0, wiki = 0, none = 0;
   for (const p of players) {
+    // Photos from other sources (ESPN headshots for draft prospects) are kept as they are
+    if (p.imgURL && !p.imgURL.includes("static.www.nfl.com") && !p.imgURL.includes("wikimedia.org")) continue;
     const id = p.imgURL && nflId(p.imgURL);
     if (id && realNfl(id)) { p.imgURL = nflUrl(id, `f_auto,q_auto,w_${WIDTH}`); nfl++; continue; }
     const commons = cache.wiki['pfr:' + pfrByKey[keyOf(p)]] || cache.wiki['nb:' + keyOf(p)];

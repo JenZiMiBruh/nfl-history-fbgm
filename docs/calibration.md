@@ -1,5 +1,7 @@
 # Calibration
 
+<p align="center"><img src="../assets/docs/eras.png" alt="Era factors by season: interceptions, sacks, completions, yards per carry, and sim vs real by decade" width="100%"></p>
+
 Football GM's game sim is tuned for the modern NFL. Run 1972 through it and quarterbacks complete passes like it's 2020, and almost nobody throws interceptions.
 
 ## Era factors

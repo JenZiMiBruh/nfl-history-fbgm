@@ -2,12 +2,16 @@
 
 No single source covers 60 years of the NFL, so every player is matched across several.
 
+<p align="center"><img src="../assets/docs/sources.png" alt="Timeline of which source covers which years" width="100%"></p>
+
 | Source | Covers | Used for |
 |---|---|---|
 | [nflverse](https://github.com/nflverse) | 1966–2027 rosters, 1999+ stats, games, weekly injuries | The backbone: player IDs, birthdates, heights, weights, modern stats, the live season |
 | Pro-Football-Reference (via the Internet Archive) | 1966–98 season, roster, team and draft pages | Pre-1999 stats, Approximate Value for every season |
 | Wikipedia | Awards, All-Pro and Pro Bowl teams, drafts, Hall of Fame, retired numbers, uniform histories | Honors, drafts, jersey eras, events and their reasons |
-| Wikimedia Commons, Logopedia, ESPN | Logos | 66 logos embedded in the file, one per era |
+| Logopedia, Wikimedia Commons | Logos | 146 era looks, rebuilt at high resolution from vector originals where they exist |
+| Wikidata | Deaths, photos | 2,229 dates of death and 4,700 player photos |
+| ESPN | College football | Rosters, recruiting grades, the 2027 draft board and headshots for the draft classes |
 | spreadspoke, nflverse games | Scores 1966+, schedules 1978+ | Team results and real schedules |
 | OverTheCap | Contracts 2000+ | Real salaries; earlier ones are estimates scaled to each era |
 | Madden | 2001+ | Cross-checks for the ratings, not their source |

@@ -126,7 +126,8 @@ nav .links a{text-decoration:none;color:var(--muted)}nav .links a:hover{color:va
 .seasonbar input{flex:1;min-width:200px;accent-color:var(--team3)}
 .seasonbar .yr{font-family:Oswald;font-size:34px;min-width:90px}
 .seasonbar .rec{font-size:15px;color:var(--muted)}
-.roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:16px}
+.roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));grid-auto-rows:76px;gap:12px;margin-top:16px;min-height:352px;align-content:start}
+.seasonbar input{touch-action:pan-y}
 .pc{display:flex;gap:12px;align-items:center;background:var(--soft);border-radius:14px;padding:12px;cursor:pointer;border:1px solid transparent}
 .pc:hover{border-color:var(--team3)}
 .ovr{flex:0 0 52px;height:52px;border-radius:12px;display:grid;place-items:center;font-family:Oswald;font-size:24px;color:#fff}
@@ -184,6 +185,13 @@ nav .links a{text-decoration:none;color:var(--muted)}nav .links a:hover{color:va
 .barlab{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:8px}
 .more{margin:18px auto 0;display:block}
 
+/* build a league */
+.bsteps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}
+.bsteps div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-weight:600;display:flex;gap:12px;align-items:center}
+.bsteps b{flex:0 0 34px;height:34px;border-radius:10px;background:var(--accent);color:#06210f;display:grid;place-items:center;font:700 18px Oswald}
+@media(max-width:700px){.bsteps{grid-template-columns:1fr}}
+iframe.selector{width:100%;height:1250px;border:1px solid var(--line);border-radius:18px;background:#fff}
+
 /* features */
 .feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:28px}
 .f{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px}
@@ -208,7 +216,7 @@ footer small{display:block;opacity:.7;margin-top:8px;max-width:520px}
 <body>
 <nav><div class="wrap">
   <a class="brand" href="#top"><i></i>NFL History</a>
-  <div class="links"><a href="#story">Why</a><a href="#teams">Your team</a><a href="#draft">Drafts</a><a href="#mod">The mod</a><a href="guide.html">How to play</a><a class="cta" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest">Download</a></div>
+  <div class="links"><a href="#story">Why</a><a href="#teams">Your team</a><a href="#draft">Drafts</a><a href="#build">Build a league</a><a href="#mod">The mod</a><a href="guide.html">How to play</a><a class="cta" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest">Download</a></div>
 </div></nav>
 
 <header class="hero" id="top">
@@ -276,6 +284,15 @@ footer small{display:block;opacity:.7;margin-top:8px;max-width:520px}
   <div class="dfilters" id="dfilters"></div>
   <div class="dgrid" id="dgrid"></div>
   <button class="btn ghost more" id="dmore" style="color:var(--ink);border-color:var(--line)">Show more</button>
+</div></section>
+
+<section id="build" style="background:var(--soft)"><div class="wrap">
+  <div class="eyebrow">Build a league, right here</div>
+  <h2>Start in any season</h2>
+  <p class="muted" style="max-width:720px">Pick a season from 1967 to today and a start point: preseason, week 1, the playoffs, after the playoffs or draft day. Then download your league and upload it in Football GM (<b>New League → Upload league file</b>). Works best on a computer: it loads all 60 years of NFL history into your browser.</p>
+  <div class="bsteps"><div><b>1</b>Tap <i>Load NFL history</i></div><div><b>2</b>Pick a season and start point</div><div><b>3</b>Generate &amp; download, then upload in Football GM</div></div>
+  <iframe class="selector" src="selector.html?master=data/NFL_Master_1966_2026.json.gz" loading="lazy" title="Season selector"></iframe>
+  <p class="muted" style="font-size:14px">Prefer a bigger window? <a href="selector.html?master=data/NFL_Master_1966_2026.json.gz">Open the season selector full screen</a>.</p>
 </div></section>
 
 <section id="mod"><div class="wrap">
@@ -493,7 +510,9 @@ function renderTeam(T) {
     }).join('') || '<p class="muted">No rated players this season.</p>';
     document.querySelectorAll('.bars .b').forEach(b => b.classList.toggle('sel', +b.dataset.y === y));
   };
-  sr.oninput = () => showSeason(+sr.value);
+  // Dragging updates at most once per frame, and the card area keeps its height, so the page never jumps under the slider
+  let pending = false;
+  sr.oninput = () => { if (pending) return; pending = true; requestAnimationFrame(() => { pending = false; showSeason(+sr.value); }); };
   showSeason(+sr.value);
   $('#roster').onclick = e => { const el = e.target.closest('.pc'); if (el) openPlayer(byId[el.dataset.id], T); };
 

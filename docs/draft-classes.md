@@ -1,5 +1,7 @@
 # Draft classes 2027–2029
 
+<p align="center"><img src="../assets/docs/funnel.png" alt="From 13,800 college players to three real draft classes of 340" width="100%"></p>
+
 Sim past today and the next three drafts are real college players, not generated ones.
 
 ## Who

@@ -6,7 +6,7 @@
  *   node --max-old-space-size=12000 src/season_slicer.js --season 1986 --phase regular   (the 1985-86 season)
  *
  * phase: "preseason" (FBGM phase 0) | "regular" (phase 1, real schedule, week 1)
- *        | "live" (2026 only: the master as-is, Week 9 with real results)
+ *        | "live" (2026 only: the master as-is, the live season with real results so far)
  */
 (function (root) {
   'use strict';
@@ -69,7 +69,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       if (S !== 2026) throw new Error('Live mode is only available for 2026.');
       shiftSeasons(master, 1);
       Object.defineProperty(master, '__shifted', { value: true, configurable: true, enumerable: false });
-      master.meta = Object.assign({}, master.meta, { name: 'NFL 2026-27 (Week 9)' });
+      master.meta = Object.assign({}, master.meta, { name: 'NFL 2026-27 (Live, through Week 8)' });
       master.gameAttributes.realPlayerDeterminism = 1;
       master.gameAttributes.useRealSchedules = true;
       return master;

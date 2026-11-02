@@ -10,3 +10,7 @@ _old/
 node_modules/
 football-gm/
 !data/prospect_overrides.json
+
+# The site's own data (explorer, charts, and the master league for the built-in season selector)
+!site/data/
+!site/data/**

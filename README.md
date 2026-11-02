@@ -8,6 +8,9 @@
   <img src="https://img.shields.io/github/downloads/JenZiMiBruh/nfl-history-fbgm/total?style=for-the-badge&label=downloads&color=f5c542" alt="Total downloads">
 </p>
 
+<h2 align="center"><a href="https://jenzimibruh.github.io/nfl-history-fbgm/">🌐 Open the NFL History site →</a></h2>
+<p align="center"><sub>Every team's logos, jerseys, records and ratings · the real draft classes · build a league for any season, right in your browser</sub></p>
+
 <table align="center"><tr>
 <td align="center" width="33%"><a href="#-play-today"><b>⚡ Play today</b></a><br><sub>This season through Sunday's games.<br>Stock Football GM, phone or computer.</sub></td>
 <td align="center" width="33%"><a href="#-pick-any-season"><b>📅 Pick any season</b></a><br><sub>1967 to 2027, preseason to draft day.<br>One HTML file, works offline.</sub></td>
@@ -62,8 +65,8 @@ The real 2026 season as of Sunday, Nov 1: standings, stats, rosters and injuries
 
 Start in 1985, 2007, any season from 1967 on, at any of five start points, just like Basketball GM: **preseason**, **week 1**, **the playoffs** (real regular season already played), **after the playoffs** (real champion and awards) or **draft day** (real draft order). The season selector is one page that runs in your browser, even offline.
 
-1. **Download** [`nfl_season_selector.html` and `NFL_Master_1966_2026.json.gz`](../../releases/latest).
-2. **Open** the selector (double-click it) and drop the master file on it.
+1. **Open** [**Build a league** on the NFL History site](https://jenzimibruh.github.io/nfl-history-fbgm/#build) and tap **Load NFL history**. (Offline instead? Download [`nfl_season_selector.html` and `NFL_Master_1966_2026.json.gz`](../../releases/latest), open the selector and drop the master file on it.)
+2. Wait a moment while 60 years of history load in your browser.
 3. **Pick** a season, a start point (Preseason, Week 1, Playoffs, After Playoffs or Draft) and the real events you want, then **Generate & download**.
 4. **Upload** your new file in Football GM, same as Play today, steps 2–4.
 
@@ -101,7 +104,7 @@ Seasons are named the way Basketball GM names them, by the year they end: 2008 i
 
 ## Your team's history
 
-Every franchise gets its own page in the **team explorer**, an interactive site with every logo and jersey a team wore, every season's record, and every notable player with his rating season by season. It goes live at [jenzimibruh.github.io/nfl-history-fbgm](https://jenzimibruh.github.io/nfl-history-fbgm/) when the project launches publicly (GitHub only hosts sites for public projects). Until then, download the project and double-click [`site/index.html`](site/). Everything below is real footage of it.
+Every franchise gets its own page on the **[NFL History site](https://jenzimibruh.github.io/nfl-history-fbgm/)**, an interactive site with every logo and jersey a team wore, every season's record, and every notable player with his rating season by season. Open it at [jenzimibruh.github.io/nfl-history-fbgm](https://jenzimibruh.github.io/nfl-history-fbgm/), or double-click [`site/index.html`](site/) in a downloaded copy. Everything below is real footage of it.
 
 <p align="center"><img src="assets/shots/header.png" alt="Patriots team page header: record, playoff seasons, six titles, retired numbers" width="100%"></p>
 
@@ -194,14 +197,15 @@ Every new full-history sim is measured the same way, and the biggest misses get 
 
 <p align="center"><img src="assets/pipeline.svg" alt="Data pipeline: sources, build, clean and rate, play" width="100%"></p>
 
-The hard parts, and why each decision was made:
+The hard parts, and why each decision was made. Each has its own deep dive with charts.
 
-- **[Sources](docs/sources.md):** where every number comes from, and how 1966–98 was rebuilt from archived Pro-Football-Reference pages
-- **[Ratings](docs/ratings.md):** BBGM has an algorithm for rating real players. Football GM needed one too, for every position, every era, and players with five career tackles
-- **[Calibration](docs/calibration.md):** making a game sim tuned for today's NFL play like 1972
-- **[Fixing the data](docs/data-fixes.md):** two players merged into one, one split into two, a backup QB named "Vincent Testacerde". Stat heads *will* notice
-- **[Draft classes](docs/draft-classes.md):** turning college rosters and recruiting grades into real prospects
-- **[The mod](mod/):** every file it touches and why
+<table>
+<tr><td width="50%" valign="top"><a href="docs/ratings.md"><img src="assets/docs/two.png" alt="How every player is rated"></a><br><b><a href="docs/ratings.md">How every player is rated →</a></b><br><sub>The algorithm: Approximate Value for how good, his stats against his era for what kind, with a full Barry Sanders worked example</sub></td><td width="50%" valign="top"><a href="docs/ratings.md#step-4-the-curve"><img src="assets/docs/curve.png" alt="From rank to rating"></a><br><b><a href="docs/ratings.md#step-4-the-curve">From rank to rating →</a></b><br><sub>Why stars land in the 80s, nobody is a 99, and an MVP can't rate below 86</sub></td></tr>
+<tr><td width="50%" valign="top"><a href="docs/sources.md"><img src="assets/docs/sources.png" alt="Where every number comes from"></a><br><b><a href="docs/sources.md">Where every number comes from →</a></b><br><sub>Nine sources stitched together, from archived Pro-Football-Reference pages to Wikidata</sub></td><td width="50%" valign="top"><a href="docs/calibration.md"><img src="assets/docs/eras.png" alt="Making 1972 play like 1972"></a><br><b><a href="docs/calibration.md">Making 1972 play like 1972 →</a></b><br><sub>The sim's dials set season by season, checked against a 60-season sim</sub></td></tr>
+<tr><td width="50%" valign="top"><a href="docs/data-fixes.md"><img src="assets/docs/fixes.png" alt="Stat heads will notice"></a><br><b><a href="docs/data-fixes.md">Stat heads will notice →</a></b><br><sub>Fake players, merged namesakes, missing co-MVPs, deaths, see-through logos, and how each was fixed</sub></td><td width="50%" valign="top"><a href="docs/draft-classes.md"><img src="assets/docs/funnel.png" alt="The real next three drafts"></a><br><b><a href="docs/draft-classes.md">The real next three drafts →</a></b><br><sub>From 13,800 college players to three real classes of 340</sub></td></tr>
+</table>
+
+And [the mod](mod/): every file it touches and why.
 
 ## FAQ
 
