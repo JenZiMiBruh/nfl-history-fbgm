@@ -270,4 +270,4 @@ To the creator of [Football GM](https://football-gm.com) and [Basketball GM](htt
 
 Team names and logos belong to the NFL and its teams. This is a fan project for personal play, not affiliated with or endorsed by the NFL or Football GM.
 
-<p align="center">Made with way too many hours and a lot of love by <b>JenZiMiBruh</b>.<br><b>Thank you, dumbmatter.</b></p>
+<p align="center">Made with way too many hours and a lot of love by <b>JenZiMiBruh</b>, a Cardinals fan who has made peace with it.<br><sub>Psst: try the Konami code on the site. And look up Larry Fitzgerald.</sub><br><b>Thank you, dumbmatter.</b></p>

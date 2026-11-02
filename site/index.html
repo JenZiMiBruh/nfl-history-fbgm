@@ -637,5 +637,63 @@ async function shotMode() {
 }
 shotMode();
 </script>
+<!-- Easter eggs. A Cardinals fan made this site, sorry in advance. -->
+<style>
+.egg-toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);opacity:0;z-index:99;background:#97233F;color:#fff;font:600 15px Inter,sans-serif;padding:12px 18px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.4);transition:.35s;pointer-events:none;max-width:calc(100% - 32px);text-align:center}
+.egg-toast.on{opacity:1;transform:translateX(-50%)}
+.egg-note{margin-top:10px;font-size:13px;font-style:italic;color:rgba(255,255,255,.75)}
+.egg-fitz{margin:14px 0 0;padding:12px 14px;border-radius:12px;background:linear-gradient(90deg,rgba(151,35,63,.25),rgba(255,182,18,.12));border:1px solid rgba(255,182,18,.45);font-size:14px;line-height:1.5}
+.egg-fitz b{color:#FFB612}
+</style>
+<script>
+(() => {
+  const toast = msg => {
+    let t = document.querySelector('.egg-toast');
+    if (!t) { t = document.createElement('div'); t.className = 'egg-toast'; document.body.appendChild(t); }
+    t.textContent = msg; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 4200);
+  };
+
+  // Konami code: every jersey on the wall becomes Larry's
+  const code = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+  let pos = 0;
+  addEventListener('keydown', e => {
+    pos = e.key === code[pos] || e.key.toLowerCase() === code[pos] ? pos + 1 : (e.key === code[0] ? 1 : 0);
+    if (pos < code.length) return;
+    pos = 0;
+    const wall = document.getElementById('wall');
+    if (wall) wall.innerHTML = Array.from({ length: 48 }, (_, i) => `<div style="animation-delay:${(i % 7) * .4}s">${jersey(['#97233F', '#FFFFFF', '#000000'], '11')}</div>`).join('');
+    scrollTo({ top: 0, behavior: 'smooth' });
+    toast('11 out of 10 jerseys agree: Larry would have caught that.');
+  });
+
+  // Cardinals team page: a little honesty
+  const notes = [
+    'The emotional support franchise of the NFL. Founded 1898, still waiting.',
+    "2008: We don't talk about the last 35 seconds of Super Bowl XLIII.",
+    'Chicago, then St. Louis, then Arizona. The Cardinals have been disappointing fans in three time zones.',
+    'Fun fact: the oldest continuously run pro football team. Also a fact: 0 titles since 1947.',
+  ];
+  const origRender = renderTeam;
+  renderTeam = function (T) {
+    origRender(T);
+    if (T.tid !== 0) return;
+    const head = document.querySelector('#team .thead > div');
+    if (head) head.insertAdjacentHTML('beforeend', `<div class="egg-note">${notes[Math.floor(Math.random() * notes.length)]}</div>`);
+  };
+  const tileTip = () => { const el = document.querySelector('.tp[data-tid="0"]'); if (el) el.title = 'Bird gang. Bring tissues.'; };
+  setTimeout(tileTip, 1500);
+  if (location.hash.split('/')[0] === '#team' && location.hash.split('/')[1] === '0') route(); // page may have rendered before this hook
+
+  // Larry Fitzgerald gets the card he deserves
+  const origOpen = openPlayer;
+  openPlayer = function (p, T) {
+    origOpen(p, T);
+    if (p.n !== 'Larry Fitzgerald') return;
+    document.querySelector('#dcard .top').insertAdjacentHTML('afterend', `<div class="egg-fitz">🐐 <b>Larry Legend.</b> 17 seasons, all of them in Arizona. <b>17,492</b> receiving yards and <b>1,432</b> catches, both 2nd all-time behind only Jerry Rice. Famous for never dropping the ball and for answering every interview like a kind uncle. Hands: illegal in several states.</div>`);
+    toast('You found the GOAT. Respect.');
+  };
+})();
+</script>
+
 </body>
 </html>
