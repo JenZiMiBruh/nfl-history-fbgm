@@ -825,12 +825,14 @@
         if (!nowActive && nextActive) {
           const b = getTeamBranding(tid, season + 1);
           const nextAlign = getAlignment(season + 1);
-          ev.push({ season, phase: PHASE.DRAFT_LOTTERY, type: 'expansionDraft', info: {
-            numProtectedPlayers: season < 1990 ? 30 : 37,
-            teams: [{ tid, region: b.region, name: b.name, abbrev: b.abbrev, imgURL: b.imgURL, imgURLSmall: b.imgURLSmall,
-              colors: b.colors, jersey: b.jersey, pop: b.pop, stadiumCapacity: b.stadiumCapacity,
-              did: String(nextAlign.teamDiv[tid].did) }]
-          } });
+          const team = { tid, region: b.region, name: b.name, abbrev: b.abbrev, imgURL: b.imgURL, imgURLSmall: b.imgURLSmall,
+            colors: b.colors, jersey: b.jersey, pop: b.pop, stadiumCapacity: b.stadiumCapacity,
+            did: String(nextAlign.teamDiv[tid].did) };
+          // Teams joining the same season share one expansion draft (Seahawks and Buccaneers 1976, Panthers and Jaguars
+          // 1995): Football GM runs one draft at a time, so a second event left the second team out
+          const same = ev.find(e => e.type === 'expansionDraft' && e.season === season && e.phase === PHASE.DRAFT_LOTTERY);
+          if (same) same.info.teams.push(team);
+          else ev.push({ season, phase: PHASE.DRAFT_LOTTERY, type: 'expansionDraft', info: { numProtectedPlayers: season < 1990 ? 30 : 37, teams: [team] } });
         }
         // Branding changes for franchises that were already playing.
         if (wasActive && nowActive) {

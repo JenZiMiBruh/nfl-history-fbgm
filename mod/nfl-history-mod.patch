@@ -181,10 +181,10 @@ index fc14a9f..51cbcae 100644
  						<NagModal close={closeNagModal} show={showNagModal} />
  					</div>
 diff --git a/src/ui/components/LeagueFileUpload.tsx b/src/ui/components/LeagueFileUpload.tsx
-index 5694d6d..62730e8 100644
+index 5694d6d..5812473 100644
 --- a/src/ui/components/LeagueFileUpload.tsx
 +++ b/src/ui/components/LeagueFileUpload.tsx
-@@ -109,13 +109,333 @@ class LeagueFileVersionError extends Error {
+@@ -109,13 +109,447 @@ class LeagueFileVersionError extends Error {
  	}
  }
  
@@ -210,6 +210,42 @@ index 5694d6d..62730e8 100644
 +};
 +let nflMaster: any;
 +
++// The master as shipped (.json.gz) or unpacked (.json)
++const readMaster = async (blob: Blob) => {
++	const head = new Uint8Array(await blob.slice(0, 2).arrayBuffer());
++	const gz = head[0] === 0x1f && head[1] === 0x8b;
++	const text = gz
++		? await new Response(
++				blob.stream().pipeThrough(new DecompressionStream("gzip")),
++			).text()
++		: await blob.text();
++	return JSON.parse(text);
++};
++
++// Week-by-week real games for starting mid-season: installed with the mod, or the site's copy
++const nflWeekly: Record<number, any> = {};
++const loadWeekly = async (season: number) => {
++	if (nflWeekly[season] !== undefined) {
++		return nflWeekly[season];
++	}
++	for (const base of [
++		"/nfl/weekly/",
++		"https://jenzimibruh.github.io/nfl-history-fbgm/data/weekly/",
++	]) {
++		try {
++			const response = await fetch(`${base}${season}.json`);
++			if (response.ok) {
++				nflWeekly[season] = await response.json();
++				return nflWeekly[season];
++			}
++		} catch {
++			// try the next one
++		}
++	}
++	nflWeekly[season] = null;
++	return null;
++};
++
 +const NflHistoryPicker = ({
 +	disabled,
 +	onFile,
@@ -221,6 +257,42 @@ index 5694d6d..62730e8 100644
 +	const [status, setStatus] = useState("");
 +	const [season, setSeason] = useState(2026);
 +	const [phase, setPhase] = useState("regular");
++	const [week, setWeek] = useState(1);
++	const [autoTried, setAutoTried] = useState(nflMaster !== undefined);
++
++	// The master file comes with the mod: load it on its own, so there's nothing to pick
++	useEffect(() => {
++		if (nflMaster !== undefined) {
++			return;
++		}
++		let cancelled = false;
++		(async () => {
++			try {
++				setStatus("Loading NFL history (16 MB)...");
++				await loadNflScript();
++				const response = await fetch("/nfl/NFL_Master_1966_2026.json.gz");
++				if (!response.ok) {
++					throw new Error(`HTTP ${response.status}`);
++				}
++				const master = await readMaster(await response.blob());
++				if (!cancelled) {
++					nflMaster = master;
++					setLoaded(true);
++					setStatus("");
++				}
++			} catch {
++				if (!cancelled) {
++					setStatus("");
++				}
++			}
++			if (!cancelled) {
++				setAutoTried(true);
++			}
++		})();
++		return () => {
++			cancelled = true;
++		};
++	}, []);
 +
 +	const loadMaster = async (event: ChangeEvent<HTMLInputElement>) => {
 +		const file = event.currentTarget.files?.[0];
@@ -230,13 +302,24 @@ index 5694d6d..62730e8 100644
 +		try {
 +			setStatus("Reading master file...");
 +			await loadNflScript();
-+			nflMaster = JSON.parse(await file.text());
++			nflMaster = await readMaster(file);
 +			setLoaded(true);
 +			setStatus("");
 +		} catch (error) {
 +			setStatus(`Error: ${(error as Error).message}`);
 +		}
 +	};
++
++	// Weeks of the real schedule; the live season stops at the next week to play
++	const w = window as any;
++	const days: number[] = (w.NFL_DATA?.schedules?.[season] ?? []).map(
++		(g: any) => g.day,
++	);
++	let maxWeek = days.length > 0 ? Math.max(...days) : 1;
++	if (season >= 2026 && w.NFL_DATA?.live) {
++		maxWeek = Math.min(maxWeek, w.NFL_DATA.live.nextWeek);
++	}
++	const weekNow = Math.min(week, maxWeek);
 +
 +	// The built league waits here while the user picks which scheduled events to keep
 +	const [league, setLeague] = useState<any>();
@@ -250,9 +333,19 @@ index 5694d6d..62730e8 100644
 +		try {
 +			const w = window as any;
 +			const data = w.NFL_DATA;
++			const startWeek = phase === "regular" ? weekNow : 1;
++			const weekly = startWeek > 1 ? await loadWeekly(season) : undefined;
++			if (startWeek > 1 && !weekly) {
++				setStatus(
++					`Couldn't load the week-by-week data for ${season + 1}, which a Week ${startWeek} start needs.`,
++				);
++				return;
++			}
 +			const built = w.SEASON_SLICER.sliceLeague(nflMaster, w.NFL_ERAS, {
 +				season,
 +				phase,
++				week: startWeek,
++				weekly: weekly ?? undefined,
 +				...data,
 +			});
 +			setLeague(built);
@@ -268,7 +361,7 @@ index 5694d6d..62730e8 100644
 +		const filtered = w.SEASON_SLICER.keepEvents({ ...league }, [...kept]);
 +		const file = new File(
 +			w.SEASON_SLICER.toJsonChunks(filtered),
-+			`NFL_${season + 1}_${phase}.json`,
++			`NFL_${season + 1}_${phase === "regular" ? `Week${weekNow}` : phase}.json`,
 +			{ type: "application/json" },
 +		);
 +		onFile(file);
@@ -426,18 +519,20 @@ index 5694d6d..62730e8 100644
 +			<div className="card-body">
 +				<h3 className="card-title">NFL History</h3>
 +				{!loaded ? (
-+					<>
-+						<p className="mb-2">
-+							Choose <code>NFL_Master_1966_2026.json</code> to start in any
-+							season.
-+						</p>
-+						<input
-+							type="file"
-+							accept=".json,application/json"
-+							onChange={loadMaster}
-+							disabled={disabled}
-+						/>
-+					</>
++					autoTried ? (
++						<>
++							<p className="mb-2">
++								Choose <code>NFL_Master_1966_2026.json.gz</code> (from the
++								release) to start in any season.
++							</p>
++							<input
++								type="file"
++								accept=".json,.gz,application/json,application/gzip"
++								onChange={loadMaster}
++								disabled={disabled}
++							/>
++						</>
++					) : null
 +				) : (
 +					<div className="d-flex flex-wrap gap-2 align-items-center">
 +						<select
@@ -472,7 +567,7 @@ index 5694d6d..62730e8 100644
 +							}}
 +						>
 +							<option value="preseason">Preseason</option>
-+							<option value="regular">Regular Season, Week 1</option>
++							<option value="regular">Regular Season</option>
 +							{season < 2026 ? (
 +								<>
 +									<option value="playoffs">Playoffs</option>
@@ -481,9 +576,28 @@ index 5694d6d..62730e8 100644
 +								</>
 +							) : null}
 +							{season === 2026 ? (
-+								<option value="live">Live (2027, through Week 8)</option>
++								<option value="live">
++									Live (2027, through Week {w.NFL_DATA?.live?.lastWeek ?? "?"})
++								</option>
 +							) : null}
 +						</select>
++						{phase === "regular" ? (
++							<select
++								className="form-select w-auto"
++								value={weekNow}
++								disabled={maxWeek === 1}
++								onChange={(event) => {
++									setWeek(Number.parseInt(event.target.value));
++									setLeague(undefined);
++								}}
++							>
++								{Array.from({ length: maxWeek }, (_, i) => (
++									<option key={i + 1} value={i + 1}>
++										Week {i + 1}
++									</option>
++								))}
++							</select>
++						) : null}
 +						<button
 +							className="btn btn-primary"
 +							type="button"
@@ -518,7 +632,7 @@ index 5694d6d..62730e8 100644
  	onDone: (b: Error | LeagueFileUploadOutput) => void;
  	disabled?: boolean;
  	enterURL?: boolean;
-@@ -257,8 +577,10 @@ export const LeagueFileUpload = ({
+@@ -257,8 +691,10 @@ export const LeagueFileUpload = ({
  
  	const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
  		beforeFile();
@@ -530,7 +644,7 @@ index 5694d6d..62730e8 100644
  		if (!file) {
  			dispatch({
  				type: "init",
-@@ -327,13 +649,24 @@ export const LeagueFileUpload = ({
+@@ -327,13 +763,24 @@ export const LeagueFileUpload = ({
  					</button>
  				</div>
  			) : (
@@ -694,7 +808,7 @@ index 8ac606a..68e546d 100644
  	| "maxOvertimes"
  	| "maxOvertimesPlayoffs"
 diff --git a/src/worker/api/index.ts b/src/worker/api/index.ts
-index 12dd36b..2c33f22 100644
+index 12dd36b..ad6941b 100644
 --- a/src/worker/api/index.ts
 +++ b/src/worker/api/index.ts
 @@ -159,6 +159,7 @@ import { formatScheduleForEditor } from "../views/scheduleEditor.ts";
@@ -741,7 +855,7 @@ index 12dd36b..2c33f22 100644
  	// Fix draft and ratings season
  	if (p.tid === PLAYER.UNDRAFTED) {
  		if (p.draft.year < season) {
-@@ -5381,8 +5404,82 @@ const whileWorkerBusy =
+@@ -5381,8 +5404,86 @@ const whileWorkerBusy =
  	(...args: Args) =>
  		lock.whileWorkerBusy(() => cb(...args));
  
@@ -766,13 +880,15 @@ index 12dd36b..2c33f22 100644
 +	dumpLeague: async () => {
 +		await idb.cache.flush();
 +		const db = idb.league;
-+		const [players, teams, teamSeasons, teamStats, playoffSeries] =
++		const [players, teams, teamSeasons, teamStats, playoffSeries, games, headToHeads] =
 +			await Promise.all([
 +				db.getAll("players"),
 +				db.getAll("teams"),
 +				db.getAll("teamSeasons"),
 +				db.getAll("teamStats"),
 +				db.getAll("playoffSeries"),
++				db.getAll("games"),
++				db.getAll("headToHeads"),
 +			]);
 +		return {
 +			players,
@@ -782,6 +898,8 @@ index 12dd36b..2c33f22 100644
 +				stats: (teamStats as any[]).filter((x) => x.tid === t.tid),
 +			})),
 +			playoffSeries,
++			games,
++			headToHeads,
 +		};
 +	},
 +	// Is a sim running right now?
@@ -824,7 +942,7 @@ index 12dd36b..2c33f22 100644
  	awardSettings,
  	eightyTwoZeroDraft,
  	exhibitionGame,
-@@ -5531,6 +5628,7 @@ const api = {
+@@ -5531,6 +5632,7 @@ const api = {
  		updateTrade,
  		upgrade65,
  		upgrade65Estimate,

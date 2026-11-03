@@ -122,8 +122,9 @@ function install(cfg) {
   run('git', ['clean', '-q', '-fd', '-e', 'node_modules'], { cwd: GAME });
   say('Applying the NFL History mod...');
   run('git', ['apply', '--whitespace=nowarn', path.join(MOD, 'nfl-history-mod.patch')], { cwd: GAME });
+  // The picker's script, the master file (any season, loaded on its own) and the week-by-week games (mid-season starts)
   fs.mkdirSync(path.join(GAME, 'public', 'football', 'nfl'), { recursive: true });
-  fs.copyFileSync(path.join(MOD, 'public', 'nfl', 'nfl_mod.js'), path.join(GAME, 'public', 'football', 'nfl', 'nfl_mod.js'));
+  fs.cpSync(path.join(MOD, 'public', 'nfl'), path.join(GAME, 'public', 'football', 'nfl'), { recursive: true, force: true });
   say('Installing packages, the longest step...');
   try { run('corepack', ['enable'], { cwd: GAME, shell: true }); } catch { /* not needed when pnpm is reachable */ }
   run('corepack', ['pnpm', 'install'], { cwd: GAME, shell: true });
@@ -133,7 +134,12 @@ function install(cfg) {
 async function main() {
   console.log('\n  NFL History for Football GM\n  ---------------------------');
   let cfg = readJson(path.join(MOD, 'version.json'));
-  const rel = await checkForUpdate(cfg.version);
+  // A failed update (a bad download, a full disk) never stops the game: it starts what's installed
+  let rel = null;
+  try { rel = await checkForUpdate(cfg.version); } catch (e) {
+    log(String(e && e.stack || e));
+    say(`  (The update didn't work: ${e.message}. Starting what's installed; it tries again next time.)`);
+  }
   if (rel) cfg = readJson(path.join(MOD, 'version.json'));
 
   const installed = fs.existsSync(MARKER) ? fs.readFileSync(MARKER, 'utf8').trim() : '';

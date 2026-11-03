@@ -28,14 +28,14 @@ git checkout bda1fa5
 git apply ../nfl-history-fbgm/mod/nfl-history-mod.patch
 ```
 
-Copy `mod/public/nfl/` (from the release zip) into `public/football/nfl/`, then:
+Copy `mod/public/nfl/` (from the release zip: the picker script, the master file and the week-by-week games) into `public/football/nfl/`, then:
 
 ```bash
 pnpm install
 SPORT=football node --run dev
 ```
 
-Open http://localhost:3000, choose **New League → Upload league file**, and the NFL History picker appears: pick a season, a phase and which events you want.
+Open http://localhost:3000, choose **New League → Upload league file**, and the NFL History picker appears with every season already loaded: pick a season, a start point (preseason, any week, playoffs, after the playoffs or the draft) and which events you want.
 
 To play on a phone, add `-- --host` to the dev command and open the PC's address from the phone, or plug the phone in and run `adb reverse tcp:3000 tcp:3000`.
 

@@ -76,7 +76,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       if (S !== 2026) throw new Error('Live mode is only available for 2026.');
       shiftSeasons(master, 1);
       Object.defineProperty(master, '__shifted', { value: true, configurable: true, enumerable: false });
-      master.meta = Object.assign({}, master.meta, { name: 'NFL 2026-27 (Live, through Week 8)' });
+      master.meta = Object.assign({}, master.meta, { name: 'NFL 2026-27 (Live, ' + (opts.live ? 'through Week ' + opts.live.lastWeek : 'this week') + ')' });
       master.gameAttributes.realPlayerDeterminism = 1;
       master.gameAttributes.useRealSchedules = true;
       return master;

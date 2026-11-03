@@ -6,6 +6,13 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.11 · Nov 3, 2026
+
+- **Mod download fixed.** The v1.10 mod zip was packed in the wrong format, so it wouldn't open in Windows Explorer or on a Mac, and Mac/Linux auto-updates stopped. It's a real zip again, and a failed update now just starts the version you have.
+- **Every season is built in.** The mod now comes with the master file and the week-by-week games: New League → Upload league file shows every season with nothing to pick or unzip.
+- **Start at any week, in the mod too.** The mod's picker has a week list like the site (any week of any season; this season up to the next week to play). On the site, this season's week list no longer shows weeks that haven't happened, and the downloaded selector gets the week-by-week games from the site when it can't find them next to it.
+- **Seahawks and Buccaneers both join in 1976.** The two expansion teams each had their own expansion draft, and Football GM only ran one, so you couldn't pick Seattle. Same for the Panthers and Jaguars in 1995. They now share one draft.
+
 ## v1.10 · Nov 3, 2026
 
 - **Week 8 complete.** Monday night (Bears 34, Seahawks 17) and Sunday night (Commanders 27, Eagles 10) are in: stats, standings, starts and ratings. Starts for Monday's game come from ESPN's box score, since snap counts post a day late.

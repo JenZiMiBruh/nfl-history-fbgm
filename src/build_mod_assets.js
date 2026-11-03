@@ -17,7 +17,7 @@ const out = [
   'window.NFL_ERA_FACTORS = ' + json('data_cache/era_factors.json', 'null') + ';',
   read('src/nfl_eras.js'),
   read('src/season_slicer.js'),
-  `window.NFL_DATA = { schedules: ${json('data_cache/real_schedules.json', '{}')}, hofYears: ${json('data_cache/hof_years.json', '{}')}, logos: ${json('data_cache/logos.json', '{}')}, logosProcessed: ${json('data_cache/logos_processed.json', '{}')}, logoEras: ${json('data_cache/logos_eras_final.json', 'null')} };`
+  `window.NFL_DATA = { schedules: ${json('data_cache/real_schedules.json', '{}')}, hofYears: ${json('data_cache/hof_years.json', '{}')}, logos: ${json('data_cache/logos.json', '{}')}, logosProcessed: ${json('data_cache/logos_processed.json', '{}')}, logoEras: ${json('data_cache/logos_eras_final.json', 'null')}, live: ${JSON.stringify(require('./live_info').liveInfo())} };`
 ].join('\n;\n');
 const dir = path.join(MOD, 'public', 'football', 'nfl');
 fs.mkdirSync(dir, { recursive: true });

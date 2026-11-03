@@ -104,7 +104,7 @@
           <label class="done"><input type="radio" name="phase" value="playoffs">Playoffs</label>
           <label class="done"><input type="radio" name="phase" value="afterplayoffs">After Playoffs</label>
           <label class="done"><input type="radio" name="phase" value="draft">Draft</label>
-          <label id="liveLabel"><input type="radio" name="phase" value="live">2027 Live (through Week 8)</label>
+          <label id="liveLabel"><input type="radio" name="phase" value="live">2027 Live (<span id="liveWk">through Week 8</span>)</label>
         </div>
       </div>
     </div>
@@ -142,6 +142,8 @@ const HOF_YEARS = /*__HOF__*/{};
 const LOGOS = /*__LOGOS__*/{};
 const LOGOS_PROCESSED = /*__LOGOS_PROCESSED__*/{};
 const LOGO_ERAS = /*__LOGO_ERAS__*/null;
+// Where the live season stands (live_info.js, filled in by build_selector.js): the week list stops at nextWeek
+const LIVE = /*__LIVE__*/{ lastWeek: 0, nextWeek: 1, date: '' };
 </script>
 <script>
 (function () {
@@ -163,7 +165,11 @@ const LOGO_ERAS = /*__LOGO_ERAS__*/null;
   const weeklyBase = () => { const m = new URLSearchParams(location.search).get('master'); return (m ? m.replace(/[^/]*$/, '') : 'data/') + 'weekly/'; };
   async function loadWeekly(S) {
     if (S < FIRST_WEEKLY || WEEKLY[S] !== undefined) return WEEKLY[S];
-    try { const r = await fetch(weeklyBase() + S + '.json'); WEEKLY[S] = r.ok ? await r.json() : null; } catch (e) { WEEKLY[S] = null; }
+    // Next to the master first; the downloaded selector opened as a file has no folder to read, so then the site's copy
+    for (const base of [weeklyBase(), 'https://jenzimibruh.github.io/nfl-history-fbgm/data/weekly/']) {
+      try { const r = await fetch(base + S + '.json'); if (r.ok) { WEEKLY[S] = await r.json(); return WEEKLY[S]; } } catch (e) { /* next */ }
+    }
+    WEEKLY[S] = null;
     return WEEKLY[S];
   }
   const week = () => (phase() === 'regular' ? +$('week').value || 1 : 1);
@@ -206,7 +212,7 @@ const LOGO_ERAS = /*__LOGO_ERAS__*/null;
   function getSlice() {
     const S = +$('season').value, ph = phase(), w = WEEKLY[S] ? week() : 1, lite = $('lite').checked;
     const key = S + '|' + ph + '|' + w + '|' + lite;
-    if (sliceCache.key !== key) sliceCache = { key, league: SL.sliceLeague(master, E, { season: S, phase: ph, week: w, lite, weekly: WEEKLY[S] || undefined, schedules: SCHEDULES, hofYears: HOF_YEARS, logos: LOGOS, logosProcessed: LOGOS_PROCESSED, logoEras: LOGO_ERAS }) };
+    if (sliceCache.key !== key) sliceCache = { key, league: SL.sliceLeague(master, E, { season: S, phase: ph, week: w, lite, weekly: WEEKLY[S] || undefined, schedules: SCHEDULES, hofYears: HOF_YEARS, logos: LOGOS, logosProcessed: LOGOS_PROCESSED, logoEras: LOGO_ERAS, live: LIVE }) };
     return sliceCache.league;
   }
   const POS_ORDER = ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S', 'K', 'P'];
@@ -271,12 +277,10 @@ const LOGO_ERAS = /*__LOGO_ERAS__*/null;
     const wsel = $('week'), keep = +wsel.value || 1;
     const days = (SCHEDULES[S] || []).map(g => g.day);
     let maxWeek = S >= FIRST_WEEKLY && days.length ? Math.max(...days) : 1;
-    if (WEEKLY[S] && S >= 2026) maxWeek = Math.min(maxWeek, Math.max(0, ...WEEKLY[S].games.map(g => g[0])) + 1);
-    if (WEEKLY[S] === null) maxWeek = 1;
+    if (S >= 2026) maxWeek = Math.min(maxWeek, LIVE.nextWeek);
     wsel.innerHTML = Array.from({ length: maxWeek }, (_, i) => '<option value="' + (i + 1) + '">Week ' + (i + 1) + '</option>').join('');
     wsel.value = String(Math.min(keep, maxWeek));
     wsel.disabled = maxWeek === 1;
-    if (S === 2026 && WEEKLY[S] === undefined) loadWeekly(S).then(render);
     const ph = phase();
     const r = E.getRules(S);
     const a = E.getAlignment(S);
@@ -307,7 +311,7 @@ const LOGO_ERAS = /*__LOGO_ERAS__*/null;
       playoffs: 'The real ' + (S + 1) + ' regular season is in the books: real records, stats and standings. Hit play and the playoffs begin.',
       afterplayoffs: 'The real ' + (S + 1) + ' season is complete: champion crowned, awards handed out, real retirements done. The draft is next.',
       draft: 'Draft day ' + (S + 1) + ', with the real draft order. You are on the clock.',
-      live: '2027 standings and stats through Sunday, Nov 1 (Week 8), real remaining schedule.'
+      live: '2027 standings and stats through ' + LIVE.date + ' (Week ' + LIVE.lastWeek + (LIVE.complete ? ' complete' : '') + '), real remaining schedule.'
     };
     $('phaseNote').textContent = notes[ph];
   }
@@ -423,6 +427,8 @@ const LOGO_ERAS = /*__LOGO_ERAS__*/null;
   $('go').addEventListener('click', async () => {
     const S = +$('season').value, ph = phase();
     if (week() > 1) await loadWeekly(S);
+    // A later week needs that season's game-by-game data: say so instead of quietly building Week 1
+    if (ph === 'regular' && week() > 1 && !WEEKLY[S]) { setStatus('Couldn't load the week-by-week data for ' + (S + 1) + ', which a Week ' + week() + ' start needs. Check your connection and try again.'); return; }
     if (ph === 'live' && master.statKeys) {
       location.href = 'https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/' + ($('lite').checked ? 'NFL_2027_Live_Lite_FBGM.json.gz' : 'NFL_2027_Live_FBGM.json.gz');
       $('go').disabled = false;
