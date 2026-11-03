@@ -6,6 +6,10 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.8 · Nov 2, 2026
+
+- **1966-69 Cardinals logo, done right.** Rebuilt from the original art with traced shapes instead of fills that leaked: the background between the arch and the cardinal and by his head is see-through, the arch is a solid white band all the way around (it was drawn hollow above his arm and at its base), his thigh and shin are whole, his shoe stripes are white again, and the white halo the scan left around every edge is gone.
+
 ## v1.7 · Nov 2, 2026
 
 - **1966-69 Cardinals logo, take two.** v1.6 left part of the white background around the cardinal's back leg. The leg is now traced from its outline, so only the leg stays white and the background behind it is see-through.
