@@ -178,6 +178,12 @@ for (const pos of MAIN) {
     tmpl[pos][k] = vals.length ? vals[Math.floor(vals.length / 2)] : 40;
   }
 }
+// Quarterbacks' passing mix: Football GM counts accuracy, deep passing and vision equally in a QB's overall, and the
+// source ratings leaned on arm strength (starters stood 0.150 below the accuracy skill's cutoff, 0.052 below deep
+// passing's, 0.102 below vision's). Accuracy +6 and arm strength -7 put all three equally far from their cutoffs, at
+// the same overall: more completions and fewer interceptions, a few less deep balls.
+tmpl.QB.tha += 6;
+tmpl.QB.thp -= 7;
 const weightMean = {};
 for (const pos of MAIN) {
   const ws = rows.filter(x => x.pos === pos && x.p.weight).map(x => x.p.weight);
@@ -266,7 +272,12 @@ for (const [pid, list] of byPlayer) {
     // (not for offensive linemen: their game counts are unreliable in the sources, e.g. Larry Allen 2003 listed with 2)
     const lean = hasPrev && x.pos !== 'OL' ? 0.6 * (1 - g) : 0;
     let sum = raw[i] * (0.6 - lean), w = 0.6 - lean;
-    if (hasPrev) { sum += raw[i - 1] * (0.2 + lean); w += 0.2 + lean; }
+    // The lean is there to protect a short sample, so it goes to the better of his previous season's raw number and its
+    // finished rating: a backup off a quiet short season isn't dragged down twice (Gardner Minshew 2026: 72nd
+    // percentile in his one game, rated 31 after a 43), and a breakout isn't held back by the year before it
+    // (Chase Young: 10 sacks in 2025, 7 in 7 games this year)
+    const prevPs = list[i - 1] && list[i - 1].ps !== undefined ? Math.max(list[i - 1].ps, raw[i - 1]) : raw[i - 1];
+    if (hasPrev) { sum += raw[i - 1] * 0.2 + prevPs * lean; w += 0.2 + lean; }
     if (raw[i + 1] !== undefined && x.season !== LIVE_SEASON) { sum += raw[i + 1] * 0.2; w += 0.2; }
     const fl = floors.get(pid + '|' + x.season) || 0;
     const ret = returnerOnly(x) || specialTeamer(x) || fullback(x);
@@ -373,7 +384,9 @@ for (const x of rows) {
       if (rush === undefined || v > rush) rush = v;
     }
     if (rush !== undefined) {
-      base.prs = pos === 'DL' ? 50 + 13 * rush : 42 + 13 * rush;
+      // Sack production is long-tailed (the best rushers get three times the average), so above one standard deviation
+      // each step counts a little more: the elite stand out from the pack instead of sharing sacks with it
+      base.prs = (pos === 'DL' ? 50 : 42) + 13 * rush + 5 * Math.max(0, rush - 1);
       skills = skills.filter(k => k !== 'prs');
     }
   }
@@ -417,7 +430,8 @@ for (const x of rows) {
   if (R.computeOvr(out, pos) !== Math.round(Math.min(99, target))) {
     const want = Math.round(Math.min(99, target));
     let best = out, bestD = Math.abs(R.computeOvr(out, pos) - want);
-    for (let d = -6; d <= 6 && bestD; d += 0.25) {
+    // fine steps: with pass rush or arm strength held fixed, fewer skills move, and a coarse step can skip the target
+    for (let d = -8; d <= 8 && bestD; d += 0.02) {
       const c = build((lo + hi) / 2 + d), dd = Math.abs(R.computeOvr(c, pos) - want);
       if (dd < bestD) { best = c; bestD = dd; }
     }

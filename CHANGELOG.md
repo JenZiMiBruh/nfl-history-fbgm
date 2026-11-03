@@ -6,6 +6,14 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.13 · Nov 3, 2026
+
+- **Quarterbacks: accuracy +6, arm strength −7.** Football GM counts accuracy, deep passing and vision equally in a QB's overall, but the ratings leaned on arm strength, so almost no starter in any era rated as accurate. Same overalls, a better mix: more completions, fewer interceptions. In every season.
+- **The best pass rushers stand out.** Sack production is long-tailed, so the elite (Donald, Garrett, White) now sit in the high 80s instead of just above the pack, and sacks stop getting spread so thin. Overalls unchanged; their other skills give a little back.
+- **Short seasons lean on the better of last year's numbers.** A backup with one game was dragged down twice by a quiet short season before it (Gardner Minshew: one good game, rated 31 after a 43; now 41). A breakout isn't held back either. Applies to every short season since 1966.
+- **Past ratings hit their overall exactly.** A coarse search left thousands of past ratings a point off; they match now.
+- **Starting 2026 at a week:** every team's real roster and injuries going into that week (Carson Beck is on the Cardinals), the box scores of the weeks already played, and a roster limit that fits the real rosters.
+
 ## v1.12 · Nov 3, 2026
 
 - **Browns logo, 1970-95.** Cleveland showed Brownie the Elf all the way to 1995; the elf was their logo through 1969, and from 1970 it was the orange helmet. Fixed in the live file, the season picker, the mod and the site. Thanks for the report!

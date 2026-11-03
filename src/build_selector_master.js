@@ -22,7 +22,7 @@ const m = JSON.parse(fs.readFileSync(path.join(ROOT, 'NFL_Master_1966_2026.json'
 
 for (const t of m.teams) for (const s of t.seasons || []) { delete s.imgURL; delete s.imgURLSmall; }
 delete m.scheduledEvents;
-delete m.games;
+// Box scores: only the live season has them (a league started mid-season shows the weeks already played)
 
 // Every stat field, in order, so the slicer can restore the zeros; then drop them from each line
 const playerKeys = new Set(), teamKeys = new Set();

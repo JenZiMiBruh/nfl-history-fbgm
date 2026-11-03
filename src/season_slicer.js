@@ -275,6 +275,27 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       players.push(p);
     }
 
+    // The live season at week W: every team's real roster and injuries going into that week (build_weekly.js), instead
+    // of the trim below. Players on no roster that week are free agents; the roster limit fits the biggest real roster.
+    let liveRosterMax = 0;
+    const wkRosters = W && S >= 2026 && opts.weekly && opts.weekly.rosters;
+    if (wkRosters) {
+      const day = Object.keys(wkRosters).map(Number).filter(d => d <= W).sort((a, b) => a - b).pop();
+      const on = new Map((wkRosters[day] || []).map(r => [r[0], r]));
+      if (on.size) {
+        const count = {};
+        for (const p of players) {
+          if (p.tid < -1) continue;
+          const r = on.get(p.pid);
+          if (!r) { if (p.tid >= 0) p.tid = -1; continue; }
+          p.tid = r[1];
+          p.injury = r[2] ? { type: r[2], gamesRemaining: r[3] } : { type: 'Healthy', gamesRemaining: 0 };
+          count[r[1]] = (count[r[1]] || 0) + 1;
+        }
+        liveRosterMax = Math.max(0, ...Object.values(count));
+        for (const k of Object.keys(rosterByTid)) delete rosterByTid[k];
+      }
+    }
     // Era roster limit: extras (fewest games, then lowest OVR) start as free agents. Each position keeps its minimum
     // first (the best by the same order), so a season with dozens of extra players can't squeeze out a position: in
     // 1987 the strike's replacement players outnumbered the injured quarterbacks' games, and teams had no quarterback.
@@ -403,6 +424,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     // Every other rule (overtime, two-point tries, kickoffs, schedule shape, rookie deals) at its season-S value.
     const timed = new Set(['numGames', 'numGamesPlayoffSeries', 'numPlayoffByes', 'maxOvertimes']);
     for (const k of E.RULE_KEYS) if (!timed.has(k)) ga[k] = rules[k];
+    if (liveRosterMax) ga.maxRosterSize = Math.max(ga.maxRosterSize, liveRosterMax); // the live season's real rosters fit
     ga.maxOvertimes = timeline(y => E.getRules(y).maxOvertimes);
     ga.overtimeLengthPlayoffs = rules.overtimeLengthPlayoffs;
     delete ga.userTid; delete ga.userTids;
@@ -486,7 +508,9 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       headToHeads: (master.headToHeads || []).filter(h => h.season < S || (DONE && h.season === S))
         .map(h => h.season === S && DONE !== 2 ? { ...h, playoffs: {} } : h)
         .concat(W ? [weekHeadToHead(S, wkGames)] : []),
-      releasedPlayers: []
+      releasedPlayers: [],
+      // Box scores of the weeks already played, where they exist (the live season: build_live_games.js)
+      games: W ? (master.games || []).filter(g => g.season === S && g.day < W) : []
     };
     shiftSeasons(league, 1, true);
     // From the slim selector master (zero stats left out): toJsonChunks puts the zeros back while writing

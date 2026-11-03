@@ -90,6 +90,30 @@ for (let y = FIRST; y <= LAST; y++) {
     (lines[p.pid] = lines[p.pid] || []).push([day, tid, line]);
     matched++;
   }
-  fs.writeFileSync(path.join(OUT, `${y}.json`), JSON.stringify({ season: y, games, lines }));
-  console.log(`${y}: ${games.length} games, ${weeks.length} weeks, ${matched} player-games matched, ${missed} unmatched`);
+  // The live season: every team's real roster going into each week (nflverse's weekly rosters: active, injured
+  // reserve, inactive) with that week's injuries (injured reserve, and Out or Doubtful on the injury report), so a
+  // league started at week W has the rosters and injuries of week W, not today's. Same rules as update_live.js.
+  let rosters;
+  if (y === 2026) {
+    const { makeFinder } = require('./live_match');
+    const findLive = makeFinder(master, y);
+    const injRows = parseCSVFile(path.join(CACHE, 'live2026', `injuries_${y}.csv`));
+    const injAt = new Map(injRows.map(r => [norm(r.full_name) + '|' + r.team + '|' + r.week, r]));
+    const severe = /acl|achilles|torn|fractur|broken|surgery|season|lisfranc|patellar/i;
+    rosters = {};
+    for (const r of parseCSVFile(path.join(CACHE, 'live2026', `roster_weekly_${y}.csv`))) {
+      const tid = CODE[r.team], day = dayOf.get(+r.week);
+      if (tid === undefined || !day || !['ACT', 'RES', 'INA'].includes(r.status)) continue;
+      const p = findLive({ player_display_name: r.full_name }, tid);
+      if (!p) continue;
+      const inj = injAt.get(norm(r.full_name) + '|' + r.team + '|' + r.week);
+      const type = (inj && (inj.report_primary_injury || inj.practice_primary_injury)) || '';
+      const row = [p.pid, tid];
+      if (r.status === 'RES') row.push(type || 'Injured Reserve', severe.test(type) ? Math.max(1, 17 - +r.week) : 4);
+      else if (inj && /^(Out|Doubtful)$/.test(inj.report_status)) row.push(type || 'Undisclosed', 1);
+      (rosters[day] = rosters[day] || []).push(row);
+    }
+  }
+  fs.writeFileSync(path.join(OUT, `${y}.json`), JSON.stringify(rosters ? { season: y, games, lines, rosters } : { season: y, games, lines }));
+  console.log(`${y}: ${games.length} games, ${weeks.length} weeks, ${matched} player-games matched, ${missed} unmatched${rosters ? `, rosters for weeks ${Object.keys(rosters).join(',')}` : ''}`);
 }

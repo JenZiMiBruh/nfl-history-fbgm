@@ -11,7 +11,7 @@
 <h2 align="center"><a href="https://jenzimibruh.github.io/nfl-history-fbgm/">🌐 Open the NFL History site →</a></h2>
 <p align="center"><a href="https://jenzimibruh.github.io/nfl-history-fbgm/#fans"><img src="https://img.shields.io/badge/%F0%9F%9F%A2%20playing%20right%20now-see%20the%20live%20count-2ecc71?style=flat-square" alt="See how many people are playing the mod right now"></a></p>
 <p align="center"><a href="docs/roadmap.md"><b>📅 Roadmap & update calendar</b></a>: the file updates the day after every game</p>
-<p align="center"><a href="CHANGELOG.md"><b>🆕 What's new</b></a>: v1.12: Browns 1970-95 logo; v1.11: every season built into the mod, any week in the mod, 1976 expansion fixed; v1.10: Week 8 complete, real contracts, receivers stay at receiver, kickers rated on kicking, ratings by week</p>
+<p align="center"><a href="CHANGELOG.md"><b>🆕 What's new</b></a>: v1.13: QB accuracy and pass rush retuned, real rosters and box scores for week starts; v1.12: Browns 1970-95 logo; v1.11: every season built into the mod, any week in the mod, 1976 expansion fixed; v1.10: Week 8 complete, real contracts, receivers stay at receiver, kickers rated on kicking, ratings by week</p>
 <p align="center"><sub>Every team's logos, jerseys, records and ratings · the real draft classes · build a league for any season, right in your browser</sub></p>
 
 <table align="center"><tr>
