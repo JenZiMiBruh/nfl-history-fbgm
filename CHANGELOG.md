@@ -6,6 +6,10 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.12 · Nov 3, 2026
+
+- **Browns logo, 1970-95.** Cleveland showed Brownie the Elf all the way to 1995; the elf was their logo through 1969, and from 1970 it was the orange helmet. Fixed in the live file, the season picker, the mod and the site. Thanks for the report!
+
 ## v1.11 · Nov 3, 2026
 
 - **Mod download fixed.** The v1.10 mod zip was packed in the wrong format, so it wouldn't open in Windows Explorer or on a Mac, and Mac/Linux auto-updates stopped. It's a real zip again, and a failed update now just starts the version you have.
