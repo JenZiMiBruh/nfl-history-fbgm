@@ -43,6 +43,15 @@ const openUrl = (url) => {
   } catch { /* no browser: the address is printed anyway */ }
 };
 
+// One anonymous count per start, so the dashboard shows how many people play and on which version: just the mod version,
+// nothing about the player or their computer. Skipped with a no-stats.txt file in this folder. Never delays the game:
+// at most 3 seconds, and any failure is ignored.
+async function countStart(version) {
+  if (fs.existsSync(path.join(DIR, 'no-stats.txt')) || process.env.NFL_NO_START) return;
+  const url = 'https://galloade.goatcounter.com/count?' + new URLSearchParams({ p: '/mod/start/v' + version, t: 'Mod started', e: 'true', rnd: Math.random().toString(36).slice(2) });
+  try { await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 NFLHistoryMod/' + version }, signal: AbortSignal.timeout(3000) }); } catch { /* offline: no count */ }
+}
+
 async function checkForUpdate(current) {
   let rel;
   try {
@@ -119,6 +128,7 @@ async function main() {
   }
   if (rel) showWhatsNew(rel);
   if (process.env.NFL_NO_START) { say('INSTALL_OK v' + cfg.version); return; }
+  await countStart(cfg.version);
 
   const ip = Object.values(os.networkInterfaces()).flat().find(a => a && a.family === 'IPv4' && !a.internal)?.address;
   say('\n  Ready. Opening http://localhost:3000');

@@ -6,6 +6,10 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.9 · Nov 2, 2026
+
+- **Anonymous play count for the mod.** Each start sends one anonymous count (just the mod version) so I can see how many people play and which versions they're on. Nothing about you or your computer is sent. An empty file named no-stats.txt in the mod folder turns it off.
+
 ## v1.8 · Nov 2, 2026
 
 - **1966-69 Cardinals logo, done right.** Rebuilt from the original art with traced shapes instead of fills that leaked: the background between the arch and the cardinal and by his head is see-through, the arch is a solid white band all the way around (it was drawn hollow above his arm and at its base), his thigh and shin are whole, his shoe stripes are white again, and the white halo the scan left around every edge is gone.
