@@ -90,7 +90,8 @@ function calcComposite(ratingsObj, ratingKeys, weights) {
 }
 
 // Exact NC(e, t) function from worker.js
-function computeOvr(ratingsObj, targetPos) {
+// raw: the value before rounding (for searches that move ratings one point at a time)
+function computeOvr(ratingsObj, targetPos, raw) {
   const pos = targetPos || ratingsObj.pos || 'WR';
   const def = POS_WEIGHTS[pos];
   if (!def) return 40;
@@ -118,6 +119,7 @@ function computeOvr(ratingsObj, targetPos) {
   else if (r >= 40) adj = -15 + (r - 40) * (10 / 12);
   else adj = -15;
 
+  if (raw) return r + adj;
   let ovr = bound(Math.round(r + adj), 0, 100);
   if (pos === 'K' || pos === 'P') {
     ovr = Math.round(ovr * 0.75);

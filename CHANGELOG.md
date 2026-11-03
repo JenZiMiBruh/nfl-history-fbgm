@@ -6,6 +6,18 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.10 · Nov 3, 2026
+
+- **Week 8 complete.** Monday night (Bears 34, Seahawks 17) and Sunday night (Commanders 27, Eagles 10) are in: stats, standings, starts and ratings. Starts for Monday's game come from ESPN's box score, since snap counts post a day late.
+- **Receivers no longer play running back too.** Football GM puts whoever has the best RB rating at RB, so star receivers (Jaxon Smith-Njigba, Calvin Johnson in 2011) lined up at RB and WR at once and piled up rushing stats. Receivers' RB ratings come down, never their overall, and every team's real back is ahead at RB. In every season since 1966.
+- **Contracts end when they really do.** Nearly every contract ran out after this season, so you had to re-sign almost the whole team. Every player now has his real contract from OverTheCap (Trey McBride through 2029, Jeremiyah Love's rookie deal through 2029), in the live file and in any season the picker builds from 2011 on.
+- **Kickers and punters rated on kicking.** They were ranked by an estimate that counted volume (a bad offense punts more) and mostly tied, so ratings were close to random. Now kickers are rated on makes over an average kicker, long ones counting extra, and punters on yards per punt and punts inside the 20.
+- **Ties no longer decide ratings.** In 2025-26, players with the same value score were ordered arbitrarily. Ties now share a rank, which nudges many ratings a point or two.
+- **Season picker: ratings by week.** A 2026 league started at a given week gets the ratings players had going into that week (from Week 9 on; each update adds a week).
+- **Season picker fixes.** Building a second league in the same session came out a season off; fixed. Teams squeezed out of a position when a season had many extra players (1987 strike: no quarterbacks) keep a full lineup. Ties in a team's last 10 games no longer break the file.
+- **Every draft class in the phone-friendly version.** It kept only the next three; now it has every real class, like the full version.
+- **Playing right now.** The site shows how many people have the mod open right now (the mod checks in anonymously every few minutes; no-stats.txt still turns it off).
+
 ## v1.9 · Nov 2, 2026
 
 - **Anonymous play count for the mod.** Each start sends one anonymous count (just the mod version) so I can see how many people play and which versions they're on. Nothing about you or your computer is sent. An empty file named no-stats.txt in the mod folder turns it off.

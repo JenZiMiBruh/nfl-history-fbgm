@@ -35,6 +35,30 @@ for (const y of SEASONS) {
     if (!byName.has(k)) byName.set(k, { p, s });
   }
   const tally = new Map(); // key -> { gp, gs }
+  // Finished games with no snap counts yet (nflverse posts them about a day later): who played and started comes from
+  // ESPN's box score instead (box_starts.js); any game with neither is reported
+  const LIVE_GAMES = path.join(ROOT, 'data_cache', 'live2026', 'games.csv');
+  const BOX = path.join(ROOT, 'data_cache', 'snaps', `box_starts_${y}.json`);
+  if (y === 2026 && fs.existsSync(LIVE_GAMES)) {
+    const have = new Set(parseCSVFile(file).map(r => r.game_id));
+    const box = fs.existsSync(BOX) ? JSON.parse(fs.readFileSync(BOX, 'utf8')) : {};
+    const missing = parseCSVFile(LIVE_GAMES).filter(g => +g.season === y && g.game_type === 'REG' && g.home_score !== '' && g.home_score !== 'NA' && !have.has(g.game_id)).map(g => g.game_id);
+    const byPid = new Map();
+    for (const { p, s } of byName.values()) byPid.set(p.pid + '|' + s.tid, { p, s });
+    for (const id of missing.filter(id => box[id])) {
+      let n = 0;
+      for (const [pid, tid, started] of box[id]) {
+        const e = byPid.get(pid + '|' + tid);
+        if (!e) continue;
+        const t = tally.get(pid + '|' + tid) || { e, gp: 0, gs: 0 };
+        t.gp++; t.gs += started; n++;
+        tally.set(pid + '|' + tid, t);
+      }
+      console.log(`${id}: no snap counts yet, ${n} players from ESPN's box score`);
+    }
+    const none = missing.filter(id => !box[id]);
+    if (none.length) console.log(`WARNING: no snap counts or box score for ${none.join(', ')}: run box_starts.js first`);
+  }
   let unmatched = 0;
   for (const r of parseCSVFile(file)) {
     if (r.game_type !== 'REG') continue;

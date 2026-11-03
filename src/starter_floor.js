@@ -1,5 +1,6 @@
 /**
- * starter_floor.js - in the season being played, keeps each team's real starting quarterback ahead of his backups.
+ * starter_floor.js - in the season being played, keeps each team's real starting quarterback ahead of his backups, and
+ * each team's real lead back ahead of everyone else at running back.
  *
  * Football GM starts whoever is rated highest at a position, before every game, for every AI team. A real starter
  * can be rated a point or two below a backup (a slow start, a backup's strong spot duty), and then the backup
@@ -47,5 +48,33 @@ for (const t of master.teams) {
   console.log(`${t.abbrev}: ${nm(starter)} ${before} -> ${r.ovr} (best backup ${best})`);
   raised++;
 }
+// Running backs: the team's best healthy back sits 1 point above every healthy receiver and tight end at RB (backs among
+// themselves are left alone). Football GM fills the RB slot by RB rating alone, so a star receiver with a
+// higher RB rating would line up at running back and receiver at once (Jaxon Smith-Njigba over Zach Charbonnet).
+const RB_SKILLS = ['elu', 'spd', 'bsc'];
+let rbRaised = 0;
+for (const t of master.teams) {
+  const roster = master.players.filter(p => p.tid === t.tid && healthy(p) && row(p));
+  const played = p => (p.stats || []).some(s => s.season === SEASON && !s.playoffs && s.gp > 0);
+  const rbs = roster.filter(p => row(p).pos === 'RB' && played(p));
+  const lead = rbs.slice().sort((a, b) => row(b).ovrs.RB - row(a).ovrs.RB)[0];
+  if (!lead) continue;
+  const r = row(lead);
+  const best = Math.max(0, ...roster.filter(p => row(p).pos !== 'RB').map(p => row(p).ovrs.RB));
+  if (r.ovrs.RB > best) continue;
+  const before = r.ovrs.RB;
+  for (let i = 0; i < 40 && R.computeOvr(r, 'RB') <= best; i++) for (const k of RB_SKILLS) r[k] = Math.min(99, r[k] + 1);
+  r.ovrs = {};
+  for (const q of R.POSITIONS) r.ovrs[q] = R.computeOvr(r, q);
+  r.ovr = r.ovrs.RB;
+  const age = SEASON - (lead.born?.year ?? SEASON - 25);
+  r.pots = {};
+  for (const q of R.POSITIONS) r.pots[q] = R.computePot(r.ovrs[q], age, q);
+  r.pot = Math.max(r.ovr, R.computePot(r.ovr, age, 'RB'));
+  r.skills = R.computeSkills({ ...r, pos: 'RB' });
+  console.log(`${t.abbrev}: ${nm(lead)} RB ${before} -> ${r.ovr} (best other at RB ${best})`);
+  rbRaised++;
+}
+console.log(`raised ${rbRaised} lead running backs`);
 fs.writeFileSync(FILE, JSON.stringify(master));
 console.log(`raised ${raised} starting quarterbacks`);

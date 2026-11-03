@@ -88,7 +88,11 @@ for (const p of master.players) for (const s of p.stats || []) {
   const pos = posOf(p, s.season);
   if (!pos || !model[pos]) continue;
   const x = [1, ...FEATURES[pos](s)];
-  s.av = Math.max(0, Math.round(x.reduce((a, v, i) => a + v * model[pos][i], 0)));
+  const est = Math.max(0, x.reduce((a, v, i) => a + v * model[pos][i], 0));
+  s.av = Math.round(est);
+  // The unrounded estimate, for rebuild_ratings.js to rank by (it removes the field): rounded, a kicker's AV is 0, 1 or 2
+  // and most of the league ties
+  s.avRaw = Math.round(est * 1000) / 1000;
   filled++;
 }
 fs.writeFileSync(FILE, JSON.stringify(master));

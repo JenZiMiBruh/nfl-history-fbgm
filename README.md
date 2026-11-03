@@ -1,7 +1,7 @@
 <p align="center"><img src="assets/banner.png" alt="NFL History for Football GM, a passion project by JenZiMiBruh" width="100%"></p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/live-through%20Week%208%20%C2%B7%20Nov%201%2C%202026-1f9d55?style=for-the-badge" alt="Live through Week 8">
+  <img src="https://img.shields.io/badge/live-through%20Week%208%20%C2%B7%20Nov%202%2C%202026-1f9d55?style=for-the-badge" alt="Live through Week 8">
   <img src="https://img.shields.io/badge/seasons-1966%E2%80%932027-0f3d22?style=for-the-badge" alt="Seasons 1966 to 2027">
   <img src="https://img.shields.io/badge/real%20players-28%2C700%2B-0f3d22?style=for-the-badge" alt="28,700+ real players">
   <img src="https://img.shields.io/badge/Football%20GM-ready-c8102e?style=for-the-badge" alt="Football GM ready">
@@ -9,8 +9,9 @@
 </p>
 
 <h2 align="center"><a href="https://jenzimibruh.github.io/nfl-history-fbgm/">🌐 Open the NFL History site →</a></h2>
+<p align="center"><a href="https://jenzimibruh.github.io/nfl-history-fbgm/#fans"><img src="https://img.shields.io/badge/%F0%9F%9F%A2%20playing%20right%20now-see%20the%20live%20count-2ecc71?style=flat-square" alt="See how many people are playing the mod right now"></a></p>
 <p align="center"><a href="docs/roadmap.md"><b>📅 Roadmap & update calendar</b></a>: the file updates the day after every game</p>
-<p align="center"><a href="CHANGELOG.md"><b>🆕 What's new</b></a>: v1.5: the mod updates itself, one-tap reports for wrong ratings or logos; v1.4: draft classes restored, installer fixed</p>
+<p align="center"><a href="CHANGELOG.md"><b>🆕 What's new</b></a>: v1.10: Week 8 complete, real contracts, receivers stay at receiver, kickers rated on kicking, ratings by week</p>
 <p align="center"><sub>Every team's logos, jerseys, records and ratings · the real draft classes · build a league for any season, right in your browser</sub></p>
 
 <table align="center"><tr>

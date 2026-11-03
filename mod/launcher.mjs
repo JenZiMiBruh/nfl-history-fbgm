@@ -52,6 +52,21 @@ async function countStart(version) {
   try { await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 NFLHistoryMod/' + version }, signal: AbortSignal.timeout(3000) }); } catch { /* offline: no count */ }
 }
 
+// "Playing now": while the game is open, a check-in every 4 minutes under the current 10-minute window
+// (/mod/live/20261103-0510). GoatCounter counts each computer once per path, so the site shows how many computers
+// checked in during this window or the last one. Same opt-out and same nothing-personal rule as countStart.
+function heartbeat(version) {
+  if (fs.existsSync(path.join(DIR, 'no-stats.txt')) || process.env.NFL_NO_START) return;
+  const ping = () => {
+    const d = new Date(Math.floor(Date.now() / 600000) * 600000).toISOString();
+    const bucket = d.slice(0, 10).replace(/-/g, '') + '-' + d.slice(11, 16).replace(':', '');
+    const url = 'https://galloade.goatcounter.com/count?' + new URLSearchParams({ p: '/mod/live/' + bucket, t: 'Playing now', e: 'true', rnd: Math.random().toString(36).slice(2) });
+    fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 NFLHistoryMod/' + version }, signal: AbortSignal.timeout(5000) }).catch(() => {});
+  };
+  ping();
+  setInterval(ping, 4 * 60000);
+}
+
 async function checkForUpdate(current) {
   let rel;
   try {
@@ -129,6 +144,7 @@ async function main() {
   if (rel) showWhatsNew(rel);
   if (process.env.NFL_NO_START) { say('INSTALL_OK v' + cfg.version); return; }
   await countStart(cfg.version);
+  heartbeat(cfg.version);
 
   const ip = Object.values(os.networkInterfaces()).flat().find(a => a && a.family === 'IPv4' && !a.internal)?.address;
   say('\n  Ready. Opening http://localhost:3000');

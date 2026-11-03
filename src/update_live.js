@@ -10,11 +10,14 @@
  * Then rosters, injured reserve and injuries are refreshed from nflverse's latest weekly roster and injury report.
  * Games still to be played (tonight's, Monday's) stay on the schedule.
  *
- * Then rebuild what depends on the new games, and export:
+ * Run it on the rebuild baseline (copy _old/NFL_Master_before_av_fix.json to the master first, and the updated master
+ * back over the baseline after: every rebuild starts from the baseline). Then rebuild what depends on the new games:
+ *   node src/box_starts.js   (starts for finished games whose snap counts aren't posted yet, from ESPN's box score)
+ *   node src/starts_from_snaps.js 2025,2026 && node src/estimate_av.js 2025,2026 && RATE_FROM=2025 node src/rebuild_ratings.js
+ *   node src/starter_floor.js && node src/historic_rb_fix.js && node src/real_contracts.js && node src/week_ratings.js <next week>
+ *   node src/audit_ratings.js <previous baseline>   (every check must pass before releasing)
  *   node src/build_head_to_head.js && node src/build_live_games.js && node src/build_weekly.js 2026 2026
- *   node src/starts_from_snaps.js && node src/estimate_av.js && RATE_FROM=2025 node src/rebuild_ratings.js && node src/starter_floor.js
- *   node src/audit_ratings.js <baseline master>   (every check must pass before releasing)
- *   node src/export_vanilla.js "Week N"   (and copy data_cache/weekly/2026.json to the site's data/weekly/)
+ *   node src/export_vanilla.js "Through Week N"   (and copy data_cache/weekly/2026.json to the site's data/weekly/)
  *   node src/build_selector_master.js   (the slim master: the site's data/NFL_Selector_Master.json.gz, also released
  *   as NFL_Master_1966_2026.json.gz)
  *
@@ -51,6 +54,10 @@ const get = (url) => new Promise((resolve, reject) => https.get(url, { headers: 
 (async () => {
   fs.mkdirSync(LIVE, { recursive: true });
   for (const [f, url] of Object.entries(FILES)) { fs.writeFileSync(path.join(LIVE, f), await get(url)); console.log('downloaded', f); }
+  // Snap counts, for games played and starts (starts_from_snaps.js); nflverse posts them about a day after each game
+  fs.mkdirSync(path.join(ROOT, 'data_cache', 'snaps'), { recursive: true });
+  fs.writeFileSync(path.join(ROOT, 'data_cache', 'snaps', `snap_counts_${SEASON}.csv`), await get(`https://github.com/nflverse/nflverse-data/releases/download/snap_counts/snap_counts_${SEASON}.csv`));
+  console.log('downloaded snap counts');
 
   const m = JSON.parse(fs.readFileSync(MASTER, 'utf8'));
   const ga = m.gameAttributes;

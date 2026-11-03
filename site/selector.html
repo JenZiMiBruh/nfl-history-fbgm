@@ -1725,6 +1725,8 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       p.realTeams = realTeams;
       p.injury = { type: 'Healthy', gamesRemaining: 0 };
       delete p.gamesUntilTradable;
+      delete p.realDeals;
+      delete p.weekRatings;
 
       if (debut > S) {
         // Future player: draft prospect in the class drafted after season debut-1.
@@ -1753,6 +1755,12 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       if (p.diedYear !== undefined && p.diedYear >= S) delete p.diedYear;
       p.ratings = src.ratings.filter(r => r.season <= S);
       if (!p.ratings.length) p.ratings = [Object.assign({}, src.ratings[0], { season: S })];
+      // Starting partway through the live season: the ratings he had going into that week (week_ratings.js)
+      if (W && src.weekRatings) {
+        const wk = Object.keys(src.weekRatings).map(Number).filter(w => w <= W).sort((a, b) => a - b).pop();
+        const i = p.ratings.findIndex(r => r.season === S);
+        if (wk && i >= 0) p.ratings = p.ratings.slice(0, i).concat([Object.assign({}, src.weekRatings[wk], { season: S })], p.ratings.slice(i + 1));
+      }
       p.statsTids = [...new Set(p.stats.map(s => s.tid))];
       delete p.retiredYear;
       p.hof = !!(hofYears[p.pid] && hofYears[p.pid] <= S);
@@ -1817,7 +1825,10 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
         const scaled = Math.round(rules.minContract + Math.max(0, ovr - 45) / 45 * (rules.maxContract - rules.minContract) * 0.6);
         const amount = Math.max(rules.minContract, Math.min(rules.maxContract, sal ? sal.amount : scaled));
         const yearsLeft = Math.min(Math.max(last - S, 0), 1 + (hashInt(p.pid + S) % 4));
-        p.contract = { amount, exp: S + yearsLeft };
+        // The real deal in force that season (real_contracts.js), the latest signed when an extension overlaps the old one
+        const deal = (src.realDeals || []).filter(([a, b]) => a <= S && b >= S).pop();
+        const realExp = deal ? Math.min(deal[1], S + 4) : 0;
+        p.contract = { amount, exp: realExp || S + yearsLeft };
       } else {
         p.contract = { amount: rules.minContract, exp: Math.max(S - 1, last) };
       }
@@ -1828,19 +1839,26 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       players.push(p);
     }
 
-    // Era roster limit: extras (fewest games, then lowest OVR) start as free agents.
+    // Era roster limit: extras (fewest games, then lowest OVR) start as free agents. Each position keeps its minimum
+    // first (the best by the same order), so a season with dozens of extra players can't squeeze out a position: in
+    // 1987 the strike's replacement players outnumbered the injured quarterbacks' games, and teams had no quarterback.
+    const MIN_AT = { QB: 2, RB: 2, WR: 4, TE: 2, OL: 7, DL: 6, LB: 5, CB: 4, S: 3, K: 1, P: 1 };
     for (const tid of Object.keys(rosterByTid)) {
       const roster = rosterByTid[tid];
       if (roster.length > rules.maxRosterSize) {
         roster.sort((a, b) => (b._gp - a._gp) || (b._ovr - a._ovr));
-        for (const p of roster.slice(rules.maxRosterSize)) p.tid = -1;
+        const keep = new Set();
+        for (const [pos, n] of Object.entries(MIN_AT)) roster.filter(p => p.ratings[p.ratings.length - 1].pos === pos).slice(0, n).forEach(p => keep.add(p));
+        for (const p of roster) if (keep.size < rules.maxRosterSize) keep.add(p);
+        for (const p of roster) if (!keep.has(p)) p.tid = -1;
       }
     }
     for (const p of players) { delete p._gp; delete p._ovr; }
 
-    // Phone-friendly: a much smaller league for low-end phones. Keeps everyone still playing, free agents, the next
-    // three draft classes, players retired within the last 10 seasons, Hall of Famers, and anyone the awards,
-    // All-Star and retired-number pages point to; long-retired role players and later draft classes are left out.
+    // Phone-friendly: a much smaller league for low-end phones. Keeps everyone still playing, free agents, every future
+    // draft class (the real drafts keep coming as the league is simmed), players retired within the last 10 seasons,
+    // Hall of Famers, and anyone the awards, All-Star and retired-number pages point to; long-retired role players are
+    // left out.
     // Past seasons show the team's current logo instead of a copy of each era's (see the teams below).
     if (opts.lite) {
       const keep = new Set();
@@ -1850,8 +1868,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       const before = players.length;
       for (let i = players.length - 1; i >= 0; i--) {
         const p = players[i];
-        // Future players: only the next three draft classes
-        if (p.tid === -2) { if (p.draft && p.draft.year <= S + 3) continue; players.splice(i, 1); continue; }
+        if (p.tid === -2) continue; // every future draft class
         if (p.tid !== -3 || p.hof || keep.has(p.pid) || (p.retiredYear !== undefined && p.retiredYear >= S - 10)) continue;
         players.splice(i, 1);
       }
@@ -1875,7 +1892,8 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
           if (align.teamDiv[me].cid === align.teamDiv[opp].cid) r[res + 'Conf']++;
         }
         r.pts += pf; r.oppPts += pa;
-        r.lastTen = [res === 'won' ? 1 : res === 'lost' ? 0 : 'TIE', ...r.lastTen].slice(0, 10);
+        // Football GM's codes: 1 won, 0 lost, -1 tied
+        r.lastTen = [res === 'won' ? 1 : res === 'lost' ? 0 : -1, ...r.lastTen].slice(0, 10);
         r.streak = res === 'won' ? (r.streak > 0 ? r.streak + 1 : 1) : res === 'lost' ? (r.streak < 0 ? r.streak - 1 : -1) : 0;
       }
     }
@@ -2034,7 +2052,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
         .concat(W ? [weekHeadToHead(S, wkGames)] : []),
       releasedPlayers: []
     };
-    shiftSeasons(league, 1);
+    shiftSeasons(league, 1, true);
     // From the slim selector master (zero stats left out): toJsonChunks puts the zeros back while writing
     if (master.statKeys) Object.defineProperty(league, '__statKeys', { value: master.statKeys, enumerable: false });
     if (master.ratingPos) Object.defineProperty(league, '__ratingPos', { value: master.ratingPos, enumerable: false });
@@ -2059,31 +2077,36 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     return { season, regularSeason, playoffs: {} };
   }
 
-  function shiftSeasons(league, d) {
+  // copy: change copies, never the objects themselves. A sliced league shares its stat lines, ratings, awards and more
+  // with the master; shifting those in place moved the master a season too, so the next league built in the same
+  // session came out a season off. (In place is for the live file, which is the master itself.)
+  function shiftSeasons(league, d, copy) {
     const bump = (o, k) => { if (o && typeof o[k] === 'number' && Number.isFinite(o[k])) o[k] += d; };
-    const bumpAll = (arr, k) => { for (const x of arr || []) bump(x, k); };
+    const one = (o, k) => { if (!copy || !o || typeof o[k] !== 'number' || !Number.isFinite(o[k])) { bump(o, k); return o; } return Object.assign({}, o, { [k]: o[k] + d }); };
+    const all = (arr, ...ks) => { if (!arr) return arr; if (!copy) { for (const x of arr) for (const k of ks) bump(x, k); return arr; } return arr.map(x => { let y = x; for (const k of ks) if (y && typeof y[k] === 'number' && Number.isFinite(y[k])) { if (y === x) y = Object.assign({}, x); y[k] += d; } return y; }); };
     const rekey = (obj) => { const out = {}; for (const [k, v] of Object.entries(obj || {})) out[/^\d{4}$/.test(k) ? String(+k + d) : k] = v; return out; };
 
     bump(league, 'startingSeason');
+    if (copy) league.gameAttributes = Object.assign({}, league.gameAttributes);
     const ga = league.gameAttributes;
     bump(ga, 'season'); bump(ga, 'startingSeason'); bump(ga, 'nflRealDataLastSeason');
-    bumpAll(ga.nflRetiredNumbers, 'seasonRetired'); bumpAll(ga.nflRetiredNumbers, 'seasonTeamInfo');
-    for (const v of Object.values(ga)) if (Array.isArray(v)) bumpAll(v, 'start');
+    if (ga.nflRetiredNumbers) ga.nflRetiredNumbers = all(ga.nflRetiredNumbers, 'seasonRetired', 'seasonTeamInfo');
+    for (const [k, v] of Object.entries(ga)) if (Array.isArray(v)) ga[k] = all(v, 'start');
     if (ga.realSchedules) ga.realSchedules = rekey(ga.realSchedules);
 
     for (const t of league.teams) {
-      bumpAll(t.seasons, 'season'); bumpAll(t.stats, 'season');
-      bumpAll(t.retiredJerseyNumbers, 'seasonRetired'); bumpAll(t.retiredJerseyNumbers, 'seasonTeamInfo');
+      t.seasons = all(t.seasons, 'season'); t.stats = all(t.stats, 'season');
+      t.retiredJerseyNumbers = all(t.retiredJerseyNumbers, 'seasonRetired', 'seasonTeamInfo');
     }
     for (const p of [...league.players, ...(league.releasedPlayers || [])]) {
-      for (const k of ['stats', 'ratings', 'awards', 'transactions', 'salaries', 'injuries']) bumpAll(p[k], 'season');
-      bump(p.contract, 'exp'); bump(p.draft, 'year'); bump(p.realDraft, 'year'); bump(p, 'retiredYear'); bump(p, 'diedYear');
+      for (const k of ['stats', 'ratings', 'awards', 'transactions', 'salaries', 'injuries']) if (p[k]) p[k] = all(p[k], 'season');
+      p.contract = one(p.contract, 'exp'); p.draft = one(p.draft, 'year'); p.realDraft = one(p.realDraft, 'year'); bump(p, 'retiredYear'); bump(p, 'diedYear');
       if (p.realRatings) p.realRatings = rekey(p.realRatings);
       if (p.realTeams) p.realTeams = rekey(p.realTeams);
       if (p.realJerseys) p.realJerseys = rekey(p.realJerseys);
-      if (p.realMoves) for (const m of p.realMoves) m.season += d;
+      if (p.realMoves) p.realMoves = all(p.realMoves, 'season');
     }
-    for (const k of ['draftPicks', 'scheduledEvents', 'awards', 'allStars', 'playoffSeries', 'events', 'headToHeads', 'games']) bumpAll(league[k], 'season');
+    for (const k of ['draftPicks', 'scheduledEvents', 'awards', 'allStars', 'playoffSeries', 'events', 'headToHeads', 'games']) if (league[k]) league[k] = all(league[k], 'season');
   }
 
   /** Serialize in chunks so very large leagues don't need one giant string. */
@@ -2099,7 +2122,9 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       for (const k of ['ovrs', 'pots']) if (Array.isArray(r[k])) o[k] = Object.fromEntries(rp.map((q, i) => [q, r[k][i]]));
       return o;
     });
-    const write = (k, x) => !keys ? JSON.stringify(x)
+    // realDeals and weekRatings are the master's own (real_contracts.js, week_ratings.js): never in a league file
+    const write = (k, x) => k === 'players' && (x.realDeals || x.weekRatings) ? write(k, Object.assign({}, x, { realDeals: undefined, weekRatings: undefined }))
+      : !keys ? JSON.stringify(x)
       : k === 'players' ? JSON.stringify(Object.assign({}, x, { stats: filled(x.stats, keys.player), ratings: expand(x.ratings) }))
       : k === 'teams' ? JSON.stringify(Object.assign({}, x, { stats: filled(x.stats, keys.team) }))
       : JSON.stringify(x);

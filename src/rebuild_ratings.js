@@ -117,7 +117,8 @@ function seasonTotals(p) {
     let t = by.get(s.season);
     if (!t) { t = { av: undefined }; for (const k of SUM) t[k] = 0; by.set(s.season, t); }
     for (const k of SUM) t[k] += s[k] || 0;
-    if (typeof s.av === 'number') t.av = (t.av || 0) + s.av;
+    if (typeof s.av === 'number') t.av = (t.av || 0) + (typeof s.avRaw === 'number' ? s.avRaw : s.av); // estimated seasons: unrounded
+    if (typeof s.avRaw === 'number') t.est = true;
   }
   for (const [season, t] of by) {
     t.fg = t.fg0 + t.fg20 + t.fg30 + t.fg40 + t.fg50;
@@ -212,10 +213,28 @@ for (const [, list] of groups) {
   const avRows = withGp.filter(x => typeof x.t.av === 'number');
   const prior = avRows.reduce((a, x) => a + x.t.av, 0) / Math.max(1, avRows.reduce((a, x) => a + x.t.gp, 0));
   for (const x of avRows) x.avpg = (x.t.av + prior * 4) / (x.t.gp + 4);
+  // Kickers and punters in estimated seasons: the AV estimate counts volume (a bad offense punts more), so they rank
+  // by how well they kick instead, per game, shrunk toward average over 4 games like AV:
+  //   kickers: field goals and extra points made over an average kicker's rate, long field goals counting extra
+  //   punters: yards per punt over average on every punt, plus punts inside the 20 over the average rate
+  for (const x of avRows) {
+    if (!x.t.est || (x.pos !== 'K' && x.pos !== 'P')) continue;
+    const t = x.t;
+    const q = x.pos === 'K'
+      ? 3 * (t.fg - 0.84 * t.fga) + 3 * (t.fg50 - 0.65 * t.fga50) + (t.xp - 0.95 * t.xpa)
+      : (t.pntYds - 47 * t.pnt) / 10 + 3 * (t.pntIn20 - 0.4 * t.pnt);
+    x.avpg = q / (t.gp + 4);
+  }
   const rankOf = (arr, key) => {
     const sorted = arr.slice().sort((a, b) => a[key] - b[key]);
     const n = sorted.length;
-    sorted.forEach((x, i) => { x['p_' + key] = n > 1 ? i / (n - 1) : 0.5; });
+    // Ties share their average rank: otherwise the order they happen to be listed in decides who rates higher
+    for (let i = 0; i < n;) {
+      let j = i;
+      while (j + 1 < n && sorted[j + 1][key] === sorted[i][key]) j++;
+      for (let k = i; k <= j; k++) sorted[k]['p_' + key] = n > 1 ? (i + j) / 2 / (n - 1) : 0.5;
+      i = j + 1;
+    }
   };
   rankOf(avRows, 'avpg');
   rankOf(list, 'oldOvr');
@@ -334,6 +353,9 @@ for (const x of rows) {
   const base = { hgt: r.hgt };
   for (const k of KEYS) base[k] = tmpl[pos][k];
   if (p.weight) base.stre = tmpl[pos].stre + (p.weight - weightMean[pos]) * 0.4;
+  // Skill players' strength is on one scale by real weight, not relative to their position, so a 200-pound receiver
+  // isn't as strong as a 225-pound back (strength is part of running the ball)
+  if (p.weight && ['RB', 'WR', 'TE'].includes(pos)) base.stre = tmpl.RB.stre + (p.weight - weightMean.RB) * 0.6;
   for (const [skill, raw] of Object.entries(x.rawS || {})) base[skill] = tmpl[pos][skill] + SPREAD * raw;
   // Run defense up front comes with size as well as tackles: a 347-pound nose tackle eats blockers instead of making
   // tackles (Vita Vea), a 250-pound edge rusher is lighter against the run
@@ -354,6 +376,14 @@ for (const x of rows) {
       base.prs = pos === 'DL' ? 50 + 13 * rush : 42 + 13 * rush;
       skills = skills.filter(k => k !== 'prs');
     }
+  }
+  if (pos === 'WR' || pos === 'TE') {
+    // Receivers' elusiveness (breaking tackles as a runner) and ball security don't rise with their receiving overall:
+    // otherwise their speed, hands and route running made them better running backs than real backs, and the game
+    // played them there (Omar Cooper and Adonai Mitchell over Braelon Allen). Elusiveness stays low, ball security
+    // comes from their own fumbles. Their receiver overall is unchanged.
+    base.elu = Math.min(base.elu, 8);
+    skills = skills.filter(k => k !== 'elu' && k !== 'bsc');
   }
   if (pos === 'QB') {
     // A quarterback's speed and elusiveness come from how much he runs, on a wide scale (Lamar Jackson fast, Matthew
@@ -406,6 +436,7 @@ for (const x of rows) {
   if (++n % 20000 === 0) console.log('  rows', n);
 }
 
+for (const p of master.players) for (const s of p.stats || []) delete s.avRaw;
 fs.writeFileSync(FILE, JSON.stringify(master));
 // Older one-time steps are replaced by this rebuild: mark them done for this master so they don't run on top of it
 const stat = fs.statSync(FILE);

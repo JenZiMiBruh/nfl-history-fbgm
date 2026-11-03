@@ -10,7 +10,7 @@ The roster file works in stock Football GM. The mod is what makes history *behav
 
 **Mac / Linux:** run `./install_and_play.sh` (needs git; it also uses its own Node.js 24).
 
-**Updates are automatic.** Every time you start it, it checks for a new version. If there is one, it downloads it, re-applies the mod and shows what's new (in the window, and the release notes in your browser) before the game opens. Offline? It just starts what you have. Your leagues are never touched: they live in your browser. Each start also sends an anonymous count (just the mod version) so I can see how many people play; an empty file named `no-stats.txt` in the folder turns it off.
+**Updates are automatic.** Every time you start it, it checks for a new version. If there is one, it downloads it, re-applies the mod and shows what's new (in the window, and the release notes in your browser) before the game opens. Offline? It just starts what you have. Your leagues are never touched: they live in your browser. Each start, and a check-in every few minutes while it runs, send an anonymous count (just the mod version) so the site can show how many people play right now; an empty file named `no-stats.txt` in the folder turns it off.
 
 **Phone:** run the installer on your computer, then open the address it shows (`http://<your-PC>:3000`) on your phone on the same Wi-Fi. Your phone saves its own leagues. Football GM's license doesn't allow hosting a modded copy online, so a computer on your network is required.
 
