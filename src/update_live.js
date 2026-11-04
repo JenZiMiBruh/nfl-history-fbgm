@@ -69,7 +69,8 @@ const get = (url) => new Promise((resolve, reject) => https.get(url, { headers: 
   const scheduled = new Set(m.schedule.map(s => `${s.homeTid}|${s.awayTid}`));
   const fresh = games.filter(g => g.home_score !== '' && g.away_score !== '' && !counted.has(g.game_id) && scheduled.has(`${CODE[g.home_team]}|${CODE[g.away_team]}`));
   console.log(`newly final games: ${fresh.length} (${fresh.map(g => g.game_id).join(', ')})`);
-  if (!fresh.length) return console.log('nothing new');
+  // No new games still refreshes rosters and injuries below (signings, injured reserve and cuts happen between games)
+  if (!fresh.length) console.log('no new games: refreshing rosters and injuries only');
   const freshIds = new Set(fresh.map(g => g.game_id));
 
   // ---- standings
@@ -158,8 +159,8 @@ const get = (url) => new Promise((resolve, reject) => https.get(url, { headers: 
   for (const r of current) {
     if (!['ACT', 'RES', 'INA'].includes(r.status)) continue;
     const tid = CODE[r.team];
-    const p = find({ player_display_name: r.full_name }, tid);
-    if (!p) { missing++; continue; }
+    const p = find({ player_display_name: r.full_name, position: r.position, college: r.college, birth_date: r.birth_date }, tid);
+    if (!p) { missing++; console.log('  not found: ' + r.full_name + ' (' + r.team + ', ' + r.position + ', ' + r.status + ')'); continue; }
     if (p.tid !== tid) { p.tid = tid; moved++; }
     if (r.jersey_number && r.jersey_number !== '0') p.jerseyNumber = String(r.jersey_number);
     onTeam.add(p.pid);

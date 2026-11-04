@@ -428,7 +428,7 @@ const LIVE = /*__LIVE__*/{ lastWeek: 0, nextWeek: 1, date: '' };
     const S = +$('season').value, ph = phase();
     if (week() > 1) await loadWeekly(S);
     // A later week needs that season's game-by-game data: say so instead of quietly building Week 1
-    if (ph === 'regular' && week() > 1 && !WEEKLY[S]) { setStatus('Couldn't load the week-by-week data for ' + (S + 1) + ', which a Week ' + week() + ' start needs. Check your connection and try again.'); return; }
+    if (ph === 'regular' && week() > 1 && !WEEKLY[S]) { setStatus("Couldn't load the week-by-week data for " + (S + 1) + ", which a Week " + week() + " start needs. Check your connection and try again."); return; }
     if (ph === 'live' && master.statKeys) {
       location.href = 'https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/' + ($('lite').checked ? 'NFL_2027_Live_Lite_FBGM.json.gz' : 'NFL_2027_Live_FBGM.json.gz');
       $('go').disabled = false;

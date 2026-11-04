@@ -76,8 +76,24 @@ for (let y = FIRST; y <= LAST; y++) {
   };
 
   const lines = {};
-  let matched = 0, missed = 0;
-  for (const r of parseCSVFile(file)) {
+  let matched = 0, missed = 0, swapped = 0;
+  const rowsY = parseCSVFile(file);
+  // nflverse swaps team and opponent on some rows (2001-02 Jaguars home games: Kyle Brady listed with the Steelers).
+  // A player's own team shows up in every one of his rows, in one column or the other: when a row's team isn't it but
+  // its opponent is, the two are read the other way around.
+  const usual = new Map();
+  for (const r of rowsY) {
+    if (r.season_type !== 'REG') continue;
+    const c = usual.get(r.player_id) || {};
+    for (const t of [r.team, r.opponent_team]) c[t] = (c[t] || 0) + 1;
+    usual.set(r.player_id, c);
+  }
+  for (const r of rowsY) {
+    const c = usual.get(r.player_id);
+    if (!c) continue;
+    if ((c[r.opponent_team] || 0) > (c[r.team] || 0) * 2 && rowsY.filter(x => x.player_id === r.player_id && x.team === r.opponent_team).length) { [r.team, r.opponent_team] = [r.opponent_team, r.team]; swapped++; }
+  }
+  for (const r of rowsY) {
     if (r.season_type !== 'REG' || !r.player_display_name) continue;
     const tid = CODE[r.team], day = dayOf.get(+r.week);
     if (tid === undefined || !day) continue;
@@ -104,7 +120,7 @@ for (let y = FIRST; y <= LAST; y++) {
     for (const r of parseCSVFile(path.join(CACHE, 'live2026', `roster_weekly_${y}.csv`))) {
       const tid = CODE[r.team], day = dayOf.get(+r.week);
       if (tid === undefined || !day || !['ACT', 'RES', 'INA'].includes(r.status)) continue;
-      const p = findLive({ player_display_name: r.full_name }, tid);
+      const p = findLive({ player_display_name: r.full_name, position: r.position, college: r.college, birth_date: r.birth_date }, tid);
       if (!p) continue;
       const inj = injAt.get(norm(r.full_name) + '|' + r.team + '|' + r.week);
       const type = (inj && (inj.report_primary_injury || inj.practice_primary_injury)) || '';
@@ -115,5 +131,5 @@ for (let y = FIRST; y <= LAST; y++) {
     }
   }
   fs.writeFileSync(path.join(OUT, `${y}.json`), JSON.stringify(rosters ? { season: y, games, lines, rosters } : { season: y, games, lines }));
-  console.log(`${y}: ${games.length} games, ${weeks.length} weeks, ${matched} player-games matched, ${missed} unmatched${rosters ? `, rosters for weeks ${Object.keys(rosters).join(',')}` : ''}`);
+  console.log(`${y}: ${games.length} games, ${weeks.length} weeks, ${matched} player-games matched, ${missed} unmatched, ${swapped} team/opponent swaps fixed${rosters ? `, rosters for weeks ${Object.keys(rosters).join(',')}` : ''}`);
 }
