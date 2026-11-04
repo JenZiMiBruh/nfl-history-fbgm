@@ -14,7 +14,7 @@
  * back over the baseline after: every rebuild starts from the baseline). Then rebuild what depends on the new games:
  *   node src/box_starts.js   (starts for finished games whose snap counts aren't posted yet, from ESPN's box score)
  *   node src/starts_from_snaps.js 2025,2026 && node src/estimate_av.js 2025,2026 && RATE_FROM=2025 node src/rebuild_ratings.js
- *   node src/starter_floor.js && node src/historic_rb_fix.js && node src/real_contracts.js && node src/draft_ratings.js && node src/week_ratings.js <next week>
+ *   node src/starter_floor.js && node src/historic_rb_fix.js && node src/real_contracts.js && node src/draft_ratings.js && node src/pick_trades.js && node src/week_ratings.js <next week>
  *   node src/audit_ratings.js <previous baseline>   (every check must pass before releasing)
  *   node src/build_head_to_head.js && node src/build_live_games.js && node src/build_weekly.js 2026 2026
  *   node src/export_vanilla.js "Through Week N"   (and copy data_cache/weekly/2026.json to the site's data/weekly/)

@@ -6,6 +6,11 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.19 · Nov 4, 2026
+
+- **Real traded picks, 2002 on.** A new league starts with each pick for the next 3 drafts owned by whoever really had it on that date. Before the 2016 trade the Rams keep their 2017 1st; at the 2016 draft Tennessee has it. Conditional picks stay put.
+- **Draft pick numbers fixed.** Picks mixed overall numbers and numbers within the round (Tom Brady showed as 6-199 and the 359th pick, and rounds came out of order). All are now within the round, in order.
+
 ## v1.18 · Nov 4, 2026
 
 - **Expansion drafts when starting After Playoffs or at the Draft.** Starting right when one was due dropped it (Panthers and Jaguars, 1995). It now runs at the next step of the offseason. Same for the 1995 Browns folding.

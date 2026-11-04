@@ -39,6 +39,9 @@ const m = JSON.parse(fs.readFileSync(path.join(ROOT, 'NFL_Master_1966_2026.json'
   m.scheduledEvents = m.scheduledEvents.filter(e => !passed(e)).map((e, i) => Object.assign({}, e, { id: i + 1 }));
   console.log(`applied ${applied} passed team changes; events ${before} -> ${m.scheduledEvents.length}`);
 }
+// The next drafts' picks start with whoever really owns them today
+require('./season_slicer').applyPickTrades(m.draftPicks, m.pickTrades, '9999', m.gameAttributes.season + 0);
+delete m.pickTrades;
 shiftSeasons(m, 1);
 m.meta = Object.assign({}, m.meta, { name: `NFL 2026-27 (${label})` });
 delete m.liveCounted;

@@ -1,4 +1,4 @@
-window.NFL_MOD_BUILT = "Nov 4, 2026, 1:12 AM";
+window.NFL_MOD_BUILT = "Nov 4, 2026, 1:23 AM";
 ;
 window.NFL_ERA_FACTORS = {
  "1966": {
@@ -1486,6 +1486,23 @@ window.NFL_ERA_FACTORS = {
     }
   }
 
+  // Real traded picks up to a date (master.pickTrades): each pick moves from the team giving it. A team holding several
+  // in a round gives the one the trade's pick number points to if known, then its own. A pick that can't be placed
+  // (a compensatory pick) moves nothing. firstSeason: earlier drafts are already real.
+  function applyPickTrades(draftPicks, trades, date, firstSeason) {
+    const original = new Map(); // season|round|number -> the original team of a pick, once a trade has moved it
+    for (const [when, season, round, from, to, number] of trades || []) {
+      if (when > date || season < firstSeason) continue;
+      const held = draftPicks.filter(p => p.season === season && p.round === round && p.tid === from);
+      if (!held.length) continue;
+      const key = season + '|' + round + '|' + number;
+      const known = number ? original.get(key) : undefined;
+      const pick = held.find(p => p.originalTid === known) || held.find(p => p.originalTid === from) || held[0];
+      if (number && known === undefined) original.set(key, pick.originalTid);
+      pick.tid = to;
+    }
+  }
+
   function hashInt(n) { let x = (n * 2654435761) >>> 0; x ^= x >>> 13; return x >>> 0; }
 
   /**
@@ -1902,7 +1919,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     // After the playoffs, this season's draft uses the real order: every real pick, held by the team that made it
     // (pick numbers are within the round, as Football GM stores them)
     const realOrder = DONE === 2 ? master.players.filter(p => p.draft && p.draft.year === S && p.draft.round > 0 && p.draft.pick > 0 && p.draft.tid >= 0 && !teams[p.draft.tid].disabled)
-      .map(p => ({ round: p.draft.round, overall: p.draft.pick, tid: p.draft.tid })).sort((a, b) => a.overall - b.overall) : [];
+      .map(p => ({ round: p.draft.round, inRound: p.draft.pick, tid: p.draft.tid })).sort((a, b) => a.round - b.round || a.inRound - b.inRound) : [];
     if (realOrder.length) {
       const inRound = {};
       for (const r of realOrder) {
@@ -1960,6 +1977,10 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
         return { gid: 900000 + i, day, att: 0, clutchPlays: [], season: S, numPeriods: 4, overtimes: 0, won: { tid: win.tid, pts: win.pts }, lost: { tid: lose.tid, pts: lose.pts }, scoringSummary: [], teams };
       });
     };
+    // The date this league starts, for real traded picks
+    const startDate = phaseName === 'draft' ? (S + 1) + '-05-01' : phaseName === 'afterplayoffs' ? (S + 1) + '-02-20' : phaseName === 'playoffs' ? (S + 1) + '-01-05'
+      : W ? new Date(Date.UTC(S, 8, 5 + 7 * (W - 1))).toISOString().slice(0, 10) : S + '-08-31';
+    applyPickTrades(draftPicks, master.pickTrades, startDate, realOrder.length ? S + 1 : S);
     const league = {
       version: master.version,
       startingSeason: E.FIRST_SEASON,
@@ -2059,7 +2080,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       : k === 'players' ? JSON.stringify(Object.assign({}, x, { stats: filled(x.stats, keys.player), ratings: expand(x.ratings) }))
       : k === 'teams' ? JSON.stringify(Object.assign({}, x, { stats: filled(x.stats, keys.team) }))
       : JSON.stringify(x);
-    Object.keys(league).filter(k => !k.startsWith('__')).forEach((k, i) => {
+    Object.keys(league).filter(k => !k.startsWith('__') && k !== 'pickTrades').forEach((k, i) => {
       parts.push((i ? ',' : '') + JSON.stringify(k) + ':');
       const v = league[k];
       if (k === 'teams' && keys) parts.push('[' + v.map(x => write(k, x)).join(',') + ']');
@@ -2120,7 +2141,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     return league;
   }
 
-  const api = { sliceLeague, shiftSeasons, toJsonChunks, buildDepth, fitPayrolls, PHASES, PHASE_LABELS, EVENT_CATEGORIES, eventCategory, describeEvent, keepEvents };
+  const api = { applyPickTrades, sliceLeague, shiftSeasons, toJsonChunks, buildDepth, fitPayrolls, PHASES, PHASE_LABELS, EVENT_CATEGORIES, eventCategory, describeEvent, keepEvents };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.SEASON_SLICER = api;
 
