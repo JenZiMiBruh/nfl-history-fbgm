@@ -2071,7 +2071,10 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
         .sort((x, y) => Math.abs(x.born.year - born) - Math.abs(y.born.year - born));
       return c.length ? c[0].pid : undefined;
     };
-    const scheduledEvents = E.buildScheduledEvents(S, P, resolvePid);
+    // Expansion drafts and contractions happen right after the playoffs (phase 4). A league starting at that moment or at
+    // the draft would miss them, so they fire at the next phase instead (Panthers and Jaguars from After Playoffs 1994).
+    const scheduledEvents = (P >= 4 ? E.buildScheduledEvents(S, 3, resolvePid).filter(e => !(e.season === S && e.phase <= P && !['expansionDraft', 'contraction'].includes(e.type)))
+      .map(e => (e.season === S && e.phase <= P ? Object.assign({}, e, { phase: P + 1 }) : e)) : E.buildScheduledEvents(S, P, resolvePid));
 
     // The games already played, so the schedule shows them: box scores where they exist (the live season), otherwise
     // the real score from the weekly data (no player lines)

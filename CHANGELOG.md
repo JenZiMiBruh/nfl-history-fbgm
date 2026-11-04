@@ -6,6 +6,10 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.18 · Nov 4, 2026
+
+- **Expansion drafts when starting After Playoffs or at the Draft.** Starting right when one was due dropped it (Panthers and Jaguars, 1995). It now runs at the next step of the offseason. Same for the 1995 Browns folding.
+
 ## v1.17 · Nov 4, 2026
 
 - **Backup quarterbacks stay quarterbacks.** Real QBs who barely threw in a season were rated as receivers (Scott Mitchell behind Marino in 1992). Fixed in every season.
