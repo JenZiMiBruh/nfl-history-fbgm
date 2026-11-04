@@ -6,6 +6,10 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.15 · Nov 4, 2026
+
+- **Games ending 0-0 fixed.** Leagues built with the season picker could lose their expanded ratings and stats when written to the file, so every play gained nothing. If you got 0-0 games, build a new league: existing ones keep the bad data.
+
 ## v1.14 · Nov 3, 2026
 
 - **Season picker works again.** A typo in v1.11-1.13 left the season list blank.

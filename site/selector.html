@@ -2094,8 +2094,8 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     };
     shiftSeasons(league, 1, true);
     // From the slim selector master (zero stats left out): toJsonChunks puts the zeros back while writing
-    if (master.statKeys) Object.defineProperty(league, '__statKeys', { value: master.statKeys, enumerable: false });
-    if (master.ratingPos) Object.defineProperty(league, '__ratingPos', { value: master.ratingPos, enumerable: false });
+    if (master.statKeys) league.__statKeys = master.statKeys; // plain fields, so a copy ({...league}) keeps them: without them the file goes out unexpanded and every game ends 0-0
+    if (master.ratingPos) league.__ratingPos = master.ratingPos;
     return league;
   }
 
@@ -2168,7 +2168,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       : k === 'players' ? JSON.stringify(Object.assign({}, x, { stats: filled(x.stats, keys.player), ratings: expand(x.ratings) }))
       : k === 'teams' ? JSON.stringify(Object.assign({}, x, { stats: filled(x.stats, keys.team) }))
       : JSON.stringify(x);
-    Object.keys(league).forEach((k, i) => {
+    Object.keys(league).filter(k => !k.startsWith('__')).forEach((k, i) => {
       parts.push((i ? ',' : '') + JSON.stringify(k) + ':');
       const v = league[k];
       if (k === 'teams' && keys) parts.push('[' + v.map(x => write(k, x)).join(',') + ']');
