@@ -148,7 +148,10 @@ for (const p of master.players) {
     const t = tot.get(r.season);
     let posFixed = false;
     if (pos === 'QB' && t && t.gp > 0 && t.pss < 10) {
-      const alt = t.pnt >= 10 ? 'P' : t.fga >= 5 ? 'K' : t.rec >= 5 ? 'WR' : t.rus >= 10 ? 'RB' : t.gp >= 4 ? 'WR' : null;
+      // A real quarterback (5+ passes in his career) who sat behind the starter is still a quarterback (Scott Mitchell
+      // behind Marino in 1992): he only moves if he really played elsewhere
+      const careerQB = [...tot.values()].reduce((a, y) => a + y.pss, 0) >= 5;
+      const alt = t.pnt >= 10 ? 'P' : t.fga >= 5 ? 'K' : t.rec >= 5 ? 'WR' : careerQB ? null : t.rus >= 10 ? 'RB' : t.gp >= 4 ? 'WR' : null;
       if (alt) { pos = alt; posFixed = true; }
     }
     // Listed on one side of the ball but produced only on the other (Jimmy Smith, the Jaguars receiver, listed at CB;

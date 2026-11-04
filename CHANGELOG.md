@@ -6,6 +6,14 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.17 · Nov 4, 2026
+
+- **Backup quarterbacks stay quarterbacks.** Real QBs who barely threw in a season were rated as receivers (Scott Mitchell behind Marino in 1992). Fixed in every season.
+- **Changelog in the game.** The mod shows its version, pops up what is new after an update, and keeps the full changelog a click away, without opening GitHub.
+- **Update alert in the game.** When a new version is out, the mod says so and has an Update now button. (Restart the mod once to get it.)
+- **New default settings for new mod leagues.** Real Player Determinism and Real Schedules stay on. Real Draft Picks, Scheduled Retirements, Comebacks and Suspensions, Real Retirements and Historical Rosters start off; turn on any you like in Settings.
+- **Real Draft Ratings is a league setting** in Real Players.
+
 ## v1.16 · Nov 4, 2026
 
 - **Real draft ratings.** In a league started before a draft, prospects are rated by where they really went (Dak Prescott, pick 135, is a 39, not a top-5 prospect), and with the mod their real ratings take over in their first season. A setting in the picker, on by default.

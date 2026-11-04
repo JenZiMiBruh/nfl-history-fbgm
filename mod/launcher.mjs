@@ -1,13 +1,14 @@
 // NFL History for Football GM: launcher with automatic updates. Install_and_Play (.bat / .sh) downloads a private
 // Node 24 and runs this script, which:
 //   1. checks GitHub for a newer release; if there is one, downloads NFL_History_Mod.zip, copies it over this folder
-//      and shows what's new (here, and the release notes in the browser)
+//      and shows what's new (here, and in the game when it opens)
 //   2. sets up Football GM's source with the mod applied, whenever the installed mod version isn't the current one
 //   3. starts the game
 // Offline, or if GitHub can't be reached, it skips the check and starts what's installed.
 // Testing: NFL_RELEASE_API points the update check at another URL; NFL_NO_START=1 stops before starting the game.
 import { execFileSync, spawn } from 'node:child_process';
 import fs from 'node:fs';
+import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -109,7 +110,6 @@ function showWhatsNew(rel) {
     if (t && !t.startsWith('Every NFL season') && !/^What's new in/.test(t)) say('  ' + t);
   }
   say();
-  if (rel.html_url) openUrl(rel.html_url);
 }
 
 function install(cfg) {
@@ -157,8 +157,42 @@ async function main() {
   if (ip) say(`  On your phone (same Wi-Fi): http://${ip}:3000`);
   say('  Keep this window open while you play.\n');
   setTimeout(() => openUrl('http://localhost:3000'), 4000);
-  const child = spawn(WIN ? 'node.exe' : 'node', ['--run', 'dev', '--', '--host'], { cwd: GAME, stdio: 'inherit', env: { ...process.env, SPORT: 'football' } });
-  child.on('exit', (code) => process.exit(code ?? 0));
+  let child;
+  let updating = false;
+  const startGame = () => {
+    child = spawn(WIN ? 'node.exe' : 'node', ['--run', 'dev', '--', '--host'], { cwd: GAME, stdio: 'inherit', env: { ...process.env, SPORT: 'football' } });
+    child.on('exit', (code) => { if (!updating) process.exit(code ?? 0); });
+  };
+  const stopGame = () => {
+    if (WIN) { try { execFileSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' }); } catch { /* already gone */ } }
+    else child.kill();
+  };
+  startGame();
+  // The game's Update now button: only asks for the update (nothing else can be done here), from the game's own page
+  http.createServer(async (req, res) => {
+    const origin = req.headers.origin || '';
+    if (/:3000$/.test(origin)) res.setHeader('Access-Control-Allow-Origin', origin);
+    if (req.method !== 'POST' || req.url !== '/update' || !/:3000$/.test(origin)) { res.writeHead(404); res.end(); return; }
+    if (updating) { res.writeHead(409); res.end(); return; }
+    updating = true;
+    res.writeHead(202); res.end('updating');
+    // The game keeps running until the update is ready, so a failed download changes nothing
+    try {
+      const current = readJson(path.join(MOD, 'version.json'));
+      const update = await checkForUpdate(current.version);
+      if (update) {
+        stopGame();
+        install(readJson(path.join(MOD, 'version.json')));
+        showWhatsNew(update);
+        startGame();
+      }
+    } catch (e) {
+      log(String(e && e.stack || e));
+      say('  (The update did not work: ' + e.message + '. Run Install_and_Play again to try once more.)');
+      if (child.exitCode !== null) startGame();
+    }
+    updating = false;
+  }).listen(3099).on('error', (e) => log('update button unavailable: ' + e.message));
 }
 
 main().catch((e) => {

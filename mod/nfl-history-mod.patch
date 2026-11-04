@@ -11,7 +11,7 @@ index 16a2fbe..2e19f9f 100644
  	},
  	"engines": {
 diff --git a/src/common/defaultGameAttributes.ts b/src/common/defaultGameAttributes.ts
-index 1127385..baf892a 100644
+index 1127385..d7ffea3 100644
 --- a/src/common/defaultGameAttributes.ts
 +++ b/src/common/defaultGameAttributes.ts
 @@ -81,7 +81,6 @@ const gameAttributesKeysSportSpecific = {
@@ -22,7 +22,7 @@ index 1127385..baf892a 100644
  		"rpdPot",
  		"foulRateFactor",
  		"foulsNeededToFoulOut",
-@@ -585,7 +584,16 @@ export const defaultGameAttributes: GameAttributesLeagueWithHistory = {
+@@ -585,7 +584,17 @@ export const defaultGameAttributes: GameAttributesLeagueWithHistory = {
  	thanosCooldownEnd: undefined,
  	repeatSeason: undefined,
  	equalizeRegions: false,
@@ -30,21 +30,22 @@ index 1127385..baf892a 100644
 +	// NFL history mod: football follows stored real ratings by default
 +	realPlayerDeterminism: __SPORT === "football" ? 1 : 0,
 +	useRealSchedules: true,
-+	useRealDrafts: true,
-+	nflRetirements: true,
-+	nflComebacks: true,
++	useRealDrafts: false,
++	nflRetirements: false,
++	nflComebacks: false,
 +	nflComebackDestination: "team",
-+	nflSuspensions: true,
-+	nflRealRetirements: true,
-+	nflHistoricalRosters: true,
++	nflSuspensions: false,
++	nflRealRetirements: false,
++	nflHistoricalRosters: false,
++	nflRealDraftRatings: true,
  	spectator: false,
  	elam: false,
  	elamASG: false,
 diff --git a/src/common/types.ts b/src/common/types.ts
-index 2116af8..37511b3 100644
+index 2116af8..5d04ad5 100644
 --- a/src/common/types.ts
 +++ b/src/common/types.ts
-@@ -720,6 +720,14 @@ export type GameAttributesLeague = {
+@@ -720,6 +720,15 @@ export type GameAttributesLeague = {
  	randomDebutsForever?: number;
  	realDraftRatings?: RealDraftRatingsSetting;
  	realPlayerDeterminism: number;
@@ -56,9 +57,171 @@ index 2116af8..37511b3 100644
 +	nflSuspensions: boolean;
 +	nflRealRetirements: boolean;
 +	nflHistoricalRosters: boolean;
++	nflRealDraftRatings: boolean;
  	repeatSeason:
  		| undefined
  		| {
+diff --git a/src/ui/components/Controller/NflWhatsNew.tsx b/src/ui/components/Controller/NflWhatsNew.tsx
+new file mode 100644
+index 0000000..d46be15
+--- /dev/null
++++ b/src/ui/components/Controller/NflWhatsNew.tsx
+@@ -0,0 +1,155 @@
++import { useEffect, useState, type ReactNode } from "react";
++import { Modal } from "react-bootstrap";
++
++// NFL history mod: the mod's version in the corner, its changelog in the game, and a pop up the first time a new version
++// is opened. The launcher copies version.json and CHANGELOG.md next to the mod's other files.
++const SEEN_KEY = "nflModVersionSeen";
++const RELEASES = "https://api.github.com/repos/JenZiMiBruh/nfl-history-fbgm/releases/latest";
++
++const isNewer = (a: string, b: string) => {
++	const pa = a.replace(/^v/, "").split(".").map(Number);
++	const pb = b.replace(/^v/, "").split(".").map(Number);
++	for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
++		if ((pa[i] ?? 0) !== (pb[i] ?? 0)) {
++			return (pa[i] ?? 0) > (pb[i] ?? 0);
++		}
++	}
++	return false;
++};
++
++const bold = (text: string) =>
++	text.split("**").map((part, i) => (i % 2 ? <b key={i}>{part}</b> : part));
++
++const render = (md: string, newestOnly: boolean) => {
++	const out: ReactNode[] = [];
++	let list: ReactNode[] = [];
++	let sections = 0;
++	const flush = () => {
++		if (list.length > 0) {
++			out.push(<ul key={out.length}>{list}</ul>);
++			list = [];
++		}
++	};
++	for (const line of md.split(/\r?\n/)) {
++		if (line.startsWith("## ")) {
++			sections += 1;
++			if (newestOnly && sections > 1) {
++				break;
++			}
++			flush();
++			out.push(<h4 key={out.length}>{line.slice(3)}</h4>);
++		} else if (sections > 0 && line.startsWith("- ")) {
++			list.push(<li key={list.length}>{bold(line.slice(2))}</li>);
++		}
++	}
++	flush();
++	return out;
++};
++
++export const NflWhatsNew = () => {
++	const [version, setVersion] = useState<string>();
++	const [changelog, setChangelog] = useState("");
++	const [show, setShow] = useState<"new" | "all" | undefined>();
++	const [latest, setLatest] = useState<string>();
++	const [updateStatus, setUpdateStatus] = useState("");
++
++	const update = async () => {
++		try {
++			const response = await fetch(`http://${location.hostname}:3099/update`, { method: "POST" });
++			if (!response.ok) {
++				throw new Error();
++			}
++			setUpdateStatus("Updating... the game restarts by itself, and this page reloads when it is ready.");
++			// Wait for the game to come back on the new version
++			const timer = setInterval(async () => {
++				try {
++					const v = await fetch("/nfl/version.json", { cache: "no-store" }).then((r) => r.json());
++					if (v.version === latest?.replace(/^v/, "")) {
++						clearInterval(timer);
++						location.reload();
++					}
++				} catch {
++					// still restarting
++				}
++			}, 5000);
++		} catch {
++			setUpdateStatus("Close the mod window and run Install_and_Play again to update.");
++		}
++	};
++
++	useEffect(() => {
++		(async () => {
++			try {
++				const [v, md] = await Promise.all([
++					fetch("/nfl/version.json").then((r) => r.json()),
++					fetch("/nfl/CHANGELOG.md").then((r) => r.text()),
++				]);
++				setVersion(v.version);
++				setChangelog(md);
++				fetch(RELEASES)
++					.then((r) => r.json())
++					.then((rel) => {
++						if (rel.tag_name && isNewer(rel.tag_name, v.version)) {
++							setLatest(rel.tag_name);
++						}
++					})
++					.catch(() => {});
++				if (localStorage.getItem(SEEN_KEY) !== v.version) {
++					localStorage.setItem(SEEN_KEY, v.version);
++					setShow("new");
++				}
++			} catch {
++				// no files (or no storage): nothing to show
++			}
++		})();
++	}, []);
++
++	if (!version) {
++		return null;
++	}
++
++	return (
++		<>
++			<button
++				className="btn btn-sm btn-secondary"
++				type="button"
++				style={{
++					position: "fixed",
++					left: 8,
++					bottom: 8,
++					zIndex: 1000,
++					opacity: 0.85,
++				}}
++				onClick={() => setShow("all")}
++			>
++				NFL History v{version} · What's new
++			</button>
++			{latest ? (
++				<div className="alert alert-info" style={{ position: "fixed", left: 8, bottom: 48, zIndex: 1000, maxWidth: 340, marginBottom: 0 }}>
++					<div className="mb-2">Update available: <b>{latest}</b></div>
++					{updateStatus ? <div>{updateStatus}</div> : (
++						<button className="btn btn-sm btn-primary" type="button" onClick={update}>Update now</button>
++					)}
++				</div>
++			) : null}
++			<Modal show={show !== undefined} onHide={() => setShow(undefined)} size="lg" scrollable>
++				<Modal.Header closeButton>
++					<Modal.Title>
++						{show === "new" ? "What's new in the NFL History mod" : "NFL History changelog"}
++					</Modal.Title>
++				</Modal.Header>
++				<Modal.Body>{render(changelog, show === "new")}</Modal.Body>
++				<Modal.Footer>
++					{show === "new" ? (
++						<button className="btn btn-secondary" type="button" onClick={() => setShow("all")}>
++							Full changelog
++						</button>
++					) : null}
++					<button className="btn btn-primary" type="button" onClick={() => setShow(undefined)}>
++						Close
++					</button>
++				</Modal.Footer>
++			</Modal>
++		</>
++	);
++};
 diff --git a/src/ui/components/Controller/TeamTheme.tsx b/src/ui/components/Controller/TeamTheme.tsx
 new file mode 100644
 index 0000000..3a5e35c
@@ -161,22 +324,24 @@ index 0000000..3a5e35c
 +	return null;
 +};
 diff --git a/src/ui/components/Controller/index.tsx b/src/ui/components/Controller/index.tsx
-index fc14a9f..51cbcae 100644
+index fc14a9f..b0c12d4 100644
 --- a/src/ui/components/Controller/index.tsx
 +++ b/src/ui/components/Controller/index.tsx
-@@ -12,6 +12,7 @@ import { Notifications } from "./Notifications.tsx";
+@@ -12,6 +12,8 @@ import { Notifications } from "./Notifications.tsx";
  import { SideBar } from "./SideBar.tsx";
  import { Skyscraper } from "./Skyscraper.tsx";
  import { TitleBar } from "./TitleBar.tsx";
 +import { TeamTheme } from "./TeamTheme.tsx";
++import { NflWhatsNew } from "./NflWhatsNew.tsx";
  import { useViewData } from "../../util/viewManager.tsx";
  import api from "../../api/index.ts";
  import { ErrorBoundary } from "../ErrorBoundary.tsx";
-@@ -120,6 +121,7 @@ export const Controller = () => {
+@@ -120,6 +122,8 @@ export const Controller = () => {
  							</div>
  							<Skyscraper />
  						</div>
 +						<TeamTheme />
++						<NflWhatsNew />
  						<CommandPalette />
  						<NagModal close={closeNagModal} show={showNagModal} />
  					</div>
@@ -715,7 +880,7 @@ index 949d2ba..a6c6f88 100644
  															dispatch({ type: "loadingLeagueFile" });
  														}}
 diff --git a/src/ui/views/Settings/settings.tsx b/src/ui/views/Settings/settings.tsx
-index 4e86c44..a6bde36 100644
+index 4e86c44..92c4304 100644
 --- a/src/ui/views/Settings/settings.tsx
 +++ b/src/ui/views/Settings/settings.tsx
 @@ -2311,10 +2311,19 @@ export const settings: Setting[] = (
@@ -739,7 +904,7 @@ index 4e86c44..a6bde36 100644
  					<p>
  						By default, BBGM's player development algorithm does not take into
  						account what we know about a real player's future performance. That
-@@ -2338,6 +2347,74 @@ export const settings: Setting[] = (
+@@ -2338,6 +2347,82 @@ export const settings: Setting[] = (
  				}
  			},
  		},
@@ -811,14 +976,22 @@ index 4e86c44..a6bde36 100644
 +			description:
 +				"NFL history mod: every preseason, real players move to the team they really played for that season, so team strength follows real history. Off: rosters change only through the game's own moves.",
 +		},
++		{
++			category: "Real Players",
++			key: "nflRealDraftRatings",
++			name: "Real Draft Ratings",
++			type: "bool",
++			description:
++				"NFL history mod: draft prospects are rated by where they really went in the draft, and get their real ratings in their first season. Off: prospects still waiting to be drafted show their real first-season ratings now.",
++		},
  		{
  			category: "Real Players",
  			key: "rpdPot",
 diff --git a/src/ui/views/Settings/types.ts b/src/ui/views/Settings/types.ts
-index 8ac606a..68e546d 100644
+index 8ac606a..00f9da7 100644
 --- a/src/ui/views/Settings/types.ts
 +++ b/src/ui/views/Settings/types.ts
-@@ -58,6 +58,14 @@ export type Key =
+@@ -58,6 +58,15 @@ export type Key =
  	| "challengeSisyphusMode"
  	| "challengeThanosMode"
  	| "realPlayerDeterminism"
@@ -830,11 +1003,12 @@ index 8ac606a..68e546d 100644
 +	| "nflSuspensions"
 +	| "nflRealRetirements"
 +	| "nflHistoricalRosters"
++	| "nflRealDraftRatings"
  	| "repeatSeason"
  	| "maxOvertimes"
  	| "maxOvertimesPlayoffs"
 diff --git a/src/worker/api/index.ts b/src/worker/api/index.ts
-index 12dd36b..ad6941b 100644
+index 12dd36b..28e18a3 100644
 --- a/src/worker/api/index.ts
 +++ b/src/worker/api/index.ts
 @@ -159,6 +159,7 @@ import { formatScheduleForEditor } from "../views/scheduleEditor.ts";
@@ -845,7 +1019,66 @@ index 12dd36b..ad6941b 100644
  import { getNumPlayersTradedAwayNormalizedAll } from "../core/player/getNumPlayersTradedAwayNormalized.ts";
  import { getAdjustedTicketPrice } from "../../common/getAdjustedTicketPrice.ts";
  import { gameAttributesArrayToObject } from "../../common/gameAttributesArrayToObject.ts";
-@@ -4871,6 +4872,17 @@ const upgrade65 = async () => {
+@@ -4184,9 +4185,50 @@ const updateDefaultSettingsOverrides = async (
+ 	}
+ };
+ 
++// NFL history mod: Real Draft Ratings switched in a league. Off: prospects take their real first-season ratings (the draft
++// ones are kept on the player). On: the kept ones come back.
++const applyNflDraftRatings = async (
++	gameAttributes: Partial<GameAttributesLeague>,
++) => {
++	const next = gameAttributes.nflRealDraftRatings;
++	if (next === undefined || next === g.get("nflRealDraftRatings")) {
++		return;
++	}
++	const prospects: any[] = await idb.cache.players.indexGetAll(
++		"playersByTeam",
++		PLAYER.UNDRAFTED,
++	);
++	for (const p of prospects) {
++		const ratings = p.ratings.at(-1);
++		if (next) {
++			if (!p.nflDraftRatings) {
++				continue;
++			}
++			Object.assign(ratings, p.nflDraftRatings);
++			delete p.nflDraftRatings;
++		} else {
++			const seasons = Object.keys(p.realRatings ?? {}).map(Number);
++			if (seasons.length === 0) {
++				continue;
++			}
++			const real = p.realRatings[Math.min(...seasons)];
++			const kept: Record<string, number> = {};
++			for (const key of Object.keys(real)) {
++				kept[key] = ratings[key];
++				ratings[key] = real[key];
++			}
++			p.nflDraftRatings = kept;
++		}
++		await player.develop(p, 0);
++		await player.updateValues(p);
++		await idb.cache.players.put(p);
++	}
++};
++
+ const updateGameAttributes = async (
+ 	gameAttributes: Partial<GameAttributesLeague>,
+ ) => {
++	await applyNflDraftRatings(gameAttributes);
+ 	await league.setGameAttributes(gameAttributes);
+ 	await toUI("realtimeUpdate", [["gameAttributes"]]);
+ };
+@@ -4194,6 +4236,7 @@ const updateGameAttributesGodMode = async (
+ 	settings: Settings,
+ 	conditions: Conditions,
+ ) => {
++	await applyNflDraftRatings(settings as any);
+ 	const gameAttributes: Partial<GameAttributesLeague> = omit(settings, [
+ 		"repeatSeason",
+ 	]);
+@@ -4871,6 +4914,17 @@ const upgrade65 = async () => {
  	console.timeEnd("upgrade65");
  };
  
@@ -863,7 +1096,7 @@ index 12dd36b..ad6941b 100644
  const upsertCustomizedPlayer = async (
  	{
  		p,
-@@ -4920,6 +4932,17 @@ const upsertCustomizedPlayer = async (
+@@ -4920,6 +4974,17 @@ const upsertCustomizedPlayer = async (
  
  	p.imgURL = helpers.stripBbcode(p.imgURL);
  
@@ -881,7 +1114,7 @@ index 12dd36b..ad6941b 100644
  	// Fix draft and ratings season
  	if (p.tid === PLAYER.UNDRAFTED) {
  		if (p.draft.year < season) {
-@@ -5381,8 +5404,86 @@ const whileWorkerBusy =
+@@ -5381,8 +5446,86 @@ const whileWorkerBusy =
  	(...args: Args) =>
  		lock.whileWorkerBusy(() => cb(...args));
  
@@ -968,7 +1201,7 @@ index 12dd36b..ad6941b 100644
  	awardSettings,
  	eightyTwoZeroDraft,
  	exhibitionGame,
-@@ -5531,6 +5632,7 @@ const api = {
+@@ -5531,6 +5674,7 @@ const api = {
  		updateTrade,
  		upgrade65,
  		upgrade65Estimate,
@@ -2105,10 +2338,10 @@ index 1e4f265..2df520e 100644
  	}
  
 diff --git a/src/worker/views/newLeague.ts b/src/worker/views/newLeague.ts
-index 3000371..05fbef5 100644
+index 3000371..098448b 100644
 --- a/src/worker/views/newLeague.ts
 +++ b/src/worker/views/newLeague.ts
-@@ -433,6 +433,15 @@ export const getDefaultSettings = () => {
+@@ -433,6 +433,16 @@ export const getDefaultSettings = () => {
  		),
  		neutralSite: unwrapGameAttribute(defaultGameAttributes, "neutralSite"),
  		rpdPot: unwrapGameAttribute(defaultGameAttributes, "rpdPot"),
@@ -2121,14 +2354,15 @@ index 3000371..05fbef5 100644
 +		nflSuspensions: unwrapGameAttribute(defaultGameAttributes, "nflSuspensions"),
 +		nflRealRetirements: unwrapGameAttribute(defaultGameAttributes, "nflRealRetirements"),
 +		nflHistoricalRosters: unwrapGameAttribute(defaultGameAttributes, "nflHistoricalRosters"),
++		nflRealDraftRatings: unwrapGameAttribute(defaultGameAttributes, "nflRealDraftRatings"),
  		saveOldBoxScores: unwrapGameAttribute(
  			defaultGameAttributes,
  			"saveOldBoxScores",
 diff --git a/src/worker/views/settings.ts b/src/worker/views/settings.ts
-index 7656605..e1853f9 100644
+index 7656605..cc44025 100644
 --- a/src/worker/views/settings.ts
 +++ b/src/worker/views/settings.ts
-@@ -73,6 +73,14 @@ type Key =
+@@ -73,6 +73,15 @@ type Key =
  	| "challengeSisyphusMode"
  	| "challengeThanosMode"
  	| "realPlayerDeterminism"
@@ -2140,10 +2374,11 @@ index 7656605..e1853f9 100644
 +	| "nflSuspensions"
 +	| "nflRealRetirements"
 +	| "nflHistoricalRosters"
++	| "nflRealDraftRatings"
  	| "repeatSeason"
  	| "maxOvertimes"
  	| "maxOvertimesPlayoffs"
-@@ -290,6 +298,14 @@ export const getInitialSettings = (): Settings => {
+@@ -290,6 +299,15 @@ export const getInitialSettings = (): Settings => {
  		challengeSisyphusMode: g.get("challengeSisyphusMode"),
  		challengeThanosMode: g.get("challengeThanosMode"),
  		realPlayerDeterminism: g.get("realPlayerDeterminism"),
@@ -2155,6 +2390,7 @@ index 7656605..e1853f9 100644
 +		nflSuspensions: g.get("nflSuspensions"),
 +		nflRealRetirements: g.get("nflRealRetirements"),
 +		nflHistoricalRosters: g.get("nflHistoricalRosters"),
++		nflRealDraftRatings: g.get("nflRealDraftRatings"),
  		repeatSeason: g.get("repeatSeason")?.type ?? "disabled",
  		maxOvertimes: g.get("maxOvertimes"),
  		maxOvertimesPlayoffs: g.get("maxOvertimesPlayoffs"),
