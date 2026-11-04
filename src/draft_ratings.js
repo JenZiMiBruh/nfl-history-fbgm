@@ -17,7 +17,7 @@ const FILE = path.join(__dirname, '..', 'NFL_Master_1966_2026.json');
 const KEYS = ['stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', 'elu', 'rtr', 'hnd', 'rbk', 'pbk', 'pcv', 'tck', 'prs', 'rns', 'kpw', 'kac', 'ppw', 'pac'];
 const master = JSON.parse(fs.readFileSync(FILE, 'utf8'));
 // draft.pick is the pick within the round (normalize_draft_picks.js)
-const overall = d => (d.round - 1) * 32 + d.pick;
+const overall = d => d.overall || (d.round - 1) * 32 + d.pick;
 let n = 0, off = 0;
 for (const p of master.players) {
   delete p.draftRow;

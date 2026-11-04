@@ -6,6 +6,12 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.20 · Nov 4, 2026
+
+- **QB vision raised in every season.** Vision was far too low (Tom Brady never got above 63; he now peaks at 76), and it directly affects interceptions. Overalls unchanged.
+- **Running backs in the mod.** Lead backs get fewer carries and a little less stamina, and a runner's ability is capped in the sim, to stop 400-carry, 2,300-yard seasons from generated players.
+- **Draft numbers, take two.** Picks are numbered within their round, with the real overall pick stored: Tom Brady is 6-33, the 199th pick.
+
 ## v1.19 · Nov 4, 2026
 
 - **Real traded picks, 2002 on.** A new league starts with each pick for the next 3 drafts owned by whoever really had it on that date. Before the 2016 trade the Rams keep their 2017 1st; at the 2016 draft Tennessee has it. Conditional picks stay put.

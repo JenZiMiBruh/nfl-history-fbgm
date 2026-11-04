@@ -1312,7 +1312,7 @@ index 0000000..eee4085
 +		);
 +	};
 diff --git a/src/worker/core/GameSim.football/index.ts b/src/worker/core/GameSim.football/index.ts
-index ccdc4ee..7d4e0a6 100644
+index ccdc4ee..a1695c1 100644
 --- a/src/worker/core/GameSim.football/index.ts
 +++ b/src/worker/core/GameSim.football/index.ts
 @@ -10,6 +10,18 @@ import {
@@ -1341,8 +1341,8 @@ index ccdc4ee..7d4e0a6 100644
 -				const FATIGUE_MODIFIER = pos === "WR" ? 0.75 : 1;
 -
 -				const depth = this.team[t].depth[pos];
-+				// NFL history mod: the lead back rests less often (1.3), so workhorse backs get workhorse carries
-+				const FATIGUE_MODIFIER = pos === "WR" ? 0.75 : pos === "RB" ? 1.3 : 1;
++				// NFL history mod: the lead back rests a little less often (1.1), so workhorse backs get workhorse carries
++				const FATIGUE_MODIFIER = pos === "WR" ? 0.75 : pos === "RB" ? 1.1 : 1;
 +
 +				// NFL history mod: on offense and defense, players who really play this position go first (in depth chart
 +				// order), then everyone else, so a receiver listed on the running back depth chart only plays there if needed
@@ -1423,8 +1423,8 @@ index ccdc4ee..7d4e0a6 100644
 +		// NFL history mod: the lead back (first on the field, from the depth chart) carries most of the time. In two-back
 +		// sets the second back is usually a fullback, who rarely gets the ball. Among the rest, better runners are favored.
 +		const leadBack = this.playersOnField[o].RB?.[0];
-+		// x4: lead backs get ~68% of carries in a game (18 a game), like real workhorse backs
-+		const LEAD_BACK = 4;
++		// x3: lead backs get about 60% of carries in a game (16 a game), a workhorse without 400-carry seasons
++		const LEAD_BACK = 3;
 +		const rushPower = positions.includes("WR") ? 1 : 3;
 +		const p = choice(
 +			getPlayers(this.playersOnField[o], positions),
@@ -1436,7 +1436,7 @@ index ccdc4ee..7d4e0a6 100644
  
  		if (!qbScramble) {
  			rbw = new Map();
-@@ -2708,20 +2753,24 @@ class GameSim extends GameSimBase {
+@@ -2708,20 +2753,25 @@ class GameSim extends GameSimBase {
  			names: p === qb ? [qb.name] : [qb.name, p.name],
  		});
  
@@ -1444,7 +1444,8 @@ index ccdc4ee..7d4e0a6 100644
 +		// starter-average level counts extra, so elite backs gain real separation (Sanders: a yard a carry over
 +		// the league). An average back gets the same yards as before; era calibration keeps league totals right.
 +		const RUSH_AVG = 0.63; // average starting back (1990-2025 ratings)
-+		const rusher = RUSH_AVG + (p.compositeRating.rushing - RUSH_AVG) * 1.8;
++		// Capped: generated players can rate past any real back, and uncapped they ran for 2,300 yards in future seasons
++		const rusher = Math.min(0.9, RUSH_AVG + (p.compositeRating.rushing - RUSH_AVG) * 1.8);
  		// Bound is so (in extreme contrived cases like 0 ovr teams) meanYds can't go too far above/below the truncGauss limits
  		const meanYds = helpers.bound(
  			(scrambleModifier *
@@ -1465,7 +1466,7 @@ index ccdc4ee..7d4e0a6 100644
  			ydsRaw += randInt(0, 109);
  		}
  
-@@ -3067,7 +3116,10 @@ class GameSim extends GameSimBase {
+@@ -3067,7 +3117,10 @@ class GameSim extends GameSimBase {
  		positions: Position[] = POSITIONS,
  		power: number = 1,
  	) {
@@ -2095,6 +2096,19 @@ index 324e001..e0bfca5 100644
  	// years===0 condition is so editing locked player in God Mode will update ovr and pot
  	if (!ratings.locked || years === 0) {
  		// Run these even for players developing 0 seasons
+diff --git a/src/worker/core/player/format.ts b/src/worker/core/player/format.ts
+index 8542aa0..7d932a0 100644
+--- a/src/worker/core/player/format.ts
++++ b/src/worker/core/player/format.ts
+@@ -233,6 +233,8 @@ const processAttrs = (
+ 			// Estimate pick number from draft round and pick. Would be better to store the real value
+ 			if (p.draft.round > 0 && p.draft.pick > 0) {
+ 				output.draftPosition =
++					// NFL history mod: the real overall pick when the league file has it
++					(p.draft as any).overall ??
+ 					p.draft.pick + (p.draft.round - 1) * g.get("numActiveTeams");
+ 			} else {
+ 				// Undrafted
 diff --git a/src/worker/core/player/shouldRetire.ts b/src/worker/core/player/shouldRetire.ts
 index 1b49050..b787c92 100644
 --- a/src/worker/core/player/shouldRetire.ts

@@ -187,6 +187,9 @@ for (const pos of MAIN) {
 // the same overall: more completions and fewer interceptions, a few less deep balls.
 tmpl.QB.tha += 6;
 tmpl.QB.thp -= 7;
+// Vision drives interceptions in the sim, and the source ratings left it far too low: Tom Brady never got above 63.
+// +15 here nets about +11 once the solver holds the overall, taking about 4 from accuracy and arm.
+tmpl.QB.thv += 15;
 const weightMean = {};
 for (const pos of MAIN) {
   const ws = rows.filter(x => x.pos === pos && x.p.weight).map(x => x.p.weight);
