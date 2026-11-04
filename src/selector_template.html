@@ -109,6 +109,7 @@
       </div>
     </div>
     <p class="note" id="phaseNote"></p>
+    <label class="note" style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="draftRatings" checked> <span><b>Real draft ratings</b>: future draft prospects are rated by where they really went in the draft, and get their real ratings in their first season (real ratings carry over with the mod).</span></label>
     <label class="note" style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="lite"> <span><b>Phone-friendly</b>: a much smaller league for low-end phones. Keeps every current player, recent retirees, Hall of Famers and award winners; leaves out long-retired role players.</span></label>
   </section>
 
@@ -211,8 +212,8 @@ const LIVE = /*__LIVE__*/{ lastWeek: 0, nextWeek: 1, date: '' };
   let sliceCache = { key: null, league: null };
   function getSlice() {
     const S = +$('season').value, ph = phase(), w = WEEKLY[S] ? week() : 1, lite = $('lite').checked;
-    const key = S + '|' + ph + '|' + w + '|' + lite;
-    if (sliceCache.key !== key) sliceCache = { key, league: SL.sliceLeague(master, E, { season: S, phase: ph, week: w, lite, weekly: WEEKLY[S] || undefined, schedules: SCHEDULES, hofYears: HOF_YEARS, logos: LOGOS, logosProcessed: LOGOS_PROCESSED, logoEras: LOGO_ERAS, live: LIVE }) };
+    const key = S + '|' + ph + '|' + w + '|' + lite + '|' + $('draftRatings').checked + '|' + !!WEEKLY[S];
+    if (sliceCache.key !== key) sliceCache = { key, league: SL.sliceLeague(master, E, { season: S, phase: ph, week: w, lite, weekly: WEEKLY[S] || undefined, schedules: SCHEDULES, hofYears: HOF_YEARS, logos: LOGOS, logosProcessed: LOGOS_PROCESSED, logoEras: LOGO_ERAS, live: LIVE, realDraftRatings: $('draftRatings').checked }) };
     return sliceCache.league;
   }
   const POS_ORDER = ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S', 'K', 'P'];
@@ -422,11 +423,12 @@ const LIVE = /*__LIVE__*/{ lastWeek: 0, nextWeek: 1, date: '' };
 
   $('season').addEventListener('change', async () => { if (week() > 1) { setStatus('Loading week-by-week stats…'); await loadWeekly(+$('season').value); setStatus(''); } render(); });
   $('phases').addEventListener('change', render);
+  $('draftRatings').addEventListener('change', render);
   $('week').addEventListener('change', async () => { setStatus('Loading week-by-week stats…'); await loadWeekly(+$('season').value); setStatus(''); render(); });
 
   $('go').addEventListener('click', async () => {
     const S = +$('season').value, ph = phase();
-    if (week() > 1) await loadWeekly(S);
+    if (week() > 1 || ['playoffs', 'afterplayoffs', 'draft'].includes(ph)) await loadWeekly(S); // the games already played
     // A later week needs that season's game-by-game data: say so instead of quietly building Week 1
     if (ph === 'regular' && week() > 1 && !WEEKLY[S]) { setStatus("Couldn't load the week-by-week data for " + (S + 1) + ", which a Week " + week() + " start needs. Check your connection and try again."); return; }
     if (ph === 'live' && master.statKeys) {

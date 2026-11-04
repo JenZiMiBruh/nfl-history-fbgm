@@ -35,7 +35,7 @@ for (const t of m.teams) strip(t.stats);
 m.statKeys = { player: [...playerKeys], team: [...teamKeys] };
 
 const ratingPos = Object.keys(m.players.find(p => p.ratings?.[0]?.ovrs).ratings[0].ovrs);
-for (const p of m.players) for (const r of (p.ratings || []).concat(Object.values(p.weekRatings || {}))) for (const k of ['ovrs', 'pots']) if (r[k] && !Array.isArray(r[k])) r[k] = ratingPos.map(q => r[k][q]);
+for (const p of m.players) for (const r of (p.ratings || []).concat(Object.values(p.weekRatings || {}), p.draftRow ? [p.draftRow] : [])) for (const k of ['ovrs', 'pots']) if (r[k] && !Array.isArray(r[k])) r[k] = ratingPos.map(q => r[k][q]);
 m.ratingPos = ratingPos;
 
 const json = JSON.stringify(m);

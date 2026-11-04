@@ -1,4 +1,4 @@
-window.NFL_MOD_BUILT = "Nov 3, 2026, 11:59 PM";
+window.NFL_MOD_BUILT = "Nov 4, 2026, 12:19 AM";
 ;
 window.NFL_ERA_FACTORS = {
  "1966": {
@@ -1596,11 +1596,13 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       p.injury = { type: 'Healthy', gamesRemaining: 0 };
       delete p.gamesUntilTradable;
       delete p.realDeals;
+      delete p.draftRow;
       delete p.weekRatings;
 
       if (debut > S) {
         // Future player: draft prospect in the class drafted after season debut-1.
-        const r0 = src.ratings.find(r => r.season === debut) || src.ratings[0];
+        // rated by where he really went in the draft (draft_ratings.js); his real ratings take over in his first season
+        const r0 = (opts.realDraftRatings !== false && src.draftRow) || src.ratings.find(r => r.season === debut) || src.ratings[0];
         p.tid = -2;
         p.ratings = [Object.assign({}, r0, { season: debut - 1 })];
         p.stats = []; p.awards = []; p.transactions = []; p.salaries = []; p.statsTids = []; p.injuries = []; delete p.diedYear;
@@ -1938,6 +1940,23 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     };
     const scheduledEvents = E.buildScheduledEvents(S, P, resolvePid);
 
+    // The games already played, so the schedule shows them: box scores where they exist (the live season), otherwise
+    // the real score from the weekly data (no player lines)
+    const playedGames = () => {
+      if (!W && !DONE) return [];
+      const boxes = (master.games || []).filter(g => g.season === S && (!W || g.day < W));
+      if (boxes.length || !opts.weekly) return boxes;
+      const record = {};
+      return opts.weekly.games.filter(g => !W || g[0] < W).map(([day, h, a, hp, ap], i) => {
+        const teams = [[h, hp, ap], [a, ap, hp]].map(([tid, pts, opp]) => {
+          const r = record[tid] = record[tid] || { won: 0, lost: 0, tied: 0 };
+          if (pts > opp) r.won++; else if (pts < opp) r.lost++; else r.tied++;
+          return { tid, pts, ptsQtrs: [], players: [], won: r.won, lost: r.lost, tied: r.tied };
+        });
+        const win = hp >= ap ? teams[0] : teams[1], lose = win === teams[0] ? teams[1] : teams[0];
+        return { gid: 900000 + i, day, att: 0, clutchPlays: [], season: S, numPeriods: 4, overtimes: 0, won: { tid: win.tid, pts: win.pts }, lost: { tid: lose.tid, pts: lose.pts }, scoringSummary: [], teams };
+      });
+    };
     const league = {
       version: master.version,
       startingSeason: E.FIRST_SEASON,
@@ -1951,14 +1970,15 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       awards: (master.awards || []).filter(a => a.season < S || (DONE === 2 && a.season === S)),
       allStars: (master.allStars || []).filter(a => a.season < S || (DONE && a.season === S)),
       playoffSeries: (master.playoffSeries || []).filter(s => s.season < S || (DONE === 2 && s.season === S)),
-      events: (master.events || []).filter(e => e.season < S || (DONE && e.season === S)),
+      // (a Playoffs start hasn't seen this season's Super Bowl or awards yet)
+      events: (master.events || []).filter(e => e.season < S || (DONE && e.season === S && (DONE === 2 || !['champion', 'award'].includes(e.type)))),
       // Real head-to-head records for the seasons already played (this season's once its games are done)
       headToHeads: (master.headToHeads || []).filter(h => h.season < S || (DONE && h.season === S))
         .map(h => h.season === S && DONE !== 2 ? { ...h, playoffs: {} } : h)
         .concat(W ? [weekHeadToHead(S, wkGames)] : []),
       releasedPlayers: [],
       // Box scores of the weeks already played, where they exist (the live season: build_live_games.js)
-      games: W ? (master.games || []).filter(g => g.season === S && g.day < W) : []
+      games: playedGames()
     };
     shiftSeasons(league, 1, true);
     // From the slim selector master (zero stats left out): toJsonChunks puts the zeros back while writing
@@ -2031,7 +2051,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       return o;
     });
     // realDeals and weekRatings are the master's own (real_contracts.js, week_ratings.js): never in a league file
-    const write = (k, x) => k === 'players' && (x.realDeals || x.weekRatings) ? write(k, Object.assign({}, x, { realDeals: undefined, weekRatings: undefined }))
+    const write = (k, x) => k === 'players' && (x.realDeals || x.weekRatings || x.draftRow) ? write(k, Object.assign({}, x, { realDeals: undefined, weekRatings: undefined, draftRow: undefined }))
       : !keys ? JSON.stringify(x)
       : k === 'players' ? JSON.stringify(Object.assign({}, x, { stats: filled(x.stats, keys.player), ratings: expand(x.ratings) }))
       : k === 'teams' ? JSON.stringify(Object.assign({}, x, { stats: filled(x.stats, keys.team) }))

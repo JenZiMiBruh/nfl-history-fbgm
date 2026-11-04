@@ -181,10 +181,10 @@ index fc14a9f..51cbcae 100644
  						<NagModal close={closeNagModal} show={showNagModal} />
  					</div>
 diff --git a/src/ui/components/LeagueFileUpload.tsx b/src/ui/components/LeagueFileUpload.tsx
-index 5694d6d..feea076 100644
+index 5694d6d..0cf3d00 100644
 --- a/src/ui/components/LeagueFileUpload.tsx
 +++ b/src/ui/components/LeagueFileUpload.tsx
-@@ -109,13 +109,455 @@ class LeagueFileVersionError extends Error {
+@@ -109,13 +109,473 @@ class LeagueFileVersionError extends Error {
  	}
  }
  
@@ -258,6 +258,7 @@ index 5694d6d..feea076 100644
 +	const [season, setSeason] = useState(2026);
 +	const [phase, setPhase] = useState("regular");
 +	const [week, setWeek] = useState(1);
++	const [realDraftRatings, setRealDraftRatings] = useState(true);
 +	const [autoTried, setAutoTried] = useState(nflMaster !== undefined);
 +
 +	// The master file comes with the mod: load it on its own, so there's nothing to pick
@@ -342,7 +343,11 @@ index 5694d6d..feea076 100644
 +					: live
 +						? (data.live?.nextWeek ?? 1)
 +						: 1;
-+			const weekly = startWeek > 1 ? await loadWeekly(season) : undefined;
++			// (also for Playoffs, After Playoffs and Draft: the schedule shows the games already played)
++			const weekly =
++				startWeek > 1 || ["playoffs", "afterplayoffs", "draft"].includes(phase)
++					? await loadWeekly(season)
++					: undefined;
 +			if (startWeek > 1 && !weekly) {
 +				setStatus(
 +					`Couldn't load the week-by-week data for ${season + 1}, which a Week ${startWeek} start needs.`,
@@ -353,6 +358,7 @@ index 5694d6d..feea076 100644
 +				season,
 +				phase: live ? "regular" : phase,
 +				week: startWeek,
++				realDraftRatings,
 +				weekly: weekly ?? undefined,
 +				...data,
 +			});
@@ -606,6 +612,18 @@ index 5694d6d..feea076 100644
 +								))}
 +							</select>
 +						) : null}
++						<label className="form-check-label">
++							<input
++								className="form-check-input me-1"
++								type="checkbox"
++								checked={realDraftRatings}
++								onChange={(event) => {
++									setRealDraftRatings(event.target.checked);
++									setLeague(undefined);
++								}}
++							/>
++							Real draft ratings (prospects rated by where they really went; real ratings in their first season)
++						</label>
 +						<button
 +							className="btn btn-primary"
 +							type="button"
@@ -640,7 +658,7 @@ index 5694d6d..feea076 100644
  	onDone: (b: Error | LeagueFileUploadOutput) => void;
  	disabled?: boolean;
  	enterURL?: boolean;
-@@ -257,8 +699,10 @@ export const LeagueFileUpload = ({
+@@ -257,8 +717,10 @@ export const LeagueFileUpload = ({
  
  	const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
  		beforeFile();
@@ -652,7 +670,7 @@ index 5694d6d..feea076 100644
  		if (!file) {
  			dispatch({
  				type: "init",
-@@ -327,13 +771,24 @@ export const LeagueFileUpload = ({
+@@ -327,13 +789,24 @@ export const LeagueFileUpload = ({
  					</button>
  				</div>
  			) : (

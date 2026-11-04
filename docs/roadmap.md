@@ -1,6 +1,6 @@
 # Timeline & roadmap
 
-What's out, how it stays current, and what's coming. Like Madden, the league gets **roster updates all year**: the day after every game during the season, and at every big offseason moment. Dates for future items are targets, not promises.
+What's out, how it stays current, and what's coming. Like Madden, the league gets **roster updates all year**: every Sunday during the season, and at every big offseason moment. Dates for future items are targets, not promises.
 
 ## Released
 
@@ -15,37 +15,16 @@ Every year follows the same schedule, the way Madden's roster updates do.
 
 | When | Update | What changes |
 |---|---|---|
-| **The day after every game, Sep–Jan** | Game-day roster update | Follows the NFL schedule: Friday after Thursday Night Football, Monday after Sunday, Tuesday after Monday Night Football (and the day after Saturday and holiday games). Results, standings and stats through the last game. Rosters, signings, trades, injuries and depth charts. Ratings move with how players are actually playing |
-| **Playoffs, Jan–Feb** | The day after each playoff game day | Results, playoff stats and the bracket |
+| **Every Sunday, Sep–Feb** | Weekly roster update | Stats, signings, trades, injuries and ratings, through the Super Bowl |
 | **After the Super Bowl, Feb** | Season wrap-up | Final stats and awards added to history; the season becomes pickable in the season selector |
 | **Mid-Mar** | Free agency update | Re-signings, cuts, trades and free-agent signings on their new teams. Retirements |
 | **Late Apr** | Draft update | The real draft: every pick on the team that made it. Next three draft classes re-ranked |
 | **May** | Schedule update | The real new schedule, game for game, as soon as the NFL releases it |
 | **Late Aug** | **New season release** | Full preseason league: 53-man rosters after cuts, fresh ratings from last season's production, new uniforms and logos, ready for Week 1 |
 
-## This season (2026): every update date
+## This season (2026)
 
-The file is updated the day after every game day: Friday after Thursday night, Monday after Sunday, Tuesday after Monday night, and the day after Saturday, Thanksgiving and Christmas games.
-
-| Games | Game days | File updated |
-|---|---|---|
-| Week 8 | Sun, Nov 1 · Mon, Nov 2 | ✅ Mon, Nov 2 · Tue, Nov 3 |
-| Week 9 | Thu, Nov 5 · Sun, Nov 8 · Mon, Nov 9 | Fri, Nov 6 · Mon, Nov 9 · Tue, Nov 10 |
-| Week 10 | Thu, Nov 12 · Sun, Nov 15 · Mon, Nov 16 | Fri, Nov 13 · Mon, Nov 16 · Tue, Nov 17 |
-| Week 11 | Thu, Nov 19 · Sun, Nov 22 · Mon, Nov 23 | Fri, Nov 20 · Mon, Nov 23 · Tue, Nov 24 |
-| Week 12 | Wed, Nov 25 · Thu, Nov 26 · Fri, Nov 27 · Sun, Nov 29 · Mon, Nov 30 | Thu, Nov 26 · Fri, Nov 27 · Sat, Nov 28 · Mon, Nov 30 · Tue, Dec 1 |
-| Week 13 | Thu, Dec 3 · Sun, Dec 6 · Mon, Dec 7 | Fri, Dec 4 · Mon, Dec 7 · Tue, Dec 8 |
-| Week 14 | Thu, Dec 10 · Sun, Dec 13 · Mon, Dec 14 | Fri, Dec 11 · Mon, Dec 14 · Tue, Dec 15 |
-| Week 15 | Thu, Dec 17 · Sat, Dec 19 · Sun, Dec 20 · Mon, Dec 21 | Fri, Dec 18 · Sun, Dec 20 · Mon, Dec 21 · Tue, Dec 22 |
-| Week 16 | Thu, Dec 24 · Fri, Dec 25 · Sun, Dec 27 · Mon, Dec 28 | Fri, Dec 25 · Sat, Dec 26 · Mon, Dec 28 · Tue, Dec 29 |
-| Week 17 | Thu, Dec 31 · Sun, Jan 3 · Mon, Jan 4 | Fri, Jan 1 · Mon, Jan 4 · Tue, Jan 5 |
-| Week 18 | Sun, Jan 10 | Mon, Jan 11 |
-| Wild Card | Sat, Jan 16 · Sun, Jan 17 · Mon, Jan 18 | Sun, Jan 17 · Mon, Jan 18 · Tue, Jan 19 |
-| Divisional | Sat, Jan 23 · Sun, Jan 24 | Sun, Jan 24 · Mon, Jan 25 |
-| Conference championships | Sun, Jan 31 | Mon, Feb 1 |
-| Super Bowl LXI | Sun, Feb 14 | Mon, Feb 15 |
-
-Playoff dates are the NFL's planned weekends; the exact days follow the official schedule.
+The file updates **every Sunday**, from Nov 8 through Feb 21 (the Sunday after the Super Bowl, with the final season, stats and awards).
 
 ## 2027
 

@@ -6,6 +6,13 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.16 · Nov 4, 2026
+
+- **Real draft ratings.** In a league started before a draft, prospects are rated by where they really went (Dak Prescott, pick 135, is a 39, not a top-5 prospect), and with the mod their real ratings take over in their first season. A setting in the picker, on by default.
+- **Schedule shows the games already played.** Week and Playoffs starts list the real scores from earlier weeks (no player box scores before 2026).
+- **No Super Bowl spoilers.** A Playoffs start no longer shows that season's champion or awards.
+- **Updates are every Sunday** for the rest of this season.
+
 ## v1.15 · Nov 4, 2026
 
 - **Games ending 0-0 fixed.** Leagues built with the season picker could lose their expanded ratings and stats when written to the file, so every play gained nothing. If you got 0-0 games, build a new league: existing ones keep the bad data.

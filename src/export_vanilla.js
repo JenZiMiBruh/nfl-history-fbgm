@@ -42,7 +42,7 @@ const m = JSON.parse(fs.readFileSync(path.join(ROOT, 'NFL_Master_1966_2026.json'
 shiftSeasons(m, 1);
 m.meta = Object.assign({}, m.meta, { name: `NFL 2026-27 (${label})` });
 delete m.liveCounted;
-for (const p of m.players) { delete p.espnId; delete p.prospectRank; delete p.realDeals; delete p.weekRatings; }
+for (const p of m.players) { delete p.espnId; delete p.prospectRank; delete p.realDeals; delete p.weekRatings; delete p.draftRow; }
 const out = path.join(ROOT, 'NFL_2027_Live_FBGM.json.gz');
 fs.writeFileSync(out, zlib.gzipSync(Buffer.from(JSON.stringify(m)), { level: 9 }));
 console.log(`wrote ${path.basename(out)} (${(fs.statSync(out).size / 1e6).toFixed(1)} MB)`);
