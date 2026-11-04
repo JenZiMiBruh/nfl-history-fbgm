@@ -6,6 +6,14 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.14 · Nov 3, 2026
+
+- **Season picker works again.** A typo in v1.11-1.13 left the season list blank.
+- **Week starts keep the real rosters.** Teams on a bye no longer lose everyone to free agency, and the roster limit favors who was really on the team that week, in every season.
+- **Same-name players sorted out.** Spencer Brown the Bills tackle, the two Michael Carters, Chris Brooks, Audric Estimé and others are on the right teams.
+- **Live in the mod no longer crashes.** It starts at the next week to play.
+- **2001-02 Jaguars.** A source-data error put their players on opponents at week starts.
+
 ## v1.13 · Nov 3, 2026
 
 - **Quarterbacks: accuracy +6, arm strength −7.** Football GM counts accuracy, deep passing and vision equally in a QB's overall, but the ratings leaned on arm strength, so almost no starter in any era rated as accurate. Same overalls, a better mix: more completions, fewer interceptions. In every season.

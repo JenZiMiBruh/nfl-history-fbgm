@@ -181,10 +181,10 @@ index fc14a9f..51cbcae 100644
  						<NagModal close={closeNagModal} show={showNagModal} />
  					</div>
 diff --git a/src/ui/components/LeagueFileUpload.tsx b/src/ui/components/LeagueFileUpload.tsx
-index 5694d6d..5812473 100644
+index 5694d6d..feea076 100644
 --- a/src/ui/components/LeagueFileUpload.tsx
 +++ b/src/ui/components/LeagueFileUpload.tsx
-@@ -109,13 +109,447 @@ class LeagueFileVersionError extends Error {
+@@ -109,13 +109,455 @@ class LeagueFileVersionError extends Error {
  	}
  }
  
@@ -333,7 +333,15 @@ index 5694d6d..5812473 100644
 +		try {
 +			const w = window as any;
 +			const data = w.NFL_DATA;
-+			const startWeek = phase === "regular" ? weekNow : 1;
++			// Live = the next week to play, with every played week's real games, rosters, injuries and ratings (the
++			// master that comes with the mod has no events list for a live league of its own)
++			const live = phase === "live";
++			const startWeek =
++				phase === "regular"
++					? weekNow
++					: live
++						? (data.live?.nextWeek ?? 1)
++						: 1;
 +			const weekly = startWeek > 1 ? await loadWeekly(season) : undefined;
 +			if (startWeek > 1 && !weekly) {
 +				setStatus(
@@ -343,13 +351,13 @@ index 5694d6d..5812473 100644
 +			}
 +			const built = w.SEASON_SLICER.sliceLeague(nflMaster, w.NFL_ERAS, {
 +				season,
-+				phase,
++				phase: live ? "regular" : phase,
 +				week: startWeek,
 +				weekly: weekly ?? undefined,
 +				...data,
 +			});
 +			setLeague(built);
-+			setKept(new Set(built.scheduledEvents.map((e: any) => e.id)));
++			setKept(new Set((built.scheduledEvents ?? []).map((e: any) => e.id)));
 +			setStatus("");
 +		} catch (error) {
 +			setStatus(`Error: ${(error as Error).message}`);
@@ -632,7 +640,7 @@ index 5694d6d..5812473 100644
  	onDone: (b: Error | LeagueFileUploadOutput) => void;
  	disabled?: boolean;
  	enterURL?: boolean;
-@@ -257,8 +691,10 @@ export const LeagueFileUpload = ({
+@@ -257,8 +699,10 @@ export const LeagueFileUpload = ({
  
  	const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
  		beforeFile();
@@ -644,7 +652,7 @@ index 5694d6d..5812473 100644
  		if (!file) {
  			dispatch({
  				type: "init",
-@@ -327,13 +763,24 @@ export const LeagueFileUpload = ({
+@@ -327,13 +771,24 @@ export const LeagueFileUpload = ({
  					</button>
  				</div>
  			) : (

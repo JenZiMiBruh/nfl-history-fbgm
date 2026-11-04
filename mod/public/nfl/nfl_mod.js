@@ -1,4 +1,4 @@
-window.NFL_MOD_BUILT = "Nov 3, 2026, 1:40 AM";
+window.NFL_MOD_BUILT = "Nov 3, 2026, 11:50 PM";
 ;
 window.NFL_ERA_FACTORS = {
  "1966": {
@@ -1679,6 +1679,13 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
         p.tid = played.length ? played.slice().sort((a, b) => b[0] - a[0])[0][1] : row.tid;
         if (row.jerseyNumber) p.jerseyNumber = row.jerseyNumber;
         p._gp = rowsS.reduce((a, s) => a + (s.gp || 0), 0);
+        // At week W the roster limit favors who was really there: played before and after W comes first, and someone
+        // whose games were all far from W comes last. (No lines at all, like linemen, keeps his season's games.)
+        if (W && wkLines[src.pid]) {
+          const ls = wkLines[src.pid];
+          if (ls.some(x => x[0] < W) && ls.some(x => x[0] >= W)) p._gp += 100;
+          else if (!ls.some(x => Math.abs(x[0] - W) <= 2)) p._gp *= 0.25;
+        }
         p._ovr = p.ratings[p.ratings.length - 1].ovr;
         (rosterByTid[p.tid] = rosterByTid[p.tid] || []).push(p);
       } else if (last < S) {
@@ -1714,8 +1721,11 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     let liveRosterMax = 0;
     const wkRosters = W && S >= 2026 && opts.weekly && opts.weekly.rosters;
     if (wkRosters) {
-      const day = Object.keys(wkRosters).map(Number).filter(d => d <= W).sort((a, b) => a - b).pop();
-      const on = new Map((wkRosters[day] || []).map(r => [r[0], r]));
+      // each team's latest roster at or before week W: a team on its bye has no roster that week (the 2026 Chiefs in week 5)
+      const latest = {};
+      for (const d of Object.keys(wkRosters).map(Number).filter(d => d <= W)) for (const r of wkRosters[d]) latest[r[1]] = Math.max(latest[r[1]] || 0, d);
+      const on = new Map();
+      for (const d of Object.keys(wkRosters).map(Number)) for (const r of wkRosters[d]) if (latest[r[1]] === d) on.set(r[0], r);
       if (on.size) {
         const count = {};
         for (const p of players) {
@@ -1733,13 +1743,17 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     // Era roster limit: extras (fewest games, then lowest OVR) start as free agents. Each position keeps its minimum
     // first (the best by the same order), so a season with dozens of extra players can't squeeze out a position: in
     // 1987 the strike's replacement players outnumbered the injured quarterbacks' games, and teams had no quarterback.
-    const MIN_AT = { QB: 2, RB: 2, WR: 4, TE: 2, OL: 7, DL: 6, LB: 5, CB: 4, S: 3, K: 1, P: 1 };
+    // (only what a lineup needs: in early eras position players kicked and punted and players covered several
+    // positions, so bigger minimums kept barely-used backups over real regulars, like Joe Marconi on the 1966 Bears)
+    // Defensive backs count as one group: older data labels most of them CB, so a safety minimum kept 0-game backups.
+    const MIN_AT = { QB: 2, RB: 1, WR: 2, TE: 1, OL: 5, DL: 4, LB: 3, DB: 4 };
+    const minGroup = pos => (pos === 'CB' || pos === 'S' ? 'DB' : pos);
     for (const tid of Object.keys(rosterByTid)) {
       const roster = rosterByTid[tid];
       if (roster.length > rules.maxRosterSize) {
         roster.sort((a, b) => (b._gp - a._gp) || (b._ovr - a._ovr));
         const keep = new Set();
-        for (const [pos, n] of Object.entries(MIN_AT)) roster.filter(p => p.ratings[p.ratings.length - 1].pos === pos).slice(0, n).forEach(p => keep.add(p));
+        for (const [pos, n] of Object.entries(MIN_AT)) roster.filter(p => minGroup(p.ratings[p.ratings.length - 1].pos) === pos).slice(0, n).forEach(p => keep.add(p));
         for (const p of roster) if (keep.size < rules.maxRosterSize) keep.add(p);
         for (const p of roster) if (!keep.has(p)) p.tid = -1;
       }
