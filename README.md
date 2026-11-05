@@ -234,6 +234,13 @@ Through Sunday, Nov 1, 2026 (Week 8): every final score, stat line, roster move 
 Football GM, like Basketball GM, names a season by the year it ends. The 2008 NFL season ends with the Super Bowl in February 2009.
 </details>
 
+<details><summary><b>How do I uninstall the mod?</b></summary>
+
+Double-click `Uninstall.bat` in the mod folder (Mac or Linux: `uninstall.sh`). It stops the game if it's running and deletes the folder: the mod, the downloaded Football GM files and its private copy of Node.js. Nothing else on your computer is touched, unless you choose to also clear pnpm's shared download cache. If the installer added Git for you, it stays (remove it from Windows Settings, Apps, if you don't need it).
+
+Your leagues are saved in your browser, not in the folder: to delete them, open the game and delete them from the **Leagues** page before you uninstall. Deleting the folder by hand works too.
+</details>
+
 <details><summary><b>Something's wrong with a player or a logo. Where do I report it?</b></summary>
 
 Open an issue with the player, the season and what's off. Accuracy is the whole point.

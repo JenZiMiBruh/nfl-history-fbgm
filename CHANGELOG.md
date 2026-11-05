@@ -6,6 +6,10 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.20.5 · Nov 5, 2026
+
+- **Uninstall in one double-click (mod).** The mod folder now has `Uninstall.bat` (Mac and Linux: `uninstall.sh`). It stops the game if it's running and removes the folder, and asks before touching anything else. Your leagues live in your browser: delete them from the Leagues page first if you want them gone too. Existing installs get the uninstaller with this update.
+
 ## v1.20.4 · Nov 5, 2026
 
 - **All-Star History now goes back to the first Pro Bowl in the files (1967).** The 1966–1970 and 1978 Pro Bowl rosters that v1.20.2 had to remove are restored from Pro-Football-Reference: full AFL, NFL, AFC and NFC teams, and each of those players gets his All-Star award. A few players who share a name with someone else that season are left off rather than risk crediting the wrong one. Start a new league to get them.
