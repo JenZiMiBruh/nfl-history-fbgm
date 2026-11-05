@@ -2522,6 +2522,25 @@ index 1e4f2652d..2df520e1c 100644
  		return false;
  	}
  
+diff --git a/src/worker/views/allStarHistory.ts b/src/worker/views/allStarHistory.ts
+index fd1ef9680..a7ee686a7 100644
+--- a/src/worker/views/allStarHistory.ts
++++ b/src/worker/views/allStarHistory.ts
+@@ -10,11 +10,12 @@ const addAbbrevAndCount = <
+ >(
+ 	obj: T,
+ ) => {
+-	return { ...obj, abbrev: g.get("teamInfoCache")[obj.tid]!.abbrev, count: 0 };
++	return { ...obj, abbrev: g.get("teamInfoCache")[obj.tid]?.abbrev ?? "", count: 0 };
+ };
+ 
+ const augment = (allAllStars: AllStars[]) => {
+-	const augmented = allAllStars.map((row) => {
++	// NFL history mod: skip seasons with an empty roster (old league files had a few), which would have no captain
++	const augmented = allAllStars.filter((row) => row.teams[0]?.[0] && row.teams[1]?.[0]).map((row) => {
+ 		return {
+ 			gid: row.gid,
+ 			mvp: row.mvp ? addAbbrevAndCount(row.mvp) : undefined,
 diff --git a/src/worker/views/newLeague.ts b/src/worker/views/newLeague.ts
 index 3000371a6..098448b69 100644
 --- a/src/worker/views/newLeague.ts

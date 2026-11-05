@@ -6,6 +6,14 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.20.2 · Nov 5, 2026
+
+Fixes from your reports on r/Football_GM. Thank you!
+
+- **All-Star History page fixed.** It crashed ("Cannot read properties of undefined") because six seasons of Pro Bowl history (1966–1970 and 1979) had an empty roster on one side. Those seasons are removed from every file. A league started from an older file keeps the bad data: start a new league to fix it there (in the mod, the page now skips those seasons, so existing mod leagues work too).
+- **Phone-friendly is no longer forced on phones.** The season selector used to tick it on any phone. Now it's off unless your device reports very little memory, and you can always tick or untick it.
+- **Season selector:** the 2020s interception tuning and Rookie Scale from v1.20.1 now apply to selector and website leagues too, not just the mod.
+
 ## v1.20.1 · Nov 4, 2026
 
 - **RB1 Workload slider on the Roster page (mod).** Under Play Through Injuries: slide right to give your lead back more carries, left to spread them across the backfield. Every team has its own setting; 1.1 is the default, the same as before.

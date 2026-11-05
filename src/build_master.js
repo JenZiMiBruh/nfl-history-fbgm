@@ -1240,10 +1240,12 @@ function main() {
       if (tid < 0) continue;
       teams[align.teamDiv[tid].cid].push({ pid: p.pid, tid, name: `${p.firstName} ${p.lastName}` });
     }
-    if (teams[0].length + teams[1].length === 0) continue;
+    // Both rosters needed: Football GM's All-Star History page reads each team's captain
+    if (teams[0].length < 5 || teams[1].length < 5) continue;
     L.allStars = (L.allStars || []).filter(a => a.season !== y);
     L.allStars.push({ season: y, teamNames: align.confs.map(c => c.name), teams, remaining: [], finalized: true, type: 'byConf' });
   }
+  L.allStars = L.allStars.filter(a => (a.teams || []).length === 2 && a.teams.every(t => t.length >= 5));
   L.allStars.sort((a, b) => a.season - b.season);
 
   // Retired jersey numbers from Wikipedia's current list (replaces the older team lists).

@@ -558,7 +558,8 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       schedule,
       scheduledEvents,
       awards: (master.awards || []).filter(a => a.season < S || (DONE === 2 && a.season === S)),
-      allStars: (master.allStars || []).filter(a => a.season < S || (DONE && a.season === S)),
+      // Pro Bowl rosters: only seasons with both rosters filled in (Football GM's All-Star History page reads each team's captain)
+      allStars: (master.allStars || []).filter(a => (a.season < S || (DONE && a.season === S)) && (a.teams || []).length === 2 && a.teams.every(t => t.length >= 5)),
       playoffSeries: (master.playoffSeries || []).filter(s => s.season < S || (DONE === 2 && s.season === S)),
       // (a Playoffs start hasn't seen this season's Super Bowl or awards yet)
       events: (master.events || []).filter(e => e.season < S || (DONE && e.season === S && (DONE === 2 || !['champion', 'award'].includes(e.type)))),

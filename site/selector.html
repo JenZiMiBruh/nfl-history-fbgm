@@ -624,7 +624,7 @@
  },
  "2020": {
   "completionFactor": 1.12,
-  "intFactor": 0.86,
+  "intFactor": 0.78,
   "sackFactor": 0.86,
   "fumbleFactor": 0.96,
   "rushYdsFactor": 0.94,
@@ -633,7 +633,7 @@
  },
  "2021": {
   "completionFactor": 1.12,
-  "intFactor": 0.86,
+  "intFactor": 0.78,
   "sackFactor": 0.9,
   "fumbleFactor": 0.96,
   "rushYdsFactor": 0.88,
@@ -642,7 +642,7 @@
  },
  "2022": {
   "completionFactor": 1.14,
-  "intFactor": 0.8,
+  "intFactor": 0.73,
   "sackFactor": 0.92,
   "fumbleFactor": 0.88,
   "rushYdsFactor": 0.9,
@@ -651,7 +651,7 @@
  },
  "2023": {
   "completionFactor": 1.12,
-  "intFactor": 0.8,
+  "intFactor": 0.73,
   "sackFactor": 1,
   "fumbleFactor": 0.8,
   "rushYdsFactor": 0.88,
@@ -660,7 +660,7 @@
  },
  "2024": {
   "completionFactor": 1.12,
-  "intFactor": 0.8,
+  "intFactor": 0.73,
   "sackFactor": 1.06,
   "fumbleFactor": 0.82,
   "rushYdsFactor": 0.9,
@@ -669,7 +669,7 @@
  },
  "2025": {
   "completionFactor": 1.14,
-  "intFactor": 0.76,
+  "intFactor": 0.69,
   "sackFactor": 1.1,
   "fumbleFactor": 0.8,
   "rushYdsFactor": 0.88,
@@ -678,7 +678,7 @@
  },
  "2026": {
   "completionFactor": 1.14,
-  "intFactor": 0.7,
+  "intFactor": 0.64,
   "sackFactor": 1.04,
   "fumbleFactor": 0.68,
   "rushYdsFactor": 0.94,
@@ -1236,7 +1236,8 @@
       numGames, numGamesPlayoffSeries, numPlayoffByes, numDraftRounds, maxRosterSize, minRosterSize: maxRosterSize - 8,
       salaryCap, salaryCapType, minPayroll: Math.round(salaryCap * 0.89), minContract, maxContract,
       ...simFactors, twoPointConversions, passFactor, scrimmageTouchbackKickoff, maxOvertimes, footballOvertime, footballOvertimePlayoffs, overtimeLength,
-      overtimeLengthPlayoffs: 15, numGamesConf, numGamesDiv, rookieContractLengths
+      overtimeLengthPlayoffs: 15, numGamesConf, numGamesDiv, rookieContractLengths,
+      draftPickAutoContract: true // Football GM's Rookie Scale setting, on (it's off by default in football)
     };
   }
   // Rule keys that scheduled gameAttributes events keep in sync with getRules().
@@ -2125,7 +2126,8 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       schedule,
       scheduledEvents,
       awards: (master.awards || []).filter(a => a.season < S || (DONE === 2 && a.season === S)),
-      allStars: (master.allStars || []).filter(a => a.season < S || (DONE && a.season === S)),
+      // Pro Bowl rosters: only seasons with both rosters filled in (Football GM's All-Star History page reads each team's captain)
+      allStars: (master.allStars || []).filter(a => (a.season < S || (DONE && a.season === S)) && (a.teams || []).length === 2 && a.teams.every(t => t.length >= 5)),
       playoffSeries: (master.playoffSeries || []).filter(s => s.season < S || (DONE === 2 && s.season === S)),
       // (a Playoffs start hasn't seen this season's Super Bowl or awards yet)
       events: (master.events || []).filter(e => e.season < S || (DONE && e.season === S && (DONE === 2 || !['champion', 'award'].includes(e.type)))),
@@ -2379,8 +2381,8 @@ const LIVE = {"season":2026,"lastWeek":8,"nextWeek":9,"complete":true,"date":"Mo
     return WEEKLY[S];
   }
   const week = () => (phase() === 'regular' ? +$('week').value || 1 : 1);
-  // Phones and low-memory devices start with phone-friendly leagues
-  if (/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (navigator.deviceMemory && navigator.deviceMemory <= 4)) $('lite').checked = true;
+  // Only devices that report very little memory start phone-friendly; any phone can tick it (or untick it) by hand
+  if (navigator.deviceMemory && navigator.deviceMemory <= 2) $('lite').checked = true;
   const setStatus = (msg, cls) => { $('status').textContent = msg; $('status').className = 'status' + (cls ? ' ' + cls : ''); };
   const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const money = (k) => k >= 1000 ? '$' + (k / 1000).toFixed(1) + 'M' : '$' + k + 'K';
