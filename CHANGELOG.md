@@ -6,6 +6,10 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.20.4 · Nov 5, 2026
+
+- **All-Star History now goes back to the first Pro Bowl in the files (1967).** The 1966–1970 and 1978 Pro Bowl rosters that v1.20.2 had to remove are restored from Pro-Football-Reference: full AFL, NFL, AFC and NFC teams, and each of those players gets his All-Star award. A few players who share a name with someone else that season are left off rather than risk crediting the wrong one. Start a new league to get them.
+
 ## v1.20.3 · Nov 5, 2026
 
 - **"# Conference Games" fixed.** It was 12 (the NFL's total including division games), which stock Football GM rejects as more games than the season has. It's 6 now, the way Football GM counts it (other divisions in your conference). Checked against Football GM's scheduler for every season since 1966: no AFL–NFL games before the 1970 merger, the real 3 cross-conference games a team in 1970–77 and 4 in 1978–2001, and the real NFL format from 2002 on.
