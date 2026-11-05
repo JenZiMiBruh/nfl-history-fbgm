@@ -6,6 +6,11 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.20.3 · Nov 5, 2026
+
+- **"# Conference Games" fixed.** It was 12 (the NFL's total including division games), which stock Football GM rejects as more games than the season has. It's 6 now, the way Football GM counts it (other divisions in your conference). Checked against Football GM's scheduler for every season since 1966: no AFL–NFL games before the 1970 merger, the real 3 cross-conference games a team in 1970–77 and 4 in 1978–2001, and the real NFL format from 2002 on.
+- **All-Star History starts with the 1971 Pro Bowl (1972)** for now: the earlier seasons with broken rosters were removed in v1.20.2.
+
 ## v1.20.2 · Nov 5, 2026
 
 Fixes from your reports on r/Football_GM. Thank you!

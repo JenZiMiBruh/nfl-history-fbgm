@@ -540,7 +540,14 @@
     const footballOvertimePlayoffs = season <= 2009 ? 'suddenDeath' : season <= 2021 ? 'exceptFg' : 'bothPossess';
     const overtimeLength = season <= 2016 ? 15 : 10;
     // Schedule shape: AFL and NFL never met in the regular season before the merger.
-    const numGamesConf = season <= 1969 ? numGames : season >= 2002 ? 12 : null;
+    // Conference games, the way Football GM counts them. With the division setting on (2002 on, eight divisions of four),
+    // it means games against the other divisions in the conference: the NFL plays 6, plus 6 in the division and the rest
+    // out of conference. With it off, division opponents count as conference games too, so it is "games in the
+    // conference": every game before the 1970 merger (the AFL and NFL never met), then all but the real cross-conference
+    // games (3 a team in 1970-77, 4 in 1978-2001). Division sizes were uneven before 2002, so that setting stays off.
+    // The strike seasons (1982, 1987) had no regular pattern, and with 31 teams (1999-2001: 16 AFC, 15 NFC) the
+    // cross-conference games cannot pair up evenly, so those stay off too.
+    const numGamesConf = season <= 1969 ? numGames : season >= 2002 ? 6 : season === 1982 || season === 1987 || (season >= 1999 && season <= 2001) ? null : numGames - (season <= 1977 ? 3 : 4);
     const numGamesDiv = season >= 2002 ? 6 : null;
     // Rookie deals: the 2011 CBA made every drafted contract four years.
     const rookieContractLengths = season >= 2011 ? [4] : [4, 3];
