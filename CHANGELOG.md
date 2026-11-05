@@ -6,6 +6,13 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.20.1 · Nov 4, 2026
+
+- **RB1 Workload slider on the Roster page (mod).** Under Play Through Injuries: slide right to give your lead back more carries, left to spread them across the backfield. Every team has its own setting; 1.1 is the default, the same as before.
+- **Fewer interceptions in the 2020s (mod).** The sim's interception rate for 2020–2026 is 9% lower, to match the real NFL.
+- **Rookie Scale on (mod).** New leagues turn on Football GM's Rookie Scale setting, so draft picks sign set rookie contracts.
+- **"What's new" button no longer covers the screen on phones.** It now sits at the bottom of the page instead of floating over the sidebar and roster.
+
 ## v1.20 · Nov 4, 2026
 
 - **QB vision raised in every season.** Vision was far too low (Tom Brady never got above 63; he now peaks at 76), and it directly affects interceptions. Overalls unchanged.

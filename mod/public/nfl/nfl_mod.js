@@ -1,4 +1,4 @@
-window.NFL_MOD_BUILT = "Nov 4, 2026, 4:08 AM";
+window.NFL_MOD_BUILT = "Nov 4, 2026, 11:21 PM";
 ;
 window.NFL_ERA_FACTORS = {
  "1966": {
@@ -489,7 +489,7 @@ window.NFL_ERA_FACTORS = {
  },
  "2020": {
   "completionFactor": 1.12,
-  "intFactor": 0.86,
+  "intFactor": 0.78,
   "sackFactor": 0.86,
   "fumbleFactor": 0.96,
   "rushYdsFactor": 0.94,
@@ -498,7 +498,7 @@ window.NFL_ERA_FACTORS = {
  },
  "2021": {
   "completionFactor": 1.12,
-  "intFactor": 0.86,
+  "intFactor": 0.78,
   "sackFactor": 0.9,
   "fumbleFactor": 0.96,
   "rushYdsFactor": 0.88,
@@ -507,7 +507,7 @@ window.NFL_ERA_FACTORS = {
  },
  "2022": {
   "completionFactor": 1.14,
-  "intFactor": 0.8,
+  "intFactor": 0.73,
   "sackFactor": 0.92,
   "fumbleFactor": 0.88,
   "rushYdsFactor": 0.9,
@@ -516,7 +516,7 @@ window.NFL_ERA_FACTORS = {
  },
  "2023": {
   "completionFactor": 1.12,
-  "intFactor": 0.8,
+  "intFactor": 0.73,
   "sackFactor": 1,
   "fumbleFactor": 0.8,
   "rushYdsFactor": 0.88,
@@ -525,7 +525,7 @@ window.NFL_ERA_FACTORS = {
  },
  "2024": {
   "completionFactor": 1.12,
-  "intFactor": 0.8,
+  "intFactor": 0.73,
   "sackFactor": 1.06,
   "fumbleFactor": 0.82,
   "rushYdsFactor": 0.9,
@@ -534,7 +534,7 @@ window.NFL_ERA_FACTORS = {
  },
  "2025": {
   "completionFactor": 1.14,
-  "intFactor": 0.76,
+  "intFactor": 0.69,
   "sackFactor": 1.1,
   "fumbleFactor": 0.8,
   "rushYdsFactor": 0.88,
@@ -543,7 +543,7 @@ window.NFL_ERA_FACTORS = {
  },
  "2026": {
   "completionFactor": 1.14,
-  "intFactor": 0.7,
+  "intFactor": 0.64,
   "sackFactor": 1.04,
   "fumbleFactor": 0.68,
   "rushYdsFactor": 0.94,
@@ -1102,7 +1102,8 @@ window.NFL_ERA_FACTORS = {
       numGames, numGamesPlayoffSeries, numPlayoffByes, numDraftRounds, maxRosterSize, minRosterSize: maxRosterSize - 8,
       salaryCap, salaryCapType, minPayroll: Math.round(salaryCap * 0.89), minContract, maxContract,
       ...simFactors, twoPointConversions, passFactor, scrimmageTouchbackKickoff, maxOvertimes, footballOvertime, footballOvertimePlayoffs, overtimeLength,
-      overtimeLengthPlayoffs: 15, numGamesConf, numGamesDiv, rookieContractLengths
+      overtimeLengthPlayoffs: 15, numGamesConf, numGamesDiv, rookieContractLengths,
+      draftPickAutoContract: true // Football GM's Rookie Scale setting, on (it's off by default in football)
     };
   }
   // Rule keys that scheduled gameAttributes events keep in sync with getRules().

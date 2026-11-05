@@ -548,7 +548,8 @@
       numGames, numGamesPlayoffSeries, numPlayoffByes, numDraftRounds, maxRosterSize, minRosterSize: maxRosterSize - 8,
       salaryCap, salaryCapType, minPayroll: Math.round(salaryCap * 0.89), minContract, maxContract,
       ...simFactors, twoPointConversions, passFactor, scrimmageTouchbackKickoff, maxOvertimes, footballOvertime, footballOvertimePlayoffs, overtimeLength,
-      overtimeLengthPlayoffs: 15, numGamesConf, numGamesDiv, rookieContractLengths
+      overtimeLengthPlayoffs: 15, numGamesConf, numGamesDiv, rookieContractLengths,
+      draftPickAutoContract: true // Football GM's Rookie Scale setting, on (it's off by default in football)
     };
   }
   // Rule keys that scheduled gameAttributes events keep in sync with getRules().

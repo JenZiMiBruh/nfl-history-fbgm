@@ -1,5 +1,5 @@
 diff --git a/package.json b/package.json
-index 16a2fbe..2e19f9f 100644
+index 16a2fbe0f..2e19f9f38 100644
 --- a/package.json
 +++ b/package.json
 @@ -124,6 +124,7 @@
@@ -11,7 +11,7 @@ index 16a2fbe..2e19f9f 100644
  	},
  	"engines": {
 diff --git a/src/common/defaultGameAttributes.ts b/src/common/defaultGameAttributes.ts
-index 1127385..d7ffea3 100644
+index 11273855b..d7ffea30b 100644
 --- a/src/common/defaultGameAttributes.ts
 +++ b/src/common/defaultGameAttributes.ts
 @@ -81,7 +81,6 @@ const gameAttributesKeysSportSpecific = {
@@ -42,7 +42,7 @@ index 1127385..d7ffea3 100644
  	elam: false,
  	elamASG: false,
 diff --git a/src/common/types.ts b/src/common/types.ts
-index 2116af8..5d04ad5 100644
+index 2116af8f4..c94f32060 100644
 --- a/src/common/types.ts
 +++ b/src/common/types.ts
 @@ -720,6 +720,15 @@ export type GameAttributesLeague = {
@@ -61,12 +61,22 @@ index 2116af8..5d04ad5 100644
  	repeatSeason:
  		| undefined
  		| {
+@@ -2060,6 +2069,9 @@ export type Team = {
+ 	// [regular season, playoffs]
+ 	playThroughInjuries: [number, number];
+ 
++	// NFL history mod: how hard the lead running back is worked (Roster page slider). Optional because no upgrade, default 1.1
++	rbWorkload?: number;
++
+ 	// Optional because no upgrade
+ 	autoTicketPrice?: boolean;
+ 
 diff --git a/src/ui/components/Controller/NflWhatsNew.tsx b/src/ui/components/Controller/NflWhatsNew.tsx
 new file mode 100644
-index 0000000..d46be15
+index 000000000..25decf4a5
 --- /dev/null
 +++ b/src/ui/components/Controller/NflWhatsNew.tsx
-@@ -0,0 +1,155 @@
+@@ -0,0 +1,151 @@
 +import { useEffect, useState, type ReactNode } from "react";
 +import { Modal } from "react-bootstrap";
 +
@@ -179,28 +189,24 @@ index 0000000..d46be15
 +
 +	return (
 +		<>
++			{/* In the page flow at the bottom, not fixed: a fixed button covered the sidebar and roster rows on phones */}
++			<div className="d-flex flex-wrap align-items-start gap-2 px-3 pb-3">
 +			<button
-+				className="btn btn-sm btn-secondary"
++				className="btn btn-sm btn-link text-body-secondary p-0"
 +				type="button"
-+				style={{
-+					position: "fixed",
-+					left: 8,
-+					bottom: 8,
-+					zIndex: 1000,
-+					opacity: 0.85,
-+				}}
 +				onClick={() => setShow("all")}
 +			>
 +				NFL History v{version} · What's new
 +			</button>
 +			{latest ? (
-+				<div className="alert alert-info" style={{ position: "fixed", left: 8, bottom: 48, zIndex: 1000, maxWidth: 340, marginBottom: 0 }}>
++				<div className="alert alert-info mb-0" style={{ maxWidth: 340 }}>
 +					<div className="mb-2">Update available: <b>{latest}</b></div>
 +					{updateStatus ? <div>{updateStatus}</div> : (
 +						<button className="btn btn-sm btn-primary" type="button" onClick={update}>Update now</button>
 +					)}
 +				</div>
 +			) : null}
++			</div>
 +			<Modal show={show !== undefined} onHide={() => setShow(undefined)} size="lg" scrollable>
 +				<Modal.Header closeButton>
 +					<Modal.Title>
@@ -224,7 +230,7 @@ index 0000000..d46be15
 +};
 diff --git a/src/ui/components/Controller/TeamTheme.tsx b/src/ui/components/Controller/TeamTheme.tsx
 new file mode 100644
-index 0000000..3a5e35c
+index 000000000..3a5e35c45
 --- /dev/null
 +++ b/src/ui/components/Controller/TeamTheme.tsx
 @@ -0,0 +1,95 @@
@@ -324,7 +330,7 @@ index 0000000..3a5e35c
 +	return null;
 +};
 diff --git a/src/ui/components/Controller/index.tsx b/src/ui/components/Controller/index.tsx
-index fc14a9f..b0c12d4 100644
+index fc14a9fc3..b0c12d458 100644
 --- a/src/ui/components/Controller/index.tsx
 +++ b/src/ui/components/Controller/index.tsx
 @@ -12,6 +12,8 @@ import { Notifications } from "./Notifications.tsx";
@@ -346,7 +352,7 @@ index fc14a9f..b0c12d4 100644
  						<NagModal close={closeNagModal} show={showNagModal} />
  					</div>
 diff --git a/src/ui/components/LeagueFileUpload.tsx b/src/ui/components/LeagueFileUpload.tsx
-index 5694d6d..0cf3d00 100644
+index 5694d6dad..0cf3d00eb 100644
 --- a/src/ui/components/LeagueFileUpload.tsx
 +++ b/src/ui/components/LeagueFileUpload.tsx
 @@ -109,13 +109,473 @@ class LeagueFileVersionError extends Error {
@@ -868,7 +874,7 @@ index 5694d6d..0cf3d00 100644
  			<div style={styleStatus}>
  				{state.status === "error" ? (
 diff --git a/src/ui/views/NewLeague/index.tsx b/src/ui/views/NewLeague/index.tsx
-index 949d2ba..a6c6f88 100644
+index 949d2ba3a..a6c6f887c 100644
 --- a/src/ui/views/NewLeague/index.tsx
 +++ b/src/ui/views/NewLeague/index.tsx
 @@ -1765,6 +1765,7 @@ const NewLeague = (props: View<"newLeague">) => {
@@ -879,8 +885,117 @@ index 949d2ba..a6c6f88 100644
  														onLoading={() => {
  															dispatch({ type: "loadingLeagueFile" });
  														}}
+diff --git a/src/ui/views/Roster/RbWorkloadSlider.tsx b/src/ui/views/Roster/RbWorkloadSlider.tsx
+new file mode 100644
+index 000000000..a7e6c6912
+--- /dev/null
++++ b/src/ui/views/Roster/RbWorkloadSlider.tsx
+@@ -0,0 +1,81 @@
++// NFL history mod: per-team RB1 workload, next to Play Through Injuries on the Roster page.
++// It sets how often the lead running back rests (the game sim's RB fatigue modifier).
++import { useState } from "react";
++import { HelpPopover } from "../../components/HelpPopover.tsx";
++import { toWorker } from "../../util/toWorker.ts";
++
++export const DEFAULT_RB_WORKLOAD = 1.1;
++
++const describe = (value: number) => {
++	if (value <= 0.85) {
++		return "Committee: carries spread across the backfield";
++	}
++	if (value < 1.05) {
++		return "Balanced: backups get regular work";
++	}
++	if (value <= 1.2) {
++		return "Lead back: RB1 gets most of the carries";
++	}
++	return "Workhorse: RB1 rarely leaves the field";
++};
++
++const RbWorkloadSlider = ({
++	t,
++}: {
++	t: {
++		tid: number;
++		rbWorkload?: number;
++	};
++}) => {
++	const [value, setValue] = useState(t.rbWorkload ?? DEFAULT_RB_WORKLOAD);
++	const id = "rb-workload";
++
++	return (
++		<div className="rb-workload mt-3">
++			<div className="d-flex align-items-center">
++				<b>RB1 Workload</b>
++				<HelpPopover className="ms-1" title="RB1 Workload">
++					<p>
++						How hard your lead running back is worked. Slide right and he rests
++						less and gets more of the carries; slide left to spread them across
++						the backfield.
++					</p>
++					<p>
++						1.0 is plain Football GM. The NFL History default is 1.1. Every team
++						has its own setting.
++					</p>
++				</HelpPopover>
++			</div>
++			<form className="mt-2">
++				<label className="visually-hidden" htmlFor={id}>
++					RB1 Workload
++				</label>
++				<input
++					type="range"
++					className="form-range"
++					id={id}
++					value={value}
++					min="0.7"
++					max="1.5"
++					step="0.05"
++					onChange={async (event) => {
++						const parsed = Number.parseFloat(event.target.value);
++						if (!Number.isNaN(parsed)) {
++							setValue(parsed);
++							await toWorker("main", "updateRbWorkload", {
++								tid: t.tid,
++								value: parsed,
++							});
++						}
++					}}
++				/>
++				<div style={{ marginTop: -5 }}>
++					{value.toFixed(2)}{" "}
++					<span className="text-body-secondary">({describe(value)})</span>
++				</div>
++			</form>
++		</div>
++	);
++};
++
++export default RbWorkloadSlider;
+diff --git a/src/ui/views/Roster/TopStuff.tsx b/src/ui/views/Roster/TopStuff.tsx
+index bfaf2fc52..3dafeaba4 100644
+--- a/src/ui/views/Roster/TopStuff.tsx
++++ b/src/ui/views/Roster/TopStuff.tsx
+@@ -5,6 +5,7 @@ import { helpers } from "../../util/helpers.ts";
+ import { toWorker } from "../../util/toWorker.ts";
+ import InstructionsAndSortButtons from "./InstructionsAndSortButtons.tsx";
+ import PlayThroughInjurySliders from "./PlayThroughInjuriesSliders.tsx";
++import RbWorkloadSlider from "./RbWorkloadSlider.tsx";
+ import { type LocalStateUI, type View } from "../../../common/types.ts";
+ import { bySport } from "../../../common/sportFunctions.ts";
+ import Note from "../Player/Note.tsx";
+@@ -357,6 +358,9 @@ const TopStuff = ({
+ 							{showTradingBlock ? (
+ 								<div>
+ 									<PlayThroughInjurySliders key={tid} t={t} />
++									{bySport({ football: true, default: false }) ? (
++										<RbWorkloadSlider key={`rb-${tid}`} t={t} />
++									) : null}
+ 								</div>
+ 							) : null}
+ 						</>
 diff --git a/src/ui/views/Settings/settings.tsx b/src/ui/views/Settings/settings.tsx
-index 4e86c44..92c4304 100644
+index 4e86c441c..92c430405 100644
 --- a/src/ui/views/Settings/settings.tsx
 +++ b/src/ui/views/Settings/settings.tsx
 @@ -2311,10 +2311,19 @@ export const settings: Setting[] = (
@@ -988,7 +1103,7 @@ index 4e86c44..92c4304 100644
  			category: "Real Players",
  			key: "rpdPot",
 diff --git a/src/ui/views/Settings/types.ts b/src/ui/views/Settings/types.ts
-index 8ac606a..00f9da7 100644
+index 8ac606a83..00f9da73d 100644
 --- a/src/ui/views/Settings/types.ts
 +++ b/src/ui/views/Settings/types.ts
 @@ -58,6 +58,15 @@ export type Key =
@@ -1008,7 +1123,7 @@ index 8ac606a..00f9da7 100644
  	| "maxOvertimes"
  	| "maxOvertimesPlayoffs"
 diff --git a/src/worker/api/index.ts b/src/worker/api/index.ts
-index 12dd36b..28e18a3 100644
+index 12dd36b47..1b16d32e5 100644
 --- a/src/worker/api/index.ts
 +++ b/src/worker/api/index.ts
 @@ -159,6 +159,7 @@ import { formatScheduleForEditor } from "../views/scheduleEditor.ts";
@@ -1078,7 +1193,23 @@ index 12dd36b..28e18a3 100644
  	const gameAttributes: Partial<GameAttributesLeague> = omit(settings, [
  		"repeatSeason",
  	]);
-@@ -4871,6 +4914,17 @@ const upgrade65 = async () => {
+@@ -4381,6 +4424,15 @@ const updateOptions = async (
+ 	await toUI("realtimeUpdate", [["options"]]);
+ };
+ 
++// NFL history mod: per-team RB1 workload (Roster page slider)
++const updateRbWorkload = async ({ tid, value }: { tid: number; value: number }) => {
++	const t = await idb.cache.teams.get(tid);
++	if (t) {
++		t.rbWorkload = value;
++		await idb.cache.teams.put(t);
++	}
++};
++
+ const updatePlayThroughInjuries = async ({
+ 	tid,
+ 	value,
+@@ -4871,6 +4923,17 @@ const upgrade65 = async () => {
  	console.timeEnd("upgrade65");
  };
  
@@ -1096,7 +1227,7 @@ index 12dd36b..28e18a3 100644
  const upsertCustomizedPlayer = async (
  	{
  		p,
-@@ -4920,6 +4974,17 @@ const upsertCustomizedPlayer = async (
+@@ -4920,6 +4983,17 @@ const upsertCustomizedPlayer = async (
  
  	p.imgURL = helpers.stripBbcode(p.imgURL);
  
@@ -1114,7 +1245,7 @@ index 12dd36b..28e18a3 100644
  	// Fix draft and ratings season
  	if (p.tid === PLAYER.UNDRAFTED) {
  		if (p.draft.year < season) {
-@@ -5381,8 +5446,86 @@ const whileWorkerBusy =
+@@ -5381,8 +5455,86 @@ const whileWorkerBusy =
  	(...args: Args) =>
  		lock.whileWorkerBusy(() => cb(...args));
  
@@ -1201,7 +1332,15 @@ index 12dd36b..28e18a3 100644
  	awardSettings,
  	eightyTwoZeroDraft,
  	exhibitionGame,
-@@ -5531,6 +5674,7 @@ const api = {
+@@ -5523,6 +5675,7 @@ const api = {
+ 		updateMultiTeamMode,
+ 		updateOptions,
+ 		updatePlayThroughInjuries,
++		updateRbWorkload,
+ 		updatePlayerWatch,
+ 		updatePlayersWatch,
+ 		updatePlayingTime,
+@@ -5531,6 +5684,7 @@ const api = {
  		updateTrade,
  		upgrade65,
  		upgrade65Estimate,
@@ -1211,7 +1350,7 @@ index 12dd36b..28e18a3 100644
  		validatePointsFormula,
 diff --git a/src/worker/api/native.ts b/src/worker/api/native.ts
 new file mode 100644
-index 0000000..eee4085
+index 000000000..eee408519
 --- /dev/null
 +++ b/src/worker/api/native.ts
 @@ -0,0 +1,96 @@
@@ -1312,7 +1451,7 @@ index 0000000..eee4085
 +		);
 +	};
 diff --git a/src/worker/core/GameSim.football/index.ts b/src/worker/core/GameSim.football/index.ts
-index ccdc4ee..a1695c1 100644
+index ccdc4ee51..87e31f44b 100644
 --- a/src/worker/core/GameSim.football/index.ts
 +++ b/src/worker/core/GameSim.football/index.ts
 @@ -10,6 +10,18 @@ import {
@@ -1341,8 +1480,8 @@ index ccdc4ee..a1695c1 100644
 -				const FATIGUE_MODIFIER = pos === "WR" ? 0.75 : 1;
 -
 -				const depth = this.team[t].depth[pos];
-+				// NFL history mod: the lead back rests a little less often (1.1), so workhorse backs get workhorse carries
-+				const FATIGUE_MODIFIER = pos === "WR" ? 0.75 : pos === "RB" ? 1.1 : 1;
++				// NFL history mod: the lead back rests less often (Roster page: RB1 Workload, default 1.1), so workhorse backs get workhorse carries
++				const FATIGUE_MODIFIER = pos === "WR" ? 0.75 : pos === "RB" ? this.team[t].rbWorkload : 1;
 +
 +				// NFL history mod: on offense and defense, players who really play this position go first (in depth chart
 +				// order), then everyone else, so a receiver listed on the running back depth chart only plays there if needed
@@ -1478,8 +1617,20 @@ index ccdc4ee..a1695c1 100644
  		const weightFunc =
  			rating !== undefined
  				? (p: PlayerGameSim) =>
+diff --git a/src/worker/core/GameSim.football/types.ts b/src/worker/core/GameSim.football/types.ts
+index 65a1a3f92..753c098a5 100644
+--- a/src/worker/core/GameSim.football/types.ts
++++ b/src/worker/core/GameSim.football/types.ts
+@@ -55,6 +55,7 @@ export type TeamGameSim = {
+ 	player: PlayerGameSim[];
+ 	compositeRating: any;
+ 	depth: Record<Position, PlayerGameSim[]>;
++	rbWorkload: number;
+ };
+ 
+ export type Formation = {
 diff --git a/src/worker/core/draft/runPicks.ts b/src/worker/core/draft/runPicks.ts
-index 260dbbd..d2514cd 100644
+index 260dbbdd8..d2514cd76 100644
 --- a/src/worker/core/draft/runPicks.ts
 +++ b/src/worker/core/draft/runPicks.ts
 @@ -198,7 +198,29 @@ const runPicks = async (
@@ -1514,7 +1665,7 @@ index 260dbbd..d2514cd 100644
  			const pid = selection.pid;
  			await selectPlayer(dp, pid);
 diff --git a/src/worker/core/freeAgents/autoSign.ts b/src/worker/core/freeAgents/autoSign.ts
-index 26983ab..f0b1006 100644
+index 26983abfc..f0b100629 100644
 --- a/src/worker/core/freeAgents/autoSign.ts
 +++ b/src/worker/core/freeAgents/autoSign.ts
 @@ -5,6 +5,7 @@ import { idb } from "../../db/index.ts";
@@ -1539,9 +1690,29 @@ index 26983ab..f0b1006 100644
  		if (p) {
  			// Remove from list of free agents
  			playersSorted = playersSorted.filter((p2) => p2 !== p);
+diff --git a/src/worker/core/game/loadTeams.ts b/src/worker/core/game/loadTeams.ts
+index b261af494..a5942c907 100644
+--- a/src/worker/core/game/loadTeams.ts
++++ b/src/worker/core/game/loadTeams.ts
+@@ -134,6 +134,7 @@ export const processTeam = async (
+ 		tid: number;
+ 		playThroughInjuries: [number, number];
+ 		depth?: unknown;
++		rbWorkload?: number;
+ 	},
+ 	teamSeason: {
+ 		won: number;
+@@ -239,6 +240,7 @@ export const processTeam = async (
+ 		},
+ 		compositeRating,
+ 		depth: teamInput.depth,
++		rbWorkload: teamInput.rbWorkload ?? 1.1,
+ 	};
+ 
+ 	const playThroughInjuries = actualPlayThroughInjuries[playoffs ? 1 : 0];
 diff --git a/src/worker/core/game/nflRealMoves.ts b/src/worker/core/game/nflRealMoves.ts
 new file mode 100644
-index 0000000..7284102
+index 000000000..728410280
 --- /dev/null
 +++ b/src/worker/core/game/nflRealMoves.ts
 @@ -0,0 +1,81 @@
@@ -1627,7 +1798,7 @@ index 0000000..7284102
 +	return moved.size > 0;
 +};
 diff --git a/src/worker/core/game/play.ts b/src/worker/core/game/play.ts
-index 03277b0..e066ae5 100644
+index 03277b04b..e066ae574 100644
 --- a/src/worker/core/game/play.ts
 +++ b/src/worker/core/game/play.ts
 @@ -10,6 +10,7 @@ import {
@@ -1655,7 +1826,7 @@ index 03277b0..e066ae5 100644
  
  		// More stuff for LeagueTopBar - update ovrs based on injuries, and (if user just played a game) update the score of the user's last game and add their next game
 diff --git a/src/worker/core/league/createGameAttributes.ts b/src/worker/core/league/createGameAttributes.ts
-index a23718b..60e3937 100644
+index a23718bcd..60e393752 100644
 --- a/src/worker/core/league/createGameAttributes.ts
 +++ b/src/worker/core/league/createGameAttributes.ts
 @@ -285,7 +285,8 @@ const createGameAttributes = async (
@@ -1669,7 +1840,7 @@ index a23718b..60e3937 100644
  			divs: unwrapGameAttribute(gameAttributes, "divs"),
  			numGames: unwrapGameAttribute(gameAttributes, "numGames"),
 diff --git a/src/worker/core/league/createStream.ts b/src/worker/core/league/createStream.ts
-index 864aaa0..680dc3a 100644
+index 864aaa030..680dc3a36 100644
 --- a/src/worker/core/league/createStream.ts
 +++ b/src/worker/core/league/createStream.ts
 @@ -1334,6 +1334,7 @@ const beforeDBStream = async ({
@@ -1681,7 +1852,7 @@ index 864aaa0..680dc3a 100644
  		imgURL: t.imgURL,
  		imgURLSmall: t.imgURLSmall,
 diff --git a/src/worker/core/league/loadGameAttributes.ts b/src/worker/core/league/loadGameAttributes.ts
-index 517f4c6..655faf0 100644
+index 517f4c69a..655faf06a 100644
 --- a/src/worker/core/league/loadGameAttributes.ts
 +++ b/src/worker/core/league/loadGameAttributes.ts
 @@ -101,6 +101,18 @@ const loadGameAttributes = async () => {
@@ -1705,7 +1876,7 @@ index 517f4c6..655faf0 100644
  		g.setWithoutSavingToDB("draftType", "nba2019");
 diff --git a/src/worker/core/nflRealRosters.ts b/src/worker/core/nflRealRosters.ts
 new file mode 100644
-index 0000000..3730cc5
+index 000000000..3730cc5d6
 --- /dev/null
 +++ b/src/worker/core/nflRealRosters.ts
 @@ -0,0 +1,28 @@
@@ -1738,7 +1909,7 @@ index 0000000..3730cc5
 +	return p.realTeams[season] === tid;
 +};
 diff --git a/src/worker/core/phase/newPhasePreseason.ts b/src/worker/core/phase/newPhasePreseason.ts
-index 22a2023..64ffa90 100644
+index 22a20236f..64ffa90cf 100644
 --- a/src/worker/core/phase/newPhasePreseason.ts
 +++ b/src/worker/core/phase/newPhasePreseason.ts
 @@ -409,6 +409,71 @@ const newPhasePreseason = async (
@@ -1854,7 +2025,7 @@ index 22a2023..64ffa90 100644
  					for (const p of conflicts) {
  						if (p !== playerWhoKeepsIt) {
 diff --git a/src/worker/core/phase/newPhaseResignPlayers.ts b/src/worker/core/phase/newPhaseResignPlayers.ts
-index e9d89db..24ca44d 100644
+index e9d89db1f..24ca44d52 100644
 --- a/src/worker/core/phase/newPhaseResignPlayers.ts
 +++ b/src/worker/core/phase/newPhaseResignPlayers.ts
 @@ -148,6 +148,27 @@ const newPhaseResignPlayers = async (
@@ -1911,7 +2082,7 @@ index e9d89db..24ca44d 100644
  					contractAmount: p.contract.amount,
  				});
 diff --git a/src/worker/core/phase/processScheduledEvents.ts b/src/worker/core/phase/processScheduledEvents.ts
-index 9d9e5a5..0625cae 100644
+index 9d9e5a586..0625cae8f 100644
 --- a/src/worker/core/phase/processScheduledEvents.ts
 +++ b/src/worker/core/phase/processScheduledEvents.ts
 @@ -543,7 +543,15 @@ const processContraction = async (
@@ -2064,7 +2235,7 @@ index 9d9e5a5..0625cae 100644
  				unretiredPids.push(scheduledEvent.info.pid);
  				eventLogTexts.push(...texts);
 diff --git a/src/worker/core/player/develop.ts b/src/worker/core/player/develop.ts
-index 324e001..e0bfca5 100644
+index 324e001dd..e0bfca5ad 100644
 --- a/src/worker/core/player/develop.ts
 +++ b/src/worker/core/player/develop.ts
 @@ -142,6 +142,7 @@ const develop = async (
@@ -2097,7 +2268,7 @@ index 324e001..e0bfca5 100644
  	if (!ratings.locked || years === 0) {
  		// Run these even for players developing 0 seasons
 diff --git a/src/worker/core/player/format.ts b/src/worker/core/player/format.ts
-index 8542aa0..7d932a0 100644
+index 8542aa0bc..7d932a079 100644
 --- a/src/worker/core/player/format.ts
 +++ b/src/worker/core/player/format.ts
 @@ -233,6 +233,8 @@ const processAttrs = (
@@ -2110,7 +2281,7 @@ index 8542aa0..7d932a0 100644
  			} else {
  				// Undrafted
 diff --git a/src/worker/core/player/shouldRetire.ts b/src/worker/core/player/shouldRetire.ts
-index 1b49050..b787c92 100644
+index 1b490500a..b787c9251 100644
 --- a/src/worker/core/player/shouldRetire.ts
 +++ b/src/worker/core/player/shouldRetire.ts
 @@ -91,7 +91,52 @@ const checkForceRetireRealPlayers = async (
@@ -2167,7 +2338,7 @@ index 1b49050..b787c92 100644
  	const forceRetireAge = g.get("forceRetireAge");
  
 diff --git a/src/worker/core/season/newSchedule.ts b/src/worker/core/season/newSchedule.ts
-index 5959814..6a5d64d 100644
+index 5959814f4..6a5d64d59 100644
 --- a/src/worker/core/season/newSchedule.ts
 +++ b/src/worker/core/season/newSchedule.ts
 @@ -15,6 +15,43 @@ const newSchedule = (
@@ -2215,7 +2386,7 @@ index 5959814..6a5d64d 100644
  		if (tids) {
  			return tids;
 diff --git a/src/worker/core/team/checkRosterSizes.ts b/src/worker/core/team/checkRosterSizes.ts
-index 8dd6738..301c12c 100644
+index 8dd67389c..301c12c06 100644
 --- a/src/worker/core/team/checkRosterSizes.ts
 +++ b/src/worker/core/team/checkRosterSizes.ts
 @@ -5,6 +5,7 @@ import { idb } from "../../db/index.ts";
@@ -2294,7 +2465,7 @@ index 8dd6738..301c12c 100644
  					if (!p) {
  						p = await player.genRandomFreeAgent();
 diff --git a/src/worker/core/team/genDepth.football.ts b/src/worker/core/team/genDepth.football.ts
-index 8536f14..df471d0 100644
+index 8536f14d1..df471d06d 100644
 --- a/src/worker/core/team/genDepth.football.ts
 +++ b/src/worker/core/team/genDepth.football.ts
 @@ -20,8 +20,10 @@ type PlayerForDepth = {
@@ -2310,7 +2481,7 @@ index 8536f14..df471d0 100644
  
  	return tempScore;
 diff --git a/src/worker/core/team/getTeamInfoCache.ts b/src/worker/core/team/getTeamInfoCache.ts
-index 9b41516..05ec36f 100644
+index 9b4151645..05ec36f99 100644
 --- a/src/worker/core/team/getTeamInfoCache.ts
 +++ b/src/worker/core/team/getTeamInfoCache.ts
 @@ -3,6 +3,7 @@ import type { GameAttributesLeague } from "../../../common/types.ts";
@@ -2330,7 +2501,7 @@ index 9b41516..05ec36f 100644
  		imgURL: t.imgURL,
  		imgURLSmall: t.imgURLSmall,
 diff --git a/src/worker/core/trade/betweenAiTeams.ts b/src/worker/core/trade/betweenAiTeams.ts
-index 1e4f265..2df520e 100644
+index 1e4f2652d..2df520e1c 100644
 --- a/src/worker/core/trade/betweenAiTeams.ts
 +++ b/src/worker/core/trade/betweenAiTeams.ts
 @@ -7,6 +7,7 @@ import summary from "./summary.ts";
@@ -2352,7 +2523,7 @@ index 1e4f265..2df520e 100644
  	}
  
 diff --git a/src/worker/views/newLeague.ts b/src/worker/views/newLeague.ts
-index 3000371..098448b 100644
+index 3000371a6..098448b69 100644
 --- a/src/worker/views/newLeague.ts
 +++ b/src/worker/views/newLeague.ts
 @@ -433,6 +433,16 @@ export const getDefaultSettings = () => {
@@ -2372,8 +2543,20 @@ index 3000371..098448b 100644
  		saveOldBoxScores: unwrapGameAttribute(
  			defaultGameAttributes,
  			"saveOldBoxScores",
+diff --git a/src/worker/views/roster.ts b/src/worker/views/roster.ts
+index 0a755488b..14472cb00 100644
+--- a/src/worker/views/roster.ts
++++ b/src/worker/views/roster.ts
+@@ -199,6 +199,7 @@ export default defineView({
+ 					"name",
+ 					"keepRosterSorted",
+ 					"playThroughInjuries",
++					"rbWorkload",
+ 				],
+ 				seasonAttrs,
+ 				stats: ["pts", "oppPts", "gp"],
 diff --git a/src/worker/views/settings.ts b/src/worker/views/settings.ts
-index 7656605..cc44025 100644
+index 7656605ff..cc44025a0 100644
 --- a/src/worker/views/settings.ts
 +++ b/src/worker/views/settings.ts
 @@ -73,6 +73,15 @@ type Key =
@@ -2409,7 +2592,7 @@ index 7656605..cc44025 100644
  		maxOvertimes: g.get("maxOvertimes"),
  		maxOvertimesPlayoffs: g.get("maxOvertimesPlayoffs"),
 diff --git a/tools/lib/server.ts b/tools/lib/server.ts
-index dd727b3..9ae2ee1 100644
+index dd727b3c3..9ae2ee159 100644
 --- a/tools/lib/server.ts
 +++ b/tools/lib/server.ts
 @@ -115,6 +115,7 @@ const PREFIXES_STATIC = [
@@ -2422,7 +2605,7 @@ index dd727b3..9ae2ee1 100644
  	// Not worth the confusion unless the service worker is being worked on
 diff --git a/tools/native/RecordStore.js b/tools/native/RecordStore.js
 new file mode 100644
-index 0000000..4293303
+index 000000000..4293303cd
 --- /dev/null
 +++ b/tools/native/RecordStore.js
 @@ -0,0 +1,137 @@
@@ -2565,7 +2748,7 @@ index 0000000..4293303
 +export default RecordStore;
 diff --git a/tools/native/build.ts b/tools/native/build.ts
 new file mode 100644
-index 0000000..1a5bdfd
+index 000000000..1a5bdfd2e
 --- /dev/null
 +++ b/tools/native/build.ts
 @@ -0,0 +1,40 @@
@@ -2611,7 +2794,7 @@ index 0000000..1a5bdfd
 +console.log("wrote build/native/engine.js");
 diff --git a/tools/native/entry.ts b/tools/native/entry.ts
 new file mode 100644
-index 0000000..69253eb
+index 000000000..69253eb89
 --- /dev/null
 +++ b/tools/native/entry.ts
 @@ -0,0 +1,5 @@
@@ -2622,7 +2805,7 @@ index 0000000..69253eb
 +import "../../src/worker/index.ts";
 diff --git a/tools/native/harness.mjs b/tools/native/harness.mjs
 new file mode 100644
-index 0000000..4dc92ad
+index 000000000..4dc92ad7c
 --- /dev/null
 +++ b/tools/native/harness.mjs
 @@ -0,0 +1,126 @@
@@ -2754,7 +2937,7 @@ index 0000000..4dc92ad
 +process.exit(0);
 diff --git a/tools/native/noIntlRegex.ts b/tools/native/noIntlRegex.ts
 new file mode 100644
-index 0000000..e0d9ed0
+index 000000000..e0d9ed08c
 --- /dev/null
 +++ b/tools/native/noIntlRegex.ts
 @@ -0,0 +1,31 @@
@@ -2791,7 +2974,7 @@ index 0000000..e0d9ed0
 +};
 diff --git a/tools/native/shims.ts b/tools/native/shims.ts
 new file mode 100644
-index 0000000..10d8eec
+index 000000000..10d8eece2
 --- /dev/null
 +++ b/tools/native/shims.ts
 @@ -0,0 +1,584 @@
