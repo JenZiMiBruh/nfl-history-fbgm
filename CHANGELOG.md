@@ -6,6 +6,10 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.20.7 · Nov 7, 2026
+
+- **The mod download opens again.** v1.20.4-1.20.6 shipped the mod in the wrong archive format, so it would not open in Windows Explorer or on a Mac, and Mac/Linux updates stayed on v1.20.3. It is a real zip again. Nothing else changed.
+
 ## v1.20.6 · Nov 6, 2026
 
 - **"# Conference Games" error fixed in the mod.** Starting a league from the mod's NFL History box could stop with *Can't have more division and conference games than total games* (6 division + 12 conference in a 17-game season). The mod's season builder still had the old count; it now uses 6 from 2002 on, like the season selector and the league files since v1.20.3. Mod players get it automatically the next time they start the mod.
