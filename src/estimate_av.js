@@ -20,6 +20,16 @@ const TRAIN = [2019, 2024];
 
 const tck = s => (s.defTckSolo || 0) + 0.5 * (s.defTckAst || 0);
 const fg = s => (s.fg0 || 0) + (s.fg20 || 0) + (s.fg30 || 0) + (s.fg40 || 0) + (s.fg50 || 0);
+// Real AV splits each team's points among its players, so a lineman or defender on a team that scores (or stops) a lot
+// gets more of it. Each player's games started (games for skill players) times his team's points per game above the
+// league average on offense, or below it on defense, lets the fit learn that share from 2019-2024.
+const teamOf = new Map(); // season|tid -> { off, def }
+const teamTerm = (s, tm) => {
+  const t = tm || { off: 0, def: 0 };
+  const g = s.gs || s.gp || 0;
+  return [g * t.off, g * t.def];
+};
+const OFFENSE = new Set(['QB', 'RB', 'WR', 'TE', 'OL']);
 const FEATURES = {
   // Skill players: games and production. Linemen and defenders: games started too, which for 2025-26 come from snap
   // counts (starts_from_snaps.js; the live feed's own start counts are wrong, e.g. Ja'Marr Chase 2 starts in 7 games)
@@ -59,6 +69,24 @@ function fit(X, y, lambda = 1) {
 }
 
 const master = JSON.parse(fs.readFileSync(FILE, 'utf8'));
+{
+  const bySeason = new Map();
+  for (const t of master.teams) for (const ts of t.seasons || []) {
+    const gp = (ts.won || 0) + (ts.lost || 0) + (ts.tied || 0);
+    if (!gp) continue;
+    if (!bySeason.has(ts.season)) bySeason.set(ts.season, []);
+    bySeason.get(ts.season).push({ tid: t.tid, ppg: (ts.pts || 0) / gp, oppg: (ts.oppPts || 0) / gp });
+  }
+  for (const [season, list] of bySeason) {
+    const lg = list.reduce((a, x) => a + x.ppg, 0) / list.length;
+    for (const x of list) teamOf.set(season + '|' + x.tid, { off: x.ppg - lg, def: lg - x.oppg });
+  }
+}
+// A player's features: his own stats, then his team's scoring or stopping (offense or defense)
+const featuresOf = (pos, s) => {
+  const [off, def] = teamTerm(s, teamOf.get(s.season + '|' + s.tid));
+  return pos === 'K' || pos === 'P' ? FEATURES[pos](s) : [...FEATURES[pos](s), OFFENSE.has(pos) ? off : def];
+};
 const posOf = (p, season) => {
   const r = (p.ratings || []).find(r => r.season === season) || (p.ratings || []).at(-1);
   return FEATURES[r?.pos] ? r.pos : FEATURES[p.pos] ? p.pos : null;
@@ -69,7 +97,7 @@ for (const p of master.players) for (const s of p.stats || []) {
   if (s.playoffs || s.season < TRAIN[0] || s.season > TRAIN[1] || !(s.gp > 0) || typeof s.av !== 'number') continue;
   const pos = posOf(p, s.season);
   if (!pos) continue;
-  (train[pos] = train[pos] || { X: [], y: [] }).X.push([1, ...FEATURES[pos](s)]);
+  (train[pos] = train[pos] || { X: [], y: [] }).X.push([1, ...featuresOf(pos, s)]);
   train[pos].y.push(s.av);
 }
 const model = {};
@@ -87,7 +115,7 @@ for (const p of master.players) for (const s of p.stats || []) {
   if (!(s.gp > 0)) { s.av = 0; continue; }
   const pos = posOf(p, s.season);
   if (!pos || !model[pos]) continue;
-  const x = [1, ...FEATURES[pos](s)];
+  const x = [1, ...featuresOf(pos, s)];
   const est = Math.max(0, x.reduce((a, v, i) => a + v * model[pos][i], 0));
   s.av = Math.round(est);
   // The unrounded estimate, for rebuild_ratings.js to rank by (it removes the field): rounded, a kicker's AV is 0, 1 or 2

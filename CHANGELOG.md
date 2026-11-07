@@ -6,6 +6,12 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.20.9 · Nov 7, 2026
+
+- **Better ratings for 2025 and this season.** Those seasons have no official value scores yet, so they're estimated, and the estimate ignored how good each player's team was. Now it counts team scoring and defense like the real ones do, so players on winning teams are rated like it (the 14-3 Patriots were rated 21st of 32).
+- **8 duplicate players removed.** Some 1966-75 players were in the file twice under a nickname or spelling (Charley and Charlie Cowan, Olie and Ollie Cordill). The copy took a roster spot, and Cowan's 1967 All-Pro was on the wrong one.
+- **NFL History settings on the New League screen**, with new defaults: real retirements, comebacks (to free agency) and suspensions on; real drafts and historical rosters off. Change them any time in Settings > Real Players.
+
 ## v1.20.8 · Nov 7, 2026
 
 - **No more "No player found at position K".** A team with nobody available at a spot (no kicker, or too few healthy players) stopped the whole season. Now it puts its best remaining player there and the game goes on.

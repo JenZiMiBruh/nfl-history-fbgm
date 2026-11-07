@@ -11,7 +11,7 @@ index 16a2fbe0f..2e19f9f38 100644
  	},
  	"engines": {
 diff --git a/src/common/defaultGameAttributes.ts b/src/common/defaultGameAttributes.ts
-index 11273855b..d7ffea30b 100644
+index 11273855b..9d616d412 100644
 --- a/src/common/defaultGameAttributes.ts
 +++ b/src/common/defaultGameAttributes.ts
 @@ -81,7 +81,6 @@ const gameAttributesKeysSportSpecific = {
@@ -22,7 +22,7 @@ index 11273855b..d7ffea30b 100644
  		"rpdPot",
  		"foulRateFactor",
  		"foulsNeededToFoulOut",
-@@ -585,7 +584,17 @@ export const defaultGameAttributes: GameAttributesLeagueWithHistory = {
+@@ -585,7 +584,19 @@ export const defaultGameAttributes: GameAttributesLeagueWithHistory = {
  	thanosCooldownEnd: undefined,
  	repeatSeason: undefined,
  	equalizeRegions: false,
@@ -31,11 +31,13 @@ index 11273855b..d7ffea30b 100644
 +	realPlayerDeterminism: __SPORT === "football" ? 1 : 0,
 +	useRealSchedules: true,
 +	useRealDrafts: false,
-+	nflRetirements: false,
-+	nflComebacks: false,
-+	nflComebackDestination: "team",
-+	nflSuspensions: false,
-+	nflRealRetirements: false,
++	// (new leagues: real careers play out, retirements, comebacks and suspensions included, but rosters and drafts are
++	// the league's own)
++	nflRetirements: true,
++	nflComebacks: true,
++	nflComebackDestination: "freeAgency",
++	nflSuspensions: true,
++	nflRealRetirements: true,
 +	nflHistoricalRosters: false,
 +	nflRealDraftRatings: true,
  	spectator: false,
@@ -874,10 +876,148 @@ index 5694d6dad..0cf3d00eb 100644
  			<div style={styleStatus}>
  				{state.status === "error" ? (
 diff --git a/src/ui/views/NewLeague/index.tsx b/src/ui/views/NewLeague/index.tsx
-index 949d2ba3a..a6c6f887c 100644
+index 949d2ba3a..fbd3779e8 100644
 --- a/src/ui/views/NewLeague/index.tsx
 +++ b/src/ui/views/NewLeague/index.tsx
-@@ -1765,6 +1765,7 @@ const NewLeague = (props: View<"newLeague">) => {
+@@ -266,6 +266,11 @@ type Action =
+ 	| {
+ 			type: "submit";
+ 	  }
++	| {
++			type: "setNflSetting";
++			key: (typeof NFL_NEW_LEAGUE_SETTINGS)[number]["key"];
++			value: boolean | number | string;
++	  }
+ 	| {
+ 			type: "error";
+ 	  }
+@@ -406,8 +411,25 @@ const getSettingsFromGameAttributes = (
+ 	return newSettings;
+ };
+ 
++// NFL history mod: the real-history settings, on the New League screen itself (the same as Settings > Real Players)
++const NFL_NEW_LEAGUE_SETTINGS = [
++	{ key: "useRealSchedules", name: "Real NFL Schedules" },
++	{ key: "useRealDrafts", name: "Real NFL Draft Picks" },
++	{ key: "nflRealDraftRatings", name: "Real Draft Ratings" },
++	{ key: "nflRetirements", name: "Scheduled Retirements" },
++	{ key: "nflComebacks", name: "Scheduled Comebacks" },
++	{ key: "nflSuspensions", name: "Scheduled Suspensions" },
++	{ key: "nflRealRetirements", name: "Real Retirements" },
++	{ key: "nflHistoricalRosters", name: "Historical Rosters" },
++] as const;
++
+ const reducer = (state: State, action: Action): State => {
+ 	switch (action.type) {
++		case "setNflSetting":
++			return {
++				...state,
++				settings: { ...state.settings, [action.key]: action.value },
++			};
+ 		case "submit":
+ 			return {
+ 				...state,
+@@ -1518,6 +1540,99 @@ const NewLeague = (props: View<"newLeague">) => {
+ 								) : null}
+ 							</div>
+ 
++							{__SPORT === "football" ? (
++								<div className="mb-3">
++									<label className="form-label">NFL History settings</label>
++									<div className="form-text mt-0 mb-2">
++										How much of real history plays out. You can change these
++										later in Settings &gt; Real Players.
++									</div>
++									<div className="d-flex align-items-center gap-2 mb-2">
++										<label
++											htmlFor="nfl-rpd"
++											className="mb-0"
++											title="Players develop like their real careers (100%), randomly (0%), or in between"
++										>
++											Real Player Determinism
++										</label>
++										<input
++											id="nfl-rpd"
++											type="range"
++											className="form-range flex-grow-1"
++											min={0}
++											max={1}
++											step={0.05}
++											value={(state.settings as any).realPlayerDeterminism ?? 1}
++											onChange={(event) => {
++												dispatch({
++													type: "setNflSetting",
++													key: "realPlayerDeterminism" as any,
++													value: Number.parseFloat(event.target.value),
++												});
++											}}
++										/>
++										<span style={{ minWidth: "3em" }}>
++											{Math.round(
++												((state.settings as any).realPlayerDeterminism ?? 1) *
++													100,
++											)}
++											%
++										</span>
++									</div>
++									{NFL_NEW_LEAGUE_SETTINGS.map(({ key, name }) => (
++										<div className="form-check form-switch" key={key}>
++											<input
++												className="form-check-input"
++												type="checkbox"
++												id={`nfl-${key}`}
++												checked={!!(state.settings as any)[key]}
++												onChange={(event) => {
++													dispatch({
++														type: "setNflSetting",
++														key,
++														value: event.target.checked,
++													});
++												}}
++											/>
++											<label
++												className="form-check-label"
++												htmlFor={`nfl-${key}`}
++												title={(descriptions as any)[key] ?? undefined}
++											>
++												{name}
++											</label>
++										</div>
++									))}
++									<div className="d-flex align-items-center gap-2 mt-1">
++										<label htmlFor="nfl-comeback" className="mb-0">
++											Comeback Destination
++										</label>
++										<select
++											id="nfl-comeback"
++											className="form-select form-select-sm w-auto"
++											value={
++												(state.settings as any).nflComebackDestination ??
++												"freeAgency"
++											}
++											onChange={(event) => {
++												dispatch({
++													type: "setNflSetting",
++													key: "nflComebackDestination" as any,
++													value: event.target.value,
++												});
++											}}
++										>
++											<option value="team">
++												Real team (e.g. Manning to Denver)
++											</option>
++											<option value="freeAgency">
++												Free agency (any team can sign him)
++											</option>
++										</select>
++									</div>
++								</div>
++							) : null}
++
+ 							<div className="mb-3">
+ 								<label className="form-label" htmlFor="new-league-difficulty">
+ 									Difficulty
+@@ -1765,6 +1880,7 @@ const NewLeague = (props: View<"newLeague">) => {
  											state.customize === "custom-url" ? (
  												<div className="my-3">
  													<LeagueFileUpload
