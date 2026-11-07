@@ -797,6 +797,19 @@
    * Only events strictly after the starting point are returned.
    * resolvePid(name, bornYear) -> pid | undefined (player events are skipped when unresolved).
    */
+  // Franchises that moved, keyed by the season they last played in the old city and the old franchise: the players
+  // under contract went with the owner. The Browns' name and history stayed in Cleveland (the 1996 agreement), so in
+  // the data Baltimore is a new franchise and Cleveland comes back in 1999.
+  const RELOCATIONS = { '1995|7': 2 };
+  // A franchise starting play the season after this one, as an expansion draft or a move sets it up
+  function joiningTeam(tid, season) {
+    const b = getTeamBranding(tid, season + 1);
+    const nextAlign = getAlignment(season + 1);
+    return { tid, region: b.region, name: b.name, abbrev: b.abbrev, imgURL: b.imgURL, imgURLSmall: b.imgURLSmall,
+      colors: b.colors, jersey: b.jersey, pop: b.pop, stadiumCapacity: b.stadiumCapacity,
+      did: String(nextAlign.teamDiv[tid].did) };
+  }
+
   function buildScheduledEvents(startSeason, startPhase, resolvePid) {
     const ev = [];
     const after = (season, phase) => season > startSeason || (season === startSeason && phase > startPhase);
@@ -827,15 +840,17 @@
         // A franchise that stops playing next season folds after this season's playoffs
         // (1995 Browns): players become free agents.
         if (nowActive && !nextActive) {
-          ev.push({ season, phase: PHASE.DRAFT_LOTTERY, type: 'contraction', info: { tid } });
+          const info = { tid };
+          // A move (1995 Browns to Baltimore): the NFL history mod moves the players and draft picks to the new
+          // franchise instead of making them free agents. Plain Football GM ignores this and folds the team as before.
+          const to = RELOCATIONS[season + '|' + tid];
+          if (to !== undefined) info.nflRelocateTo = joiningTeam(to, season);
+          ev.push({ season, phase: PHASE.DRAFT_LOTTERY, type: 'contraction', info });
         }
-        // A franchise that starts next season joins via expansion draft after this season's playoffs.
+        // A franchise that starts next season joins via expansion draft after this season's playoffs (skipped by the
+        // mod when a move above already started it).
         if (!nowActive && nextActive) {
-          const b = getTeamBranding(tid, season + 1);
-          const nextAlign = getAlignment(season + 1);
-          const team = { tid, region: b.region, name: b.name, abbrev: b.abbrev, imgURL: b.imgURL, imgURLSmall: b.imgURLSmall,
-            colors: b.colors, jersey: b.jersey, pop: b.pop, stadiumCapacity: b.stadiumCapacity,
-            did: String(nextAlign.teamDiv[tid].did) };
+          const team = joiningTeam(tid, season);
           // Teams joining the same season share one expansion draft (Seahawks and Buccaneers 1976, Panthers and Jaguars
           // 1995): Football GM runs one draft at a time, so a second event left the second team out
           const same = ev.find(e => e.type === 'expansionDraft' && e.season === season && e.phase === PHASE.DRAFT_LOTTERY);

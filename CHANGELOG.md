@@ -6,6 +6,10 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.20.10 · Nov 7, 2026
+
+- **The Browns move to Baltimore like they really did.** After the 1995 season, the Browns players, their contracts and their draft picks now go to the new Baltimore Ravens, instead of every Browns player hitting free agency and Baltimore filling its roster from an expansion draft. Cleveland keeps the Browns name and history and comes back in 1999 with its own expansion draft, as in real life. If you run the Browns, you keep running the team in Baltimore.
+
 ## v1.20.9 · Nov 7, 2026
 
 - **Better ratings for 2025 and this season.** Those seasons have no official value scores yet, so they're estimated, and the estimate ignored how good each player's team was. Now it counts team scoring and defense like the real ones do, so players on winning teams are rated like it (the 14-3 Patriots were rated 21st of 32).

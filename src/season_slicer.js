@@ -672,6 +672,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
   function eventCategory(e) {
     if (e.type === 'gameAttributes') return e.info.nflSuspension ? 'suspension' : 'rules';
     if (e.type === 'confsDivs') return 'realignment';
+    if (e.type === 'contraction' && e.info.nflRelocateTo) return 'relocation';
     if (e.type === 'expansionDraft' || e.type === 'contraction') return 'expansion';
     if (e.type === 'teamInfo') return e.info.region || e.info.name ? 'relocation' : 'branding';
     if (e.type === 'retirePlayer') return 'retire';
@@ -689,6 +690,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       return move + (what.length ? (i.region || i.name ? ' (also ' : ': ') + what.join(', ') + (i.region || i.name ? ')' : '') : '');
     }
     if (e.type === 'expansionDraft') return 'Expansion draft: ' + i.teams.map(t => t.region + ' ' + t.name).join(', ');
+    if (e.type === 'contraction' && i.nflRelocateTo) return team(i.tid) + ' move to ' + i.nflRelocateTo.region + ' as the ' + i.nflRelocateTo.name + ' (players and picks go with them)';
     if (e.type === 'contraction') return team(i.tid) + ' suspend operations';
     if (e.type === 'confsDivs') return 'Realignment: ' + i.confs.map(c => c.name).join(' / ') + ', ' + i.divs.length + ' divisions';
     if (e.type === 'gameAttributes' && i.nflSuspension) {

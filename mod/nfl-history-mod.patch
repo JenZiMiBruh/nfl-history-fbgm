@@ -2219,10 +2219,146 @@ index e9d89db1f..24ca44d52 100644
  					contractAmount: p.contract.amount,
  				});
 diff --git a/src/worker/core/phase/processScheduledEvents.ts b/src/worker/core/phase/processScheduledEvents.ts
-index 9d9e5a586..0625cae8f 100644
+index 9d9e5a586..a89cd7125 100644
 --- a/src/worker/core/phase/processScheduledEvents.ts
 +++ b/src/worker/core/phase/processScheduledEvents.ts
-@@ -543,7 +543,15 @@ const processContraction = async (
+@@ -10,11 +10,13 @@ import {
+ 	player,
+ 	finances,
+ 	freeAgents,
++	draft,
+ } from "../../core/index.ts";
+ import type {
+ 	ScheduledEvent,
+ 	Conditions,
+ 	RealTeamInfo,
++	Team,
+ } from "../../../common/types.ts";
+ import { PHASE, PLAYER } from "../../../common/constants.ts";
+ import local from "../../util/local.ts";
+@@ -528,14 +530,121 @@ const processExpansionDraft = async (
+ 	];
+ };
+ 
++type RelocationTeam = Extract<
++	ScheduledEvent,
++	{ type: "expansionDraft" }
++>["info"]["teams"][number];
++
++// NFL history mod: a franchise moves to another city as a new franchise (the 1995 Browns became the Ravens, while the
++// Browns' name and history stayed in Cleveland). The players, their contracts and the draft picks go to the new team,
++// instead of free agency and an expansion draft. The expansion draft event for the new team is then skipped, since the
++// team is already playing. Returns undefined if the move can't happen (the new team is already playing), so the old
++// team just folds.
++const processRelocation = async (
++	from: Team,
++	teamInfo: RelocationTeam,
++	realTeamInfo: RealTeamInfo | undefined,
++) => {
++	const tid = teamInfo.tid;
++	if (tid === undefined) {
++		return;
++	}
++	const prev = await idb.cache.teams.get(tid);
++	if (prev && !prev.disabled) {
++		return;
++	}
++	if (realTeamInfo) {
++		applyRealTeamInfo(teamInfo as any, realTeamInfo, g.get("season"));
++	}
++
++	// The new team takes the old team's place in the league until a realignment says otherwise
++	const did = Number.parseInt(teamInfo.did);
++	const to = await team.addNewTeamToExistingLeague(
++		{
++			...teamInfo,
++			did: g.get("divs").some((div) => div.did === did) ? did : from.did,
++			pop: Number(teamInfo.pop ?? from.pop),
++			imgURL: teamInfo.imgURL,
++			stadiumCapacity:
++				teamInfo.stadiumCapacity === undefined
++					? undefined
++					: Number(teamInfo.stadiumCapacity),
++			tid,
++		},
++		{ fromScheduledEvent: true },
++	);
++
++	const players = await idb.cache.players.indexGetAll("playersByTid", from.tid);
++	for (const p of players) {
++		p.tid = to.tid;
++	}
++	await idb.cache.players.putAll(players);
++
++	// Picks the old team owns, and its own picks that another team owns, become the new team's
++	await draft.genPicks();
++	const draftPicks = (await idb.cache.draftPicks.getAll()).filter(
++		(dp) => dp.tid === from.tid || dp.originalTid === from.tid,
++	);
++	for (const dp of draftPicks) {
++		if (dp.tid === from.tid) {
++			dp.tid = to.tid;
++		}
++		if (dp.originalTid === from.tid) {
++			dp.originalTid = to.tid;
++		}
++	}
++	await idb.cache.draftPicks.putAll(draftPicks);
++
++	// A user running the old team keeps running it in its new city
++	const userTids = g.get("userTids");
++	if (userTids.includes(from.tid)) {
++		await league.setGameAttributes({
++			userTid: g.get("userTid") === from.tid ? to.tid : g.get("userTid"),
++			userTids: userTids.map((userTid) =>
++				userTid === from.tid ? to.tid : userTid,
++			),
++		});
++	}
++
++	// Nothing is left on the old team, so this only takes it out of the league
++	await team.disable(from.tid);
++
++	const fromUrl = helpers.leagueUrl([
++		"team_history",
++		`${from.abbrev}_${from.tid}`,
++	]);
++	const toUrl = helpers.leagueUrl(["roster", `${to.abbrev}_${to.tid}`]);
++	logEvent({
++		text: `The <a href="${fromUrl}">${from.region} ${from.name}</a> are moving to ${to.region}, where they will play as the <a href="${toUrl}">${to.region} ${to.name}</a>. Their players and draft picks go with them.`,
++		type: "teamContraction",
++		tids: [from.tid, to.tid],
++		showNotification: false,
++		score: 20,
++	});
++
++	return [
++		`<b>Relocation!</b> The ${from.region} ${from.name} are moving to ${to.region} as the ${to.name}. Their players and draft picks go with them.`,
++	];
++};
++
+ const processContraction = async (
+ 	info: Extract<ScheduledEvent, { type: "contraction" }>["info"],
++	realTeamInfo: RealTeamInfo | undefined,
+ ) => {
+ 	const t = await idb.cache.teams.get(info.tid);
+ 	if (!t) {
+ 		throw new Error(`No team found in scheduled event: ${info.tid}`);
+ 	}
+ 
++	// NFL history mod: a franchise moving (1995 Browns to Baltimore)
++	const relocateTo = (info as any).nflRelocateTo as RelocationTeam | undefined;
++	if (relocateTo) {
++		const texts = await processRelocation(t, relocateTo, realTeamInfo);
++		if (texts) {
++			return texts;
++		}
++	}
++
+ 	await team.disable(t.tid);
+ 
+ 	const text = `<b>Contraction!</b> The ${t.region} ${t.name} franchise is disbanding. All their players will become free agents.`;
+@@ -543,7 +652,15 @@ const processContraction = async (
  	return [text];
  };
  
@@ -2239,7 +2375,7 @@ index 9d9e5a586..0625cae8f 100644
  	const p = await idb.merged.players.get(pid);
  
  	// Player might be deleted or already retired
-@@ -558,11 +566,11 @@ const processRetirePlayer = async (pid: number, conditions: Conditions) => {
+@@ -558,11 +675,11 @@ const processRetirePlayer = async (pid: number, conditions: Conditions) => {
  	await player.retire(p, conditions);
  	await idb.cache.players.put(p);
  
@@ -2254,7 +2390,7 @@ index 9d9e5a586..0625cae8f 100644
  
  		return [text];
  	}
-@@ -570,8 +578,48 @@ const processRetirePlayer = async (pid: number, conditions: Conditions) => {
+@@ -570,8 +687,48 @@ const processRetirePlayer = async (pid: number, conditions: Conditions) => {
  	return [];
  };
  
@@ -2304,7 +2440,7 @@ index 9d9e5a586..0625cae8f 100644
  	const p = await idb.merged.players.get(pid);
  
  	// Player might have been deleted or might not be retired. In both of those cases, there is nothing to do.
-@@ -605,16 +653,27 @@ const processUnretirePlayer = async (pid: number) => {
+@@ -605,16 +762,27 @@ const processUnretirePlayer = async (pid: number) => {
  
  	p.retiredYear = Infinity;
  	player.addToFreeAgents(p, await getNumPlayersTradedAwayNormalizedAll());
@@ -2334,7 +2470,7 @@ index 9d9e5a586..0625cae8f 100644
  
  		return [text];
  	}
-@@ -675,6 +734,15 @@ export const processScheduledEvents = async (
+@@ -675,6 +843,15 @@ export const processScheduledEvents = async (
  					confsDivsDids,
  				)),
  			);
@@ -2350,8 +2486,14 @@ index 9d9e5a586..0625cae8f 100644
  		} else if (scheduledEvent.type === "gameAttributes") {
  			eventLogTexts.push(...(await processGameAttributes(scheduledEvent.info)));
  		} else if (scheduledEvent.type === "awards") {
-@@ -700,10 +768,18 @@ export const processScheduledEvents = async (
- 			eventLogTexts.push(...(await processContraction(scheduledEvent.info)));
+@@ -697,13 +874,23 @@ export const processScheduledEvents = async (
+ 				)),
+ 			);
+ 		} else if (scheduledEvent.type === "contraction") {
+-			eventLogTexts.push(...(await processContraction(scheduledEvent.info)));
++			eventLogTexts.push(
++				...(await processContraction(scheduledEvent.info, realTeamInfo)),
++			);
  		} else if (scheduledEvent.type === "retirePlayer") {
  			eventLogTexts.push(
 -				...(await processRetirePlayer(scheduledEvent.info.pid, conditions)),
