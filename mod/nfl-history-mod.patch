@@ -1451,7 +1451,7 @@ index 000000000..eee408519
 +		);
 +	};
 diff --git a/src/worker/core/GameSim.football/index.ts b/src/worker/core/GameSim.football/index.ts
-index ccdc4ee51..87e31f44b 100644
+index ccdc4ee51..a3664804c 100644
 --- a/src/worker/core/GameSim.football/index.ts
 +++ b/src/worker/core/GameSim.football/index.ts
 @@ -10,6 +10,18 @@ import {
@@ -1473,7 +1473,30 @@ index ccdc4ee51..87e31f44b 100644
  import { penaltiesByPlayType } from "./penalties.ts";
  import type { Position } from "../../../common/types.football.ts";
  import type {
-@@ -1430,9 +1442,18 @@ class GameSim extends GameSimBase {
+@@ -561,7 +573,21 @@ class GameSim extends GameSimBase {
+ 		const players = this.playersOnField[t][pos];
+ 
+ 		if (!players || !players[0]) {
+-			throw new Error(`No player found at position ${pos}`);
++			// NFL history mod: nobody available at this spot (a team with no kicker, or too few healthy players to fill
++			// every spot in the formation). A real team puts its best remaining player there, healthy first, so the game
++			// goes on instead of stopping the season ("No player found at position K").
++			const candidates = this.team[t].player
++				.slice()
++				.sort(
++					(a, b) =>
++						Number(a.injured) - Number(b.injured) ||
++						(b.ovrs[pos] ?? 0) - (a.ovrs[pos] ?? 0),
++				);
++			if (!candidates[0]) {
++				throw new Error(`No player found at position ${pos}`);
++			}
++			this.playersOnField[t][pos] = [candidates[0]];
++			return candidates[0];
+ 		}
+ 
+ 		return players[0];
+@@ -1430,10 +1456,28 @@ class GameSim extends GameSimBase {
  				const numPlayers = formation[side][pos]!;
  
  				// Not sure why this adjustment is needed, but without it, basically only the top 3 WR play. Maybe because formations with fewer than 3 WR let some of them rest, so you'd need 3 WR sets called very frequently to ever get them all tired.
@@ -1493,9 +1516,28 @@ index ccdc4ee51..87e31f44b 100644
 +						]
 +					: depthRaw;
  				const players: PlayerGameSim[] = [];
++				// NFL history mod: with enough healthy players who really play this position, the rest-and-rotate pass only
++				// picks among them. Otherwise a back who rolled "tired" on a play let the pass run on into the quarterbacks and
++				// receivers listed after him, and a backup QB came in at running back.
++				const ownHealthy = REAL_POSITION_FIRST.has(pos)
++					? depth.filter(
++							(p) => p.pos === pos && !p.injured && !pidsUsed.has(p.id),
++						).length
++					: 0;
++				const onlyOwn = ownHealthy >= numPlayers;
  				if (FATIGUE_POS.has(pos)) {
  					for (let depthIndex = 0; depthIndex < depth.length; depthIndex++) {
-@@ -2259,7 +2280,8 @@ class GameSim extends GameSimBase {
+ 						if (players.length >= numPlayers) {
+@@ -1441,7 +1485,7 @@ class GameSim extends GameSimBase {
+ 						}
+ 
+ 						const p = depth[depthIndex]!;
+-						if (p.injured || pidsUsed.has(p.id)) {
++						if (p.injured || pidsUsed.has(p.id) || (onlyOwn && p.pos !== pos)) {
+ 							continue;
+ 						}
+ 
+@@ -2259,7 +2303,8 @@ class GameSim extends GameSimBase {
  	) {
  		const { d } = this.currentPlay.state.initial;
  
@@ -1505,7 +1547,7 @@ index ccdc4ee51..87e31f44b 100644
  		const ydsRaw = randInt(-1, -12);
  		const yds = this.currentPlay.boundedYds(ydsRaw);
  
-@@ -2461,7 +2483,8 @@ class GameSim extends GameSimBase {
+@@ -2461,7 +2506,8 @@ class GameSim extends GameSimBase {
  			o,
  			Math.random() < 0.2 ? "catching" : "gettingOpen",
  			["WR", "TE", "RB"],
@@ -1515,7 +1557,7 @@ index ccdc4ee51..87e31f44b 100644
  		);
  
  		// RB passes are often short, so 50% chance of a decrease in yardage, which is more severe for players with low gettingOpen
-@@ -2506,7 +2529,16 @@ class GameSim extends GameSimBase {
+@@ -2506,7 +2552,16 @@ class GameSim extends GameSimBase {
  
  		const yds = this.boundedYdsBallCarrier(ydsRaw);
  
@@ -1533,7 +1575,7 @@ index ccdc4ee51..87e31f44b 100644
  		const complete = Math.random() < this.probComplete(qb, target, defender);
  		const interception = Math.random() < this.probInt(qb, defender);
  
-@@ -2611,8 +2643,7 @@ class GameSim extends GameSimBase {
+@@ -2611,8 +2666,7 @@ class GameSim extends GameSimBase {
  		const d = this.d;
  
  		let rbw:
@@ -1543,69 +1585,7 @@ index ccdc4ee51..87e31f44b 100644
  		const rbCounts = { aOL: 0, aOther: 0, wOL: 0, wOther: 0 };
  
  		// Usually do normal run, but sometimes do special stuff
-@@ -2627,7 +2658,8 @@ class GameSim extends GameSimBase {
- 
- 			if (rand < 0.5 || rbs.length === 0) {
- 				positions.push("QB");
--			} else if (rand < 0.57 || rbs.length === 0) {
-+			} else if (rand < 0.53 || rbs.length === 0) {
-+				// NFL history mod: end-arounds on 3% of runs (was 7%), closer to how often receivers really carry
- 				positions.push("WR");
- 			}
- 
-@@ -2642,7 +2674,20 @@ class GameSim extends GameSimBase {
- 		// Scrambles tend to be longer runs
- 		const scrambleModifier = qbScramble ? 3 : 1;
- 
--		const p = this.pickPlayer(o, "rushing", positions);
-+		// NFL history mod: with two backs on the field the better one gets most carries (was power 1)
-+		// NFL history mod: the lead back (first on the field, from the depth chart) carries most of the time. In two-back
-+		// sets the second back is usually a fullback, who rarely gets the ball. Among the rest, better runners are favored.
-+		const leadBack = this.playersOnField[o].RB?.[0];
-+		// x3: lead backs get about 60% of carries in a game (16 a game), a workhorse without 400-carry seasons
-+		const LEAD_BACK = 3;
-+		const rushPower = positions.includes("WR") ? 1 : 3;
-+		const p = choice(
-+			getPlayers(this.playersOnField[o], positions),
-+			(pl) =>
-+				(pl.compositeRating.rushing * fatigue(pl.stat.energy, pl.injured)) **
-+					rushPower *
-+				(pl === leadBack ? LEAD_BACK : 1),
-+		);
- 
- 		if (!qbScramble) {
- 			rbw = new Map();
-@@ -2708,20 +2753,25 @@ class GameSim extends GameSimBase {
- 			names: p === qb ? [qb.name] : [qb.name, p.name],
- 		});
- 
-+		// NFL history mod: the runner counts for more than his blocking (60/40, was 50/50), and ability above the
-+		// starter-average level counts extra, so elite backs gain real separation (Sanders: a yard a carry over
-+		// the league). An average back gets the same yards as before; era calibration keeps league totals right.
-+		const RUSH_AVG = 0.63; // average starting back (1990-2025 ratings)
-+		// Capped: generated players can rate past any real back, and uncapped they ran for 2,300 yards in future seasons
-+		const rusher = Math.min(0.9, RUSH_AVG + (p.compositeRating.rushing - RUSH_AVG) * 1.8);
- 		// Bound is so (in extreme contrived cases like 0 ovr teams) meanYds can't go too far above/below the truncGauss limits
- 		const meanYds = helpers.bound(
- 			(scrambleModifier *
- 				(3.5 *
--					0.5 *
--					(p.compositeRating.rushing +
--						this.team[o].compositeRating.runBlocking))) /
-+					(0.6 * rusher + 0.4 * this.team[o].compositeRating.runBlocking))) /
- 				this.team[d].compositeRating.runStopping,
- 			-5,
- 			15,
- 		);
- 		let ydsRaw = Math.round(truncGauss(meanYds, 6, -5, 15));
- 
--		if (Math.random() < 0.01) {
-+		// Breakaway runs: better runners break more of them (1% for an average back)
-+		if (Math.random() < 0.01 * helpers.bound(rusher / RUSH_AVG, 0.5, 2) ** 2) {
- 			ydsRaw += randInt(0, 109);
- 		}
- 
-@@ -3067,7 +3117,10 @@ class GameSim extends GameSimBase {
+@@ -3067,7 +3121,10 @@ class GameSim extends GameSimBase {
  		positions: Position[] = POSITIONS,
  		power: number = 1,
  	) {
@@ -1691,7 +1671,7 @@ index 26983abfc..f0b100629 100644
  			// Remove from list of free agents
  			playersSorted = playersSorted.filter((p2) => p2 !== p);
 diff --git a/src/worker/core/game/loadTeams.ts b/src/worker/core/game/loadTeams.ts
-index b261af494..a5942c907 100644
+index b261af494..4e92647ba 100644
 --- a/src/worker/core/game/loadTeams.ts
 +++ b/src/worker/core/game/loadTeams.ts
 @@ -134,6 +134,7 @@ export const processTeam = async (
@@ -1710,6 +1690,23 @@ index b261af494..a5942c907 100644
  	};
  
  	const playThroughInjuries = actualPlayThroughInjuries[playoffs ? 1 : 0];
+@@ -264,8 +266,15 @@ export const processTeam = async (
+ 		const injuryFactor = playThroughInjuriesFactor(p.injury.gamesRemaining);
+ 
+ 		// p.jerseyNumber fallback is for exhibition game players for the current season with no stats
++		// NFL history mod: his number for this season with this team. The last stat line can be from another season or
++		// team (a player who moved, or whose real number changed this year), which put the wrong number on him.
++		const currentRow = p.stats.findLast(
++			(row: any) => row.season === g.get("season") && row.tid === p.tid,
++		);
+ 		const jerseyNumber =
+-			p.stats.length > 0 ? p.stats.at(-1)!.jerseyNumber : p.jerseyNumber;
++			currentRow?.jerseyNumber ??
++			p.jerseyNumber ??
++			(p.stats.length > 0 ? p.stats.at(-1)!.jerseyNumber : undefined);
+ 
+ 		const rating = last(p.ratings);
+ 		const playerCompositeRatings: any = {};
 diff --git a/src/worker/core/game/nflRealMoves.ts b/src/worker/core/game/nflRealMoves.ts
 new file mode 100644
 index 000000000..728410280

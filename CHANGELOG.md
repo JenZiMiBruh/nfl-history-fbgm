@@ -6,6 +6,14 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.20.8 · Nov 7, 2026
+
+- **No more "No player found at position K".** A team with nobody available at a spot (no kicker, or too few healthy players) stopped the whole season. Now it puts its best remaining player there and the game goes on.
+- **Running backs back to normal workloads.** The mod's run-game changes were reverted to stock Football GM, which ends the 400-carry, 2,300-yard seasons. The RB1 Workload slider on the Roster page still works.
+- **Fewer interceptions** in leagues built from the mod and the season selector: 10% fewer in every era.
+- **Right jersey numbers in games.** Players wear their number for this season and team (some showed an old number from another season or team).
+- **No backup QB at running back** while the team has healthy backs.
+
 ## v1.20.7 · Nov 7, 2026
 
 - **The mod download opens again.** v1.20.4-1.20.6 shipped the mod in the wrong archive format, so it would not open in Windows Explorer or on a Mac, and Mac/Linux updates stayed on v1.20.3. It is a real zip again. Nothing else changed.
