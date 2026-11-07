@@ -1,12 +1,15 @@
 <p align="center"><img src="assets/banner.png" alt="NFL History for Football GM, a passion project by JenZiMiBruh" width="100%"></p>
 
 <p align="center">
+  <img src="https://img.shields.io/badge/status-beta-orange?style=for-the-badge" alt="Beta">
   <img src="https://img.shields.io/badge/live-through%20Week%208%20%C2%B7%20Nov%202%2C%202026-1f9d55?style=for-the-badge" alt="Live through Week 8">
   <img src="https://img.shields.io/badge/seasons-1966%E2%80%932027-0f3d22?style=for-the-badge" alt="Seasons 1966 to 2027">
   <img src="https://img.shields.io/badge/real%20players-28%2C700%2B-0f3d22?style=for-the-badge" alt="28,700+ real players">
   <img src="https://img.shields.io/badge/Football%20GM-ready-c8102e?style=for-the-badge" alt="Football GM ready">
   <img src="https://img.shields.io/github/downloads/JenZiMiBruh/nfl-history-fbgm/total?style=for-the-badge&label=total%20downloads&color=f5c542" alt="Total downloads, all versions">
 </p>
+
+<p align="center"><b>🧪 Beta:</b> it works, but you may still hit bugs. Found one? <a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new/choose">Report it</a> and it gets fixed in the next update.</p>
 
 <h2 align="center"><a href="https://jenzimibruh.github.io/nfl-history-fbgm/">🌐 Open the NFL History site →</a></h2>
 <p align="center"><a href="https://jenzimibruh.github.io/nfl-history-fbgm/#fans"><img src="https://img.shields.io/badge/%F0%9F%9F%A2%20playing%20right%20now-see%20the%20live%20count-2ecc71?style=flat-square" alt="See how many people are playing the mod right now"></a></p>
