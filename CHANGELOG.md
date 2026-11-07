@@ -6,6 +6,12 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.20.6 · Nov 6, 2026
+
+- **"# Conference Games" error fixed in the mod.** Starting a league from the mod's NFL History box could stop with *Can't have more division and conference games than total games* (6 division + 12 conference in a 17-game season). The mod's season builder still had the old count; it now uses 6 from 2002 on, like the season selector and the league files since v1.20.3. Mod players get it automatically the next time they start the mod.
+- **The mod always has every season.** If the seasons file is ever missing from the mod folder, the launcher downloads it from the release (about 18 MB) instead of the NFL History box asking you to choose it.
+- **Roster updates move to Tuesdays,** the day after Monday Night Football ends each NFL week. See the [roadmap](docs/roadmap.md).
+
 ## v1.20.5 · Nov 5, 2026
 
 - **Uninstall in one double-click (mod).** The mod folder now has `Uninstall.bat` (Mac and Linux: `uninstall.sh`). It stops the game if it's running and removes the folder, and asks before touching anything else. Your leagues live in your browser: delete them from the Leagues page first if you want them gone too. Existing installs get the uninstaller with this update.

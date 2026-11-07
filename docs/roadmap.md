@@ -1,6 +1,6 @@
 # Timeline & roadmap
 
-What's out, how it stays current, and what's coming. Like Madden, the league gets **roster updates all year**: every Sunday during the season, and at every big offseason moment. Dates for future items are targets, not promises.
+What's out, how it stays current, and what's coming. Like Madden, the league gets **roster updates all year**: every Tuesday during the season (the day after Monday Night Football ends the NFL week), and at every big offseason moment. Dates for future items are targets, not promises.
 
 ## Released
 
@@ -15,7 +15,7 @@ Every year follows the same schedule, the way Madden's roster updates do.
 
 | When | Update | What changes |
 |---|---|---|
-| **Every Sunday, Sep–Feb** | Weekly roster update | Stats, signings, trades, injuries and ratings, through the Super Bowl |
+| **Every Tuesday, Sep–Feb** | Weekly roster update (the day after the NFL week ends on Monday night) | Stats, signings, trades, injuries and ratings, through the Super Bowl |
 | **After the Super Bowl, Feb** | Season wrap-up | Final stats and awards added to history; the season becomes pickable in the season selector |
 | **Mid-Mar** | Free agency update | Re-signings, cuts, trades and free-agent signings on their new teams. Retirements |
 | **Late Apr** | Draft update | The real draft: every pick on the team that made it. Next three draft classes re-ranked |
@@ -24,7 +24,7 @@ Every year follows the same schedule, the way Madden's roster updates do.
 
 ## This season (2026)
 
-The file updates **every Sunday**, from Nov 8 through Feb 21 (the Sunday after the Super Bowl, with the final season, stats and awards).
+The file updates **every Tuesday**, the day after Monday Night Football closes each NFL week: Nov 10 through the end of the regular season (Week 18 ends Sunday, Jan 3, so that update is Monday, Jan 4), then the day after each playoff round, and Monday, Feb 15, the day after Super Bowl LXI, with the final season, stats and awards.
 
 ## 2027
 

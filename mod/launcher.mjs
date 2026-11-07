@@ -112,6 +112,41 @@ function showWhatsNew(rel) {
   say();
 }
 
+// The master file (every season, for the NFL History box on New League) is too big for the mod zip: it comes from the
+// release once, is kept with the mod (so a reinstall keeps it), and is fetched again only when a release has a newer one
+async function ensureMaster() {
+  const dest = path.join(MOD, 'public', 'nfl', 'NFL_Master_1966_2026.json.gz');
+  const game = path.join(GAME, 'public', 'football', 'nfl');
+  const tagFile = dest + '.release';
+  const intoGame = () => { if (fs.existsSync(dest) && fs.existsSync(game)) fs.copyFileSync(dest, path.join(game, path.basename(dest))); };
+  let rel;
+  try {
+    const res = await fetch(API, { headers: { 'User-Agent': 'nfl-history-fbgm-launcher' }, signal: AbortSignal.timeout(8000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    rel = await res.json();
+  } catch { intoGame(); return; } // offline: use the copy we have
+  const asset = (rel.assets || []).find(a => a.name === 'NFL_Master_1966_2026.json.gz');
+  if (!asset) { intoGame(); return; }
+  const want = String(asset.updated_at || rel.tag_name);
+  // (the release zip carries the file: only a copy that is missing, or older than the release's, is downloaded)
+  if (fs.existsSync(dest) && !fs.existsSync(tagFile)) fs.writeFileSync(tagFile, want);
+  const have = fs.existsSync(dest) && fs.existsSync(tagFile) ? fs.readFileSync(tagFile, 'utf8').trim() : '';
+  if (have !== want) {
+    say('  Downloading every NFL season for the NFL History box (about 18 MB, only when it changes)...');
+    try {
+      const res = await fetch(asset.browser_download_url, { headers: { 'User-Agent': 'nfl-history-fbgm-launcher' } });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      fs.mkdirSync(path.dirname(dest), { recursive: true });
+      fs.writeFileSync(dest + '.part', Buffer.from(await res.arrayBuffer()));
+      fs.renameSync(dest + '.part', dest);
+      fs.writeFileSync(tagFile, want);
+    } catch (e) {
+      say('  (Could not download the seasons file: ' + e.message + '. The NFL History box will ask for it; it tries again next time.)');
+    }
+  }
+  intoGame();
+}
+
 function install(cfg) {
   if (!fs.existsSync(path.join(GAME, '.git'))) {
     say('Downloading Football GM source...');
@@ -148,6 +183,7 @@ async function main() {
     install(cfg);
   }
   if (rel) showWhatsNew(rel);
+  await ensureMaster();
   if (process.env.NFL_NO_START) { say('INSTALL_OK v' + cfg.version); return; }
   await countStart(cfg.version);
   heartbeat(cfg.version);

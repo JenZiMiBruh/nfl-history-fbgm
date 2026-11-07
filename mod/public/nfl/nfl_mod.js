@@ -1,4 +1,4 @@
-window.NFL_MOD_BUILT = "Nov 5, 2026, 6:29 AM";
+window.NFL_MOD_BUILT = "Nov 6, 2026, 7:25 PM";
 ;
 window.NFL_ERA_FACTORS = {
  "1966": {

@@ -10,7 +10,7 @@
 
 <h2 align="center"><a href="https://jenzimibruh.github.io/nfl-history-fbgm/">🌐 Open the NFL History site →</a></h2>
 <p align="center"><a href="https://jenzimibruh.github.io/nfl-history-fbgm/#fans"><img src="https://img.shields.io/badge/%F0%9F%9F%A2%20playing%20right%20now-see%20the%20live%20count-2ecc71?style=flat-square" alt="See how many people are playing the mod right now"></a></p>
-<p align="center"><a href="docs/roadmap.md"><b>📅 Roadmap & update calendar</b></a>: the file updates every Sunday this season</p>
+<p align="center"><a href="docs/roadmap.md"><b>📅 Roadmap & update calendar</b></a>: the file updates every Tuesday this season, the day after the NFL week ends</p>
 <p align="center"><a href="CHANGELOG.md"><b>🆕 What's new</b></a>: v1.20: QB vision raised, RB workloads capped, Brady is the 199th pick; v1.19: real traded picks, draft numbers fixed; v1.18: expansion drafts on offseason starts; v1.17: backup QBs fixed, changelog in the game, new mod defaults; v1.16: real draft ratings, schedules on Playoffs starts, no spoilers; v1.15: 0-0 games fixed; v1.14: picker and week-start fixes; v1.13: QB accuracy and pass rush retuned, real rosters and box scores for week starts; v1.12: Browns 1970-95 logo; v1.11: every season built into the mod, any week in the mod, 1976 expansion fixed; v1.10: Week 8 complete, real contracts, receivers stay at receiver, kickers rated on kicking, ratings by week</p>
 <p align="center"><sub>Every team's logos, jerseys, records and ratings · the real draft classes · build a league for any season, right in your browser</sub></p>
 
@@ -83,7 +83,7 @@ Everything above, plus history that keeps happening: the real schedule every sea
 
 1. **Download** [`NFL_History_Mod.zip`](../../releases/latest) and unzip it.
 2. **Double-click** `Install_and_Play.bat` (Mac or Linux: `install_and_play.sh`). The first run sets everything up in 5–10 minutes.
-3. The game opens in your browser: **New League → Upload league file**, and the **NFL History** box lets you pick any season.
+3. The game opens in your browser: **New League → Upload league file**, and the **NFL History** box lets you pick any season. Every season comes with the mod: the first start downloads it for you (about 18 MB), so there is no file to choose.
 4. **On your phone**, open the address the window shows, on the same Wi-Fi.
 
 <p align="center"><img src="assets/guide/mod.png" alt="Full experience, step by step: unzip, double-click Install_and_Play, pick a season, play on your phone" width="100%"></p>
@@ -196,7 +196,7 @@ Every new full-history sim is measured the same way, and the biggest misses get 
 
 ## 🗓️ Roster updates & timeline
 
-Like Madden, the league is updated all year: **a roster update every Sunday during the season**, following the NFL schedule (stats, signings, trades, injuries, ratings), then free agency in March, the real draft in April, the schedule in May, and a **new season release every August**. Full schedule in [docs/roadmap.md](docs/roadmap.md).
+Like Madden, the league is updated all year: **a roster update every Tuesday during the season** (the day after Monday Night Football ends the NFL week), following the NFL schedule (stats, signings, trades, injuries, ratings), then free agency in March, the real draft in April, the schedule in May, and a **new season release every August**. Full schedule in [docs/roadmap.md](docs/roadmap.md).
 
 ## How it was built
 

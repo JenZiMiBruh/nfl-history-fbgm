@@ -17,7 +17,7 @@
 
 <meta name="description" content="Every NFL season from 1966 to 2027 for Football GM: real players, real ratings, real schedules, every logo and jersey. A passion project by JenZiMiBruh.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#f6f8f6;--panel:#ffffff;--ink:#0e1f16;--muted:#5d6f64;--line:#dfe7e2;--soft:#eef3ef;
@@ -282,6 +282,35 @@ footer .wrap{display:flex;gap:30px;flex-wrap:wrap;justify-content:space-between}
 footer b{color:#fff}
 footer small{display:block;opacity:.7;margin-top:8px;max-width:520px}
 .livedot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#2ecc71;margin-right:6px;vertical-align:middle;box-shadow:0 0 0 0 rgba(46,204,113,.6);animation:livepulse 2s infinite}@keyframes livepulse{70%{box-shadow:0 0 0 7px rgba(46,204,113,0)}100%{box-shadow:0 0 0 0 rgba(46,204,113,0)}}
+
+/* ---- Visual refresh (Nov 2026): one accent, no gradients or emoji icons, editorial type ---- */
+:root{--accent:#c8102e;--gold:#e8b23a;--line:#e3e1db;--bg:#f7f6f2;--soft:#efede6;--muted:#5f625c;--ink:#141614}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d0f0e;--panel:#151816;--ink:#ecebe6;--muted:#9a9d97;--line:#262a27;--soft:#1b1e1c;--accent:#e5484d}}
+:root[data-theme="dark"]{--bg:#0d0f0e;--panel:#151816;--ink:#ecebe6;--muted:#9a9d97;--line:#262a27;--soft:#1b1e1c;--accent:#e5484d}
+body{font-family:"Barlow",system-ui,sans-serif;font-size:17px}
+h1,h2,h3,.tl b,.feats b,.cal b,.stats b,nav .brand{font-family:"Barlow Condensed",Oswald,sans-serif;font-weight:700}
+h2{letter-spacing:.5px}
+.eyebrow{color:var(--accent);letter-spacing:2.5px;font-weight:700}
+nav .brand i{width:30px;height:19px;border-radius:0;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2040%22%3E%3Cpath%20d%3D%22M2%2020C10%204%2054%204%2062%2020%2054%2036%2010%2036%202%2020Z%22%20fill%3D%22%238b4513%22%20stroke%3D%22%235a2b0c%22%20stroke-width%3D%222%22%2F%3E%3Cpath%20d%3D%22M14%209c4%206%204%2016%200%2022M50%209c-4%206-4%2016%200%2022%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M22%2020h20%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M25%2016.5v7M29%2016.5v7M33%2016.5v7M37%2016.5v7%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E") center/contain no-repeat;box-shadow:none;transform:rotate(-18deg)}
+.cta,.btn.primary{background:var(--accent)!important;color:#fff!important;border-radius:6px}
+.btn{border-radius:6px}
+.btn.ghost{border-radius:6px}
+.hero h1 span{background:none;color:var(--gold);-webkit-text-fill-color:currentColor}
+.hero .eyebrow{color:var(--gold)!important;letter-spacing:4px}
+.hero .years i{background:var(--gold)}
+.stats{background:rgba(8,10,9,.78);border:0;border-top:3px solid var(--gold);border-radius:4px}
+.stats b{color:#fff}
+.tl:before{background:var(--line)}
+.tl li,.feats div,.news>div,.path,.cal div{border-radius:6px}
+.tl li.done:before{background:var(--ink);border-color:var(--ink)}
+.tl li.now:before{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 25%,transparent)}
+.tl b.days em.ok,.cal span.done{background:var(--soft);border-color:var(--line);color:var(--ink)}
+.cal div.cur{border-color:var(--accent);box-shadow:none}
+.feats i,.news i{display:none}
+.feats div,.news>div{border-top:3px solid var(--accent)}
+.fans{background:var(--soft)}
+.fans .lbl{color:var(--accent)}
+.path .tag{background:none!important;color:var(--accent)!important;padding:0!important;letter-spacing:2px}
 </style>
 </head>
 <body>
@@ -318,7 +347,7 @@ footer small{display:block;opacity:.7;margin-top:8px;max-width:520px}
     <div id="fVisits" hidden><b>0</b><span>fans have visited</span></div>
     <div id="fDl" hidden><b>0</b><span>downloads</span></div>
     <div id="fStars" hidden><b>0</b><span>stars on GitHub</span></div>
-    <div class="first" id="fFirst">🏈 Just launched. Be one of the first fans.</div>
+    <div class="first" id="fFirst">Just launched. Be one of the first fans.</div>
   </div>
   <div class="acts"><a href="https://github.com/JenZiMiBruh/nfl-history-fbgm" data-goatcounter-click="star">⭐ Star it on GitHub</a><a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new?template=rating.yml" data-goatcounter-click="report-rating">📊 Report a wrong rating</a><a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new?template=logo.yml" data-goatcounter-click="report-logo">🎨 Report a wrong logo</a></div>
 </div></section>
@@ -398,9 +427,9 @@ footer small{display:block;opacity:.7;margin-top:8px;max-width:520px}
   <div class="eyebrow">Play it</div>
   <h2>Pick your path</h2>
   <div class="paths">
-    <div class="path"><span class="tag">⚡ QUICK START</span><h3>This season</h3><ol><li>Download this season's league file (don't unzip it)</li><li>Football GM → New League → Upload league file</li></ol><p class="muted" style="font-size:14px">Works on phone and computer, no install.</p><a class="btn" data-goatcounter-click="download-NFL_2027_Live_FBGM.json.gz" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_2027_Live_FBGM.json.gz">Download this season</a><p style="margin:10px 0 0;font-size:14px;text-align:center">Older or low-memory phone? <a data-goatcounter-click="download-NFL_2027_Live_Lite_FBGM.json.gz" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_2027_Live_Lite_FBGM.json.gz">Phone-friendly version (13 MB)</a></p></div>
-    <div class="path"><span class="tag">📅 ANY SEASON</span><h3>Pick a year</h3><ol><li>Use Build a league on this page</li><li>Pick a season and a start point, then generate</li><li>Upload your league to Football GM</li></ol><p class="muted" style="font-size:14px">Right in your browser. Want it offline? <a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/nfl_season_selector.html">Download the selector</a>.</p><a class="btn" href="#build">Build a league</a></div>
-    <div class="path"><span class="tag">🏈 FULL EXPERIENCE</span><h3>With the mod</h3><ol><li>Download the release zip</li><li>Double-click Install_and_Play</li><li>Play on your computer, or your phone over Wi-Fi</li></ol><p class="muted" style="font-size:14px">The first run sets up in about 5–10 minutes.</p><a class="btn" data-goatcounter-click="download-NFL_History_Mod.zip" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_History_Mod.zip">Download the mod</a><p style="margin:10px 0 0;font-size:14px;text-align:center"><a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/tree/main/mod">Install guide</a></p></div>
+    <div class="path"><span class="tag">Quick start</span><h3>This season</h3><ol><li>Download this season's league file (don't unzip it)</li><li>Football GM → New League → Upload league file</li></ol><p class="muted" style="font-size:14px">Works on phone and computer, no install.</p><a class="btn" data-goatcounter-click="download-NFL_2027_Live_FBGM.json.gz" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_2027_Live_FBGM.json.gz">Download this season</a><p style="margin:10px 0 0;font-size:14px;text-align:center">Older or low-memory phone? <a data-goatcounter-click="download-NFL_2027_Live_Lite_FBGM.json.gz" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_2027_Live_Lite_FBGM.json.gz">Phone-friendly version (13 MB)</a></p></div>
+    <div class="path"><span class="tag">Any season</span><h3>Pick a year</h3><ol><li>Use Build a league on this page</li><li>Pick a season and a start point, then generate</li><li>Upload your league to Football GM</li></ol><p class="muted" style="font-size:14px">Right in your browser. Want it offline? <a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/nfl_season_selector.html">Download the selector</a>.</p><a class="btn" href="#build">Build a league</a></div>
+    <div class="path"><span class="tag">Full experience</span><h3>With the mod</h3><ol><li>Download the release zip</li><li>Double-click Install_and_Play</li><li>Play on your computer, or your phone over Wi-Fi</li></ol><p class="muted" style="font-size:14px">The first run sets up in about 5–10 minutes.</p><a class="btn" data-goatcounter-click="download-NFL_History_Mod.zip" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_History_Mod.zip">Download the mod</a><p style="margin:10px 0 0;font-size:14px;text-align:center"><a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/tree/main/mod">Install guide</a></p></div>
   </div>
 </div></section>
 
@@ -415,7 +444,7 @@ footer small{display:block;opacity:.7;margin-top:8px;max-width:520px}
   <div class="eyebrow">Timeline</div>
   <h2>Updated all year, like Madden</h2>
   <p class="muted" style="max-width:640px">Future dates are targets, not promises. Got a request? <a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/issues">Open an issue</a>.</p>
-  <ol class="tl"><li class="done"><small>Nov 1, 2026 · done</small><b>v1.0 released</b><span>1966 to today, the season selector, the mod and the real 2027–2029 drafts.</span></li><li class="done"><small>Nov 2 · done</small><b>First update</b><span>Real rosters stay real: no AI-to-AI trades, no stray signings. New site look.</span></li><li class="now"><small>Week 8 · this week</small><b class="days"><em class="ok">Mon, Nov 2</em><em class="ok">Tue, Nov 3</em></b><span>File updated the day after each game day: Sunday, Monday games.</span></li><li class="next"><small>Every Sunday · Nov 8 to Feb 21</small><b>Weekly update</b><span>The file updates every Sunday for the rest of this season, through the Super Bowl: stats, signings, trades, injuries, ratings.</span></li><li class="next"><small>Mid-Mar 2027</small><b>Free agency update</b><span>Re-signings, cuts, trades, new teams and retirements.</span></li><li class="next"><small>Late Apr 2027</small><b>Draft update</b><span>Every real pick on the team that made it. The next three classes re-ranked.</span></li><li class="next"><small>May 2027</small><b>Schedule update</b><span>The real 2027 schedule, game for game.</span></li><li class="next"><small>Late Aug 2027</small><b>2027 season release</b><span>53-man rosters, fresh ratings, new uniforms. Ready for Week 1. Then the cycle repeats every year.</span></li><li class="next"><small>Someday</small><b>Android</b><span>If Football GM's license ever allows sharing builds.</span></li></ol>
+  <ol class="tl"><li class="done"><small>Nov 1, 2026 · done</small><b>v1.0 released</b><span>1966 to today, the season selector, the mod and the real 2027–2029 drafts.</span></li><li class="done"><small>Nov 2 · done</small><b>First update</b><span>Real rosters stay real: no AI-to-AI trades, no stray signings. New site look.</span></li><li class="now"><small>Week 8 · this week</small><b class="days"><em class="ok">Mon, Nov 2</em><em class="ok">Tue, Nov 3</em></b><span>File updated the day after each game day: Sunday, Monday games.</span></li><li class="next"><small>Every Tuesday · Nov 10 to Feb 15</small><b>Weekly update</b><span>The day after Monday Night Football ends each NFL week, through the Super Bowl: stats, signings, trades, injuries, ratings.</span></li><li class="next"><small>Mid-Mar 2027</small><b>Free agency update</b><span>Re-signings, cuts, trades, new teams and retirements.</span></li><li class="next"><small>Late Apr 2027</small><b>Draft update</b><span>Every real pick on the team that made it. The next three classes re-ranked.</span></li><li class="next"><small>May 2027</small><b>Schedule update</b><span>The real 2027 schedule, game for game.</span></li><li class="next"><small>Late Aug 2027</small><b>2027 season release</b><span>53-man rosters, fresh ratings, new uniforms. Ready for Week 1. Then the cycle repeats every year.</span></li><li class="next"><small>Someday</small><b>Android</b><span>If Football GM's license ever allows sharing builds.</span></li></ol>
   <h3 id="modplans" style="margin-top:48px;font-size:26px;text-transform:uppercase">Coming to the mod</h3>
   <p class="muted">The features at the top of the list.</p>
   <div class="feats"><div><i>🏆</i><b>Named Super Bowls, forever</b><span>Every title game gets its real name: Super Bowl I in January 1967 through LX, then the numbering keeps going in your league (LXI, LXII … C) with Roman numerals, a host city and a date. The 1966–69 AFL and NFL Championship Games keep their real names too.</span></div><div><i>📅</i><b>A real NFL calendar</b><span>Games land on real days and dates, not just &quot;Week 9&quot;: Thursday, Sunday and Monday, Thanksgiving, Christmas, Saturdays late in the season and the playoffs on their real weekends.</span></div><div><i>🌙</i><b>Named game slots</b><span>Monday Night Football (from 1970), Sunday Night Football, Thursday Night Football, Thanksgiving in Detroit and Dallas, the Christmas games, Saturday doubleheaders. Each era only has the slots it really had.</span></div><div><i>🕐</i><b>Kickoff times</b><span>Early (1:00 ET), late afternoon (4:05/4:25), primetime (8:15) and London morning games, so you can see whether a game is midday, under the lights or at breakfast.</span></div><div><i>⭐</i><b>Game of the Week</b><span>The biggest matchup each week gets flagged and flexed into primetime, like the NFL does with Sunday night flex scheduling.</span></div></div>
