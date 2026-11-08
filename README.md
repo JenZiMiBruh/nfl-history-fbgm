@@ -211,6 +211,7 @@ It's a beta, so here's what's known and not fixed yet. Seen something not on thi
 |---|---|---|
 | **The Browns' move needs the mod** | Regular Football GM | Football GM can't move a team without its history, so in a league from 1995 or earlier the Browns' players go to free agency and Baltimore holds an expansion draft. History stays right in Cleveland. [Why, and vote on it](#faq) |
 | **Arch Manning isn't linked to his family** | Everywhere | His tie to Archie, Peyton and Eli runs through his father Cooper, who didn't play, so Football GM can't connect them |
+| **Mod on an Android phone: "This site can't be reached"** | The mod, played on a phone | Android blocks Chrome from local addresses until you allow it: Settings → Apps → Chrome → Permissions → Nearby devices (or Local network) → Allow. [More](#faq) |
 | **Practice-squad call-ups** | Leagues starting mid-season, mostly 2020–21 | Football GM has no practice squad. Players who were only called up for games may start as free agents |
 | **Late-season events happen at the trade deadline** | The mod | Football GM runs events between phases, so something from December (Marshawn Lynch's 2019 return) happens at the trade deadline |
 | **Hall of Fame after your start season** | The mod | Football GM picks new Hall of Famers with its own formula when they retire, like Basketball GM does, not on their real induction date |
@@ -255,7 +256,9 @@ Why not move the team and its history? Then the Browns' 1966-95 records, players
 
 <details><summary><b>Does it work on my phone?</b></summary>
 
-Yes. Download this season or build any season on the site, then upload it in Football GM's New League screen. The mod runs on a computer, and your phone can play on it over Wi-Fi.
+Yes. Download this season or build any season on the site, then upload it in Football GM's New League screen. The mod runs on a computer, and your phone can play on it over Wi-Fi: open the address the mod window shows, on the same Wi-Fi.
+
+**"This site can't be reached" (ERR_TOO_MANY_RETRIES) on Android?** Newer Android versions stop Chrome from opening addresses on your home network until you allow it. On the phone, open **Settings → Apps → Chrome → Permissions**, set **Nearby devices** (or **Local network**) to **Allow**, then close Chrome fully and open the address again. If the router's page (192.168.0.1 or similar) also won't open on the phone, this is the fix.
 </details>
 
 <details><summary><b>How current is this season's file?</b></summary>

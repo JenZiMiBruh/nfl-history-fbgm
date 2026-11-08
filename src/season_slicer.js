@@ -345,6 +345,10 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
         roster.sort((a, b) => (b._gp - a._gp) || (b._ovr - a._ovr));
         const keep = new Set();
         for (const [pos, n] of Object.entries(MIN_AT)) roster.filter(p => minGroup(p.ratings[p.ratings.length - 1].pos) === pos).slice(0, n).forEach(p => keep.add(p));
+        // The team's own rookies make the roster however few games they played: a draft pick who stuck all season as a
+        // backup (Tom Brady, 2000 Patriots: 1 game) was cut for mid-season fill-ins with more games. Draft years are the
+        // season before (Brady's 2000 draft is filed under 1999)
+        for (const p of roster) if (keep.size < rules.maxRosterSize && p.draft && p.draft.tid === +tid && p.draft.year === S - 1) keep.add(p);
         for (const p of roster) if (keep.size < rules.maxRosterSize) keep.add(p);
         for (const p of roster) if (!keep.has(p)) p.tid = -1;
       }

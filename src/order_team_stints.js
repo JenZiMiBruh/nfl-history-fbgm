@@ -44,7 +44,10 @@ for (const file of FILES) {
       const prev = i > 0 ? bySeason.get(years[i - 1]) : [];
       const next = i < years.length - 1 ? bySeason.get(years[i + 1]) : [];
       // Before: his last team of the previous season he played; after: his first team of the next one
-      const before = new Set(prev.length ? [prev[prev.length - 1].tid] : []);
+      // A rookie has no season before, so he starts with the team that drafted him (Courtney Brown, the 2000 first
+      // pick, with Cleveland; draft years are filed under the season before)
+      const rookie = !prev.length && p.draft && p.draft.tid >= 0 && p.draft.year === years[i] - 1;
+      const before = new Set(prev.length ? [prev[prev.length - 1].tid] : rookie ? [p.draft.tid] : []);
       const after = new Set(next.length ? [next[0].tid] : []);
       const sorted = rows.map((r, k) => ({ r, k, w: place(r, before, after) })).sort((a, b) => a.w - b.w || a.k - b.k).map(x => x.r);
       if (sorted.some((r, k) => r !== rows[k])) { bySeason.set(years[i], sorted); seasons++; changed = true; }
