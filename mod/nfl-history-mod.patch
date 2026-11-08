@@ -75,10 +75,10 @@ index 2116af8f4..c94f32060 100644
  
 diff --git a/src/ui/components/Controller/NflWhatsNew.tsx b/src/ui/components/Controller/NflWhatsNew.tsx
 new file mode 100644
-index 000000000..dd07b3fa3
+index 000000000..3c319a2c3
 --- /dev/null
 +++ b/src/ui/components/Controller/NflWhatsNew.tsx
-@@ -0,0 +1,294 @@
+@@ -0,0 +1,295 @@
 +import { useEffect, useState, type ReactNode } from "react";
 +import { Modal } from "react-bootstrap";
 +
@@ -212,7 +212,7 @@ index 000000000..dd07b3fa3
 +
 +	const sum = totals ? totals.reduce((a, b) => a + b, 0) : 0;
 +	return (
-+		<div className="border-top pt-3 mt-3">
++		<div className="border-bottom pb-3 mb-3">
 +			<h5 className="mb-1">Have your say: {poll.q}</h5>
 +			<p className="text-body-secondary small mb-2">
 +				{voted
@@ -356,8 +356,9 @@ index 000000000..dd07b3fa3
 +					</Modal.Title>
 +				</Modal.Header>
 +				<Modal.Body>
-+					{render(changelog, show === "new")}
++					{/* The poll first, where it's seen without scrolling past the changelog */}
 +					<NflPoll />
++					{render(changelog, show === "new")}
 +				</Modal.Body>
 +				<Modal.Footer>
 +					{show === "new" ? (
