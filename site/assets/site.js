@@ -94,7 +94,7 @@
         <div><a class="brand" href="index.html">${ball}<span>NFL <em>History</em></span></a>
           <small>Every NFL season since 1966 for Football GM. A passion project by <b style="color:var(--hero-ink)">JenZiMiBruh</b>. Thank you, dumbmatter.</small></div>
         <div><h4>Explore</h4>${PAGES.slice(1, 4).map(([h, , l]) => `<a href="${h}">${l}</a>`).join('')}</div>
-        <div><h4>Play</h4><a href="guide.html">How to play</a><a href="mod.html">The mod</a><a href="updates.html">Updates &amp; roadmap</a><a href="download.html">Download</a></div>
+        <div><h4>Play</h4><a href="guide.html">How to play</a><a href="mod.html">The mod</a><a href="updates.html">Updates &amp; roadmap</a><a href="visuals.html">How it works</a><a href="download.html">Download</a></div>
         <div><h4>Help out</h4><a href="${REPO}/issues/new/choose">Report a bug</a><a href="${REPO}/issues/new?template=rating.yml">Report a wrong rating</a><a href="${REPO}/issues/new?template=logo.yml">Report a wrong logo</a><a href="${REPO}">Star it on GitHub</a></div>
       </div>
       <div class="base"><span>Unofficial fan project. Team names and logos belong to the NFL and its teams. Not affiliated with the NFL or Football GM. Data: nflverse, Pro-Football-Reference via the Internet Archive, Wikipedia, OverTheCap.</span>

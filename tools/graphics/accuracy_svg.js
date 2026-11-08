@@ -13,9 +13,9 @@ order.forEach((pos, i) => {
   const good = c.median >= 0.9;
   rows += `<text x="${left - 18}" y="${y + 6}" text-anchor="end" class="lab">${label[pos]}</text>`;
   rows += `<text x="${left - 18}" y="${y + 22}" text-anchor="end" class="sub">${c.stat}</text>`;
-  rows += `<rect x="${x(c.q25)}" y="${y - 8}" width="${x(c.q75) - x(c.q25)}" height="18" rx="9" fill="${good ? '#d99a14' : '#c98b2b'}" opacity=".35"/>`;
-  rows += `<circle cx="${x(c.median)}" cy="${y + 1}" r="9" fill="${good ? '#ffb81c' : '#f0a93b'}" stroke="#0a0e14" stroke-width="3"/>`;
-  rows += `<text x="${W - right + 24}" y="${y + 7}" class="val" fill="${good ? '#ffb81c' : '#f0a93b'}">${Math.round(c.median * 100)}%</text>`;
+  rows += `<rect x="${x(c.q25)}" y="${y - 8}" width="${x(c.q75) - x(c.q25)}" height="18" rx="9" fill="${good ? '#3fbf73' : '#c98b2b'}" opacity=".35"/>`;
+  rows += `<circle cx="${x(c.median)}" cy="${y + 1}" r="9" fill="${good ? '#3fbf73' : '#f0a93b'}" stroke="#0a0e14" stroke-width="3"/>`;
+  rows += `<text x="${W - right + 24}" y="${y + 7}" class="val" fill="${good ? '#3fbf73' : '#f0a93b'}">${Math.round(c.median * 100)}%</text>`;
 });
 const ticks = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2].map(v => `<line x1="${x(v)}" x2="${x(v)}" y1="${top - 26}" y2="${H - 50}" stroke="${v === 1 ? '#e8efe9' : '#223029'}" ${v === 1 ? 'stroke-dasharray="5 5"' : ''}/><text x="${x(v)}" y="${H - 28}" text-anchor="middle" class="ax">${Math.round(v * 100)}%</text>`).join('');
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="Barlow,'Segoe UI',Helvetica,Arial,sans-serif">
