@@ -331,6 +331,8 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
         for (const k of Object.keys(rosterByTid)) delete rosterByTid[k];
       }
     }
+    // Full records by player (the roster limit looks at next season; scheduled events at whole careers)
+    const srcByPid = new Map(master.players.map(p => [p.pid, p]));
     // Era roster limit: extras (fewest games, then lowest OVR) start as free agents. Each position keeps its minimum
     // first (the best by the same order), so a season with dozens of extra players can't squeeze out a position: in
     // 1987 the strike's replacement players outnumbered the injured quarterbacks' games, and teams had no quarterback.
@@ -345,10 +347,16 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
         roster.sort((a, b) => (b._gp - a._gp) || (b._ovr - a._ovr));
         const keep = new Set();
         for (const [pos, n] of Object.entries(MIN_AT)) roster.filter(p => minGroup(p.ratings[p.ratings.length - 1].pos) === pos).slice(0, n).forEach(p => keep.add(p));
-        // The team's own rookies make the roster however few games they played: a draft pick who stuck all season as a
-        // backup (Tom Brady, 2000 Patriots: 1 game) was cut for mid-season fill-ins with more games. Draft years are the
-        // season before (Brady's 2000 draft is filed under 1999)
-        for (const p of roster) if (keep.size < rules.maxRosterSize && p.draft && p.draft.tid === +tid && p.draft.year === S - 1) keep.add(p);
+        // The team's own rookies who stuck make the roster however few games they played: a draft pick kept all season as
+        // a backup (Tom Brady, 2000 Patriots: 1 game) was cut for mid-season fill-ins with more games. "Stuck" means
+        // still with that team the next season; a rookie who played a game or two and was cut in September wasn't, and
+        // keeping him would push out a veteran who played all year. Only at the start of a season (at week W the
+        // roster is who was really there by then). Draft years are the season before (Brady's 2000 draft is under 1999)
+        if (!W) for (const p of roster) {
+          if (keep.size >= rules.maxRosterSize || !p.draft || p.draft.tid !== +tid || p.draft.year !== S - 1) continue;
+          const src = srcByPid.get(p.pid);
+          if ((src && src.stats || []).some(s => s.season === S + 1 && !s.playoffs && s.tid === +tid)) keep.add(p);
+        }
         for (const p of roster) if (keep.size < rules.maxRosterSize) keep.add(p);
         for (const p of roster) if (!keep.has(p)) p.tid = -1;
       }
@@ -524,7 +532,6 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     // ---------------------------------------------------------- scheduled events
     // Names match without case or a suffix (Jr., Sr., II), on both the event and the player side
     const nameKey = n => n.toLowerCase().replace(/[.,]/g, '').replace(/\s+(jr|sr|ii|iii|iv)$/, '').trim();
-    const srcByPid = new Map(master.players.map(p => [p.pid, p]));
     const pidByName = new Map();
     for (const p of players) {
       const k = nameKey(`${p.firstName} ${p.lastName}`);
