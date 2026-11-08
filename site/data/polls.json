@@ -82,7 +82,7 @@
       "note": "Hit something specific? Report it on GitHub so it can be fixed.",
       "options": [
         {
-          "id": "player-ratings",
+          "id": "player-ratings-v2",
           "label": "Player ratings",
           "desc": "Someone is rated way too high or too low",
           "then": "flag"
