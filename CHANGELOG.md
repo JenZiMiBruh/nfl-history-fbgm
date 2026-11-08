@@ -6,6 +6,13 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.20.16 · Nov 8, 2026
+
+- **No more "JSON schema validation errors" warning** when you load a league. Four in-season events (Marshawn Lynch's and Philip Rivers' comebacks, Chuck Hughes, Ezekiel Elliott's suspension) were missing the phase they happen in, so they could never fire, and one player's birth record was missing a field. Every league is now checked against Football GM's own file format before release.
+- **Draft prospects have real ages.** Everyone in the 2027, 2028 and 2029 classes was the same age. Now each prospect's age comes from his high-school class, so redshirts and fifth-year players are older: most are 21 to 23 at the draft.
+
+Download the league file again or build a new league to get these.
+
 ## v1.20.15 · Nov 8, 2026
 
 - **New League opens on the NFL History box** (mod): Customize starts on Upload league file, so picking a season is the first thing you see. Default (a random league) is still in the menu.
