@@ -347,18 +347,25 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
         roster.sort((a, b) => (b._gp - a._gp) || (b._ovr - a._ovr));
         const keep = new Set();
         for (const [pos, n] of Object.entries(MIN_AT)) roster.filter(p => minGroup(p.ratings[p.ratings.length - 1].pos) === pos).slice(0, n).forEach(p => keep.add(p));
-        // The team's own rookies who stuck make the roster however few games they played: a draft pick kept all season as
-        // a backup (Tom Brady, 2000 Patriots: 1 game) was cut for mid-season fill-ins with more games. "Stuck" means
-        // still with that team the next season; a rookie who played a game or two and was cut in September wasn't, and
-        // keeping him would push out a veteran who played all year. Only at the start of a season (at week W the
-        // roster is who was really there by then). Draft years are the season before (Brady's 2000 draft is under 1999)
-        if (!W) for (const p of roster) {
-          if (keep.size >= rules.maxRosterSize || !p.draft || p.draft.tid !== +tid || p.draft.year !== S - 1) continue;
-          const src = srcByPid.get(p.pid);
-          if ((src && src.stats || []).some(s => s.season === S + 1 && !s.playoffs && s.tid === +tid)) keep.add(p);
-        }
+        const minimums = new Set(keep);
         for (const p of roster) if (keep.size < rules.maxRosterSize) keep.add(p);
-        for (const p of roster) if (!keep.has(p)) p.tid = -1;
+        // The team's own rookies who stuck take the place of a fringe player: a draft pick kept all season as a backup
+        // (Tom Brady, 2000 Patriots: 1 game) was cut for mid-season fill-ins. "Stuck" means still with that team the next
+        // season (a rookie cut in September wasn't). He only bumps someone with under 8 games for the team, never a
+        // regular, and only at the start of a season (at week W the roster is who was really there by then). Draft
+        // years are the season before (Brady's 2000 draft is filed under 1999)
+        const FRINGE = 8;
+        if (!W) for (const p of roster) {
+          if (keep.has(p) || !p.draft || p.draft.tid !== +tid || p.draft.year !== S - 1) continue;
+          const src = srcByPid.get(p.pid);
+          if (!(src && src.stats || []).some(s => s.season === S + 1 && !s.playoffs && s.tid === +tid)) continue;
+          // the kept player with the fewest games, not a position minimum and not another protected rookie
+          let out;
+          for (const q of keep) if (!minimums.has(q) && !q._rookie && q._gp < FRINGE && (!out || q._gp < out._gp)) out = q;
+          if (!out) continue;
+          keep.delete(out); keep.add(p); p._rookie = true;
+        }
+        for (const p of roster) { if (!keep.has(p)) p.tid = -1; delete p._rookie; }
       }
     }
     for (const p of players) { delete p._gp; delete p._ovr; }

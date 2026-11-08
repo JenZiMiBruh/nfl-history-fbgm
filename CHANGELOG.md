@@ -6,6 +6,16 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.20.14 · Nov 8, 2026
+
+- **Tom Brady starts the 2000 season on the Patriots.** In leagues starting in 2000 he was a free agent: the roster limit kept the players with the most games, and Brady, the 2000 Patriots' fourth quarterback, played in one. A team's own rookie who stayed with the team now takes the spot of a fringe player (fewer than 8 games), never a regular. The same goes for every other rookie like him.
+- **Rookies traded during their first season start with the team that drafted them** (Courtney Brown, the 2000 first pick, with Cleveland).
+- **Pro Bowl honors on the right players:** John L. Williams (1990-91) and James "Big Cat" Williams (2001) were linked to the wrong player IDs.
+- **Playing the mod on an Android phone?** If Chrome says "This site can't be reached", Android is blocking it from your home network: Settings > Apps > Chrome > Permissions > Nearby devices (or Local network) > Allow. The mod's window now says so under the phone address.
+- **Flag a rating** on the site: a button at the bottom of every page to search any player since 1966 and say whether a season's rating is too high or too low. No account needed.
+
+Download the league file again or build a new league to get the data fixes.
+
 ## v1.20.13 · Nov 8, 2026
 
 - **A "?" next to every NFL History setting** on the New League screen (mod), like Football GM's own settings. Tap it to see what the setting does.
