@@ -263,7 +263,12 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
         const row = rowsS[0];
         p.tid = played.length ? played.slice().sort((a, b) => b[0] - a[0])[0][1] : row.tid;
         if (row.jerseyNumber) p.jerseyNumber = row.jerseyNumber;
-        p._gp = rowsS.reduce((a, s) => a + (s.gp || 0), 0);
+        // For the roster limit: his games for the team he starts with, plus a little for games elsewhere (a tie-breaker).
+        // Counting the whole season let a player traded away after two games (Karl Kirby, 1969 Vikings) outrank a
+        // regular who spent the season there (Jim Lindsey)
+        const total = rowsS.reduce((a, s) => a + (s.gp || 0), 0);
+        const own = rowsS.filter(s => s.tid === p.tid).reduce((a, s) => a + (s.gp || 0), 0);
+        p._gp = own + 0.1 * (total - own);
         // At week W the roster limit favors who was really there: played before and after W comes first, and someone
         // whose games were all far from W comes last. (No lines at all, like linemen, keeps his season's games.)
         if (W && wkLines[src.pid]) {
@@ -362,6 +367,9 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
         if (p.tid !== -3 || p.hof || keep.has(p.pid) || (p.retiredYear !== undefined && p.retiredYear >= S - 10)) continue;
         players.splice(i, 1);
       }
+      // Family links only to players still in the league (a dropped father would be a link to nobody)
+      const kept = new Set(players.map(p => p.pid));
+      for (const p of players) if (p.relatives) { p.relatives = p.relatives.filter(r => kept.has(r.pid)); if (!p.relatives.length) delete p.relatives; }
       if (typeof console !== 'undefined') console.log('phone-friendly: kept ' + players.length + ' of ' + before + ' players');
     }
     fitPayrolls(players, rules);
@@ -509,22 +517,45 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     }
 
     // ---------------------------------------------------------- scheduled events
+    // Names match without case or a suffix (Jr., Sr., II), on both the event and the player side
+    const nameKey = n => n.toLowerCase().replace(/[.,]/g, '').replace(/\s+(jr|sr|ii|iii|iv)$/, '').trim();
+    const srcByPid = new Map(master.players.map(p => [p.pid, p]));
     const pidByName = new Map();
     for (const p of players) {
-      const k = `${p.firstName} ${p.lastName}`.toLowerCase();
+      const k = nameKey(`${p.firstName} ${p.lastName}`);
       if (!pidByName.has(k)) pidByName.set(k, []);
       pidByName.get(k).push(p);
     }
-    const resolvePid = (name, born) => {
-      const key = name.toLowerCase().replace(/s+(jr.?|sr.?|ii|iii|iv)$/, '');
+    // An event's player: same name, born within a year, the closest birth year first, then the one whose career is
+    // nearest the event's season (two receivers named Steve Smith were born in 1979; the 2017 retirement is the one
+    // who played until 2016, not the one with a 2002 season)
+    const careerGap = (pid, season) => {
+      const src = srcByPid.get(pid);
+      const ys = (src && src.stats || []).filter(s => !s.playoffs).map(s => s.season);
+      if (!ys.length || season === undefined) return Infinity;
+      return season < Math.min(...ys) ? Math.min(...ys) - season : season > Math.max(...ys) ? season - Math.max(...ys) : 0;
+    };
+    const resolvePid = (name, born, season) => {
+      const key = nameKey(name);
       const c = (pidByName.get(key) || []).filter(p => !born || Math.abs(p.born.year - born) <= 1)
-        .sort((x, y) => Math.abs(x.born.year - born) - Math.abs(y.born.year - born));
+        .sort((x, y) => Math.abs(x.born.year - born) - Math.abs(y.born.year - born) || careerGap(x.pid, season) - careerGap(y.pid, season));
       return c.length ? c[0].pid : undefined;
     };
     // Expansion drafts and contractions happen right after the playoffs (phase 4). A league starting at that moment or at
     // the draft would miss them, so they fire at the next phase instead (Panthers and Jaguars from After Playoffs 1994).
     const scheduledEvents = (P >= 4 ? E.buildScheduledEvents(S, 3, resolvePid).filter(e => !(e.season === S && e.phase <= P && !['expansionDraft', 'contraction'].includes(e.type)))
       .map(e => (e.season === S && e.phase <= P ? Object.assign({}, e, { phase: P + 1 }) : e)) : E.buildScheduledEvents(S, P, resolvePid));
+    // A league starting at week W of the regular season has already passed this season's week-1 suspensions, so the
+    // games still to serve start out as an absence (Josh Gordon from week 3 of 2014: 8 of his 10 games left)
+    if (W) {
+      for (const e of E.buildScheduledEvents(S, 0, resolvePid)) {
+        const s = e.info && e.info.nflSuspension;
+        if (!s || e.season !== S || e.phase !== PHASES.regular) continue;
+        const p = players.find(x => x.pid === s.pid);
+        const left = s.games - (W - 1);
+        if (p && p.tid >= 0 && left > 0) p.injury = { type: s.reason, gamesRemaining: Math.max(left, (p.injury && p.injury.gamesRemaining) || 0) };
+      }
+    }
 
     // The games already played, so the schedule shows them: box scores where they exist (the live season), otherwise
     // the real score from the weekly data (no player lines)

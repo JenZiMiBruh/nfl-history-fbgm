@@ -568,6 +568,8 @@
   // Famous retirements / comebacks (resolved to pids by name+birth year).
   // Football GM retirePlayer/unretirePlayer only need info.pid.
   // ---------------------------------------------------------------------------
+  // Phases: Football GM runs events as it enters a phase, so an event during the season is filed under the regular
+  // season (it happened by week 1) or after the trade deadline (later in the season, the nearest it gets)
   const PLAYER_EVENTS = [
     { season: 1999, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Reggie White', born: 1961 },
     { season: 2000, phase: PHASE.PRESEASON, type: 'unretirePlayer', name: 'Reggie White', born: 1961, tid: 4 },
@@ -584,7 +586,7 @@
     { season: 2016, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Marshawn Lynch', born: 1986 },
     { season: 2017, phase: PHASE.PRESEASON, type: 'unretirePlayer', name: 'Marshawn Lynch', born: 1986, tid: 16 },
     { season: 2018, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Marshawn Lynch', born: 1986 },
-    { season: 2019, phase: PHASE.REGULAR_SEASON, type: 'unretirePlayer', name: 'Marshawn Lynch', born: 1986, tid: 28 },
+    { season: 2019, phase: PHASE.AFTER_TRADE_DEADLINE, type: 'unretirePlayer', name: 'Marshawn Lynch', born: 1986, tid: 28 },
     { season: 2020, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Marshawn Lynch', born: 1986 },
     { season: 2018, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Jason Witten', born: 1982 },
     { season: 2019, phase: PHASE.PRESEASON, type: 'unretirePlayer', name: 'Jason Witten', born: 1982, tid: 8 },
@@ -616,12 +618,12 @@
     { season: 2018, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Joe Thomas', born: 1984 },
     { season: 2021, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Drew Brees', born: 1979 },
     { season: 2021, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Philip Rivers', born: 1981 },
-    { season: 2025, phase: PHASE.REGULAR_SEASON, type: 'unretirePlayer', name: 'Philip Rivers', born: 1981, tid: 13 }, // signed by the Colts in December 2025
+    { season: 2025, phase: PHASE.AFTER_TRADE_DEADLINE, type: 'unretirePlayer', name: 'Philip Rivers', born: 1981, tid: 13 }, // signed by the Colts in December 2025
     { season: 2022, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Ben Roethlisberger', born: 1982 },
     { season: 2024, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Matt Ryan', born: 1985 },
     { season: 2024, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Jason Kelce', born: 1987 },
     // Careers ended by injury, death, or a sudden retirement that changed the league.
-    { season: 1971, phase: PHASE.REGULAR_SEASON, type: 'retirePlayer', name: 'Chuck Hughes', born: 1943 },
+    { season: 1971, phase: PHASE.AFTER_TRADE_DEADLINE, type: 'retirePlayer', name: 'Chuck Hughes', born: 1943 },
     { season: 1978, phase: PHASE.REGULAR_SEASON, type: 'retirePlayer', name: 'Darryl Stingley', born: 1951 },
     { season: 1986, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Joe Theismann', born: 1949 },
     { season: 1991, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Bo Jackson', born: 1962 },
@@ -695,7 +697,7 @@
     { season: 2014, phase: PHASE.REGULAR_SEASON, type: 'suspension', name: "Josh Gordon", born: 1991, games: 10, reason: 'Suspended (substance abuse policy)' },
     { season: 2014, phase: PHASE.REGULAR_SEASON, type: 'suspension', name: "Adrian Peterson", born: 1985, games: 15, reason: 'Suspended (child abuse case)' },
     { season: 2016, phase: PHASE.REGULAR_SEASON, type: 'suspension', name: "Tom Brady", born: 1977, games: 4, reason: 'Suspended (Deflategate)' },
-    { season: 2017, phase: PHASE.REGULAR_SEASON, type: 'suspension', name: "Ezekiel Elliott", born: 1995, games: 6, reason: 'Suspended (personal conduct policy)' },
+    { season: 2017, phase: PHASE.AFTER_TRADE_DEADLINE, type: 'suspension', name: "Ezekiel Elliott", born: 1995, games: 6, reason: 'Suspended (personal conduct policy)' },
     { season: 2022, phase: PHASE.REGULAR_SEASON, type: 'suspension', name: "Deshaun Watson", born: 1995, games: 11, reason: 'Suspended (personal conduct policy)' },
     { season: 2022, phase: PHASE.REGULAR_SEASON, type: 'suspension', name: "DeAndre Hopkins", born: 1992, games: 6, reason: 'Suspended (PED policy)' }
   ];
@@ -871,7 +873,7 @@
     }
 
     for (const pe of PLAYER_EVENTS) {
-      const pid = resolvePid ? resolvePid(pe.name, pe.born) : undefined;
+      const pid = resolvePid ? resolvePid(pe.name, pe.born, pe.season) : undefined;
       if (pid === undefined) continue;
       if (pe.type === 'suspension') {
         // Sent as a gameAttributes event so plain Football GM only stores a harmless setting; the mod turns it

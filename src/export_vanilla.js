@@ -68,6 +68,9 @@ console.log(`wrote ${path.basename(out)} (${(fs.statSync(out).size / 1e6).toFixe
   for (const t of m.teams) for (const j of t.retiredJerseyNumbers || []) if (j.pid !== undefined) keep.add(j.pid);
   const before = m.players.length;
   m.players = m.players.filter(p => p.tid !== -3 || p.hof || keep.has(p.pid) || (p.retiredYear !== undefined && p.retiredYear >= S - 10));
+  // Family links only to players still in the file
+  const kept = new Set(m.players.map(p => p.pid));
+  for (const p of m.players) if (p.relatives) { p.relatives = p.relatives.filter(r => kept.has(r.pid)); if (!p.relatives.length) delete p.relatives; }
   for (const t of m.teams) for (const ts of t.seasons || []) if (ts.season < S) { delete ts.imgURL; delete ts.imgURLSmall; }
   m.meta.name = m.meta.name.replace(')', ', phone-friendly)');
   const lite = path.join(ROOT, 'NFL_2027_Live_Lite_FBGM.json.gz');

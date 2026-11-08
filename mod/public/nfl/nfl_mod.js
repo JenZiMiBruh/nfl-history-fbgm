@@ -1,4 +1,4 @@
-window.NFL_MOD_BUILT = "Nov 7, 2026, 4:23 PM";
+window.NFL_MOD_BUILT = "Nov 8, 2026, 12:03 AM";
 ;
 window.NFL_ERA_FACTORS = {"1966":{"completionFactor":0.86,"intFactor":1.69,"sackFactor":1.1,"fumbleFactor":1.8,"rushYdsFactor":0.82,"passYdsFactor":1.02,"passFactor":0.98},"1967":{"completionFactor":0.9,"intFactor":1.62,"sackFactor":1.16,"fumbleFactor":1.82,"rushYdsFactor":0.82,"passYdsFactor":1.02,"passFactor":0.96},"1968":{"completionFactor":0.9,"intFactor":1.58,"sackFactor":1.16,"fumbleFactor":1.88,"rushYdsFactor":0.82,"passYdsFactor":0.98,"passFactor":0.92},"1969":{"completionFactor":0.92,"intFactor":1.67,"sackFactor":1.16,"fumbleFactor":2.06,"rushYdsFactor":0.82,"passYdsFactor":0.96,"passFactor":0.88},"1970":{"completionFactor":0.84,"intFactor":1.82,"sackFactor":1.22,"fumbleFactor":1.82,"rushYdsFactor":0.82,"passYdsFactor":1.06,"passFactor":0.94},"1971":{"completionFactor":0.88,"intFactor":1.76,"sackFactor":1.3,"fumbleFactor":2,"rushYdsFactor":0.84,"passYdsFactor":0.98,"passFactor":0.88},"1972":{"completionFactor":0.88,"intFactor":1.76,"sackFactor":1.24,"fumbleFactor":1.94,"rushYdsFactor":0.8,"passYdsFactor":0.94,"passFactor":0.82},"1973":{"completionFactor":0.88,"intFactor":1.78,"sackFactor":1.3,"fumbleFactor":2.08,"rushYdsFactor":0.84,"passYdsFactor":0.9,"passFactor":0.78},"1974":{"completionFactor":0.9,"intFactor":1.58,"sackFactor":1.42,"fumbleFactor":2.26,"rushYdsFactor":0.86,"passYdsFactor":0.88,"passFactor":0.74},"1975":{"completionFactor":0.9,"intFactor":1.67,"sackFactor":1.54,"fumbleFactor":2.34,"rushYdsFactor":0.8,"passYdsFactor":0.84,"passFactor":0.72},"1976":{"completionFactor":0.92,"intFactor":1.69,"sackFactor":1.2,"fumbleFactor":2.32,"rushYdsFactor":0.8,"passYdsFactor":0.84,"passFactor":0.74},"1977":{"completionFactor":0.94,"intFactor":1.57,"sackFactor":1,"fumbleFactor":2.38,"rushYdsFactor":0.8,"passYdsFactor":0.88,"passFactor":0.78},"1978":{"completionFactor":1,"intFactor":1.42,"sackFactor":0.74,"fumbleFactor":2.12,"rushYdsFactor":0.8,"passYdsFactor":0.88,"passFactor":0.96},"1979":{"completionFactor":1.02,"intFactor":1.3,"sackFactor":0.5,"fumbleFactor":2,"rushYdsFactor":0.8,"passYdsFactor":0.9,"passFactor":1.02},"1980":{"completionFactor":0.96,"intFactor":1.73,"sackFactor":0.56,"fumbleFactor":2,"rushYdsFactor":0.78,"passYdsFactor":0.9,"passFactor":0.8},"1981":{"completionFactor":1,"intFactor":1.51,"sackFactor":0.52,"fumbleFactor":1.98,"rushYdsFactor":0.82,"passYdsFactor":0.9,"passFactor":0.86},"1982":{"completionFactor":1.04,"intFactor":1.4,"sackFactor":0.5,"fumbleFactor":1.86,"rushYdsFactor":0.82,"passYdsFactor":0.9,"passFactor":0.92},"1983":{"completionFactor":1,"intFactor":1.33,"sackFactor":0.66,"fumbleFactor":1.96,"rushYdsFactor":0.84,"passYdsFactor":0.9,"passFactor":0.98},"1984":{"completionFactor":1.02,"intFactor":1.28,"sackFactor":0.84,"fumbleFactor":1.7,"rushYdsFactor":0.82,"passYdsFactor":0.9,"passFactor":0.98},"1985":{"completionFactor":1,"intFactor":1.22,"sackFactor":0.96,"fumbleFactor":1.72,"rushYdsFactor":0.82,"passYdsFactor":0.9,"passFactor":0.98},"1986":{"completionFactor":0.98,"intFactor":1.12,"sackFactor":1.02,"fumbleFactor":1.52,"rushYdsFactor":0.82,"passYdsFactor":0.9,"passFactor":1.04},"1987":{"completionFactor":0.98,"intFactor":1.1,"sackFactor":1.2,"fumbleFactor":1.5,"rushYdsFactor":0.8,"passYdsFactor":0.94,"passFactor":1.04},"1988":{"completionFactor":0.98,"intFactor":0.99,"sackFactor":1.22,"fumbleFactor":1.44,"rushYdsFactor":0.8,"passYdsFactor":0.94,"passFactor":1.04},"1989":{"completionFactor":1,"intFactor":0.92,"sackFactor":1.16,"fumbleFactor":1.44,"rushYdsFactor":0.8,"passYdsFactor":0.9,"passFactor":1.04},"1990":{"completionFactor":0.96,"intFactor":1.44,"sackFactor":1.02,"fumbleFactor":1.86,"rushYdsFactor":0.84,"passYdsFactor":0.94,"passFactor":0.94},"1991":{"completionFactor":0.98,"intFactor":1.26,"sackFactor":1.08,"fumbleFactor":1.78,"rushYdsFactor":0.82,"passYdsFactor":0.88,"passFactor":0.96},"1992":{"completionFactor":1.04,"intFactor":1.1,"sackFactor":1,"fumbleFactor":1.62,"rushYdsFactor":0.8,"passYdsFactor":0.88,"passFactor":1},"1993":{"completionFactor":1.04,"intFactor":1.01,"sackFactor":0.9,"fumbleFactor":1.52,"rushYdsFactor":0.78,"passYdsFactor":0.82,"passFactor":1.02},"1994":{"completionFactor":1.04,"intFactor":0.99,"sackFactor":0.9,"fumbleFactor":1.4,"rushYdsFactor":0.76,"passYdsFactor":0.82,"passFactor":1.02},"1995":{"completionFactor":1.04,"intFactor":0.88,"sackFactor":0.88,"fumbleFactor":1.28,"rushYdsFactor":0.76,"passYdsFactor":0.82,"passFactor":1.06},"1996":{"completionFactor":1.04,"intFactor":0.88,"sackFactor":0.9,"fumbleFactor":1.18,"rushYdsFactor":0.78,"passYdsFactor":0.84,"passFactor":1.06},"1997":{"completionFactor":1,"intFactor":0.9,"sackFactor":0.98,"fumbleFactor":1.18,"rushYdsFactor":0.8,"passYdsFactor":0.88,"passFactor":1.06},"1998":{"completionFactor":1,"intFactor":0.95,"sackFactor":1.06,"fumbleFactor":1.14,"rushYdsFactor":0.8,"passYdsFactor":0.92,"passFactor":1.04},"1999":{"completionFactor":1.04,"intFactor":0.94,"sackFactor":1.1,"fumbleFactor":1.14,"rushYdsFactor":0.84,"passYdsFactor":0.94,"passFactor":1.06},"2000":{"completionFactor":0.98,"intFactor":1.04,"sackFactor":1.12,"fumbleFactor":1.58,"rushYdsFactor":0.82,"passYdsFactor":0.9,"passFactor":1.1},"2001":{"completionFactor":1,"intFactor":1.04,"sackFactor":1,"fumbleFactor":1.54,"rushYdsFactor":0.82,"passYdsFactor":0.9,"passFactor":1.08},"2002":{"completionFactor":1.02,"intFactor":1.03,"sackFactor":1,"fumbleFactor":1.48,"rushYdsFactor":0.86,"passYdsFactor":0.9,"passFactor":1.04},"2003":{"completionFactor":1.04,"intFactor":0.97,"sackFactor":1,"fumbleFactor":1.42,"rushYdsFactor":0.84,"passYdsFactor":0.9,"passFactor":1.04},"2004":{"completionFactor":1.04,"intFactor":0.97,"sackFactor":0.94,"fumbleFactor":1.36,"rushYdsFactor":0.86,"passYdsFactor":0.9,"passFactor":1.04},"2005":{"completionFactor":1.06,"intFactor":0.97,"sackFactor":0.94,"fumbleFactor":1.32,"rushYdsFactor":0.84,"passYdsFactor":0.9,"passFactor":1.04},"2006":{"completionFactor":1.08,"intFactor":0.9,"sackFactor":0.9,"fumbleFactor":1.22,"rushYdsFactor":0.84,"passYdsFactor":0.9,"passFactor":1.04},"2007":{"completionFactor":1.1,"intFactor":0.88,"sackFactor":0.82,"fumbleFactor":1.16,"rushYdsFactor":0.86,"passYdsFactor":0.88,"passFactor":1.04},"2008":{"completionFactor":1.12,"intFactor":0.85,"sackFactor":0.82,"fumbleFactor":1.1,"rushYdsFactor":0.88,"passYdsFactor":0.9,"passFactor":1.08},"2009":{"completionFactor":1.14,"intFactor":0.81,"sackFactor":0.78,"fumbleFactor":0.96,"rushYdsFactor":0.9,"passYdsFactor":0.9,"passFactor":1.1},"2010":{"completionFactor":1.02,"intFactor":1.13,"sackFactor":0.84,"fumbleFactor":1.32,"rushYdsFactor":0.88,"passYdsFactor":0.94,"passFactor":1.04},"2011":{"completionFactor":1.02,"intFactor":1.12,"sackFactor":0.9,"fumbleFactor":1.26,"rushYdsFactor":0.86,"passYdsFactor":0.94,"passFactor":1.08},"2012":{"completionFactor":1.04,"intFactor":0.99,"sackFactor":0.92,"fumbleFactor":1.16,"rushYdsFactor":0.86,"passYdsFactor":0.94,"passFactor":1.1},"2013":{"completionFactor":1.06,"intFactor":0.86,"sackFactor":0.92,"fumbleFactor":1.1,"rushYdsFactor":0.86,"passYdsFactor":0.94,"passFactor":1.1},"2014":{"completionFactor":1.1,"intFactor":0.74,"sackFactor":0.86,"fumbleFactor":1.04,"rushYdsFactor":0.86,"passYdsFactor":0.88,"passFactor":1.14},"2015":{"completionFactor":1.1,"intFactor":0.72,"sackFactor":0.9,"fumbleFactor":0.94,"rushYdsFactor":0.82,"passYdsFactor":0.88,"passFactor":1.14},"2016":{"completionFactor":1.14,"intFactor":0.65,"sackFactor":0.9,"fumbleFactor":0.86,"rushYdsFactor":0.86,"passYdsFactor":0.88,"passFactor":1.14},"2017":{"completionFactor":1.16,"intFactor":0.61,"sackFactor":0.92,"fumbleFactor":0.86,"rushYdsFactor":0.86,"passYdsFactor":0.88,"passFactor":1.16},"2018":{"completionFactor":1.18,"intFactor":0.58,"sackFactor":0.9,"fumbleFactor":0.8,"rushYdsFactor":0.92,"passYdsFactor":0.84,"passFactor":1.14},"2019":{"completionFactor":1.18,"intFactor":0.61,"sackFactor":0.96,"fumbleFactor":0.74,"rushYdsFactor":0.92,"passYdsFactor":0.82,"passFactor":1.12},"2020":{"completionFactor":1.12,"intFactor":0.7,"sackFactor":0.86,"fumbleFactor":0.96,"rushYdsFactor":0.94,"passYdsFactor":0.88,"passFactor":1.12},"2021":{"completionFactor":1.12,"intFactor":0.7,"sackFactor":0.9,"fumbleFactor":0.96,"rushYdsFactor":0.88,"passYdsFactor":0.86,"passFactor":1.12},"2022":{"completionFactor":1.14,"intFactor":0.66,"sackFactor":0.92,"fumbleFactor":0.88,"rushYdsFactor":0.9,"passYdsFactor":0.84,"passFactor":1.1},"2023":{"completionFactor":1.12,"intFactor":0.66,"sackFactor":1,"fumbleFactor":0.8,"rushYdsFactor":0.88,"passYdsFactor":0.84,"passFactor":1.06},"2024":{"completionFactor":1.12,"intFactor":0.66,"sackFactor":1.06,"fumbleFactor":0.82,"rushYdsFactor":0.9,"passYdsFactor":0.84,"passFactor":1.06},"2025":{"completionFactor":1.14,"intFactor":0.62,"sackFactor":1.1,"fumbleFactor":0.8,"rushYdsFactor":0.88,"passYdsFactor":0.84,"passFactor":1.06},"2026":{"completionFactor":1.14,"intFactor":0.58,"sackFactor":1.04,"fumbleFactor":0.68,"rushYdsFactor":0.94,"passYdsFactor":0.84,"passFactor":1.04}};
 ;
@@ -572,6 +572,8 @@ window.NFL_ERA_FACTORS = {"1966":{"completionFactor":0.86,"intFactor":1.69,"sack
   // Famous retirements / comebacks (resolved to pids by name+birth year).
   // Football GM retirePlayer/unretirePlayer only need info.pid.
   // ---------------------------------------------------------------------------
+  // Phases: Football GM runs events as it enters a phase, so an event during the season is filed under the regular
+  // season (it happened by week 1) or after the trade deadline (later in the season, the nearest it gets)
   const PLAYER_EVENTS = [
     { season: 1999, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Reggie White', born: 1961 },
     { season: 2000, phase: PHASE.PRESEASON, type: 'unretirePlayer', name: 'Reggie White', born: 1961, tid: 4 },
@@ -588,7 +590,7 @@ window.NFL_ERA_FACTORS = {"1966":{"completionFactor":0.86,"intFactor":1.69,"sack
     { season: 2016, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Marshawn Lynch', born: 1986 },
     { season: 2017, phase: PHASE.PRESEASON, type: 'unretirePlayer', name: 'Marshawn Lynch', born: 1986, tid: 16 },
     { season: 2018, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Marshawn Lynch', born: 1986 },
-    { season: 2019, phase: PHASE.REGULAR_SEASON, type: 'unretirePlayer', name: 'Marshawn Lynch', born: 1986, tid: 28 },
+    { season: 2019, phase: PHASE.AFTER_TRADE_DEADLINE, type: 'unretirePlayer', name: 'Marshawn Lynch', born: 1986, tid: 28 },
     { season: 2020, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Marshawn Lynch', born: 1986 },
     { season: 2018, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Jason Witten', born: 1982 },
     { season: 2019, phase: PHASE.PRESEASON, type: 'unretirePlayer', name: 'Jason Witten', born: 1982, tid: 8 },
@@ -620,12 +622,12 @@ window.NFL_ERA_FACTORS = {"1966":{"completionFactor":0.86,"intFactor":1.69,"sack
     { season: 2018, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Joe Thomas', born: 1984 },
     { season: 2021, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Drew Brees', born: 1979 },
     { season: 2021, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Philip Rivers', born: 1981 },
-    { season: 2025, phase: PHASE.REGULAR_SEASON, type: 'unretirePlayer', name: 'Philip Rivers', born: 1981, tid: 13 }, // signed by the Colts in December 2025
+    { season: 2025, phase: PHASE.AFTER_TRADE_DEADLINE, type: 'unretirePlayer', name: 'Philip Rivers', born: 1981, tid: 13 }, // signed by the Colts in December 2025
     { season: 2022, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Ben Roethlisberger', born: 1982 },
     { season: 2024, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Matt Ryan', born: 1985 },
     { season: 2024, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Jason Kelce', born: 1987 },
     // Careers ended by injury, death, or a sudden retirement that changed the league.
-    { season: 1971, phase: PHASE.REGULAR_SEASON, type: 'retirePlayer', name: 'Chuck Hughes', born: 1943 },
+    { season: 1971, phase: PHASE.AFTER_TRADE_DEADLINE, type: 'retirePlayer', name: 'Chuck Hughes', born: 1943 },
     { season: 1978, phase: PHASE.REGULAR_SEASON, type: 'retirePlayer', name: 'Darryl Stingley', born: 1951 },
     { season: 1986, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Joe Theismann', born: 1949 },
     { season: 1991, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Bo Jackson', born: 1962 },
@@ -699,7 +701,7 @@ window.NFL_ERA_FACTORS = {"1966":{"completionFactor":0.86,"intFactor":1.69,"sack
     { season: 2014, phase: PHASE.REGULAR_SEASON, type: 'suspension', name: "Josh Gordon", born: 1991, games: 10, reason: 'Suspended (substance abuse policy)' },
     { season: 2014, phase: PHASE.REGULAR_SEASON, type: 'suspension', name: "Adrian Peterson", born: 1985, games: 15, reason: 'Suspended (child abuse case)' },
     { season: 2016, phase: PHASE.REGULAR_SEASON, type: 'suspension', name: "Tom Brady", born: 1977, games: 4, reason: 'Suspended (Deflategate)' },
-    { season: 2017, phase: PHASE.REGULAR_SEASON, type: 'suspension', name: "Ezekiel Elliott", born: 1995, games: 6, reason: 'Suspended (personal conduct policy)' },
+    { season: 2017, phase: PHASE.AFTER_TRADE_DEADLINE, type: 'suspension', name: "Ezekiel Elliott", born: 1995, games: 6, reason: 'Suspended (personal conduct policy)' },
     { season: 2022, phase: PHASE.REGULAR_SEASON, type: 'suspension', name: "Deshaun Watson", born: 1995, games: 11, reason: 'Suspended (personal conduct policy)' },
     { season: 2022, phase: PHASE.REGULAR_SEASON, type: 'suspension', name: "DeAndre Hopkins", born: 1992, games: 6, reason: 'Suspended (PED policy)' }
   ];
@@ -875,7 +877,7 @@ window.NFL_ERA_FACTORS = {"1966":{"completionFactor":0.86,"intFactor":1.69,"sack
     }
 
     for (const pe of PLAYER_EVENTS) {
-      const pid = resolvePid ? resolvePid(pe.name, pe.born) : undefined;
+      const pid = resolvePid ? resolvePid(pe.name, pe.born, pe.season) : undefined;
       if (pid === undefined) continue;
       if (pe.type === 'suspension') {
         // Sent as a gameAttributes event so plain Football GM only stores a harmless setting; the mod turns it
@@ -1170,7 +1172,12 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
         const row = rowsS[0];
         p.tid = played.length ? played.slice().sort((a, b) => b[0] - a[0])[0][1] : row.tid;
         if (row.jerseyNumber) p.jerseyNumber = row.jerseyNumber;
-        p._gp = rowsS.reduce((a, s) => a + (s.gp || 0), 0);
+        // For the roster limit: his games for the team he starts with, plus a little for games elsewhere (a tie-breaker).
+        // Counting the whole season let a player traded away after two games (Karl Kirby, 1969 Vikings) outrank a
+        // regular who spent the season there (Jim Lindsey)
+        const total = rowsS.reduce((a, s) => a + (s.gp || 0), 0);
+        const own = rowsS.filter(s => s.tid === p.tid).reduce((a, s) => a + (s.gp || 0), 0);
+        p._gp = own + 0.1 * (total - own);
         // At week W the roster limit favors who was really there: played before and after W comes first, and someone
         // whose games were all far from W comes last. (No lines at all, like linemen, keeps his season's games.)
         if (W && wkLines[src.pid]) {
@@ -1269,6 +1276,9 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
         if (p.tid !== -3 || p.hof || keep.has(p.pid) || (p.retiredYear !== undefined && p.retiredYear >= S - 10)) continue;
         players.splice(i, 1);
       }
+      // Family links only to players still in the league (a dropped father would be a link to nobody)
+      const kept = new Set(players.map(p => p.pid));
+      for (const p of players) if (p.relatives) { p.relatives = p.relatives.filter(r => kept.has(r.pid)); if (!p.relatives.length) delete p.relatives; }
       if (typeof console !== 'undefined') console.log('phone-friendly: kept ' + players.length + ' of ' + before + ' players');
     }
     fitPayrolls(players, rules);
@@ -1416,22 +1426,45 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     }
 
     // ---------------------------------------------------------- scheduled events
+    // Names match without case or a suffix (Jr., Sr., II), on both the event and the player side
+    const nameKey = n => n.toLowerCase().replace(/[.,]/g, '').replace(/\s+(jr|sr|ii|iii|iv)$/, '').trim();
+    const srcByPid = new Map(master.players.map(p => [p.pid, p]));
     const pidByName = new Map();
     for (const p of players) {
-      const k = `${p.firstName} ${p.lastName}`.toLowerCase();
+      const k = nameKey(`${p.firstName} ${p.lastName}`);
       if (!pidByName.has(k)) pidByName.set(k, []);
       pidByName.get(k).push(p);
     }
-    const resolvePid = (name, born) => {
-      const key = name.toLowerCase().replace(/s+(jr.?|sr.?|ii|iii|iv)$/, '');
+    // An event's player: same name, born within a year, the closest birth year first, then the one whose career is
+    // nearest the event's season (two receivers named Steve Smith were born in 1979; the 2017 retirement is the one
+    // who played until 2016, not the one with a 2002 season)
+    const careerGap = (pid, season) => {
+      const src = srcByPid.get(pid);
+      const ys = (src && src.stats || []).filter(s => !s.playoffs).map(s => s.season);
+      if (!ys.length || season === undefined) return Infinity;
+      return season < Math.min(...ys) ? Math.min(...ys) - season : season > Math.max(...ys) ? season - Math.max(...ys) : 0;
+    };
+    const resolvePid = (name, born, season) => {
+      const key = nameKey(name);
       const c = (pidByName.get(key) || []).filter(p => !born || Math.abs(p.born.year - born) <= 1)
-        .sort((x, y) => Math.abs(x.born.year - born) - Math.abs(y.born.year - born));
+        .sort((x, y) => Math.abs(x.born.year - born) - Math.abs(y.born.year - born) || careerGap(x.pid, season) - careerGap(y.pid, season));
       return c.length ? c[0].pid : undefined;
     };
     // Expansion drafts and contractions happen right after the playoffs (phase 4). A league starting at that moment or at
     // the draft would miss them, so they fire at the next phase instead (Panthers and Jaguars from After Playoffs 1994).
     const scheduledEvents = (P >= 4 ? E.buildScheduledEvents(S, 3, resolvePid).filter(e => !(e.season === S && e.phase <= P && !['expansionDraft', 'contraction'].includes(e.type)))
       .map(e => (e.season === S && e.phase <= P ? Object.assign({}, e, { phase: P + 1 }) : e)) : E.buildScheduledEvents(S, P, resolvePid));
+    // A league starting at week W of the regular season has already passed this season's week-1 suspensions, so the
+    // games still to serve start out as an absence (Josh Gordon from week 3 of 2014: 8 of his 10 games left)
+    if (W) {
+      for (const e of E.buildScheduledEvents(S, 0, resolvePid)) {
+        const s = e.info && e.info.nflSuspension;
+        if (!s || e.season !== S || e.phase !== PHASES.regular) continue;
+        const p = players.find(x => x.pid === s.pid);
+        const left = s.games - (W - 1);
+        if (p && p.tid >= 0 && left > 0) p.injury = { type: s.reason, gamesRemaining: Math.max(left, (p.injury && p.injury.gamesRemaining) || 0) };
+      }
+    }
 
     // The games already played, so the schedule shows them: box scores where they exist (the live season), otherwise
     // the real score from the weekly data (no player lines)

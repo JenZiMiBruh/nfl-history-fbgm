@@ -2188,6 +2188,25 @@ index 000000000..3730cc5d6
 +	}
 +	return p.realTeams[season] === tid;
 +};
+diff --git a/src/worker/core/phase/finalize.ts b/src/worker/core/phase/finalize.ts
+index 24de3d174..0b1781672 100644
+--- a/src/worker/core/phase/finalize.ts
++++ b/src/worker/core/phase/finalize.ts
+@@ -65,8 +65,14 @@ const finalize = async (
+ 
+ 	updateEvents.push("newPhase");
+ 
++	// NFL history mod: also during the season (regular season, after the trade deadline, playoffs), for the real
++	// suspensions, retirements and comebacks that happened then. Before, those events were never run: they were deleted
++	// as already past at the draft lottery
+ 	if (
+ 		phase === PHASE.PRESEASON ||
++		phase === PHASE.REGULAR_SEASON ||
++		phase === PHASE.AFTER_TRADE_DEADLINE ||
++		phase === PHASE.PLAYOFFS ||
+ 		phase === PHASE.DRAFT_LOTTERY ||
+ 		phase === PHASE.FREE_AGENCY
+ 	) {
 diff --git a/src/worker/core/phase/newPhasePreseason.ts b/src/worker/core/phase/newPhasePreseason.ts
 index 22a20236f..64ffa90cf 100644
 --- a/src/worker/core/phase/newPhasePreseason.ts
@@ -2362,7 +2381,7 @@ index e9d89db1f..24ca44d52 100644
  					contractAmount: p.contract.amount,
  				});
 diff --git a/src/worker/core/phase/processScheduledEvents.ts b/src/worker/core/phase/processScheduledEvents.ts
-index 9d9e5a586..adf515a41 100644
+index 9d9e5a586..01b08ebfc 100644
 --- a/src/worker/core/phase/processScheduledEvents.ts
 +++ b/src/worker/core/phase/processScheduledEvents.ts
 @@ -15,6 +15,7 @@ import type {
@@ -2593,13 +2612,19 @@ index 9d9e5a586..adf515a41 100644
  	const p = await idb.merged.players.get(pid);
  
  	// Player might have been deleted or might not be retired. In both of those cases, there is nothing to do.
-@@ -605,16 +777,27 @@ const processUnretirePlayer = async (pid: number) => {
+@@ -605,16 +777,33 @@ const processUnretirePlayer = async (pid: number) => {
  
  	p.retiredYear = Infinity;
  	player.addToFreeAgents(p, await getNumPlayersTradedAwayNormalizedAll());
 +
 +	const t = tid !== undefined ? await idb.cache.teams.get(tid) : undefined;
 +	if (t && !t.disabled) {
++		// A fresh one-year deal at what he's worth now: his contract from before he retired ended years ago (an end year
++		// in the past). After the playoffs it's for next season
++		p.contract = {
++			...player.genContract(p),
++			exp: g.get("season") + (g.get("phase") > PHASE.PLAYOFFS ? 1 : 0),
++		};
 +		await player.sign(p, t.tid, p.contract, g.get("phase"));
 +	}
  	await idb.cache.players.put(p);
@@ -2623,7 +2648,7 @@ index 9d9e5a586..adf515a41 100644
  
  		return [text];
  	}
-@@ -675,6 +858,15 @@ export const processScheduledEvents = async (
+@@ -675,6 +864,15 @@ export const processScheduledEvents = async (
  					confsDivsDids,
  				)),
  			);
@@ -2639,7 +2664,7 @@ index 9d9e5a586..adf515a41 100644
  		} else if (scheduledEvent.type === "gameAttributes") {
  			eventLogTexts.push(...(await processGameAttributes(scheduledEvent.info)));
  		} else if (scheduledEvent.type === "awards") {
-@@ -697,13 +889,23 @@ export const processScheduledEvents = async (
+@@ -697,13 +895,23 @@ export const processScheduledEvents = async (
  				)),
  			);
  		} else if (scheduledEvent.type === "contraction") {
