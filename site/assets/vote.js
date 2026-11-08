@@ -1,8 +1,11 @@
 // Fan votes with no account. The polls live in data/polls.json, which the mod's What's new screen reads too, so a
-// poll can change without a mod update. Each vote is one GoatCounter count on its own path (/vote/<poll>/<option>),
+// poll can change without a mod update. Each vote is one GoatCounter count on its own path (vote/<poll>/<option>),
 // the same cookie-free counter the site already uses, sent with GoatCounter's no-script counter so it never waits on
 // their script. Totals come back from GoatCounter's public counter. This browser remembers its vote, so a second click
 // changes nothing. Not tamper-proof (clearing site data allows another vote), which is fine for a fan poll.
+//
+// GoatCounter stores an event path without its leading slash (vote/<poll>/<option>), so it is sent and read that
+// way. The mod's launcher check-ins work the same way (mod/live/<window>).
 //
 // Markup: <div class="poll" data-poll="browns-move"></div>
 (() => {
@@ -12,13 +15,13 @@
   const remember = (id, v) => { try { localStorage.setItem(key(id), v); } catch {} };
   const count = path => fetch(`${GC}/counter/${encodeURIComponent(path)}.json`)
     .then(r => r.ok ? r.json() : { count: '0' }).then(j => +String(j.count).replace(/[^0-9]/g, '') || 0).catch(() => 0);
-  const send = (path, title) => { new Image().src = `${GC}/count?p=${encodeURIComponent(path)}&t=${encodeURIComponent(title)}&rnd=${Math.random().toString(36).slice(2)}`; };
+  const send = (path, title) => { new Image().src = `${GC}/count?${new URLSearchParams({ p: path, t: title, e: 'true', rnd: Math.random().toString(36).slice(2) })}`; };
   const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const justVoted = {};
 
   async function draw(el, P) {
     const voted = mine(P.id);
-    const totals = await Promise.all(P.options.map(o => count(`/vote/${P.id}/${o.id}`)));
+    const totals = await Promise.all(P.options.map(o => count(`vote/${P.id}/${o.id}`)));
     // Your own vote shows right away, before GoatCounter has counted it
     const shown = totals.map((n, i) => n + (justVoted[P.id] === P.options[i].id ? 1 : 0));
     const sum = shown.reduce((a, b) => a + b, 0);
@@ -35,7 +38,7 @@
       if (mine(P.id)) return;
       remember(P.id, b.dataset.o);
       justVoted[P.id] = b.dataset.o;
-      send(`/vote/${P.id}/${b.dataset.o}`, `Vote: ${P.id} ${b.dataset.o}`);
+      send(`vote/${P.id}/${b.dataset.o}`, `Vote: ${P.id} ${b.dataset.o}`);
       draw(el, P);
     });
   }

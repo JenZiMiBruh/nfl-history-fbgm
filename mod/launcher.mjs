@@ -204,10 +204,22 @@ async function main() {
     else child.kill();
   };
   startGame();
-  // The game's Update now button: only asks for the update (nothing else can be done here), from the game's own page
+  // The game's Update now button, and its fan poll: only these two requests, and only from the game's own page
   http.createServer(async (req, res) => {
     const origin = req.headers.origin || '';
     if (/:3000$/.test(origin)) res.setHeader('Access-Control-Allow-Origin', origin);
+    // A vote from the What's new poll. GoatCounter drops counts sent from a local page (the game runs on localhost or
+    // the home network), so the launcher sends it, the same way as its other counts. Only short ids go through
+    const vote = req.method === 'POST' && /:3000$/.test(origin) && /^\/vote\?/.test(req.url || '') ? new URLSearchParams(req.url.slice(6)) : undefined;
+    if (vote) {
+      const poll = vote.get('poll') || '', option = vote.get('option') || '';
+      if (!/^[a-z0-9-]{1,40}$/.test(poll) || !/^[a-z0-9-]{1,40}$/.test(option)) { res.writeHead(400); res.end(); return; }
+      const v = readJson(path.join(MOD, 'version.json')).version;
+      const url = 'https://galloade.goatcounter.com/count?' + new URLSearchParams({ p: `vote/${poll}/${option}`, t: `Vote: ${poll} ${option}`, e: 'true', rnd: Math.random().toString(36).slice(2) });
+      try { await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 NFLHistoryMod/' + v }, signal: AbortSignal.timeout(5000) }); res.writeHead(204); } catch { res.writeHead(502); }
+      res.end();
+      return;
+    }
     if (req.method !== 'POST' || req.url !== '/update' || !/:3000$/.test(origin)) { res.writeHead(404); res.end(); return; }
     if (updating) { res.writeHead(409); res.end(); return; }
     updating = true;

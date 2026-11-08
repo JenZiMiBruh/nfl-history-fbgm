@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // in this window or the last one, whichever is more (a window that just began has few check-ins yet). Every minute.
   const live = async () => {
     const bucket = ago => { const d = new Date((Math.floor(Date.now() / 600000) - ago) * 600000).toISOString(); return d.slice(0, 10).replace(/-/g, '') + '-' + d.slice(11, 16).replace(':', ''); };
-    const count = b => fetch('https://' + GC + '.goatcounter.com/counter/' + encodeURIComponent('/mod/live/' + b) + '.json').then(r => r.ok ? r.json() : { count_unique: 0 }).then(j => +String(j.count_unique).replace(/[^0-9]/g, '')).catch(() => 0);
+    const count = b => fetch('https://' + GC + '.goatcounter.com/counter/' + encodeURIComponent('mod/live/' + b) + '.json').then(r => r.ok ? r.json() : { count_unique: 0 }).then(j => +String(j.count_unique).replace(/[^0-9]/g, '')).catch(() => 0);
     const n = Math.max(await count(bucket(0)), await count(bucket(1)));
     const el = document.getElementById('fLive');
     if (n > 0) { el.hidden = false; document.getElementById('fFirst').hidden = true; el.querySelector('b').textContent = n.toLocaleString(); } else el.hidden = true;

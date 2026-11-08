@@ -75,10 +75,10 @@ index 2116af8f4..c94f32060 100644
  
 diff --git a/src/ui/components/Controller/NflWhatsNew.tsx b/src/ui/components/Controller/NflWhatsNew.tsx
 new file mode 100644
-index 000000000..1e1d4e2cf
+index 000000000..dd07b3fa3
 --- /dev/null
 +++ b/src/ui/components/Controller/NflWhatsNew.tsx
-@@ -0,0 +1,275 @@
+@@ -0,0 +1,294 @@
 +import { useEffect, useState, type ReactNode } from "react";
 +import { Modal } from "react-bootstrap";
 +
@@ -117,7 +117,8 @@ index 000000000..1e1d4e2cf
 +	});
 +
 +// Fan polls: the same ones as the site's Updates page, read from the site so a poll can change without a mod update.
-+// A vote is one GoatCounter count on /vote/<poll>/<option> (no cookies, no account), and this browser remembers it.
++// A vote is one GoatCounter event on vote/<poll>/<option> (no cookies, no account; GoatCounter keeps event paths
++// without a leading slash), and this browser remembers it.
 +const POLLS = "https://jenzimibruh.github.io/nfl-history-fbgm/data/polls.json";
 +const GOATCOUNTER = "https://galloade.goatcounter.com";
 +type Poll = {
@@ -137,6 +138,8 @@ index 000000000..1e1d4e2cf
 +	const [poll, setPoll] = useState<Poll>();
 +	const [voted, setVoted] = useState<string | null>(null);
 +	const [totals, setTotals] = useState<number[]>();
++	const [sending, setSending] = useState(false);
++	const [problem, setProblem] = useState("");
 +
 +	useEffect(() => {
 +		(async () => {
@@ -159,7 +162,7 @@ index 000000000..1e1d4e2cf
 +				if (mine) {
 +					setTotals(
 +						await Promise.all(
-+							p.options.map((o) => readCount(`/vote/${p.id}/${o.id}`)),
++							p.options.map((o) => readCount(`vote/${p.id}/${o.id}`)),
 +						),
 +					);
 +				}
@@ -174,16 +177,32 @@ index 000000000..1e1d4e2cf
 +	}
 +
 +	const vote = async (option: string) => {
-+		if (voted) {
++		if (voted || sending) {
++			return;
++		}
++		setSending(true);
++		setProblem("");
++		// Through the launcher: GoatCounter drops counts sent straight from a local page like this one. A launcher from
++		// before voting (still running right after an update) doesn't know the request, so the vote isn't kept
++		const query = new URLSearchParams({ poll: poll.id, option });
++		const ok = await fetch(`http://${location.hostname}:3099/vote?${query}`, {
++			method: "POST",
++		})
++			.then((r) => r.ok)
++			.catch(() => false);
++		setSending(false);
++		if (!ok) {
++			setProblem(
++				"Your vote didn't go through. Close the mod window and run Install_and_Play again, then vote here or on the NFL History site.",
++			);
 +			return;
 +		}
 +		try {
 +			localStorage.setItem(voteKey(poll.id), option);
 +		} catch {}
 +		setVoted(option);
-+		new Image().src = `${GOATCOUNTER}/count?p=${encodeURIComponent(`/vote/${poll.id}/${option}`)}&t=${encodeURIComponent(`Vote: ${poll.id} ${option}`)}&rnd=${Math.random().toString(36).slice(2)}`;
 +		const counts = await Promise.all(
-+			poll.options.map((o) => readCount(`/vote/${poll.id}/${o.id}`)),
++			poll.options.map((o) => readCount(`vote/${poll.id}/${o.id}`)),
 +		);
 +		// Your own vote counts right away, before GoatCounter has it
 +		setTotals(
@@ -198,7 +217,7 @@ index 000000000..1e1d4e2cf
 +			<p className="text-body-secondary small mb-2">
 +				{voted
 +					? `Thanks for voting · ${sum.toLocaleString()} ${sum === 1 ? "vote" : "votes"} so far`
-+					: "One tap, no account needed."}
++					: problem || "One tap, no account needed."}
 +			</p>
 +			<div className="d-flex flex-wrap gap-2">
 +				{poll.options.map((o, i) => {
@@ -208,7 +227,7 @@ index 000000000..1e1d4e2cf
 +							key={o.id}
 +							type="button"
 +							title={o.desc}
-+							disabled={!!voted}
++							disabled={!!voted || sending}
 +							className={`btn btn-sm ${voted === o.id ? "btn-primary" : "btn-outline-secondary"}`}
 +							onClick={() => vote(o.id)}
 +						>
