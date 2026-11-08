@@ -40,7 +40,18 @@
       justVoted[P.id] = b.dataset.o;
       send(`vote/${P.id}/${b.dataset.o}`, `Vote: ${P.id} ${b.dataset.o}`);
       draw(el, P);
+      // An option like "Player ratings" leads straight to saying which one
+      const o = P.options.find(x => x.id === b.dataset.o);
+      if (o && o.then === 'flag' && window.NFLH && window.NFLH.flag) window.NFLH.flag(undefined, undefined, 'Thanks. Which player? Find him and say which way his rating is off.');
     });
+    // Voted for it already: keep a way back to the search
+    const o = P.options.find(x => x.id === voted);
+    if (o && o.then === 'flag') {
+      const a = document.createElement('button');
+      a.type = 'button'; a.className = 'flag-inline'; a.textContent = 'Flag a specific rating →';
+      a.onclick = () => window.NFLH.flag(undefined, undefined, 'Which player? Find him and say which way his rating is off.');
+      el.querySelector('.pfoot').append(' · ', a);
+    }
   }
 
   async function start() {

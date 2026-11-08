@@ -1,5 +1,5 @@
 {
-  "note": "Fan polls for the site (assets/vote.js) and the mod's What's new screen. inGame: the poll the game shows. Votes are counted at GoatCounter under /vote/<id>/<option>, so keep ids stable.",
+  "note": "Fan polls for the site (assets/vote.js) and the mod's What's new screen. inGame: the poll the game shows. Votes are counted at GoatCounter under /vote/<id>/<option>, so keep ids stable. An option with then: \"flag\" opens the Flag a rating search right after someone votes for it.",
   "inGame": "next-feature",
   "polls": [
     {
@@ -82,9 +82,10 @@
       "note": "Hit something specific? Report it on GitHub so it can be fixed.",
       "options": [
         {
-          "id": "ratings",
+          "id": "player-ratings",
           "label": "Player ratings",
-          "desc": "Someone is rated way too high or too low"
+          "desc": "Someone is rated way too high or too low",
+          "then": "flag"
         },
         {
           "id": "rosters",

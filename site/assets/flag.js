@@ -40,7 +40,9 @@
     root.querySelector('#flag-q').addEventListener('input', e => search(e.target.value));
   }
 
-  async function open(pid, season) {
+  // note: what to say above the search, when something else led here (a vote for "Player ratings")
+  async function open(pid, season, note) {
+    root.querySelector('.flag-sub').textContent = note || "Find the player and season, then say which way it's off. No account needed.";
     root.hidden = false;
     document.body.style.overflow = 'hidden';
     const q = root.querySelector('#flag-q');
@@ -109,6 +111,6 @@
     redraw();
   }
 
-  const start = () => { build(); window.NFLH = Object.assign(window.NFLH || {}, { flag: (pid, season) => open(pid, season) }); };
+  const start = () => { build(); window.NFLH = Object.assign(window.NFLH || {}, { flag: (pid, season, note) => open(pid, season, note) }); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();
