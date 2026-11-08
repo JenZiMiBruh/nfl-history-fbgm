@@ -6,6 +6,13 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.20.13 · Nov 8, 2026
+
+- **A "?" next to every NFL History setting** on the New League screen (mod), like Football GM's own settings. Tap it to see what the setting does.
+- **The poll is at the top of What's new** (mod), so you see it without scrolling past the changelog.
+
+Only the mod changed: no need to start a new league.
+
 ## v1.20.12 · Nov 7, 2026
 
 - **No more "# Division Games and # Conference Games settings were reset" message** when you upload this season's league file. The file asked for 6 division games plus 12 more conference games, 18 in a 17-game season, so Football GM threw both settings out and the schedule stopped favoring division and conference opponents. It's now the real NFL format: 6 division games and 6 other conference games. Leagues built with the season selector or the mod already had this right. A check now stops a release that gets it wrong.

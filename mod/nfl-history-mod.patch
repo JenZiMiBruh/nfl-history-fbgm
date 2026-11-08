@@ -1020,10 +1020,18 @@ index 5694d6dad..0cf3d00eb 100644
  			<div style={styleStatus}>
  				{state.status === "error" ? (
 diff --git a/src/ui/views/NewLeague/index.tsx b/src/ui/views/NewLeague/index.tsx
-index 949d2ba3a..fbd3779e8 100644
+index 949d2ba3a..794e7de30 100644
 --- a/src/ui/views/NewLeague/index.tsx
 +++ b/src/ui/views/NewLeague/index.tsx
-@@ -266,6 +266,11 @@ type Action =
+@@ -18,6 +18,7 @@ import {
+ 	LEAGUE_DATABASE_VERSION,
+ } from "../../../common/constants.ts";
+ import { ActionButton } from "../../components/ActionButton.tsx";
++import { HelpPopover } from "../../components/HelpPopover.tsx";
+ import {
+ 	LeagueFileUpload,
+ 	type LeagueFileUploadOutput,
+@@ -266,6 +267,11 @@ type Action =
  	| {
  			type: "submit";
  	  }
@@ -1035,20 +1043,54 @@ index 949d2ba3a..fbd3779e8 100644
  	| {
  			type: "error";
  	  }
-@@ -406,8 +411,25 @@ const getSettingsFromGameAttributes = (
+@@ -406,8 +412,59 @@ const getSettingsFromGameAttributes = (
  	return newSettings;
  };
  
 +// NFL history mod: the real-history settings, on the New League screen itself (the same as Settings > Real Players)
++// help: the "?" next to each one, like stock Football GM's settings (the same as the descriptions in Settings > Real
++// Players, worded for someone starting a league)
 +const NFL_NEW_LEAGUE_SETTINGS = [
-+	{ key: "useRealSchedules", name: "Real NFL Schedules" },
-+	{ key: "useRealDrafts", name: "Real NFL Draft Picks" },
-+	{ key: "nflRealDraftRatings", name: "Real Draft Ratings" },
-+	{ key: "nflRetirements", name: "Scheduled Retirements" },
-+	{ key: "nflComebacks", name: "Scheduled Comebacks" },
-+	{ key: "nflSuspensions", name: "Scheduled Suspensions" },
-+	{ key: "nflRealRetirements", name: "Real Retirements" },
-+	{ key: "nflHistoricalRosters", name: "Historical Rosters" },
++	{
++		key: "useRealSchedules",
++		name: "Real NFL Schedules",
++		help: "Each season plays that year's real NFL schedule: the same opponents, weeks and byes, 1966 to 2026. Seasons after that use Football GM's normal schedule.",
++	},
++	{
++		key: "useRealDrafts",
++		name: "Real NFL Draft Picks",
++		help: "AI teams take the players they really drafted that year, when those players are still available. Your own picks are still yours to make (auto draft follows the real picks too).",
++	},
++	{
++		key: "nflRealDraftRatings",
++		name: "Real Draft Ratings",
++		help: "Draft prospects are rated by where they really went in the draft, then get their real ratings in their first season, so you can't spot the late-round star early. Off: prospects show their real first-season ratings right away.",
++	},
++	{
++		key: "nflRetirements",
++		name: "Scheduled Retirements",
++		help: "Players who retired early retire when they really did (Barry Sanders, Andrew Luck, Brady), with the real reason in the news. Off: Football GM decides those retirements itself.",
++	},
++	{
++		key: "nflComebacks",
++		name: "Scheduled Comebacks",
++		help: "Retired players come back when they really did (Favre, Brady, Gronkowski, Aaron Donald). Where they go is set by Comeback Destination below.",
++	},
++	{
++		key: "nflSuspensions",
++		name: "Scheduled Suspensions",
++		help: "Real suspensions (Deflategate, Adrian Peterson in 2014) keep the player out for the real number of games, shown like an injury.",
++	},
++	{
++		key: "nflRealRetirements",
++		name: "Real Retirements",
++		help: "Real players never retire before their real last season (Brady plays into his 40s) and retire right after it. Seasons they really sat out are skipped. After the real data ends, Football GM decides.",
++	},
++	{
++		key: "nflHistoricalRosters",
++		name: "Historical Rosters",
++		help: "Every preseason, real players move to the team they really played for that season, so team strength follows real history. Your own moves get undone. Off: rosters change only through the game's own moves.",
++	},
 +] as const;
 +
  const reducer = (state: State, action: Action): State => {
@@ -1061,7 +1103,7 @@ index 949d2ba3a..fbd3779e8 100644
  		case "submit":
  			return {
  				...state,
-@@ -1518,6 +1540,99 @@ const NewLeague = (props: View<"newLeague">) => {
+@@ -1518,6 +1575,109 @@ const NewLeague = (props: View<"newLeague">) => {
  								) : null}
  							</div>
  
@@ -1073,13 +1115,15 @@ index 949d2ba3a..fbd3779e8 100644
 +										later in Settings &gt; Real Players.
 +									</div>
 +									<div className="d-flex align-items-center gap-2 mb-2">
-+										<label
-+											htmlFor="nfl-rpd"
-+											className="mb-0"
-+											title="Players develop like their real careers (100%), randomly (0%), or in between"
-+										>
++										<label htmlFor="nfl-rpd" className="mb-0">
 +											Real Player Determinism
 +										</label>
++										<HelpPopover title="Real Player Determinism">
++											How closely players develop like their real careers. At
++											100%, careers follow the real ones (Jerry Rice plays into
++											his 40s). At 0%, players develop like normal Football GM
++											players. Anything in between mixes the two.
++										</HelpPopover>
 +										<input
 +											id="nfl-rpd"
 +											type="range"
@@ -1104,7 +1148,7 @@ index 949d2ba3a..fbd3779e8 100644
 +											%
 +										</span>
 +									</div>
-+									{NFL_NEW_LEAGUE_SETTINGS.map(({ key, name }) => (
++									{NFL_NEW_LEAGUE_SETTINGS.map(({ key, name, help }) => (
 +										<div className="form-check form-switch" key={key}>
 +											<input
 +												className="form-check-input"
@@ -1122,16 +1166,24 @@ index 949d2ba3a..fbd3779e8 100644
 +											<label
 +												className="form-check-label"
 +												htmlFor={`nfl-${key}`}
-+												title={(descriptions as any)[key] ?? undefined}
 +											>
 +												{name}
 +											</label>
++											<HelpPopover className="ms-1" title={name}>
++												{help}
++											</HelpPopover>
 +										</div>
 +									))}
 +									<div className="d-flex align-items-center gap-2 mt-1">
 +										<label htmlFor="nfl-comeback" className="mb-0">
 +											Comeback Destination
 +										</label>
++										<HelpPopover title="Comeback Destination">
++											Where a player goes when he comes out of retirement. Real
++											team: he signs with the team he really came back to
++											(Manning to Denver). Free agency: any team can sign him,
++											including yours.
++										</HelpPopover>
 +										<select
 +											id="nfl-comeback"
 +											className="form-select form-select-sm w-auto"
@@ -1161,7 +1213,7 @@ index 949d2ba3a..fbd3779e8 100644
  							<div className="mb-3">
  								<label className="form-label" htmlFor="new-league-difficulty">
  									Difficulty
-@@ -1765,6 +1880,7 @@ const NewLeague = (props: View<"newLeague">) => {
+@@ -1765,6 +1925,7 @@ const NewLeague = (props: View<"newLeague">) => {
  											state.customize === "custom-url" ? (
  												<div className="my-3">
  													<LeagueFileUpload
