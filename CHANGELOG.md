@@ -6,6 +6,12 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.20.15 · Nov 8, 2026
+
+- **New League opens on the NFL History box** (mod): Customize starts on Upload league file, so picking a season is the first thing you see. Default (a random league) is still in the menu.
+
+Only the mod changed: no need to start a new league.
+
 ## v1.20.14 · Nov 8, 2026
 
 - **Tom Brady starts the 2000 season on the Patriots.** In leagues starting in 2000 he was a free agent: the roster limit kept the players with the most games, and Brady, the 2000 Patriots' fourth quarterback, played in one. A team's own rookie who stayed with the team now takes the spot of a fringe player (fewer than 8 games), never a regular. The same goes for every other rookie like him.
