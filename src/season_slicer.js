@@ -263,12 +263,13 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
         const row = rowsS[0];
         p.tid = played.length ? played.slice().sort((a, b) => b[0] - a[0])[0][1] : row.tid;
         if (row.jerseyNumber) p.jerseyNumber = row.jerseyNumber;
-        // For the roster limit: his games for the team he starts with, plus a little for games elsewhere (a tie-breaker).
-        // Counting the whole season let a player traded away after two games (Karl Kirby, 1969 Vikings) outrank a
-        // regular who spent the season there (Jim Lindsey)
+        // For the roster limit at the start of the season: his games for the team he starts with, plus a little for games
+        // elsewhere (a tie-breaker). Counting the whole season let a player traded away after two games (Karl Kirby, 1969
+        // Vikings) outrank a regular who spent the season there (Jim Lindsey). At week W he's on the team he had by then,
+        // and a player who just arrived has few games with it yet, so there it stays his season's games
         const total = rowsS.reduce((a, s) => a + (s.gp || 0), 0);
         const own = rowsS.filter(s => s.tid === p.tid).reduce((a, s) => a + (s.gp || 0), 0);
-        p._gp = own + 0.1 * (total - own);
+        p._gp = W ? total : own + 0.1 * (total - own);
         // At week W the roster limit favors who was really there: played before and after W comes first, and someone
         // whose games were all far from W comes last. (No lines at all, like linemen, keeps his season's games.)
         if (W && wkLines[src.pid]) {

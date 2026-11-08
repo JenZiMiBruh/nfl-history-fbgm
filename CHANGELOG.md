@@ -19,6 +19,8 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 - **Roster limits favor players who spent the season with the team.** A player traded away early no longer takes the spot of a regular who stayed.
 - **Only real Hall of Famers.** Tom Brady, Antonio Brown, J.J. Watt and 20 other recently retired players were marked as Hall of Famers in this season's file and on the site, though none have been inducted (Football GM marks a player the moment he retires if his stats clear its formula). Now only players really inducted count.
 - **Shilo Sanders' bio fixed:** born in 2000, played at Colorado (it said 2003 and Clemson).
+- **AFL MVPs, 1966-69.** Each pre-merger season now has both MVPs, like the 2003 co-MVPs: Jim Nance, Daryle Lamonica (twice) and Joe Namath next to the NFL's.
+- **Numbers aren't retired while the player still wears them.** Larry Wilson, Bob Johnson and Pete Retzlaff's numbers now retire after their last season.
 - **Have your say.** Vote on what gets built and fixed next, no account needed: in the mod, right at the bottom of this What's new screen, or on the site at [jenzimibruh.github.io/nfl-history-fbgm/updates.html#vote](https://jenzimibruh.github.io/nfl-history-fbgm/updates.html#vote)
 
 ## v1.20.11 · Nov 7, 2026
