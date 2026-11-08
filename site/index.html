@@ -199,8 +199,9 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const { esc, jersey, data } = window.NFLH;
   const teams = await data('teams');
-  document.getElementById('sLooks').textContent = teams.reduce((n, t) => n + t.looks, 0);
-  document.getElementById('logos').innerHTML = teams.map(t => `<a href="teams.html#team/${t.tid}" style="--c:${t.colors[0]}" title="${esc(t.region)} ${esc(t.name)}"><img src="${t.logo}" alt="${esc(t.region)} ${esc(t.name)}" loading="lazy"></a>`).join('');
+  const looks = document.getElementById('sLooks'), logos = document.getElementById('logos');
+  if (looks) looks.textContent = teams.reduce((n, t) => n + t.looks, 0);
+  if (logos) logos.innerHTML = teams.map(t => `<a href="teams.html#team/${t.tid}" style="--c:${t.colors[0]}" title="${esc(t.region)} ${esc(t.name)}"><img src="${t.logo}" alt="${esc(t.region)} ${esc(t.name)}" loading="lazy"></a>`).join('');
   // Hero wall: jerseys from across the league, with Larry's in the middle
   const nums = [12, 7, 32, 80, 56, 19, 34, 88, 13, 4, 22, 99, 10, 52, 87, 8, 18, 92, 81, 28, 15, 3, 74, 21];
   window.paintWall = (all) => { document.getElementById('wall').innerHTML = Array.from({ length: 84 }, (_, i) => { const r = Math.floor(i / 12), c = i % 12; return `<div>${all ? jersey(all, '11') : r === 4 && c === 6 ? jersey(['#97233F', '#FFFFFF', '#000000'], '11') : jersey(teams[(i * 5) % teams.length].colors, nums[(r * 5 + c * 7 + i) % nums.length])}</div>`; }).join(''); };
