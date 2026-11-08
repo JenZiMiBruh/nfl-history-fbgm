@@ -200,13 +200,6 @@
     return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><polyline fill="none" stroke="var(--teamc)" stroke-width="2" stroke-linejoin="round" points="${pts.map((v, i) => xs(i) + ',' + ys(v)).join(' ')}"/><circle cx="${xs(pts.indexOf(Math.max(...pts)))}" cy="${ys(Math.max(...pts))}" r="3" fill="var(--ink)"/></svg>`;
   }
 
-  // GitHub's report form, pre-filled with the player, his latest season here (named by the year it ends, like the
-  // game) and his rating, so a report takes one tap
-  function reportRating(p, T) {
-    const last = p.s[p.s.length - 1];
-    const q = new URLSearchParams({ template: 'rating.yml', title: `[Rating] ${p.n}, ${last[0] + 1}`, player: p.n, season: String(last[0] + 1), shown: `${last[1]} overall at ${last[2]} (${T.region} ${T.name})` });
-    return REPO + '/issues/new?' + q.toString();
-  }
   function openPlayer(p, T) {
     const W = 700, H = 210, pad = 30, s = p.s;
     const xs = i => pad + i * (W - pad * 2) / Math.max(1, s.length - 1), ys = v => H - pad - (Math.max(30, Math.min(90, v)) - 30) / 60 * (H - pad * 2);
@@ -223,11 +216,13 @@
         <div><div class="eyebrow">${esc(T.region)} ${esc(T.name)} · ${p.pos}</div><h3>${esc(p.n)}</h3><div style="margin-top:8px">${honors(p)}</div></div>
         <button class="close" aria-label="Close">×</button></div>
       ${fitz}
-      <p class="muted" style="font-size:14px;margin:18px 0 6px">Rating by season with the ${esc(T.name)} · <a data-goatcounter-click="report-rating-player" target="_blank" rel="noopener" href="${reportRating(p, T)}">Rating look wrong? Report it</a></p>
+      <p class="muted" style="font-size:14px;margin:18px 0 6px">Rating by season with the ${esc(T.name)} · <button type="button" class="flag-inline" data-flag="${p.id}" data-season="${s[s.length - 1][0]}">Rating look off? Flag it</button></p>
       ${chart}
       <table class="tbl" style="margin-top:12px"><thead><tr><th>Season</th><th class="num">Rating</th><th>Pos</th><th class="num">GP</th><th>Stats</th></tr></thead>
       <tbody>${s.map(x => `<tr style="cursor:default"><td>${x[0]}</td><td class="num"><b style="color:${ovrColor(x[1])}">${x[1]}</b></td><td>${x[2]}</td><td class="num">${x[3]}</td><td>${statText(x)}</td></tr>`).join('')}</tbody></table>`;
     $('#dcard .close').onclick = closeDrawer;
+    const fl = $('#dcard [data-flag]');
+    if (fl) fl.onclick = () => { closeDrawer(); window.NFLH.flag(+fl.dataset.flag, +fl.dataset.season); };
     $('#drawer').classList.add('on');
     if (fitz) toast('You found the GOAT. Respect.');
   }
