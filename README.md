@@ -69,7 +69,7 @@ The real 2026 season as of Sunday, Nov 1: standings, stats, rosters and injuries
 
 Start in 1985, 2007, any season from 1967 on, at any of five start points, just like Basketball GM: **preseason**, **week 1**, **the playoffs** (real regular season already played), **after the playoffs** (real champion and awards) or **draft day** (real draft order). The season selector is one page that runs in your browser, even offline.
 
-1. **Open** [**Build a league** on the NFL History site](https://jenzimibruh.github.io/nfl-history-fbgm/#build) and tap **Load NFL history**. (Offline instead? Download [`nfl_season_selector.html` and `NFL_Master_1966_2026.json.gz`](../../releases/latest), open the selector and drop the master file on it.)
+1. **Open** [**Build a league** on the NFL History site](https://jenzimibruh.github.io/nfl-history-fbgm/build.html) and tap **Load NFL history**. (Offline instead? Download [`nfl_season_selector.html` and `NFL_Master_1966_2026.json.gz`](../../releases/latest), open the selector and drop the master file on it.)
 2. Wait a moment while 60 years of history load in your browser.
 3. **Pick** a season, a start point (Preseason, Week 1, Playoffs, After Playoffs or Draft) and the real events you want, then **Generate & download**.
 4. **Upload** your new file in Football GM, same as Play today, steps 2–4.

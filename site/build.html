@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build a league · NFL History</title>
+<meta name="description" content="Build a Football GM league that starts in any NFL season since 1967: preseason, any week, the playoffs or draft day.">
+<meta property="og:title" content="Build a league · NFL History for Football GM">
+<meta property="og:image" content="https://jenzimibruh.github.io/nfl-history-fbgm/og.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Big+Shoulders+Display:wght@700;800;900&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+.steps{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);background:var(--panel);margin-bottom:26px}
+.steps div{padding:20px 22px;border-left:1px solid var(--line);display:flex;gap:16px;align-items:center;font-weight:600}
+.steps div:first-child{border-left:0}
+.steps b{font:900 44px/1 var(--display);color:var(--signal)}
+@media(max-width:760px){.steps{grid-template-columns:1fr}.steps div{border-left:0;border-top:1px solid var(--line)}.steps div:first-child{border-top:0}}
+.frame{border:1px solid var(--line);background:#fff;box-shadow:var(--shadow)}
+.frame .bar{display:flex;align-items:center;gap:12px;justify-content:space-between;background:var(--hero);color:var(--hero-muted);padding:10px 14px;font:500 12px/1 var(--mono);letter-spacing:.6px;text-transform:uppercase}
+.frame .bar a{color:var(--hero-ink)}
+iframe.selector{display:block;width:100%;height:1250px;border:0;background:#fff}
+.notes{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:40px}
+@media(max-width:860px){.notes{grid-template-columns:1fr}}
+</style>
+<script src="assets/site.js" defer></script>
+</head>
+<body data-page="build">
+<header class="phead"><div class="wrap">
+  <div class="chy"><b>Build a league</b><span>Right here</span></div>
+  <h1>Start in <em>any</em><br>season</h1>
+  <p class="lede">Pick a season from 1967 to today and a start point: preseason, any week, the playoffs, after the playoffs or draft day. Then download your league and upload it in Football GM (<b style="color:var(--hero-ink)">New League → Upload league file</b>).</p>
+  <div class="yard">1967</div>
+</div></header>
+
+<section class="tight"><div class="wrap">
+  <div class="steps"><div><b>1</b>Tap Load NFL history</div><div><b>2</b>Pick a season and a start point</div><div><b>3</b>Generate, download, upload in Football GM</div></div>
+  <div class="frame">
+    <div class="bar"><span>Season selector</span><a href="selector.html?master=data/NFL_Selector_Master.json.gz">Open full screen ↗</a></div>
+    <iframe class="selector" src="selector.html?master=data/NFL_Selector_Master.json.gz" loading="lazy" title="Season selector"></iframe>
+  </div>
+  <div class="notes">
+    <div class="panel tile"><span class="no">01</span><h3>On a phone?</h3><p>Tick <b>Phone-friendly</b> (on by default on phones) for a smaller league that won't run out of memory.</p></div>
+    <div class="panel tile"><span class="no">02</span><h3>Want it offline?</h3><p><a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/nfl_season_selector.html">Download the selector</a> and the seasons file from the latest release, then drop the file on it.</p></div>
+    <div class="panel tile"><span class="no">03</span><h3>Keep history going</h3><p>A league file plays in stock Football GM. For real schedules, drafts and careers after day one, use <a href="mod.html">the mod</a>.</p></div>
+  </div>
+</div></section>
+</body>
+</html>

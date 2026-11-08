@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NFL History for Football GM</title>
+<meta name="description" content="Every NFL season from 1966 to today for Football GM: real players, real ratings, real schedules, every logo and jersey. A passion project by JenZiMiBruh.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="NFL History for Football GM">
 <meta property="og:title" content="NFL History for Football GM">
@@ -14,779 +15,217 @@
 <meta property="og:image:height" content="640">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://jenzimibruh.github.io/nfl-history-fbgm/og.jpg">
-
-<meta name="description" content="Every NFL season from 1966 to 2027 for Football GM: real players, real ratings, real schedules, every logo and jersey. A passion project by JenZiMiBruh.">
+<script>
+// Old one-page links (index.html#build, #team/5, ...) go to their new pages
+(() => {
+  const h = location.hash, to = { '#teams': 'teams.html', '#draft': 'draft.html', '#build': 'build.html', '#mod': 'mod.html', '#news': 'updates.html', '#roadmap': 'updates.html#roadmap', '#modplans': 'updates.html#coming' };
+  if (/^#team\/\d+/.test(h)) location.replace('teams.html' + h);
+  else if (to[h]) location.replace(to[h]);
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Big+Shoulders+Display:wght@700;800;900&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
 <style>
-:root{
-  --bg:#f6f8f6;--panel:#ffffff;--ink:#0e1f16;--muted:#5d6f64;--line:#dfe7e2;--soft:#eef3ef;
-  --turf:#0f3d22;--turf2:#062012;--accent:#1f9d55;--gold:#d4a017;
-  --team1:#0f3d22;--team2:#ffffff;--team3:#1f9d55;
-}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b0f0d;--panel:#121915;--ink:#e8efe9;--muted:#93a39a;--line:#223029;--soft:#18211c}}
-:root[data-theme="dark"]{--bg:#0b0f0d;--panel:#121915;--ink:#e8efe9;--muted:#93a39a;--line:#223029;--soft:#18211c}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-a{color:inherit}
-.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
-h1,h2,h3{font-family:Oswald,Inter,sans-serif;letter-spacing:.2px;line-height:1.1;margin:0}
-h2{font-size:clamp(28px,4vw,40px);text-transform:uppercase}
-.eyebrow{font-size:12px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--accent)}
-.muted{color:var(--muted)}
-section{padding:72px 0}
-
-/* nav */
-nav{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-nav .wrap{display:flex;align-items:center;gap:20px;height:58px}
-nav .brand{font-family:Oswald;font-weight:700;font-size:20px;text-decoration:none;display:flex;align-items:center;gap:10px}
-nav .brand i{display:inline-block;width:26px;height:16px;border-radius:50%;background:#7a3b16;transform:rotate(-25deg);box-shadow:inset 0 0 0 2px #4a210a}
-nav .links{margin-left:auto;display:flex;gap:18px;font-size:14px;font-weight:600}
-nav .links a{text-decoration:none;color:var(--muted)}nav .links a:hover{color:var(--ink)}
-@media(max-width:700px){nav .links a:not(.cta){display:none}}
-.cta{background:var(--accent);color:#fff!important;padding:8px 14px;border-radius:999px}
-
-/* hero: same look as the GitHub banner (tools/graphics/banner.html) */
-.hero{position:relative;overflow:hidden;background:#05100a;color:#fff;padding:96px 0 80px;perspective:1400px;clip-path:inset(0);contain:paint}
-.hero .wall{position:absolute;left:34%;top:-140px;width:1180px;display:grid;grid-template-columns:repeat(12,1fr);gap:14px 12px;transform:rotateY(-24deg) rotateX(6deg) rotateZ(-4deg);transform-origin:0 50%;pointer-events:none}
-.hero .wall>div{filter:drop-shadow(0 8px 10px rgba(0,0,0,.55))}
+/* Hero: a wall of jerseys in every franchise's colors, tilted away under stadium light */
+.hero{position:relative;background:var(--hero);color:var(--hero-ink);overflow:hidden;isolation:isolate;padding:104px 0 72px;perspective:1400px;contain:paint}
+.hero .wall{position:absolute;left:36%;top:-150px;width:1200px;display:grid;grid-template-columns:repeat(12,1fr);gap:14px 12px;transform:rotateY(-24deg) rotateX(6deg) rotateZ(-4deg);transform-origin:0 50%;pointer-events:none;z-index:-2}
+.hero .wall>div{filter:drop-shadow(0 8px 10px rgba(0,0,0,.6))}
 .hero .wall svg{width:100%;height:auto;display:block}
-.hero .shade{position:absolute;inset:0;pointer-events:none;background:
-  linear-gradient(90deg,#05100a 0%,#05100a 28%,rgba(5,16,10,.88) 44%,rgba(5,16,10,.25) 66%,rgba(5,16,10,0) 80%),
-  linear-gradient(0deg,#05100a,transparent 22%),linear-gradient(180deg,rgba(5,16,10,.7),transparent 18%),
-  radial-gradient(circle at 78% 40%,rgba(255,240,200,.12),transparent 45%)}
-.hero .inner{position:relative;max-width:620px}
-.hero .eyebrow{color:#7ee0a1!important;letter-spacing:6px}
-.hero h1{font-size:clamp(64px,11vw,128px);text-transform:uppercase;line-height:.92;letter-spacing:1px}
-.hero h1 span{display:block;background:linear-gradient(90deg,#7ee0a1,#f5c542);-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero .years{display:flex;align-items:center;gap:14px;margin:22px 0 4px;font:700 26px Oswald,sans-serif}
-.hero .years i{flex:0 0 150px;height:3px;background:linear-gradient(90deg,#7ee0a1,#f5c542);border-radius:2px}
-.hero .sub{font-size:clamp(18px,2.2vw,21px);color:#cfe3d5;margin:16px 0 6px;max-width:500px}
-.hero .by{font-size:15px;color:#8fb39b;margin-bottom:28px}
-.hero .by b{color:#fff}
-.btns{display:flex;flex-wrap:wrap;gap:12px}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 20px;border-radius:12px;font-weight:700;text-decoration:none;border:0;cursor:pointer;font-size:15px}
-.btn.primary{background:linear-gradient(90deg,#7ee0a1,#f5c542);color:#05100a}
-.btn.ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.22)}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);margin-top:42px;max-width:600px;background:rgba(10,15,11,.82);border:2px solid rgba(245,197,66,.5);border-radius:12px;padding:16px 0}
-.stats div{text-align:center;border-left:2px solid rgba(255,255,255,.12)}.stats div:first-child{border:0}
-.stats b{display:block;font-family:Oswald;font-size:32px;line-height:1.1;color:#f5c542}
-.stats span{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#a9c9b3}
-@media(max-width:700px){.hero .wall{left:-10%;opacity:.35}.hero .shade{background:linear-gradient(90deg,rgba(5,16,10,.92),rgba(5,16,10,.6)),linear-gradient(0deg,#05100a,transparent 22%)}.stats{grid-template-columns:repeat(2,1fr);gap:14px 0}.stats div:nth-child(3){border:0}}
-.cta{background:linear-gradient(90deg,#7ee0a1,#f5c542);color:#05100a!important}
+.hero .shade{position:absolute;inset:0;z-index:-1;pointer-events:none;background:
+  linear-gradient(90deg,var(--hero) 0%,var(--hero) 30%,rgba(10,14,20,.86) 46%,rgba(10,14,20,.2) 70%,rgba(10,14,20,0) 84%),
+  linear-gradient(0deg,var(--hero),transparent 26%),linear-gradient(180deg,rgba(10,14,20,.75),transparent 20%),
+  radial-gradient(circle at 76% 34%,rgba(255,232,180,.14),transparent 44%)}
+.hero .inner{max-width:660px}
+.hero h1{font-size:clamp(78px,13vw,170px);line-height:.8;letter-spacing:.5px}
+.hero h1 .l2{display:block;color:var(--signal)}
+.hero .years{display:flex;align-items:center;gap:16px;margin:26px 0 0;font:900 30px/1 var(--display);letter-spacing:2px}
+.hero .years i{flex:0 0 120px;height:3px;background:repeating-linear-gradient(90deg,var(--signal) 0 10px,transparent 10px 16px)}
+.hero .sub{font-size:clamp(18px,2.1vw,21px);color:var(--hero-muted);margin:22px 0 30px;max-width:540px}
+.hero .bug{margin-top:56px;max-width:640px}
+.hero .by{margin-top:18px;font:500 13px/1.4 var(--mono);color:var(--hero-muted);letter-spacing:.4px}
+.hero .by b{color:var(--hero-ink);font-weight:600}
+@media(max-width:760px){.hero{padding-top:72px}.hero .wall{left:-20%;opacity:.3}.hero .shade{background:linear-gradient(90deg,rgba(10,14,20,.94),rgba(10,14,20,.7)),linear-gradient(0deg,var(--hero),transparent 26%)}}
 
-/* readability + navigation */
-section,[id]{scroll-margin-top:70px}
-.block .hint{font-size:15px;line-height:1.5}
-nav .links a.on{color:var(--ink);box-shadow:inset 0 -2px 0 var(--accent)}
-.findteam{display:flex;gap:10px;align-items:center;margin:18px 0 6px}
-.findteam input{flex:1;max-width:360px;background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:11px 14px;font:inherit;font-size:15px}
-.tp.hide{display:none}
-.tswitch{display:flex;gap:10px;align-items:center;position:relative;z-index:1;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
-.tswitch select{background:rgba(0,0,0,.25);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:11px 12px;font:600 14px Inter;cursor:pointer}
-.tswitch select option{color:#000}
-.tswitch .back{margin-left:0}
-.lookwrap{position:relative}
-.lookwrap .arr{position:absolute;top:50%;transform:translateY(-60%);z-index:2;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:20px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3)}
-.lookwrap .arr.l{left:-12px}.lookwrap .arr.r{right:-12px}
-@media(hover:none){.lookwrap .arr{display:none}}
-.axis{position:relative;height:16px;display:block}
-.axis span{position:absolute;transform:translateX(-50%)}
-.axis span:first-child{transform:none}.axis span:last-child{transform:translateX(-100%)}
+/* Community strip */
+.crowd{background:var(--bg2);border-bottom:1px solid var(--line)}
+.crowd .wrap{display:flex;align-items:center;gap:36px;flex-wrap:wrap;padding-top:20px;padding-bottom:20px}
+.crowd .nums{display:flex;gap:40px;flex-wrap:wrap}
+.crowd b{display:block;font:900 34px/1 var(--display);font-variant-numeric:tabular-nums}
+.crowd span{font:500 12px/1.3 var(--mono);letter-spacing:.6px;color:var(--muted);text-transform:uppercase}
+.crowd .first{font-weight:600}
+.crowd .acts{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
 
-.tl{list-style:none;margin:28px 0 0;padding:0;position:relative;display:grid;gap:14px}
-.tl:before{content:"";position:absolute;left:11px;top:8px;bottom:8px;width:3px;border-radius:2px;background:linear-gradient(#7ee0a1,#f5c542 30%,var(--line) 45%)}
-.tl li{position:relative;padding:14px 18px 14px 46px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
-.tl li:before{content:"";position:absolute;left:4px;top:18px;width:17px;height:17px;border-radius:50%;background:var(--panel);border:3px solid var(--line)}
-.tl li.done:before{background:#7ee0a1;border-color:#7ee0a1}.tl li.now:before{background:#f5c542;border-color:#f5c542;box-shadow:0 0 0 5px rgba(245,197,66,.25)}
-.tl small{font:700 12px Inter;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
-.tl b{display:block;font:700 19px Oswald,sans-serif;margin:2px 0}.tl span{font-size:15px;color:var(--muted)}
-.cal{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:22px}
-.cal div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
-.cal b{display:block;font:700 15px Oswald,sans-serif;text-transform:uppercase;letter-spacing:.5px}
-.cal span{display:inline-block;margin:4px 4px 0 0;padding:2px 8px;border-radius:999px;background:var(--soft);font-size:12.5px;font-weight:600}
-.cal span.done{background:rgba(126,224,161,.18);color:var(--accent)}
-.cal div.cur{border-color:#f5c542;box-shadow:0 0 0 2px rgba(245,197,66,.25)}
-.tl b.days{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}
-.tl b.days em{font:700 15px Inter;font-style:normal;padding:3px 10px;border-radius:999px;background:var(--soft);border:1px solid var(--line)}
-.tl b.days em.ok{background:rgba(126,224,161,.18);border-color:rgba(126,224,161,.5);color:var(--accent)}
-.feats{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:20px}
-.feats div{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
-.feats i{font-style:normal;font-size:26px}.feats b{display:block;font:700 19px Oswald,sans-serif;text-transform:uppercase;margin:6px 0 4px}.feats span{font-size:14.5px;color:var(--muted);line-height:1.5}
-.fans{background:linear-gradient(90deg,rgba(126,224,161,.08),rgba(245,197,66,.08));border-bottom:1px solid var(--line)}
-.fans .wrap{display:flex;align-items:center;gap:28px;flex-wrap:wrap;padding-top:22px;padding-bottom:22px}
-.fans .lbl{font:800 12px Inter;letter-spacing:3px;text-transform:uppercase;color:var(--accent)}
-.fans .nums{display:flex;gap:30px;flex-wrap:wrap}
-.fans .nums div[hidden]{display:none}
-.fans .nums b{display:block;font:700 30px/1 Oswald,sans-serif;color:#f5c542}.fans .nums span{font-size:12.5px;color:var(--muted)}
-.fans .first{font:600 16px Inter}
-.fans .acts{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
-.fans .acts a{text-decoration:none;font:700 14px Inter;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--panel)}
-.news{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:20px}
-.news div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
-.news i{font-style:normal;font-size:22px}.news b{display:block;font:700 17px Oswald,sans-serif;text-transform:uppercase;margin:4px 0 2px}.news span{font-size:14px;color:var(--muted);line-height:1.5}
-/* story */
-.story{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
-@media(max-width:860px){.story{grid-template-columns:1fr}}
-.story p{font-size:18px;margin:0 0 16px}
-.story .big{font-family:Oswald;font-size:clamp(34px,5vw,54px);text-transform:uppercase;line-height:1;margin:22px 0}
-.compare{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden}
-.compare table{width:100%;border-collapse:collapse;font-size:15px}
-.compare th,.compare td{padding:12px 16px;border-bottom:1px solid var(--line);text-align:center}
-.compare th:first-child,.compare td:first-child{text-align:left}
-.compare thead th{background:var(--soft);font-size:12px;letter-spacing:1px;text-transform:uppercase}
-.compare td.y{color:var(--accent);font-weight:800}.compare td.n{color:#c0392b;font-weight:800}
+/* Three ways in: broadcast "game cards" */
+.ways{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--line);background:var(--panel);box-shadow:var(--shadow)}
+.way{padding:30px 28px 28px;display:flex;flex-direction:column;border-left:1px solid var(--line);position:relative}
+.way:first-child{border-left:0}
+.way .k{font:600 12px/1 var(--mono);letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between}
+.way .k b{color:var(--signal);font-weight:600}
+.way h3{font-size:clamp(34px,3.6vw,46px);margin:18px 0 12px}
+.way p{color:var(--muted);font-size:16px}
+.way ol{margin:0 0 22px;padding:0;list-style:none;counter-reset:s}
+.way li{counter-increment:s;display:flex;gap:12px;padding:9px 0;border-top:1px dashed var(--line);font-size:15.5px}
+.way li::before{content:counter(s);font:900 18px/1.2 var(--display);color:var(--signal);min-width:14px}
+.way .btn{margin-top:auto;justify-content:center}
+.way small{display:block;margin-top:12px;text-align:center;font-size:14px;color:var(--muted)}
+@media(max-width:900px){.ways{grid-template-columns:1fr}.way{border-left:0;border-top:1px solid var(--line)}.way:first-child{border-top:0}}
 
-/* team picker */
-.picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:12px;margin-top:28px}
-.tp{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 8px 12px;text-align:center;cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s;position:relative;overflow:hidden}
-.tp:hover,.tp:focus-visible{transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,.12);border-color:var(--c);outline:none}
-.tp::before{content:"";position:absolute;inset:0 0 auto;height:5px;background:var(--c)}
-.tp img{width:64px;height:64px;object-fit:contain}
-.tp b{display:block;font-size:13px;margin-top:6px}
-.tp small{color:var(--muted);font-size:11px}
+/* Teams strip: every franchise, linking to its page */
+.logos{display:grid;grid-template-columns:repeat(16,1fr);gap:6px}
+.logos a{aspect-ratio:1;display:grid;place-items:center;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);transition:transform .15s,border-color .15s;position:relative;overflow:hidden}
+.logos a::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--c);transform:scaleX(0);transition:transform .2s}
+.logos a:hover{transform:translateY(-3px);border-color:var(--c)}
+.logos a:hover::after{transform:none}
+.logos img{width:76%;height:76%;object-fit:contain}
+@media(max-width:900px){.logos{grid-template-columns:repeat(8,1fr)}}
 
-/* team view */
-#team{display:none}
-#team.on{display:block}
-.thead{background:linear-gradient(120deg,var(--team1) 0%,color-mix(in srgb,var(--team1) 70%,#000) 100%);color:#fff;border-radius:22px;padding:28px;display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center;position:relative;overflow:hidden}
-.thead::after{content:"";position:absolute;right:0;top:0;bottom:0;width:10px;background:var(--teamc)}
-.thead img{width:110px;height:110px;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(0,0,0,.35));position:relative;z-index:1}
-.thead h2{font-size:clamp(30px,5vw,50px)}
-.thead .meta{opacity:.85;font-size:14px;margin-top:6px}
-.thead .back{position:relative;z-index:1}
-.kpis{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-.kpi{background:rgba(255,255,255,.14);border-radius:12px;padding:8px 12px;font-size:13px}
-.kpi b{font-family:Oswald;font-size:22px;display:block;line-height:1}
-@media(max-width:700px){.thead{grid-template-columns:1fr;text-align:left}.thead img{width:80px;height:80px}}
+/* Why: the story plus the comparison */
+.why{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:start}
+@media(max-width:900px){.why{grid-template-columns:1fr;gap:36px}}
+.why .quote{font:800 clamp(34px,4.4vw,54px)/1 var(--display);text-transform:uppercase;margin:4px 0 26px}
+.why .quote em{font-style:normal;color:var(--signal)}
+.why p{font-size:18px}
+.vs{width:100%;border-collapse:collapse}
+.vs th{font:600 11px/1 var(--mono);letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);padding:12px 14px;text-align:center;border-bottom:2px solid var(--ink)}
+.vs th:first-child{text-align:left}
+.vs th.us{color:var(--ink);background:var(--soft)}
+.vs td{padding:13px 14px;border-bottom:1px solid var(--line);text-align:center;font-size:15.5px}
+.vs td:first-child{text-align:left}
+.vs td.us{background:var(--soft);color:var(--field);font-weight:800}
+.vs td.no{color:var(--muted);opacity:.6}
 
-.block{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:24px;margin-top:20px}
-.block h3{font-size:22px;text-transform:uppercase;margin-bottom:4px}
-.block .hint{font-size:14px;color:var(--muted);margin:0 0 18px}
-
-/* looks timeline */
-.looks{display:flex;gap:16px;overflow-x:auto;padding:6px 2px 14px;scroll-snap-type:x mandatory;align-items:stretch}
-.look{flex:0 0 232px;scroll-snap-align:start;background:var(--soft);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;text-align:center;position:relative}
-.look .stage{position:relative;height:150px;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 14px;background:radial-gradient(120% 90% at 50% 0%,color-mix(in srgb,var(--c) 55%,transparent),transparent 75%),linear-gradient(180deg,color-mix(in srgb,var(--c) 22%,transparent),transparent)}
-.look .stage img{width:104px;height:104px;object-fit:contain;filter:drop-shadow(0 6px 12px rgba(0,0,0,.45))}
-.look .stage svg{width:84px;height:auto;filter:drop-shadow(0 6px 10px rgba(0,0,0,.4))}
-.look .info{padding:12px 14px 16px;display:flex;flex-direction:column;align-items:center;gap:2px;flex:1}
-.look .yrs{font-family:Oswald;font-size:26px;line-height:1.1}
-.look .nm{font-size:13.5px;color:var(--muted)}
-.look .who{font-size:12.5px;color:var(--muted);margin-top:6px;min-height:18px}.look .who b{color:var(--ink)}
-.look .now{position:absolute;top:10px;right:10px;font:800 10px Inter;letter-spacing:1.5px;text-transform:uppercase;background:#f5c542;color:#05100a;padding:3px 8px;border-radius:999px}
-.sw{display:flex;gap:6px;margin-top:auto;padding-top:10px}.sw i{width:26px;height:12px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(127,127,127,.35)}
-
-/* seasons chart */
-.chart{position:relative}
-.bars{display:flex;align-items:flex-end;gap:2px;height:180px;border-bottom:1px solid var(--line);position:relative}
-.bars .b{flex:1;min-width:3px;background:color-mix(in srgb,var(--muted) 55%,transparent);border-radius:3px 3px 0 0;position:relative;cursor:pointer;opacity:.85;transition:opacity .1s}
-.bars .b.po{background:var(--teamc)}
-.bars .b:hover,.bars .b.sel{opacity:1;outline:2px solid var(--ink)}
-.bars .b.ch::after{content:"🏆";position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:14px}
-.bars .half{position:absolute;left:0;right:0;border-top:1px dashed var(--muted);opacity:.5;pointer-events:none}
-.axis{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:6px}
-.legend{display:flex;gap:16px;font-size:13px;color:var(--muted);margin-top:10px;flex-wrap:wrap}
-.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:6px}
-.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);padding:8px 10px;border-radius:10px;font-size:13px;z-index:50;display:none;max-width:240px}
-
-/* season roster */
-.seasonbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.seasonbar input{flex:1;min-width:200px;accent-color:var(--team3)}
-.seasonbar .yr{font-family:Oswald;font-size:34px;min-width:90px}
-.seasonbar .rec{font-size:15px;color:var(--muted);flex-basis:100%;order:3} /* own line, so the slider never resizes mid-drag */
-.roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));grid-auto-rows:76px;gap:12px;margin-top:16px;align-content:start}
-.seasonbar input{touch-action:pan-y}
-.pc{display:flex;gap:12px;align-items:center;background:var(--soft);border-radius:14px;padding:12px;cursor:pointer;border:1px solid transparent}
-.pc:hover{border-color:var(--team3)}
-.ovr{flex:0 0 52px;height:52px;border-radius:12px;display:grid;place-items:center;font-family:Oswald;font-size:24px;color:#fff}
-.pc b{display:block;font-size:15px}
-.pc small{color:var(--muted);font-size:12.5px}
-
-/* legends table */
-.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
-.tools input,.tools select{background:var(--soft);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:9px 12px;font:inherit;font-size:14px}
-.tools input{flex:1;min-width:180px}
-.tbl{width:100%;border-collapse:collapse;font-size:14px}
-.tbl th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap}
-.tbl td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
-.tbl tr{cursor:pointer}.tbl tbody tr:hover{background:var(--soft)}
-.tbl .num{text-align:right;font-variant-numeric:tabular-nums}
-.badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--soft);margin:1px 2px 1px 0;white-space:nowrap}
-.badge.hof{background:var(--gold);color:#2b1d00}
-.spark{display:block}
-@media(max-width:700px){.hide-sm{display:none}}
-
-/* retired */
-.retired{display:flex;gap:10px;flex-wrap:wrap}
-.rj{display:flex;align-items:center;gap:10px;background:var(--soft);border-radius:14px;padding:8px 14px 8px 8px}
-.rj svg{width:40px;height:auto}
-.rj b{font-size:14px;display:block}.rj small{color:var(--muted);font-size:12px}
-
-/* player drawer */
-.drawer{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:40;align-items:flex-end;justify-content:center}
-.drawer.on{display:flex}
-.drawer .card{background:var(--panel);width:min(760px,100%);max-height:88vh;overflow:auto;border-radius:22px 22px 0 0;padding:24px}
-@media(min-width:800px){.drawer{align-items:center}.drawer .card{border-radius:22px}}
-.drawer .top{display:flex;gap:16px;align-items:center}
-.drawer h3{font-size:30px}
-.close{margin-left:auto;background:var(--soft);border:0;border-radius:50%;width:38px;height:38px;font-size:20px;cursor:pointer;color:var(--ink)}
-
-/* draft classes */
-.dtabs{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 14px}
-.dtab{background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:9px 18px;font:600 15px Inter;cursor:pointer}
-.dtab.on{background:var(--accent);border-color:var(--accent);color:#fff}
-.dfilters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
-.dfilters button{background:var(--soft);border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:6px 10px;font:600 12px Inter;cursor:pointer}
-.dfilters button.on{color:var(--ink);border-color:var(--ink)}
-.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
-.pros{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;position:relative;transition:transform .15s,box-shadow .15s}
-.pros:hover{transform:translateY(-3px);box-shadow:0 12px 26px rgba(0,0,0,.15)}
-.pros .ph{height:138px;background:linear-gradient(160deg,var(--soft),var(--panel));display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
-.pros .ph img{height:132px;width:auto;object-fit:cover}
-.pros .rk{position:absolute;top:10px;left:10px;background:var(--ink);color:var(--bg);font:700 13px Oswald;border-radius:8px;padding:3px 8px;z-index:1}
-.pros .ps{position:absolute;top:10px;right:10px;background:var(--accent);color:#fff;font:700 12px Inter;border-radius:8px;padding:3px 8px;z-index:1}
-.pros .bd{padding:12px 14px 14px}
-.pros b{font-size:15px;display:block}
-.pros small{color:var(--muted);font-size:12.5px;display:block;min-height:17px}
-.bar{height:7px;border-radius:4px;background:var(--soft);margin-top:7px;position:relative;overflow:hidden}
-.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px}
-.barlab{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:8px}
-.more{margin:18px auto 0;display:block}
-
-/* build a league */
-.bsteps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}
-.bsteps div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-weight:600;display:flex;gap:12px;align-items:center}
-.bsteps b{flex:0 0 34px;height:34px;border-radius:10px;background:var(--accent);color:#06210f;display:grid;place-items:center;font:700 18px Oswald}
-@media(max-width:700px){.bsteps{grid-template-columns:1fr}}
-iframe.selector{width:100%;height:1250px;border:1px solid var(--line);border-radius:18px;background:#fff}
-
-/* features */
-.feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:28px}
-.f{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px}
-.f .ico{font-size:28px}
-.f h3{font-size:22px;margin:10px 0 6px;text-transform:uppercase}
-.f p{margin:0;color:var(--muted);font-size:15px}
-
-/* paths */
-.paths{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:28px}
-.path{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:24px;display:flex;flex-direction:column}
-.path .tag{font-size:12px;font-weight:800;letter-spacing:2px;color:var(--accent)}
-.path h3{font-size:26px;margin:6px 0 10px;text-transform:uppercase}
-.path ol{padding-left:20px;margin:0 0 16px;color:var(--muted);font-size:15px}
-.path .btn{margin-top:auto;background:var(--turf);color:#fff;justify-content:center}
-
-footer{background:var(--turf2);color:#cfe7d6;padding:48px 0;margin-top:40px}
-footer .wrap{display:flex;gap:30px;flex-wrap:wrap;justify-content:space-between}
-footer b{color:#fff}
-footer small{display:block;opacity:.7;margin-top:8px;max-width:520px}
-.livedot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#2ecc71;margin-right:6px;vertical-align:middle;box-shadow:0 0 0 0 rgba(46,204,113,.6);animation:livepulse 2s infinite}@keyframes livepulse{70%{box-shadow:0 0 0 7px rgba(46,204,113,0)}100%{box-shadow:0 0 0 0 rgba(46,204,113,0)}}
-
-/* ---- Visual refresh (Nov 2026): one accent, no gradients or emoji icons, editorial type ---- */
-:root{--accent:#c8102e;--gold:#e8b23a;--line:#e3e1db;--bg:#f7f6f2;--soft:#efede6;--muted:#5f625c;--ink:#141614}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d0f0e;--panel:#151816;--ink:#ecebe6;--muted:#9a9d97;--line:#262a27;--soft:#1b1e1c;--accent:#e5484d}}
-:root[data-theme="dark"]{--bg:#0d0f0e;--panel:#151816;--ink:#ecebe6;--muted:#9a9d97;--line:#262a27;--soft:#1b1e1c;--accent:#e5484d}
-body{font-family:"Barlow",system-ui,sans-serif;font-size:17px}
-h1,h2,h3,.tl b,.feats b,.cal b,.stats b,nav .brand{font-family:"Barlow Condensed",Oswald,sans-serif;font-weight:700}
-h2{letter-spacing:.5px}
-.eyebrow{color:var(--accent);letter-spacing:2.5px;font-weight:700}
-nav .brand i{width:30px;height:19px;border-radius:0;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2040%22%3E%3Cpath%20d%3D%22M2%2020C10%204%2054%204%2062%2020%2054%2036%2010%2036%202%2020Z%22%20fill%3D%22%238b4513%22%20stroke%3D%22%235a2b0c%22%20stroke-width%3D%222%22%2F%3E%3Cpath%20d%3D%22M14%209c4%206%204%2016%200%2022M50%209c-4%206-4%2016%200%2022%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M22%2020h20%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M25%2016.5v7M29%2016.5v7M33%2016.5v7M37%2016.5v7%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E") center/contain no-repeat;box-shadow:none;transform:rotate(-18deg)}
-.cta,.btn.primary{background:var(--accent)!important;color:#fff!important;border-radius:6px}
-.btn{border-radius:6px}
-.btn.ghost{border-radius:6px}
-.hero h1 span{background:none;color:var(--gold);-webkit-text-fill-color:currentColor}
-.hero .eyebrow{color:var(--gold)!important;letter-spacing:4px}
-.hero .years i{background:var(--gold)}
-.stats{background:rgba(8,10,9,.78);border:0;border-top:3px solid var(--gold);border-radius:4px}
-.stats b{color:#fff}
-.tl:before{background:var(--line)}
-.tl li,.feats div,.news>div,.path,.cal div{border-radius:6px}
-.tl li.done:before{background:var(--ink);border-color:var(--ink)}
-.tl li.now:before{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 25%,transparent)}
-.tl b.days em.ok,.cal span.done{background:var(--soft);border-color:var(--line);color:var(--ink)}
-.cal div.cur{border-color:var(--accent);box-shadow:none}
-.feats i,.news i{display:none}
-.feats div,.news>div{border-top:3px solid var(--accent)}
-.fans{background:var(--soft)}
-.fans .lbl{color:var(--accent)}
-.path .tag{background:none!important;color:var(--accent)!important;padding:0!important;letter-spacing:2px}
+/* Latest: newest changelog entries */
+.latest{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media(max-width:900px){.latest{grid-template-columns:1fr}}
+.latest article{padding:24px}
+.latest .v{font:600 12px/1 var(--mono);letter-spacing:1.4px;color:var(--signal);text-transform:uppercase}
+.latest h3{font-size:26px;margin:12px 0 10px}
+.latest p{color:var(--muted);font-size:15.5px;margin:0}
 </style>
+<script src="assets/site.js" defer></script>
 </head>
-<body>
-<nav><div class="wrap">
-  <a class="brand" href="#top"><i></i>NFL History</a>
-  <div class="links"><a href="#story">Why</a><a href="#teams">Your team</a><a href="#draft">Drafts</a><a href="#build">Build a league</a><a href="#mod">The mod</a><a href="#news">What's new</a><a href="#roadmap">Roadmap</a><a href="guide.html">How to play</a><a class="cta" data-goatcounter-click="download-nav" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_2027_Live_FBGM.json.gz" title="Download this season's league file">Download</a></div>
-</div></nav>
+<body data-page="home">
 
 <header class="hero" id="top">
   <div class="wall" id="wall" aria-hidden="true"></div>
   <div class="shade"></div>
   <div class="wrap"><div class="inner">
-    <div class="eyebrow" style="color:#7fe0a5">For Football GM · <span style="background:#f0883e;color:#111;padding:1px 8px;border-radius:999px;font-weight:700" title="It works, but you may still hit bugs">Beta</span></div>
-    <h1>NFL <span>History</span></h1>
-    <div class="years">1966<i></i>TODAY</div>
-    <p class="sub">Every season, every uniform. Real players, real ratings, real schedules, and every logo and jersey, switching on the real date.</p>
-    <p class="by" style="opacity:.85">Beta: you may still hit bugs. <a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new/choose" style="color:inherit;text-decoration:underline">Report one</a> and it gets fixed in the next update.</p>
-    <p class="by">A passion project by <b>JenZiMiBruh</b></p>
+    <div class="chy"><b>For Football GM</b><span style="background:var(--hero-ink);color:var(--hero)">Beta</span></div>
+    <h1>NFL<span class="l2">History</span></h1>
+    <div class="years">1966<i></i>Today</div>
+    <p class="sub">Every season, every uniform. Real players with ratings built from their real careers, real schedules and drafts, and every logo and jersey switching on the real date.</p>
     <div class="btns">
-      <a class="btn primary" href="#teams">Explore your team's history →</a>
-      <a class="btn ghost" href="guide.html">How to play →</a>
+      <a class="btn go" href="#play">Start playing <span class="arr">→</span></a>
+      <a class="btn line" href="teams.html">Explore your team</a>
     </div>
-    <div class="stats">
-      <div><b id="sPlayers">28,700+</b><span>real players</span></div>
-      <div><b>61</b><span>seasons</span></div>
-      <div><b id="sLooks">146</b><span>logo &amp; jersey eras</span></div>
-      <div><b>121</b><span>real events</span></div>
+    <div class="bug">
+      <div><b id="sPlayers">28,700+</b><span>Real players</span></div>
+      <div><b>61</b><span>Seasons</span></div>
+      <div><b id="sLooks">146</b><span>Logo &amp; jersey eras</span></div>
+      <div><b>121</b><span>Real events</span></div>
     </div>
+    <div class="by">A passion project by <b>JenZiMiBruh</b> · Beta: you may still hit bugs, <a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new/choose">report one</a></div>
   </div></div>
 </header>
-<section class="fans" id="fans" style="padding:0"><div class="wrap">
-  <div class="lbl">The community</div>
+
+<div class="crowd" id="fans"><div class="wrap">
+  <div class="chy solo"><b>The community</b></div>
   <div class="nums">
-    <div id="fLive" hidden><b>0</b><span><i class="livedot"></i>playing the mod right now</span></div>
-    <div id="fVisits" hidden><b>0</b><span>fans have visited</span></div>
-    <div id="fDl" hidden><b>0</b><span>downloads</span></div>
-    <div id="fStars" hidden><b>0</b><span>stars on GitHub</span></div>
+    <div id="fLive" hidden><b>0</b><span><i class="livedot"></i>Playing the mod now</span></div>
+    <div id="fVisits" hidden><b>0</b><span>Fans have visited</span></div>
+    <div id="fDl" hidden><b>0</b><span>Downloads</span></div>
+    <div id="fStars" hidden><b>0</b><span>GitHub stars</span></div>
     <div class="first" id="fFirst">Just launched. Be one of the first fans.</div>
   </div>
-  <div class="acts"><a href="https://github.com/JenZiMiBruh/nfl-history-fbgm" data-goatcounter-click="star">⭐ Star it on GitHub</a><a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new?template=rating.yml" data-goatcounter-click="report-rating">📊 Report a wrong rating</a><a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new?template=logo.yml" data-goatcounter-click="report-logo">🎨 Report a wrong logo</a></div>
+  <div class="acts"><a class="chip" href="https://github.com/JenZiMiBruh/nfl-history-fbgm" data-goatcounter-click="star">Star on GitHub</a><a class="chip" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new/choose" data-goatcounter-click="report-bug">Report a bug</a></div>
+</div></div>
+
+<section id="play"><div class="wrap">
+  <div class="sh rv"><div><div class="chy"><b>01</b><span>Play it</span></div><h2>Three ways in</h2><p>Pick the one that sounds like you. The first two work in regular Football GM on any phone or computer.</p></div><a class="more" href="guide.html">Step-by-step guide →</a></div>
+  <div class="ways rv">
+    <div class="way"><div class="k"><span>Quick start</span><b>2 min</b></div><h3>This season</h3>
+      <ol><li>Download this season's league file (don't unzip it)</li><li>Football GM → New League → Upload league file</li><li>Pick your team</li></ol>
+      <a class="btn go" data-goatcounter-click="download-NFL_2027_Live_FBGM.json.gz" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_2027_Live_FBGM.json.gz">Download this season</a>
+      <small>Older phone? <a data-goatcounter-click="download-NFL_2027_Live_Lite_FBGM.json.gz" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_2027_Live_Lite_FBGM.json.gz">Phone-friendly version (13 MB)</a></small></div>
+    <div class="way"><div class="k"><span>Any season</span><b>5 min</b></div><h3>Pick a year</h3>
+      <ol><li>Open Build a league</li><li>Pick a season from 1967 on, and a week or phase</li><li>Download it and upload it to Football GM</li></ol>
+      <a class="btn go" href="build.html">Build a league</a>
+      <small>Right in your browser, no install.</small></div>
+    <div class="way"><div class="k"><span>Full experience</span><b>10 min once</b></div><h3>With the mod</h3>
+      <ol><li>Download the mod zip</li><li>Double-click Install_and_Play</li><li>Play on your computer, or your phone over Wi-Fi</li></ol>
+      <a class="btn go" data-goatcounter-click="download-NFL_History_Mod.zip" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_History_Mod.zip">Download the mod</a>
+      <small><a href="mod.html">What the mod adds →</a></small></div>
+  </div>
 </div></section>
 
-<section id="story"><div class="wrap story">
-  <div>
-    <div class="eyebrow">Why this exists</div>
-    <p style="margin-top:14px">I've played Football GM since 2020. Basketball GM is what got me into NBA history and stats. It has real players, real ratings, portraits, logos and jersey history going back decades. You can start in 1985 and see if you'd have drafted Jordan.</p>
-    <p>Football GM didn't have any of that, so I built it.</p>
-    <p>Every NFL season since 1966, rebuilt from real data. Start in any year. See if the Patriots can really go 19-0. See what happens if Barry Sanders doesn't retire.</p>
-    <p class="muted" style="font-size:15px">— JenZiMiBruh</p>
+<section class="band"><div class="wrap">
+  <div class="sh rv"><div><div class="chy"><b>02</b><span>Your team</span></div><h2>Every franchise, 1966 to today</h2><p>Every logo and jersey they wore, every season's record, and every notable player with the rating they get in the game.</p></div><a class="more" href="teams.html">All teams →</a></div>
+  <div class="logos rv" id="logos"></div>
+</div></section>
+
+<section><div class="wrap why">
+  <div class="rv">
+    <div class="chy"><b>03</b><span>Why this exists</span></div>
+    <p class="quote">Basketball GM had history. <em>Football GM didn't.</em></p>
+    <p>I've played Football GM since 2020. Basketball GM is what got me into NBA history: real players, real ratings, logos and jerseys going back decades. Start in 1985 and see if you'd have drafted Jordan.</p>
+    <p>Football GM didn't have any of that, so I built it. Every NFL season since 1966, rebuilt from real data. See if the Patriots can really go 19-0. See what happens if Barry Sanders doesn't retire.</p>
+    <p class="muted mono" style="font-size:14px">— JenZiMiBruh</p>
   </div>
-  <div class="compare">
-    <table>
-      <thead><tr><th></th><th>Stock FBGM</th><th>NFL History</th></tr></thead>
+  <div class="panel rv" style="overflow:hidden">
+    <table class="vs">
+      <thead><tr><th></th><th>Stock FBGM</th><th class="us">NFL History</th></tr></thead>
       <tbody>
-        <tr><td>Real players &amp; stats since 1966</td><td class="n">✕</td><td class="y">✓</td></tr>
-        <tr><td>Ratings built from real careers</td><td class="n">✕</td><td class="y">✓</td></tr>
-        <tr><td>Logos &amp; jerseys by era</td><td class="n">✕</td><td class="y">✓</td></tr>
-        <tr><td>Real schedules, game for game</td><td class="n">✕</td><td class="y">✓</td></tr>
-        <tr><td>Real drafts</td><td class="n">✕</td><td class="y">✓</td></tr>
-        <tr><td>Retirements, comebacks, suspensions</td><td class="n">✕</td><td class="y">✓</td></tr>
-        <tr><td>Era-accurate game sim</td><td class="n">✕</td><td class="y">✓</td></tr>
-        <tr><td>Pick any season to start</td><td class="n">✕</td><td class="y">✓</td></tr>
+        <tr><td>Real players and stats since 1966</td><td class="no">—</td><td class="us">✓</td></tr>
+        <tr><td>Ratings built from real careers</td><td class="no">—</td><td class="us">✓</td></tr>
+        <tr><td>Logos and jerseys by era</td><td class="no">—</td><td class="us">✓</td></tr>
+        <tr><td>Real schedules, game for game</td><td class="no">—</td><td class="us">✓</td></tr>
+        <tr><td>Real drafts</td><td class="no">—</td><td class="us">✓</td></tr>
+        <tr><td>Retirements, comebacks, suspensions</td><td class="no">—</td><td class="us">✓</td></tr>
+        <tr><td>Era-accurate game sim</td><td class="no">—</td><td class="us">✓</td></tr>
+        <tr><td>Start in any season, any week</td><td class="no">—</td><td class="us">✓</td></tr>
       </tbody>
     </table>
   </div>
 </div></section>
 
-<section id="teams" style="background:var(--soft)"><div class="wrap">
-  <div id="pickerView">
-    <div class="eyebrow">Your team, 1966 to today</div>
-    <h2>Pick a team</h2>
-    <p class="muted" style="max-width:640px">Every logo and jersey they wore, every season's record, and every notable player with the rating they have in the league, season by season. All of it straight from the league file.</p>
-    <div class="findteam"><input id="findteam" type="search" placeholder="Find your team… (try &quot;Cardinals&quot; or &quot;ARI&quot;)" aria-label="Find your team"></div>
-    <div class="picker" id="picker"></div>
-  </div>
-  <div id="team"></div>
+<section class="dark"><div class="wrap">
+  <div class="sh rv"><div><div class="chy"><b>04</b><span style="background:var(--hero-ink);color:var(--hero)">Latest</span></div><h2>Fresh off the field</h2><p>Fixes from your reports. Download again and start a new league to get them.</p></div><a class="more" href="updates.html">All updates →</a></div>
+  <div class="latest rv" id="latest"><p class="muted">Loading the latest updates…</p></div>
 </div></section>
 
-<section id="draft"><div class="wrap">
-  <div class="eyebrow">Sim past today</div>
-  <h2>The real next three drafts</h2>
-  <p class="muted" style="max-width:700px">1,020 real college players, ranked from their production, recruiting pedigree and where their position really goes. The top of 2027 follows ESPN's big board. Draft them in your league.</p>
-  <div class="dtabs" id="dtabs"></div>
-  <div class="dfilters" id="dfilters"></div>
-  <div class="dgrid" id="dgrid"></div>
-  <button class="btn ghost more" id="dmore" style="color:var(--ink);border-color:var(--line)">Show more</button>
-</div></section>
-
-<section id="build" style="background:var(--soft)"><div class="wrap">
-  <div class="eyebrow">Build a league, right here</div>
-  <h2>Start in any season</h2>
-  <p class="muted" style="max-width:720px">Pick a season from 1967 to today and a start point: preseason, any week of the regular season, the playoffs, after the playoffs or draft day. Then download your league and upload it in Football GM (<b>New League → Upload league file</b>). Works on phones too: tick <b>Phone-friendly</b> (on by default on phones) for a smaller league.</p>
-  <div class="bsteps"><div><b>1</b>Tap <i>Load NFL history</i></div><div><b>2</b>Pick a season and start point</div><div><b>3</b>Generate &amp; download, then upload in Football GM</div></div>
-  <iframe class="selector" src="selector.html?master=data/NFL_Selector_Master.json.gz" loading="lazy" title="Season selector"></iframe>
-  <p class="muted" style="font-size:14px">Prefer a bigger window? <a href="selector.html?master=data/NFL_Selector_Master.json.gz">Open the season selector full screen</a>.</p>
-</div></section>
-
-<section id="mod"><div class="wrap">
-  <div class="eyebrow">The mod · settings for everything</div>
-  <h2>History that behaves like history</h2>
-  <p class="muted" style="max-width:680px">The league file works in stock Football GM. The mod keeps it real after day one, and every piece is a setting you can turn off.</p>
-  <div class="feat">
-    <div class="f"><div class="ico">📈</div><h3>RPD</h3><p>Real Player Determinism. Careers follow the real one: Jerry Rice plays into his 40s, Barry Sanders walks away. One slider from random to exactly real.</p></div>
-    <div class="f"><div class="ico">🗓️</div><h3>Real schedules</h3><p>Every season since 1966 plays its real schedule: same opponents, same weeks, same byes. Pre-merger AFL and NFL slates and strike seasons included.</p></div>
-    <div class="f"><div class="ico">🎯</div><h3>Real drafts</h3><p>Elway, Manning, Stafford. The real players go to the teams that really took them.</p></div>
-    <div class="f"><div class="ico">📰</div><h3>121 real events</h3><p>Retirements, comebacks to the real team, suspensions for the real number of games, each with the real reason.</p></div>
-    <div class="f"><div class="ico">🔁</div><h3>Rosters &amp; moves</h3><p>Historical rosters every preseason, mid-season trades on the real week, real jersey numbers, numbers retired when they really were.</p></div>
-    <div class="f"><div class="ico">⚙️</div><h3>Era calibration</h3><p>Seven sim factors retuned every season, measured against a full 60-season sim. 1972 plays like 1972.</p></div>
-    <div class="f"><div class="ico">🎨</div><h3>Your team's colors</h3><p>The whole interface takes your team's colors, and changes when theirs do.</p></div>
-    <div class="f"><div class="ico">🕹️</div><h3>Pick any season</h3><p>Choose the year, the phase and which events you want, right in New League.</p></div>
-  </div>
-</div></section>
-
-<section id="play" style="background:var(--soft)"><div class="wrap">
-  <div class="eyebrow">Play it</div>
-  <h2>Pick your path</h2>
-  <div class="paths">
-    <div class="path"><span class="tag">Quick start</span><h3>This season</h3><ol><li>Download this season's league file (don't unzip it)</li><li>Football GM → New League → Upload league file</li></ol><p class="muted" style="font-size:14px">Works on phone and computer, no install.</p><a class="btn" data-goatcounter-click="download-NFL_2027_Live_FBGM.json.gz" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_2027_Live_FBGM.json.gz">Download this season</a><p style="margin:10px 0 0;font-size:14px;text-align:center">Older or low-memory phone? <a data-goatcounter-click="download-NFL_2027_Live_Lite_FBGM.json.gz" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_2027_Live_Lite_FBGM.json.gz">Phone-friendly version (13 MB)</a></p></div>
-    <div class="path"><span class="tag">Any season</span><h3>Pick a year</h3><ol><li>Use Build a league on this page</li><li>Pick a season and a start point, then generate</li><li>Upload your league to Football GM</li></ol><p class="muted" style="font-size:14px">Right in your browser. Want it offline? <a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/nfl_season_selector.html">Download the selector</a>.</p><a class="btn" href="#build">Build a league</a></div>
-    <div class="path"><span class="tag">Full experience</span><h3>With the mod</h3><ol><li>Download the release zip</li><li>Double-click Install_and_Play</li><li>Play on your computer, or your phone over Wi-Fi</li></ol><p class="muted" style="font-size:14px">The first run sets up in about 5–10 minutes.</p><a class="btn" data-goatcounter-click="download-NFL_History_Mod.zip" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_History_Mod.zip">Download the mod</a><p style="margin:10px 0 0;font-size:14px;text-align:center"><a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/tree/main/mod">Install guide</a></p></div>
-  </div>
-</div></section>
-
-<section id="news" style="background:var(--soft)"><div class="wrap">
-  <div class="eyebrow">v1.20 · Nov 4, 2026</div>
-  <h2>What's new</h2>
-  <p class="muted" style="max-width:680px">Fixes from your reports on r/Football_GM, thank you. If something here fixed a problem you hit, download again and start a new league. <a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/blob/main/CHANGELOG.md">Full changelog →</a></p>
-  <div class="news"><div><i>🎯</i><b>Accurate quarterbacks</b><span>QB accuracy up, arm strength down, same overalls: more completions, fewer picks. Elite pass rushers stand out too.</span></div><div><i>🗓️</i><b>Any week, in the mod too</b><span>The mod comes with every season built in and a week list, like the site. Seahawks and Buccaneers both join in 1976.</span></div><div><i>🏃</i><b>Receivers stay at receiver</b><span>Star receivers no longer line up at RB too: every team's real back is ahead at RB, in every season since 1966.</span></div><div><i>📝</i><b>Real contracts</b><span>Contracts end when they really do (OverTheCap), so you're not re-signing the whole team after one season.</span></div><div><i>🦵</i><b>Kickers rated on kicking</b><span>Kickers on makes and long field goals, punters on yards per punt and inside-20s. They were close to random.</span></div><div><i>📅</i><b>Ratings by week</b><span>Start a 2026 league at a week and players have the ratings they had going into it. Week 8 is complete.</span></div><div><i>🔄</i><b>The mod updates itself</b><span>It checks for a new version every time you start it, installs it and shows what's new. No more re-downloading.</span></div><div><i>📝</i><b>Report it in one tap</b><span>Every player card and team page has a link that opens a pre-filled report for a wrong rating or logo.</span></div><div><i>🎓</i><b>Draft classes restored</b><span>v1.2-1.3 flattened all three real draft classes to 40/59 by mistake. The real prospects are back, and every release now checks for it.</span></div><div><i>🛠️</i><b>Mod installer fixed</b><span>Newer Node.js versions broke the install. It now uses its own Node 24, resumes if a run fails, and saves a log for bug reports.</span></div><div><i>💨</i><b>Pass rushers rush like themselves</b><span>Pass rush comes from each player's own sacks, in every era: Donald 2018 and Garrett 2025 at the top, Crosby 76.</span></div><div><i>🧱</i><b>Nose tackles stop the run</b><span>Run defense comes with size too: Vita Vea 67 (was 40), Dexter Lawrence 68, Haloti Ngata 78.</span></div><div><i>⭐</i><b>Ratings fixed</b><span>Stars stuck near 49 (Olave, Chase, Taylor) are back in the high 70s. Starts now come from real snap counts.</span></div><div><i>🏃</i><b>Quarterbacks run like themselves</b><span>QB speed comes from real running: Lamar 77, Daniels 72, Hurts 67; Stafford and Goff in the low 30s.</span></div><div><i>🏈</i><b>Real starters start</b><span>Every team's real starting QB starts, and nobody is rated at a position he didn't play.</span></div><div><i>📱</i><b>Works on phones</b><span>Building a past season no longer crashes phones: 16 MB instead of 88, with a phone-friendly option.</span></div><div><i>📅</i><b>Start at any week</b><span>Any season since 1966, any week: standings, results and stats already played from the real games.</span></div><div><i>🆚</i><b>Head-to-head and box scores</b><span>Real head-to-head records for every season, and this season's box scores by quarter.</span></div></div>
-</div></section>
-
-<section id="roadmap"><div class="wrap">
-  <div class="eyebrow">Timeline</div>
-  <h2>Updated all year, like Madden</h2>
-  <p class="muted" style="max-width:640px">Future dates are targets, not promises. Got a request? <a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/issues">Open an issue</a>.</p>
-  <ol class="tl"><li class="done"><small>Nov 1, 2026 · done</small><b>v1.0 released</b><span>1966 to today, the season selector, the mod and the real 2027–2029 drafts.</span></li><li class="done"><small>Nov 2 · done</small><b>First update</b><span>Real rosters stay real: no AI-to-AI trades, no stray signings. New site look.</span></li><li class="now"><small>Week 8 · this week</small><b class="days"><em class="ok">Mon, Nov 2</em><em class="ok">Tue, Nov 3</em></b><span>File updated the day after each game day: Sunday, Monday games.</span></li><li class="next"><small>Every Tuesday · Nov 10 to Feb 15</small><b>Weekly update</b><span>The day after Monday Night Football ends each NFL week, through the Super Bowl: stats, signings, trades, injuries, ratings.</span></li><li class="next"><small>Mid-Mar 2027</small><b>Free agency update</b><span>Re-signings, cuts, trades, new teams and retirements.</span></li><li class="next"><small>Late Apr 2027</small><b>Draft update</b><span>Every real pick on the team that made it. The next three classes re-ranked.</span></li><li class="next"><small>May 2027</small><b>Schedule update</b><span>The real 2027 schedule, game for game.</span></li><li class="next"><small>Late Aug 2027</small><b>2027 season release</b><span>53-man rosters, fresh ratings, new uniforms. Ready for Week 1. Then the cycle repeats every year.</span></li><li class="next"><small>Someday</small><b>Android</b><span>If Football GM's license ever allows sharing builds.</span></li></ol>
-  <h3 id="modplans" style="margin-top:48px;font-size:26px;text-transform:uppercase">Coming to the mod</h3>
-  <p class="muted">The features at the top of the list.</p>
-  <div class="feats"><div><i>🏆</i><b>Named Super Bowls, forever</b><span>Every title game gets its real name: Super Bowl I in January 1967 through LX, then the numbering keeps going in your league (LXI, LXII … C) with Roman numerals, a host city and a date. The 1966–69 AFL and NFL Championship Games keep their real names too.</span></div><div><i>📅</i><b>A real NFL calendar</b><span>Games land on real days and dates, not just &quot;Week 9&quot;: Thursday, Sunday and Monday, Thanksgiving, Christmas, Saturdays late in the season and the playoffs on their real weekends.</span></div><div><i>🌙</i><b>Named game slots</b><span>Monday Night Football (from 1970), Sunday Night Football, Thursday Night Football, Thanksgiving in Detroit and Dallas, the Christmas games, Saturday doubleheaders. Each era only has the slots it really had.</span></div><div><i>🕐</i><b>Kickoff times</b><span>Early (1:00 ET), late afternoon (4:05/4:25), primetime (8:15) and London morning games, so you can see whether a game is midday, under the lights or at breakfast.</span></div><div><i>⭐</i><b>Game of the Week</b><span>The biggest matchup each week gets flagged and flexed into primetime, like the NFL does with Sunday night flex scheduling.</span></div></div>
-</div></section>
-<footer><div class="wrap">
-  <div><b>NFL History for Football GM</b><br>A passion project by <b>JenZiMiBruh</b>
-    <small>Team names and logos belong to the NFL and its teams. Unofficial fan project, not affiliated with or endorsed by the NFL or Football GM. Data: nflverse, Pro-Football-Reference via the Internet Archive, Wikipedia, OverTheCap.</small>
-  </div>
-  <div><a href="https://github.com/JenZiMiBruh/nfl-history-fbgm">GitHub</a><br><br><b>Thank you, dumbmatter.</b></div>
-</div></footer>
-
-<div class="drawer" id="drawer" role="dialog" aria-modal="true"><div class="card" id="dcard"></div></div>
-<div class="tip" id="tip"></div>
-
-<script src="data/all.js"></script>
 <script>
-const $ = s => document.querySelector(s);
-const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-
-// A jersey in a team's colors: body, numbers, trim.
-function jersey(c, num = '', w = 80) {
-  let [body, numc, trim] = c || ['#555', '#fff', '#999'];
-  // Numbers must read on the jersey: if the number color is too close to the body, use the trim color instead
-  const lum = h => { const n = parseInt(h.slice(1), 16); return ((n >> 16) * 299 + (n >> 8 & 255) * 587 + (n & 255) * 114) / 1000; };
-  if (Math.abs(lum(body) - lum(numc)) < 90 && Math.abs(lum(body) - lum(trim)) > Math.abs(lum(body) - lum(numc))) [numc, trim] = [trim, numc];
-  return `<svg viewBox="0 0 100 106" width="${w}" aria-hidden="true">
-    <path d="M30 2 L40 8 Q50 13 60 8 L70 2 L98 15 L90 41 L79 37 L79 104 L21 104 L21 37 L10 41 L2 15 Z" fill="${body}" stroke="rgba(0,0,0,.25)" stroke-width="1.2" stroke-linejoin="round"/>
-    <path d="M2 15 L30 2 M70 2 L98 15" stroke="${trim}" stroke-width="4" fill="none" stroke-linecap="round"/>
-    <path d="M90 41 L79 37 M10 41 L21 37" stroke="${trim}" stroke-width="5" stroke-linecap="round"/>
-    <path d="M40 8 Q50 13 60 8" stroke="${trim}" stroke-width="3" fill="none"/>
-    ${num !== '' ? `<text x="50" y="78" text-anchor="middle" font-family="Oswald,Arial Black,sans-serif" font-weight="700" font-size="40" fill="${numc}" stroke="${trim}" stroke-width="1.2" paint-order="stroke">${esc(num)}</text>` : ''}
-  </svg>`;
-}
-const ovrColor = o => o >= 80 ? '#1f9d55' : o >= 70 ? '#4a9e2f' : o >= 60 ? '#a3a32a' : o >= 50 ? '#c98b2b' : '#b5523b';
-const range = (a, b) => a === b ? `${a}` : `${a}–${b === 2026 ? 'now' : b}`;
-
-let TEAMS = [];
-const cache = {};
-
-async function init() {
-  TEAMS = window.SITE_DATA ? window.SITE_DATA.teams : await (await fetch('data/teams.json')).json();
-  $('#sLooks').textContent = TEAMS.reduce((n, t) => n + t.looks, 0);
-  $('#picker').innerHTML = TEAMS.map(t => `
-    <div class="tp" tabindex="0" style="--c:${t.colors[0]}" data-tid="${t.tid}">
-      <img src="${t.logo}" alt="" loading="lazy"><b>${esc(t.region)} ${esc(t.name)}</b><small>${t.looks} looks${t.champs ? ` · ${'🏆'.repeat(Math.min(t.champs, 6))}` : ''}</small>
-    </div>`).join('');
-  $('#findteam').addEventListener('input', e => { const q = e.target.value.trim().toLowerCase(); document.querySelectorAll('#picker .tp').forEach(el => { const t = TEAMS[+el.dataset.tid]; el.classList.toggle('hide', !!q && !(t.region + ' ' + t.name + ' ' + t.abbrev).toLowerCase().includes(q)); }); });
-  $('#findteam').addEventListener('keydown', e => { if (e.key === 'Enter') { const el = document.querySelector('#picker .tp:not(.hide)'); if (el) location.hash = 'team/' + el.dataset.tid; } });
-  $('#picker').addEventListener('click', e => { const el = e.target.closest('.tp'); if (el) location.hash = 'team/' + el.dataset.tid; });
-  $('#picker').addEventListener('keydown', e => { if (e.key === 'Enter') { const el = e.target.closest('.tp'); if (el) location.hash = 'team/' + el.dataset.tid; } });
-  // Hero wall: one jersey per look from across the league.
-  const all = [];
-  for (const t of TEAMS) all.push(t.colors);
+document.addEventListener('DOMContentLoaded', async () => {
+  const { esc, jersey, data } = window.NFLH;
+  const teams = await data('teams');
+  document.getElementById('sLooks').textContent = teams.reduce((n, t) => n + t.looks, 0);
+  document.getElementById('logos').innerHTML = teams.map(t => `<a href="teams.html#team/${t.tid}" style="--c:${t.colors[0]}" title="${esc(t.region)} ${esc(t.name)}"><img src="${t.logo}" alt="${esc(t.region)} ${esc(t.name)}" loading="lazy"></a>`).join('');
+  // Hero wall: jerseys from across the league, with Larry's in the middle
   const nums = [12, 7, 32, 80, 56, 19, 34, 88, 13, 4, 22, 99, 10, 52, 87, 8, 18, 92, 81, 28, 15, 3, 74, 21];
-  $('#wall').innerHTML = Array.from({ length: 84 }, (_, i) => { const r = Math.floor(i / 12), c = i % 12; return `<div>${r === 4 && c === 6 ? jersey(['#97233F', '#FFFFFF', '#000000'], '11') : jersey(all[(i * 5) % all.length], nums[(r * 5 + c * 7 + i) % nums.length])}</div>`; }).join('');
-  initDraft();
-  route();
-}
+  window.paintWall = (all) => { document.getElementById('wall').innerHTML = Array.from({ length: 84 }, (_, i) => { const r = Math.floor(i / 12), c = i % 12; return `<div>${all ? jersey(all, '11') : r === 4 && c === 6 ? jersey(['#97233F', '#FFFFFF', '#000000'], '11') : jersey(teams[(i * 5) % teams.length].colors, nums[(r * 5 + c * 7 + i) % nums.length])}</div>`; }).join(''); };
+  paintWall();
+});
 
-// Draft classes
-let DRAFT = null, dYear = null, dPos = '', dShow = 24;
-async function initDraft() {
-  DRAFT = window.SITE_DATA && window.SITE_DATA.draft ? window.SITE_DATA.draft : await (await fetch('data/draft.json')).json();
-  const years = Object.keys(DRAFT).sort();
-  const qs = new URLSearchParams(location.search);
-  dYear = qs.get('dyear') && DRAFT[qs.get('dyear')] ? qs.get('dyear') : years[0];
-  dPos = qs.get('dpos') || '';
-  $('#dtabs').innerHTML = years.map(y => `<button class="dtab" data-y="${y}">${y} draft</button>`).join('');
-  $('#dfilters').innerHTML = ['', 'QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S'].map(p => `<button data-p="${p}">${p || 'All'}</button>`).join('');
-  $('#dtabs').onclick = e => { const b = e.target.closest('.dtab'); if (b) { dYear = b.dataset.y; dShow = 24; drawDraft(); } };
-  $('#dfilters').onclick = e => { const b = e.target.closest('button'); if (b) { dPos = b.dataset.p; dShow = 24; drawDraft(); } };
-  $('#dmore').onclick = () => { dShow += 48; drawDraft(); };
-  drawDraft();
-}
-function drawDraft() {
-  document.querySelectorAll('.dtab').forEach(b => b.classList.toggle('on', b.dataset.y === dYear));
-  document.querySelectorAll('#dfilters button').forEach(b => b.classList.toggle('on', b.dataset.p === dPos));
-  const list = DRAFT[dYear].filter(p => !dPos || p.pos === dPos);
-  const inch = v => v ? `${Math.floor(v / 12)}'${v % 12}"` : '';
-  $('#dgrid').innerHTML = list.slice(0, dShow).map(p => `
-    <div class="pros"><div class="rk">#${p.rank}</div><div class="ps">${p.pos}</div>
-      <div class="ph">${p.img ? `<img src="${p.img}" alt="" loading="lazy" onerror="this.remove()">` : ''}</div>
-      <div class="bd"><b>${esc(p.n)}</b><small>${esc(p.college)}</small><small>${inch(p.hgt)} · ${p.wgt || ''} lbs${p.home ? ' · ' + esc(p.home) : ''}</small>
-        <div class="barlab"><span>Rating ${p.ovr}</span><span>Upside ${p.pot}</span></div>
-        <div class="bar"><i style="width:${p.pot}%;background:color-mix(in srgb,var(--accent) 35%,transparent)"></i><i style="width:${p.ovr}%;background:var(--accent)"></i></div>
-      </div></div>`).join('');
-  $('#dmore').style.display = list.length > dShow ? '' : 'none';
-}
-
-async function loadTeam(tid) {
-  if (!cache[tid]) cache[tid] = window.SITE_DATA ? window.SITE_DATA.team[tid] : await (await fetch(`data/team-${tid}.json`)).json();
-  return cache[tid];
-}
-
-window.addEventListener('hashchange', route);
-async function route() {
-  const m = location.hash.match(/^#team\/(\d+)/);
-  if (!m) { $('#team').classList.remove('on'); $('#pickerView').style.display = ''; return; }
-  const T = await loadTeam(+m[1]);
-  renderTeam(T);
-  $('#pickerView').style.display = 'none';
-  $('#team').classList.add('on');
-  document.getElementById('teams').scrollIntoView({ behavior: 'smooth' });
-}
-
-function renderTeam(T) {
-  const r = document.documentElement.style;
-  const [c1, c2, c3] = T.colors;
-  const dark = hex => { const n = parseInt(hex.slice(1), 16); return ((n >> 16) * 299 + ((n >> 8 & 255) * 587) + ((n & 255) * 114)) / 1000 < 150; };
-  const team1 = dark(c1) ? c1 : (dark(c3) ? c3 : '#1d2b24');
-  const team3 = c3 && c3.toLowerCase() !== '#ffffff' ? c3 : (c2.toLowerCase() !== '#ffffff' ? c2 : '#1f9d55');
-  r.setProperty('--team1', team1); r.setProperty('--team3', team3);
-  const vivid = [c1, c3, c2].find(c => { const n = parseInt(c.slice(1), 16), R = n >> 16, G = n >> 8 & 255, B = n & 255; return Math.max(R, G, B) - Math.min(R, G, B) > 60 && (R * 299 + G * 587 + B * 114) / 1000 > 55; }) || '#1f9d55';
-  r.setProperty('--teamc', vivid);
-
-  const W = T.seasons.reduce((n, s) => n + s.w, 0), L = T.seasons.reduce((n, s) => n + s.l, 0);
-  const po = T.seasons.filter(s => s.po >= 0).length;
-  const players = T.players;
-  const byId = Object.fromEntries(players.map(p => [p.id, p]));
-  const years = T.seasons.map(s => s.y);
-
-  $('#team').innerHTML = `
-    <div class="thead">
-      <img src="${T.logo}" alt="">
-      <div style="position:relative;z-index:1">
-        <div class="eyebrow" style="color:rgba(255,255,255,.75)">${T.looks.length} looks · since ${T.looks[0].from}</div>
-        <h2>${esc(T.region)} ${esc(T.name)}</h2>
-        <div class="kpis">
-          <div class="kpi"><b>${W}–${L}</b>record since ${T.seasons[0]?.y}</div>
-          <div class="kpi"><b>${po}</b>playoff seasons</div>
-          <div class="kpi"><b>${T.champs.length}</b>${T.champs.length === 1 ? 'title' : 'titles'}${T.champs.length ? ' · ' + T.champs.join(', ') : ''}</div>
-          <div class="kpi"><b>${T.retired.length}</b>retired numbers</div>
-        </div>
-      </div>
-      <div class="tswitch">
-        <select aria-label="Switch team" onchange="location.hash='team/'+this.value">${TEAMS.map(t => `<option value="${t.tid}"${t.tid === T.tid ? ' selected' : ''}>${esc(t.region)} ${esc(t.name)}</option>`).join('')}</select>
-        <button class="btn ghost back" onclick="location.hash='teams'">← All teams</button>
-      </div>
-    </div>
-
-    <div class="block">
-      <h3>Every look</h3><p class="hint" style="margin:-2px 0 6px"><a data-goatcounter-click="report-logo-team" target="_blank" rel="noopener" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new?template=logo.yml&team=${encodeURIComponent(T.region + ' ' + T.name)}">Logo or uniform wrong? Report it</a></p>
-      <p class="hint">Logo and jersey for each era. In the game these switch on the real date as you sim.</p>
-      <div class="lookwrap"><button class="arr l" aria-label="Earlier looks" onclick="this.parentNode.querySelector('.looks').scrollBy({left:-430,behavior:'smooth'})">‹</button><button class="arr r" aria-label="Later looks" onclick="this.parentNode.querySelector('.looks').scrollBy({left:430,behavior:'smooth'})">›</button><div class="looks">${T.looks.map(l => `
-        ${(() => { const k = num(T, l); return `<div class="look" style="--c:${l.colors[0]}">${l.to >= 2026 ? '<span class="now">Now</span>' : ''}
-          <div class="stage">${l.logo ? `<img src="${l.logo}" alt="">` : ''}${jersey(l.colors, k.n)}</div>
-          <div class="info">
-            <div class="yrs">${range(l.from, l.to)}</div>
-            <div class="nm">${esc(l.region)} ${esc(l.name)}</div>
-            <div class="who">${k.who ? `#${esc(k.n)} <b>${esc(k.who)}</b>` : ''}</div>
-            <div class="sw">${l.colors.map(c => `<i style="background:${c}" title="${c}"></i>`).join('')}</div>
-          </div>
-        </div>`; })()}`).join('')}</div></div>
-    </div>
-
-    <div class="block chart">
-      <h3>Season by season</h3>
-      <p class="hint">Win percentage every season. Click a bar to see that year's best players below.</p>
-      <div class="bars" id="bars"><div class="half" style="bottom:50%"></div>${T.seasons.map(s => {
-        const pct = (s.w + s.t / 2) / Math.max(1, s.w + s.l + s.t);
-        return `<div class="b ${s.po >= 0 ? 'po' : ''} ${T.champs.includes(s.y) ? 'ch' : ''}" data-y="${s.y}" style="height:${Math.max(3, pct * 100)}%"></div>`;
-      }).join('')}</div>
-      <div class="axis">${years.map((y, i) => i === 0 || i === years.length - 1 || (y % 10 === 0 && i > 5 && i < years.length - 5) ? `<span style="left:${(i + .5) / years.length * 100}%">${y}</span>` : '').join('')}</div>
-      <div class="legend"><span><i style="background:color-mix(in srgb,var(--muted) 55%,transparent)"></i>Missed the playoffs</span><span><i style="background:var(--teamc)"></i>Made the playoffs</span><span>🏆 Champions</span><span>- - .500</span></div>
-    </div>
-
-    <div class="block">
-      <h3>Best players by season</h3>
-      <p class="hint">Their rating in the league that season, built from what they really did.</p>
-      <div class="seasonbar">
-        <div class="yr" id="syr"></div>
-        <input type="range" id="srange" min="0" max="${years.length - 1}" value="${defaultIdx(T)}" aria-label="Season">
-        <div class="rec" id="srec"></div>
-      </div>
-      <div class="roster" id="roster"></div>
-    </div>
-
-    <div class="block">
-      <h3>Franchise legends</h3>
-      <p class="hint">Everyone notable who played here, ranked by career value with the team. Tap a player for his season-by-season ratings.</p>
-      <div class="tools">
-        <input id="q" placeholder="Search players…" aria-label="Search players">
-        <select id="pos" aria-label="Position"><option value="">All positions</option>${['QB','RB','WR','TE','OL','DL','LB','CB','S','K','P'].map(p => `<option>${p}</option>`).join('')}</select>
-        <select id="sort" aria-label="Sort"><option value="av">Career value</option><option value="peak">Peak rating</option><option value="yrs">Seasons</option></select>
-      </div>
-      <table class="tbl"><thead><tr><th>Player</th><th>Pos</th><th class="hide-sm">Years</th><th class="num">Peak</th><th class="hide-sm">Rating by season</th><th class="hide-sm">Honors</th></tr></thead><tbody id="legends"></tbody></table>
-    </div>
-
-    ${T.retired.length ? `<div class="block"><h3>Retired numbers</h3><p class="hint">With the mod, numbers retired after your start season are retired when they really were.</p>
-      <div class="retired">${T.retired.sort((a, b) => a.season - b.season).map(x => `<div class="rj">${jersey(T.colors, x.num, 40)}<div><b>${esc(x.text)}</b><small>#${esc(x.num)} · retired ${x.season || ''}</small></div></div>`).join('')}</div></div>` : ''}
-  `;
-
-  // season roster slider
-  const sr = $('#srange');
-  const showSeason = i => {
-    const y = years[i], s = T.seasons[i];
-    $('#syr').textContent = y;
-    $('#srec').innerHTML = `${esc(s.n)} · ${s.w}–${s.l}${s.t ? '–' + s.t : ''}${T.champs.includes(y) ? ' · 🏆 Champions' : s.po >= 0 ? ' · Playoffs' : ''}`;
-    const ids = T.seasonBest[y] || [];
-    $('#roster').innerHTML = ids.map(id => {
-      const p = byId[id]; const x = p.s.find(r => r[0] === y);
-      return `<div class="pc" data-id="${id}"><div class="ovr" style="background:${ovrColor(x[1])}">${x[1]}</div><div><b>${esc(p.n)}</b><small>${x[2]}${x[4] ? ' · #' + esc(x[4]) : ''} · ${statText(x)}</small></div></div>`;
-    }).join('') || '<p class="muted">No rated players this season.</p>';
-    document.querySelectorAll('.bars .b').forEach(b => b.classList.toggle('sel', +b.dataset.y === y));
-  };
-  // Dragging updates at most once per frame, and the card area keeps its height, so the page never jumps under the slider
-  let pending = false;
-  sr.oninput = () => { if (pending) return; pending = true; requestAnimationFrame(() => { pending = false; showSeason(+sr.value); }); };
-  showSeason(+sr.value);
-  $('#roster').onclick = e => { const el = e.target.closest('.pc'); if (el) openPlayer(byId[el.dataset.id], T); };
-
-  // bars: tooltip + select
-  const tip = $('#tip');
-  $('#bars').addEventListener('mousemove', e => {
-    const b = e.target.closest('.b'); if (!b) { tip.style.display = 'none'; return; }
-    const s = T.seasons.find(x => x.y === +b.dataset.y);
-    tip.innerHTML = `<b>${s.y}</b> · ${s.w}–${s.l}${s.t ? '–' + s.t : ''}<br>${esc(s.n)}${T.champs.includes(s.y) ? '<br>🏆 Champions' : s.po >= 0 ? '<br>Playoffs' : ''}`;
-    tip.style.display = 'block'; tip.style.left = Math.min(e.clientX + 14, innerWidth - 250) + 'px'; tip.style.top = e.clientY + 14 + 'px';
-  });
-  $('#bars').addEventListener('mouseleave', () => tip.style.display = 'none');
-  $('#bars').addEventListener('click', e => {
-    const b = e.target.closest('.b'); if (!b) return;
-    sr.value = years.indexOf(+b.dataset.y); showSeason(+sr.value);
-    $('#roster').scrollIntoView({ behavior: 'smooth', block: 'center' });
-  });
-
-  // legends table
-  const draw = () => {
-    const q = $('#q').value.toLowerCase(), pos = $('#pos').value, sort = $('#sort').value;
-    const list = players.filter(p => (!q || p.n.toLowerCase().includes(q)) && (!pos || p.pos === pos))
-      .sort((a, b) => sort === 'peak' ? b.peak - a.peak : sort === 'yrs' ? b.s.length - a.s.length : b.av - a.av).slice(0, 60);
-    $('#legends').innerHTML = list.map(p => {
-      const ys = p.s.map(x => x[0]);
-      return `<tr data-id="${p.id}"><td><b>${esc(p.n)}</b></td><td>${p.pos}</td><td class="hide-sm">${range(Math.min(...ys), Math.max(...ys))}</td>
-        <td class="num"><b style="color:${ovrColor(p.peak)}">${p.peak}</b></td><td class="hide-sm">${spark(p.s)}</td>
-        <td class="hide-sm">${p.hof ? '<span class="badge hof">Hall of Fame</span>' : ''}${Object.entries(p.aw).map(([k, v]) => `<span class="badge">${v > 1 ? v + '× ' : ''}${k}</span>`).join('')}</td></tr>`;
-    }).join('');
-  };
-  ['q', 'pos', 'sort'].forEach(id => $('#' + id).addEventListener('input', draw));
-  draw();
-  $('#legends').onclick = e => { const el = e.target.closest('tr'); if (el) openPlayer(byId[el.dataset.id], T); };
-}
-
-// Start on the last complete season (the current one is still in progress).
-const defaultIdx = T => { const n = T.seasons.length, last = T.seasons[n - 1]; return last && last.w + last.l + last.t < 14 && n > 1 ? n - 2 : n - 1; };
-
-// The jersey number to show on a look: the franchise's best player's number in that era.
-function num(T, l) {
-  if (T.tid === 0 && l.from <= 2022 && l.to >= 2004) return { n: '11', who: 'Larry Fitzgerald' }; // Larry's years in Arizona
-  let best = null, who = '';
-  for (const p of T.players) for (const x of p.s) if (x[0] >= l.from && x[0] <= l.to && x[4] && (!best || x[1] > best[1])) { best = x; who = p.n; }
-  return best ? { n: best[4], who } : { n: '', who: '' };
-}
-const statText = x => { if (x[2] === 'OL') return x[3] + ' games'; const out = []; for (let i = 5; i < x.length; i += 2) out.push(`${Number(x[i]).toLocaleString()} ${x[i + 1]}`); return out.join(' · '); };
-
-function spark(s, w = 140, h = 30) {
-  const pts = s.map(x => x[1]); if (pts.length < 2) return `<svg class="spark" width="${w}" height="${h}"><circle cx="4" cy="${h - (pts[0] - 30) / 60 * h}" r="3" fill="var(--team3)"/></svg>`;
-  const xs = i => 3 + i * (w - 6) / (pts.length - 1), ys = v => h - 3 - (Math.max(30, Math.min(90, v)) - 30) / 60 * (h - 6);
-  return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><polyline fill="none" stroke="var(--teamc)" stroke-width="2" stroke-linejoin="round" points="${pts.map((v, i) => xs(i) + ',' + ys(v)).join(' ')}"/><circle cx="${xs(pts.indexOf(Math.max(...pts)))}" cy="${ys(Math.max(...pts))}" r="3" fill="var(--team1)"/></svg>`;
-}
-
-// GitHub's report form, pre-filled with the player, his latest season here (named by the year it ends, like the game)
-// and his rating, so a report takes one tap
-function reportRating(p, T) {
-  const last = p.s[p.s.length - 1];
-  const q = new URLSearchParams({ template: 'rating.yml', title: `[Rating] ${p.n}, ${last[0] + 1}`, player: p.n, season: String(last[0] + 1), shown: `${last[1]} overall at ${last[2]} (${T.region} ${T.name})` });
-  return 'https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new?' + q.toString();
-}
-function openPlayer(p, T) {
-  const W = 680, H = 200, pad = 30, s = p.s;
-  const xs = i => pad + i * (W - pad * 2) / Math.max(1, s.length - 1), ys = v => H - pad - (Math.max(30, Math.min(90, v)) - 30) / 60 * (H - pad * 2);
-  const grid = [40, 50, 60, 70, 80, 90].map(v => `<line x1="${pad}" x2="${W - pad}" y1="${ys(v)}" y2="${ys(v)}" stroke="var(--line)"/><text x="${pad - 6}" y="${ys(v) + 4}" text-anchor="end" font-size="11" fill="var(--muted)">${v}</text>`).join('');
-  const chart = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Rating by season">${grid}
-    <polyline fill="none" stroke="var(--teamc)" stroke-width="3" stroke-linejoin="round" points="${s.map((x, i) => xs(i) + ',' + ys(x[1])).join(' ')}"/>
-    ${s.map((x, i) => `<circle cx="${xs(i)}" cy="${ys(x[1])}" r="4.5" fill="${ovrColor(x[1])}" stroke="var(--panel)" stroke-width="2"><title>${x[0]}: ${x[1]}</title></circle>`).join('')}
-    ${s.map((x, i) => (s.length < 14 || i % 2 === 0) ? `<text x="${xs(i)}" y="${H - 8}" text-anchor="middle" font-size="11" fill="var(--muted)">${String(x[0]).slice(2)}</text>` : '').join('')}
-  </svg>`;
-  const lastNum = [...s].reverse().find(x => x[4]);
-  $('#dcard').innerHTML = `
-    <div class="top">${jersey(T.colors, lastNum ? lastNum[4] : '', 64)}
-      <div><div class="eyebrow">${esc(T.region)} ${esc(T.name)} · ${p.pos}</div><h3>${esc(p.n)}</h3>
-      <div>${p.hof ? '<span class="badge hof">Hall of Fame</span>' : ''}${Object.entries(p.aw).map(([k, v]) => `<span class="badge">${v > 1 ? v + '× ' : ''}${k}</span>`).join('')}</div></div>
-      <button class="close" aria-label="Close" onclick="closeDrawer()">×</button></div>
-    <p class="muted" style="font-size:14px;margin:16px 0 4px">Rating by season with the ${esc(T.name)} · <a data-goatcounter-click="report-rating-player" target="_blank" rel="noopener" href="${reportRating(p, T)}">Rating look wrong? Report it</a></p>
-    ${chart}
-    <table class="tbl" style="margin-top:10px"><thead><tr><th>Season</th><th class="num">Rating</th><th>Pos</th><th class="num">GP</th><th>Stats</th></tr></thead>
-    <tbody>${s.map(x => `<tr style="cursor:default"><td>${x[0]}</td><td class="num"><b style="color:${ovrColor(x[1])}">${x[1]}</b></td><td>${x[2]}</td><td class="num">${x[3]}</td><td>${statText(x)}</td></tr>`).join('')}</tbody></table>`;
-  $('#drawer').classList.add('on');
-}
-function closeDrawer() { $('#drawer').classList.remove('on'); }
-$('#drawer').addEventListener('click', e => { if (e.target.id === 'drawer') closeDrawer(); });
-addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
-
-// Capture mode for README images: ?shot=<block>&teams=29,30 renders just that block.
-async function shotMode() {
-  const q = new URLSearchParams(location.search), mode = q.get('shot');
-  if (!mode) return init();
-  document.documentElement.setAttribute('data-theme', q.get('theme') || 'dark');
-  TEAMS = window.SITE_DATA ? window.SITE_DATA.teams : await (await fetch('data/teams.json')).json();
-  const root = document.createElement('div');
-  root.style.cssText = 'padding:28px;display:flex;flex-direction:column;gap:18px';
-  const tids = (q.get('teams') || '29').split(',').map(Number);
-  const fresh = () => { document.body.innerHTML = '<div id="team" class="on"></div><div id="pickerView"></div><div class="tip" id="tip"></div><div class="drawer" id="drawer"><div class="card" id="dcard"></div></div>'; };
-  if (mode === 'draft') { await init(); document.querySelectorAll('nav,header,section:not(#draft),footer').forEach(e => e.remove()); return; }
-  if (mode === 'hero') { await init(); document.querySelectorAll('nav,section,footer').forEach(e => e.remove()); document.querySelector('.hero .btns').remove(); return; }
-  if (mode === 'banner') { await init(); document.querySelectorAll('nav,section,footer').forEach(e => e.remove()); document.querySelector('.hero .btns').remove(); const st = document.createElement('style'); st.textContent = 'body{overflow:hidden}.hero{height:100vh;min-height:0;display:flex;flex-direction:column;justify-content:center;box-sizing:border-box}.hero .wrap{width:100%;margin:0;padding:0 70px;box-sizing:border-box}'; document.head.appendChild(st); return; }
-  if (mode === 'looks') {
-    const st = document.createElement('style'); st.textContent = '.looks{flex-wrap:wrap;overflow:visible}.look{flex:0 0 190px}'; document.head.appendChild(st);
-    for (const tid of tids) {
-      const T = await loadTeam(tid);
-      fresh(); renderTeam(T);
-      const blk = document.querySelector('#team .block');
-      blk.querySelector('h3').innerHTML = `<span style="display:flex;align-items:center;gap:12px"><img src="${T.logo}" style="width:38px;height:38px;object-fit:contain">${esc(T.region)} ${esc(T.name)}</span>`;
-      blk.querySelector('.hint').remove();
-      root.appendChild(blk);
-    }
-  } else {
-    const T = await loadTeam(tids[0]);
-    fresh(); renderTeam(T);
-    if (mode === 'header') { document.querySelector('.thead .back').remove(); root.appendChild(document.querySelector('.thead')); }
-    else if (mode === 'chart') { document.querySelectorAll('.bars .sel').forEach(b => b.classList.remove('sel')); root.appendChild(document.querySelector('.chart')); }
-    else if (mode === 'roster') {
-      const s = q.get('season'); if (s) { const sr = document.querySelector('#srange'); sr.value = T.seasons.findIndex(x => x.y === +s); sr.oninput(); }
-      root.appendChild(document.querySelector('#roster').closest('.block'));
-    } else if (mode === 'legends') root.appendChild(document.querySelector('#legends').closest('.block'));
-    else if (mode === 'player') {
-      const p = T.players.find(x => x.n === q.get('name')) || T.players[0];
-      openPlayer(p, T);
-      const card = document.querySelector('#dcard'); card.style.cssText += ';max-height:none;border-radius:22px;background:var(--panel);border:1px solid var(--line)';
-      card.querySelector('.close').remove();
-      card.querySelectorAll('tbody tr').forEach((r, i) => { if (i >= 8) r.remove(); });
-      const wrap = document.createElement('div'); wrap.className = 'drawer on'; wrap.style.cssText = 'position:static;background:none;display:block'; wrap.appendChild(card); root.appendChild(wrap);
-    }
-  }
-  root.querySelectorAll('.block').forEach(b => b.style.margin = '0');
-  document.body.innerHTML = '';
-  document.body.appendChild(root);
-}
-shotMode();
-// Community numbers: GoatCounter visits + GitHub release downloads and stars. A number only shows once it is above zero.
+// Latest: the newest entries from the changelog, so this never goes stale
 (async () => {
+  const el = document.getElementById('latest');
+  try {
+    const md = await (await fetch('https://raw.githubusercontent.com/JenZiMiBruh/nfl-history-fbgm/main/CHANGELOG.md')).text();
+    const out = [];
+    for (const block of md.split(/\n## /).slice(1)) {
+      const v = block.split('\n')[0];
+      for (const m of block.matchAll(/^- \*\*(.+?)\*\*\s*(.*)$/gm)) { if (!/^Limits/.test(m[1])) out.push({ v, t: m[1].replace(/\.$/, ''), d: m[2] }); if (out.length >= 3) break; }
+      if (out.length >= 3) break;
+    }
+    const { esc } = window.NFLH;
+    const short = s => { s = s.replace(/\*\*|\*|`/g, '').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1'); return s.length > 190 ? s.slice(0, s.lastIndexOf(' ', 185)) + '…' : s; };
+    el.innerHTML = out.map(x => `<article class="panel"><div class="v">${esc(x.v)}</div><h3>${esc(x.t)}</h3><p>${esc(short(x.d))}</p></article>`).join('');
+  } catch { el.innerHTML = '<p class="muted">See <a href="updates.html">Updates</a> for the latest changes.</p>'; }
+})();
+
+// Community numbers: GoatCounter visits, GitHub downloads and stars. A number only shows once it is above zero.
+(() => {
   const GC = 'galloade';
   const show = (id, n) => { if (!(n > 0)) return; const el = document.getElementById(id); el.hidden = false; document.getElementById('fFirst').hidden = true; const b = el.querySelector('b'), t0 = performance.now(); const tick = t => { const k = Math.min(1, (t - t0) / 1200); b.textContent = Math.round(n * (1 - Math.pow(1 - k, 3))).toLocaleString(); if (k < 1) requestAnimationFrame(tick); }; requestAnimationFrame(tick); };
   fetch('https://' + GC + '.goatcounter.com/counter/TOTAL.json').then(r => r.ok ? r.json() : null).then(j => j && show('fVisits', +String(j.count).replace(/[^0-9]/g, ''))).catch(() => {});
@@ -804,72 +243,25 @@ shotMode();
   live(); setInterval(live, 60000);
 })();
 
-// Highlight the nav link for the section on screen
-if ('IntersectionObserver' in window) {
-  const links = [...document.querySelectorAll('nav .links a[href^="#"]')];
-  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) links.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id)); }), { rootMargin: '-45% 0px -50% 0px' });
-  links.forEach(a => { const t = document.querySelector(a.getAttribute('href')); if (t) io.observe(t); });
-}
-</script>
-<!-- Easter eggs. A Cardinals fan made this site, sorry in advance. -->
-<style>
-.egg-toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);opacity:0;z-index:99;background:#97233F;color:#fff;font:600 15px Inter,sans-serif;padding:12px 18px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.4);transition:.35s;pointer-events:none;max-width:calc(100% - 32px);text-align:center}
-.egg-toast.on{opacity:1;transform:translateX(-50%)}
-.egg-note{margin-top:10px;font-size:13px;font-style:italic;color:rgba(255,255,255,.75)}
-.egg-fitz{margin:14px 0 0;padding:12px 14px;border-radius:12px;background:linear-gradient(90deg,rgba(151,35,63,.25),rgba(255,182,18,.12));border:1px solid rgba(255,182,18,.45);font-size:14px;line-height:1.5}
-.egg-fitz b{color:#FFB612}
-</style>
-<script>
+// Konami code: every jersey on the wall becomes Larry's. A Cardinals fan made this site, sorry in advance.
 (() => {
-  const toast = msg => {
-    let t = document.querySelector('.egg-toast');
-    if (!t) { t = document.createElement('div'); t.className = 'egg-toast'; document.body.appendChild(t); }
-    t.textContent = msg; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 4200);
-  };
-
-  // Konami code: every jersey on the wall becomes Larry's
   const code = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
   let pos = 0;
   addEventListener('keydown', e => {
     pos = e.key === code[pos] || e.key.toLowerCase() === code[pos] ? pos + 1 : (e.key === code[0] ? 1 : 0);
     if (pos < code.length) return;
     pos = 0;
-    const wall = document.getElementById('wall');
-    if (wall) wall.innerHTML = Array.from({ length: 84 }, (_, i) => `<div style="animation-delay:${(i % 7) * .4}s">${jersey(['#97233F', '#FFFFFF', '#000000'], '11')}</div>`).join('');
+    if (window.paintWall) paintWall(['#97233F', '#FFFFFF', '#000000']);
     scrollTo({ top: 0, behavior: 'smooth' });
-    toast('11 out of 10 jerseys agree: Larry would have caught that.');
+    window.NFLH.toast('11 out of 10 jerseys agree: Larry would have caught that.');
   });
-
-  // Cardinals team page: a little honesty
-  const notes = [
-    'The emotional support franchise of the NFL. Founded 1898, still waiting.',
-    "2008: We don't talk about the last 35 seconds of Super Bowl XLIII.",
-    'Chicago, then St. Louis, then Arizona. The Cardinals have been disappointing fans in three time zones.',
-    'Fun fact: the oldest continuously run pro football team. Also a fact: 0 titles since 1947.',
-  ];
-  const origRender = renderTeam;
-  renderTeam = function (T) {
-    origRender(T);
-    if (T.tid !== 0) return;
-    const head = document.querySelector('#team .thead > div');
-    if (head) head.insertAdjacentHTML('beforeend', `<div class="egg-note">${notes[Math.floor(Math.random() * notes.length)]}</div>`);
-  };
-  const tileTip = () => { const el = document.querySelector('.tp[data-tid="0"]'); if (el) el.title = 'Bird gang. Bring tissues.'; };
-  setTimeout(tileTip, 1500);
-  if (location.hash.split('/')[0] === '#team' && location.hash.split('/')[1] === '0') route(); // page may have rendered before this hook
-
-  // Larry Fitzgerald gets the card he deserves
-  const origOpen = openPlayer;
-  openPlayer = function (p, T) {
-    origOpen(p, T);
-    if (p.n !== 'Larry Fitzgerald') return;
-    document.querySelector('#dcard .top').insertAdjacentHTML('afterend', `<div class="egg-fitz">🐐 <b>Larry Legend.</b> 17 seasons, all of them in Arizona. <b>17,492</b> receiving yards and <b>1,432</b> catches, both 2nd all-time behind only Jerry Rice. Famous for never dropping the ball and for answering every interview like a kind uncle. Hands: illegal in several states.</div>`);
-    toast('You found the GOAT. Respect.');
-  };
 })();
-</script>
 
-<!-- Visitor stats (GoatCounter: no cookies, no personal data) -->
-<script data-goatcounter="https://galloade.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+// Capture mode for the README banner: ?shot=hero shows only the hero
+if (new URLSearchParams(location.search).get('shot') === 'hero') {
+  document.documentElement.setAttribute('data-theme', 'dark');
+  addEventListener('DOMContentLoaded', () => setTimeout(() => { document.querySelectorAll('.nav,.ticker,.crowd,section,footer,.hero .btns,.hero .by').forEach(e => e.remove()); }, 0));
+}
+</script>
 </body>
 </html>

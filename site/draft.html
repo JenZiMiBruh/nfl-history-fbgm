@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The next three drafts · NFL History</title>
+<meta name="description" content="1,020 real college players in the 2027, 2028 and 2029 NFL draft classes, ranked and rated for Football GM.">
+<meta property="og:title" content="The next three drafts · NFL History for Football GM">
+<meta property="og:image" content="https://jenzimibruh.github.io/nfl-history-fbgm/og.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Big+Shoulders+Display:wght@700;800;900&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+.dbar{display:flex;gap:18px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:28px;padding-bottom:18px;border-bottom:2px solid var(--ink)}
+.years{display:flex;gap:0}
+.years button{background:none;border:0;color:var(--muted);font:900 clamp(30px,4vw,44px)/1 var(--display);padding:4px 18px 8px 0;cursor:pointer;position:relative}
+.years button.on{color:var(--ink)}
+.years button.on::after{content:"";position:absolute;left:0;right:18px;bottom:-20px;height:4px;background:var(--signal)}
+.pos{display:flex;gap:6px;flex-wrap:wrap}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.pros{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:transform .15s,box-shadow .15s,border-color .15s}
+.pros:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:color-mix(in srgb,var(--signal) 60%,var(--line))}
+.pros .ph{height:150px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;background:
+  repeating-linear-gradient(90deg,transparent 0 29px,color-mix(in srgb,var(--line) 70%,transparent) 29px 30px),
+  linear-gradient(180deg,var(--soft),var(--panel))}
+.pros .ph img{height:144px;width:auto;object-fit:cover}
+.pros .rk{position:absolute;top:0;left:0;background:var(--ink);color:var(--bg);font:900 22px/1 var(--display);padding:8px 10px 7px;z-index:1}
+.pros .rk small{font:600 10px/1 var(--mono);opacity:.7;margin-right:2px}
+.pros .ps{position:absolute;top:10px;right:10px;background:var(--signal);color:var(--signal-ink);font:600 11px/1 var(--mono);letter-spacing:.8px;padding:5px 7px;border-radius:2px;z-index:1}
+.pros .bd{padding:14px 16px 16px}
+.pros b{font:800 21px/1 var(--display);text-transform:uppercase;display:block;letter-spacing:.3px}
+.pros small{color:var(--muted);font-size:13px;display:block;min-height:18px;margin-top:4px}
+.meter{display:flex;justify-content:space-between;font:600 11px/1 var(--mono);letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-top:12px}
+.meter b{display:inline;font:900 18px/1 var(--display);color:var(--ink)}
+.bar{height:6px;background:var(--soft);margin-top:7px;position:relative;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0}
+.moreb{margin:30px auto 0;display:flex}
+</style>
+<script src="assets/site.js" defer></script>
+</head>
+<body data-page="draft">
+<header class="phead"><div class="wrap">
+  <div class="chy"><b>Draft</b><span>Sim past today</span></div>
+  <h1>The real next<br><em>three drafts</em></h1>
+  <p class="lede">1,020 real college players, ranked from their production, recruiting pedigree and where their position really goes. The top of 2027 follows ESPN's big board. Draft them in your league.</p>
+  <div class="yard">1st</div>
+</div></header>
+
+<section class="tight" id="draft"><div class="wrap">
+  <div class="dbar"><div class="years" id="dtabs"></div><div class="pos" id="dfilters"></div></div>
+  <div class="dgrid" id="dgrid"></div>
+  <button class="btn line moreb" id="dmore">Show more</button>
+</div></section>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const $ = s => document.querySelector(s);
+  const { esc, data } = window.NFLH;
+  const DRAFT = await data('draft');
+  const years = Object.keys(DRAFT).sort();
+  const qs = new URLSearchParams(location.search);
+  let dYear = qs.get('dyear') && DRAFT[qs.get('dyear')] ? qs.get('dyear') : years[0], dPos = qs.get('dpos') || '', dShow = 24;
+  $('#dtabs').innerHTML = years.map(y => `<button data-y="${y}">${y}</button>`).join('');
+  $('#dfilters').innerHTML = ['', 'QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S'].map(p => `<button class="chip" data-p="${p}">${p || 'All'}</button>`).join('');
+  $('#dtabs').onclick = e => { const b = e.target.closest('button'); if (b) { dYear = b.dataset.y; dShow = 24; draw(); } };
+  $('#dfilters').onclick = e => { const b = e.target.closest('button'); if (b) { dPos = b.dataset.p; dShow = 24; draw(); } };
+  $('#dmore').onclick = () => { dShow += 48; draw(); };
+  const inch = v => v ? `${Math.floor(v / 12)}'${v % 12}"` : '';
+  function draw() {
+    document.querySelectorAll('#dtabs button').forEach(b => b.classList.toggle('on', b.dataset.y === dYear));
+    document.querySelectorAll('#dfilters button').forEach(b => b.classList.toggle('on', b.dataset.p === dPos));
+    const list = DRAFT[dYear].filter(p => !dPos || p.pos === dPos);
+    $('#dgrid').innerHTML = list.slice(0, dShow).map(p => `
+      <div class="pros"><div class="rk"><small>#</small>${p.rank}</div><div class="ps">${p.pos}</div>
+        <div class="ph">${p.img ? `<img src="${p.img}" alt="" loading="lazy" onerror="this.remove()">` : ''}</div>
+        <div class="bd"><b>${esc(p.n)}</b><small>${esc(p.college)}</small><small>${inch(p.hgt)}${p.wgt ? ' · ' + p.wgt + ' lbs' : ''}${p.home ? ' · ' + esc(p.home) : ''}</small>
+          <div class="meter"><span>Rating <b>${p.ovr}</b></span><span>Upside <b>${p.pot}</b></span></div>
+          <div class="bar"><i style="width:${p.pot}%;background:color-mix(in srgb,var(--signal) 35%,transparent)"></i><i style="width:${p.ovr}%;background:var(--signal)"></i></div>
+        </div></div>`).join('');
+    $('#dmore').style.display = list.length > dShow ? '' : 'none';
+  }
+  draw();
+  if (qs.get('shot') === 'draft') { document.documentElement.setAttribute('data-theme', 'dark'); document.querySelectorAll('.nav,.ticker,.phead,footer').forEach(e => e.remove()); }
+});
+</script>
+</body>
+</html>
