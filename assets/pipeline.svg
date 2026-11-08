@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 430" width="1200" height="430" font-family="'Segoe UI',Helvetica,Arial,sans-serif">
   <style>
-    .bg{fill:#ffffff}.card{fill:#f3f6f4;stroke:#c9d6cd}.t{fill:#10241a;font-weight:700;font-size:17px}.s{fill:#4b5d53;font-size:13.5px}.h{fill:#5b7064;font-size:13px;font-weight:700;letter-spacing:2px}.ar{stroke:#6e7781;stroke-width:2;fill:none}.hl{fill:#0f3d22}.hlt{fill:#fff;font-weight:700;font-size:17px}.hls{fill:#cfe7d6;font-size:13.5px}
+    .bg{fill:#ffffff}.card{fill:#f3f6f4;stroke:#c9d6cd}.t{fill:#10241a;font-weight:700;font-size:17px}.s{fill:#4b5d53;font-size:13.5px}.h{fill:#5b7064;font-size:13px;font-weight:700;letter-spacing:2px}.ar{stroke:#6e7781;stroke-width:2;fill:none}.hl{fill:#2c3a4a}.hlt{fill:#fff;font-weight:700;font-size:17px}.hls{fill:#cfe7d6;font-size:13.5px}
     @media (prefers-color-scheme: dark){.bg{fill:#0d1117}.card{fill:#161b22;stroke:#30363d}.t{fill:#e6edf3}.s,.h{fill:#9da7b1}}
   </style>
   <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#6e7781"/></marker></defs>

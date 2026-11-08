@@ -22,6 +22,14 @@ const weeklyOf = s => { const f = path.join(SITE, 'weekly', s + '.json'); return
 const byPid = new Map(m.players.map(p => [p.pid, p]));
 const at = (v, season) => Array.isArray(v) ? [...v].reverse().find(x => x.start == null || x.start <= season)?.value : v;
 const posOf = p => (p.ratings.at(-1) || {}).pos;
+// Football GM's own file-format check (the upload warning), when a built game is around: the repo's football-gm, or
+// NFLH_GAME pointing at one with build/files/league-schema.json
+const GAME = process.env.NFLH_GAME || path.join(__dirname, '..', 'football-gm');
+let schemaCheck;
+if (fs.existsSync(path.join(GAME, 'build', 'files', 'league-schema.json'))) {
+  const warn = console.warn; console.warn = () => {}; // ajv's strict-mode notes about the schema itself
+  schemaCheck = require('./schema_check.js').makeCheck(GAME); console.warn = warn;
+}
 // Real game logs make the console noisy; the slicer prints one line per phone-friendly build
 const log = console.log; console.log = () => {};
 
@@ -38,6 +46,7 @@ for (let S = FROM; S <= TO; S++) {
     try { L = SL.sliceLeague(m, E, { season: S, phase: ph, week: w, lite, weekly: wk, schedules: SCHED, live: LIVE }); built++; }
     catch (e) { bad('crash', tag + ': ' + e.message); continue; }
     const ga = L.gameAttributes, season = ga.season, active = L.teams.filter(t => !t.disabled);
+    if (schemaCheck) for (const [k, v] of Object.entries(schemaCheck(L))) bad('FILE FORMAT (Football GM upload warning)', `${tag} ${k} x${v.n}: ${v.example}`);
     const activeTids = new Set(active.map(t => t.tid));
     const offseason = ph === 'afterplayoffs' || ph === 'draft'; // retirements happen, free agency refills
     const inSeason = !offseason;

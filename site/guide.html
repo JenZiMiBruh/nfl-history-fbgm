@@ -3,181 +3,160 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>How to Play</title>
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="NFL History for Football GM">
+<title>How to play · NFL History</title>
+<meta name="description" content="How to play NFL History in Football GM: this season in two minutes, any season since 1967, or the full mod. Every step, with what you'll see.">
 <meta property="og:title" content="How to play · NFL History for Football GM">
-<meta property="og:description" content="Step-by-step: play this season, pick any season since 1967, or install the full mod.">
-<meta property="og:url" content="https://jenzimibruh.github.io/nfl-history-fbgm/guide.html">
 <meta property="og:image" content="https://jenzimibruh.github.io/nfl-history-fbgm/og.jpg">
-<meta property="og:image:width" content="1280">
-<meta property="og:image:height" content="640">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://jenzimibruh.github.io/nfl-history-fbgm/og.jpg">
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Big+Shoulders+Display:wght@700;800;900&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/site.css">
-<script src="assets/site.js" defer></script>
 <style>
-:root{--bg:#0b0f0d;--panel:#121915;--soft:#18211c;--line:#223029;--ink:#e8efe9;--muted:#93a39a;--accent:#2fd07a;--gold:#f5c542;--red:#ff5d5d;--blue:#5aa9ff;--turf:#0f3d22}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-.wrap{max-width:1100px;margin:0 auto;padding:0 20px}
-h1,h2,h3{font-family:Oswald,sans-serif;margin:0;line-height:1.05;text-transform:uppercase}
-a{color:var(--accent)}
-.top{padding:70px 0 30px;background:radial-gradient(900px 400px at 85% -20%,#1b6b3c 0,transparent 60%),linear-gradient(180deg,var(--turf),var(--bg))}
-.top h1{font-size:clamp(44px,7vw,80px)}
-.top p{font-size:19px;color:#cfe7d6;max-width:640px;margin:12px 0 26px}
-.paths{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-@media(max-width:820px){.paths{grid-template-columns:1fr}}
-.pathcard{display:block;text-decoration:none;color:var(--ink);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:22px;transition:transform .15s,background .15s}
-.pathcard:hover{transform:translateY(-3px);background:rgba(255,255,255,.1)}
-.pathcard .em{font-size:34px}
-.pathcard h3{font-size:26px;margin:8px 0 6px}
-.pathcard p{margin:0;color:#cfe7d6;font-size:14.5px}
-.pathcard .who{display:inline-block;margin-top:12px;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:rgba(47,208,122,.15);color:var(--accent)}
+/* Path picker in the header */
+.paths3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:34px}
+@media(max-width:860px){.paths3{grid-template-columns:1fr}}
+.pc3{display:block;text-decoration:none;color:var(--hero-ink);border:1px solid var(--hero-line);background:rgba(255,255,255,.03);padding:20px 20px 18px;transition:border-color .15s,transform .15s}
+.pc3:hover{border-color:var(--signal);transform:translateY(-2px);color:var(--hero-ink)}
+.pc3 .k{font:600 11px/1 var(--mono);letter-spacing:1.4px;text-transform:uppercase;color:var(--signal)}
+.pc3 h3{font-size:32px;margin:10px 0 8px}
+.pc3 p{color:var(--hero-muted);font-size:15px;margin:0}
 
-section.path{padding:64px 0 30px;border-top:1px solid var(--line)}
-.phead{display:flex;align-items:center;gap:18px;margin-bottom:8px}
-.phead .em{font-size:48px}
-.phead h2{font-size:clamp(34px,5vw,52px)}
-.lead{color:var(--muted);font-size:17px;max-width:720px;margin:6px 0 26px}
-.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:26px}
-.chip{background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600}
-.chip.ok{color:var(--accent)}
-.steps{display:grid;gap:18px}
-.step{display:grid;grid-template-columns:64px 1fr 1.15fr;gap:22px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:22px}
-@media(max-width:860px){.step{grid-template-columns:52px 1fr}.step .mock{grid-column:1/-1}}
-.num{width:56px;height:56px;border-radius:16px;background:var(--accent);color:#06210f;display:grid;place-items:center;font:700 28px Oswald}
-.step h3{font-size:24px;margin-bottom:6px}
-.step p{margin:0;color:var(--muted)}
-.step code,.tip code{font-family:'JetBrains Mono',monospace;font-size:13.5px;background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--ink)}
-.tip{margin-top:18px;background:linear-gradient(90deg,rgba(245,197,66,.12),transparent);border-left:4px solid var(--gold);border-radius:12px;padding:14px 18px;color:#f3e6bd}
-.tip b{color:var(--gold)}
+/* A path: heading, what you get, and the steps */
+.gpath{scroll-margin-top:110px}
+.gpath .lead{color:var(--muted);font-size:18px;max-width:720px;margin:14px 0 18px}
+.facts{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px}
+.facts span{font:600 12px/1 var(--mono);letter-spacing:.6px;text-transform:uppercase;padding:8px 10px;border:1px solid var(--line);background:var(--panel)}
+.facts span.ok{color:var(--field)}
+.gsteps{display:grid;gap:14px}
+.gstep{display:grid;grid-template-columns:64px 1fr 1.1fr;gap:24px;align-items:center;padding:22px}
+@media(max-width:860px){.gstep{grid-template-columns:48px 1fr}.gstep .mock{grid-column:1/-1}}
+.gstep .n{font:900 56px/1 var(--display);color:var(--signal)}
+.gstep h3{font-size:28px;margin-bottom:8px}
+.gstep p{margin:0;color:var(--muted);font-size:16px}
+.gstep p b{color:var(--ink)}
+.gstep code,.gtip code{font:500 13.5px var(--mono);background:var(--soft);border:1px solid var(--line);padding:1px 6px;color:var(--ink)}
+.gtip{margin-top:16px;padding:16px 18px;border-left:4px solid var(--signal);background:var(--panel);font-size:16px}
+.gtip b{color:var(--ink)}
+.gstep .btn{margin:6px 0 10px}
 
-/* mock UI */
-.mock{background:#1e2124;border-radius:14px;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.45);border:1px solid #2d3236;font-size:13px}
-.bar{display:flex;align-items:center;gap:6px;background:#2a2e32;padding:8px 10px}
-.bar i{width:10px;height:10px;border-radius:50%;background:#555;display:inline-block}
-.bar i:nth-child(1){background:#ff5f57}.bar i:nth-child(2){background:#febc2e}.bar i:nth-child(3){background:#28c840}
-.url{flex:1;margin-left:8px;background:#1a1d20;border-radius:7px;padding:4px 10px;color:#c9d1d9;font-family:'JetBrains Mono',monospace;font-size:12px}
+/* Mock screens: how Football GM and the mod really look, so they keep the game's own dark styling */
+.mock{background:#1e2124;border:1px solid #2d3236;font-size:13px;color:#c9d1d9;box-shadow:var(--shadow)}
+.mock .bar{display:flex;align-items:center;gap:6px;background:#2a2e32;padding:8px 10px}
+.mock .bar i{width:10px;height:10px;border-radius:50%;background:#555;display:inline-block}
+.mock .bar i:nth-child(1){background:#ff5f57}.mock .bar i:nth-child(2){background:#febc2e}.mock .bar i:nth-child(3){background:#28c840}
+.mock .url{flex:1;margin-left:8px;background:#1a1d20;border-radius:6px;padding:4px 10px;font:500 12px var(--mono)}
 .mbody{padding:14px}
-.row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;color:#c9d1d9}
-.row + .row{margin-top:6px}
-.row .ic{font-size:16px}
+.row{display:flex;align-items:center;gap:10px;padding:9px 10px}
+.row + .row{margin-top:4px}
 .row .sz{margin-left:auto;color:#8b949e;font-size:12px}
-.hl{position:relative;outline:3px solid var(--accent);outline-offset:2px;background:rgba(47,208,122,.12)!important;border-radius:9px}
-.hl::after{content:"tap this";position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--accent);color:#06210f;font:700 12px Inter;padding:4px 9px;border-radius:999px;white-space:nowrap}
-
-.hl.below::after{top:auto;bottom:-34px;right:50%;transform:translateX(50%)}
-.fbgm{background:#212529}
+.hl{position:relative;outline:2px solid #ffb81c;outline-offset:2px;background:rgba(255,184,28,.1)!important}
+/* A tap marker on the thing to press, so each screen says where to look */
+.hl::after{content:"Tap";position:absolute;right:-6px;top:-11px;background:#ffb81c;color:#111;font:700 10px/1 var(--mono);letter-spacing:1px;text-transform:uppercase;padding:4px 6px;border-radius:2px;box-shadow:0 2px 6px rgba(0,0,0,.4);animation:tap 1.8s ease-in-out infinite}
+.hl.nt::after{content:none}
+@keyframes tap{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@media (prefers-reduced-motion:reduce){.hl::after{animation:none}}
+.mock{border-radius:6px;overflow:hidden}
 .fbnav{background:#343a40;display:flex;gap:14px;align-items:center;padding:8px 12px;color:#dee2e6;font-weight:600}
 .fbnav .logo{color:#fd7e14;font-weight:800}
-.fbnav span.on{color:#fff;border-bottom:2px solid #fd7e14}
 .fbrow{display:flex;gap:12px;padding:12px}
-.fbcol{flex:1}
-.lab2{color:#adb5bd;font-size:11.5px;margin:6px 0 3px}
-.inp{background:#2b3035;border:1px solid #495057;border-radius:6px;padding:6px 9px;color:#dee2e6}
-.sel{display:flex;justify-content:space-between}
+.fbcol{flex:1;min-width:0}
+.lab2{color:#adb5bd;font-size:11.5px;margin:8px 0 3px}
+.inp2{background:#2b3035;border:1px solid #495057;border-radius:6px;padding:6px 9px;color:#dee2e6}
 .btn2{display:inline-block;background:#fd7e14;color:#fff;font-weight:700;border-radius:6px;padding:7px 12px;margin-top:10px}
-.menu{background:#2b3035;border:1px solid #495057;border-radius:6px;margin-top:4px;overflow:visible}
+.menu{background:#2b3035;border:1px solid #495057;border-radius:6px;margin-top:4px}
 .menu div{padding:6px 9px;color:#dee2e6}
-.term{background:#0c0c0c;color:#cccccc;font-family:'JetBrains Mono',monospace;font-size:12.5px;padding:14px;line-height:1.6}
+.term{background:#0c0c0c;color:#ccc;font:500 12.5px/1.6 var(--mono);padding:14px}
 .term .g{color:#16c60c}.term .y{color:#f9f1a5}
-.sel2{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
-.sel2 div{background:#2b3035;border-radius:6px;padding:6px;text-align:center;color:#c9d1d9}
-.drop{border:2px dashed #3d6b4f;border-radius:12px;padding:18px;text-align:center;color:#93a39a}
-.android{margin:60px 0;background:linear-gradient(135deg,#132a1d,#121915);border:1px solid var(--line);border-radius:24px;padding:30px;display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center}
-.android .em{font-size:64px}
-.android h3{font-size:30px}
-.android p{margin:8px 0 0;color:var(--muted)}
+.chips2{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
+.chips2 div{background:#2b3035;border-radius:6px;padding:6px 4px;text-align:center;font-size:12px}
+.chips2 .on{background:#ffb81c;color:#111;font-weight:700}
 </style>
+<script src="assets/site.js" defer></script>
 </head>
 <body data-page="guide">
-<header class="top"><div class="wrap">
-  <h1>How to play</h1>
-  <p>Three ways in. Pick the one that sounds like you. Each takes a few minutes, and every step is below with exactly what you'll see.</p>
-  <div class="paths">
-    <a class="pathcard" href="#today"><div class="em">⚡</div><h3>Play today</h3><p>This season, right now, with every game through Sunday. Easiest.</p><span class="who">Phone or computer · 2 min</span></a>
-    <a class="pathcard" href="#season"><div class="em">📅</div><h3>Pick any season</h3><p>Start in 1985, 2007, any year from 1967 on, from preseason to draft day.</p><span class="who">Phone or computer · 5 min</span></a>
-    <a class="pathcard" href="#mod"><div class="em">🏈</div><h3>Full experience</h3><p>History keeps happening: real schedules, drafts and careers.</p><span class="who">Computer · 10 min once</span></a>
+<header class="phead"><div class="wrap">
+  <div class="chy"><b>How to play</b><span>Pick a path</span></div>
+  <h1>Three ways <em>in</em></h1>
+  <p class="lede">Pick the one that sounds like you. Each takes a few minutes, and every step is below with exactly what you'll see.</p>
+  <div class="paths3">
+    <a class="pc3" href="#today"><div class="k">Quick start · 2 min</div><h3>This season</h3><p>The real 2026 season, right now. Phone or computer, nothing to install.</p></a>
+    <a class="pc3" href="#season"><div class="k">Any season · 5 min</div><h3>Pick a year</h3><p>Start in 1985, 2007, any year from 1967, from preseason to draft day.</p></a>
+    <a class="pc3" href="#mod"><div class="k">Full experience · 10 min once</div><h3>The mod</h3><p>History keeps happening: real schedules, drafts, careers and events.</p></a>
   </div>
+  <div class="yard">GO</div>
 </div></header>
 
-<section class="path" id="today"><div class="wrap">
-  <div class="phead"><div class="em">⚡</div><h2>Play today</h2></div>
-  <p class="lead">You get the real 2026 season as of Sunday: standings, stats, rosters, injuries, and all of NFL history since 1966 behind it. Works in regular Football GM, nothing to install.</p>
-  <div class="chips"><span class="chip ok">✓ Phone</span><span class="chip ok">✓ Computer</span><span class="chip ok">✓ No mod needed</span><span class="chip">92 MB download</span></div>
-  <div class="steps">
-    <div class="step"><div class="num">1</div><div><h3>Download the league</h3><p><a class="btn2" style="text-decoration:none;margin:4px 0 8px" data-goatcounter-click="download-NFL_2027_Live_FBGM.json.gz" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_2027_Live_FBGM.json.gz">Download this season's league file</a><br>Older or low-memory phone? Get the <a data-goatcounter-click="download-NFL_2027_Live_Lite_FBGM.json.gz" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_2027_Live_Lite_FBGM.json.gz">phone-friendly version</a> (13 MB instead of 87): same season, leaves out long-retired role players.<br> Don't unzip it: Football GM reads it as it is.</p></div>
-      <div class="mock"><div class="bar"><i></i><i></i><i></i><div class="url">github.com/JenZiMiBruh/nfl-history-fbgm/releases</div></div>
-        <div class="mbody"><div class="row" style="color:#fff;font-weight:700">Assets</div>
-          <div class="row hl"><span class="ic">📦</span>NFL_2027_Live_FBGM.json.gz<span class="sz">91.5 MB</span></div>
-          <div class="row"><span class="ic">📦</span>NFL_Master_1966_2026.json.gz<span class="sz">16 MB</span></div>
-          <div class="row"><span class="ic">📄</span>nfl_season_selector.html<span class="sz">6.7 MB</span></div>
-          <div class="row"><span class="ic">📦</span>NFL_History_Mod.zip<span class="sz">4.6 MB</span></div></div></div></div>
-    <div class="step"><div class="num">2</div><div><h3>Open Football GM</h3><p>Go to <a href="https://play.football-gm.com">play.football-gm.com</a> and tap <b>New League</b> at the top.</p></div>
-      <div class="mock fbgm"><div class="bar"><i></i><i></i><i></i><div class="url">play.football-gm.com</div></div>
-        <div class="fbnav"><span class="logo">🏈 Football GM</span><span style="margin-left:auto">Leagues</span><span class="on hl below" style="padding:2px 6px">New League</span><span>Tools</span></div>
+<section class="gpath" id="today"><div class="wrap">
+  <div class="chy"><b>01</b><span>Quick start</span></div>
+  <h2>This season</h2>
+  <p class="lead">The real 2026 season as of the latest week: standings, stats, rosters and injuries, with all of NFL history since 1966 behind it. Works in regular Football GM.</p>
+  <div class="facts"><span class="ok">✓ Phone</span><span class="ok">✓ Computer</span><span class="ok">✓ No mod needed</span><span>About 85 MB</span></div>
+  <div class="gsteps">
+    <div class="panel gstep"><div class="n">1</div><div><h3>Download the league</h3><a class="btn go" href="download.html">Go to Download</a><p>Get <b>This season</b>. Older or low-memory phone? Get the <b>phone-friendly version</b> there (13 MB): the same season without long-retired role players. Don't unzip it: Football GM reads it as it is.</p></div>
+      <div class="mock"><div class="bar"><i></i><i></i><i></i><div class="url">jenzimibruh.github.io/nfl-history-fbgm/download.html</div></div>
+        <div class="mbody"><div class="row hl">This season's league file<span class="sz">85 MB</span></div><div class="row">Phone-friendly version<span class="sz">13 MB</span></div><div class="row">The mod<span class="sz">26 MB</span></div></div></div></div>
+    <div class="panel gstep"><div class="n">2</div><div><h3>Open Football GM</h3><p>Go to <a href="https://play.football-gm.com">play.football-gm.com</a> and tap <b>New League</b> at the top.</p></div>
+      <div class="mock"><div class="bar"><i></i><i></i><i></i><div class="url">play.football-gm.com</div></div>
+        <div class="fbnav"><span class="logo">Football GM</span><span style="margin-left:auto">Leagues</span><span class="hl" style="padding:2px 6px">New League</span><span>Tools</span></div>
         <div class="mbody" style="color:#adb5bd">Your leagues will show up here.</div></div></div>
-    <div class="step"><div class="num">3</div><div><h3>Choose “Upload league file”</h3><p>On the right, in the <b>Customize</b> box, change <b>Default</b> to <b>Upload league file</b>, then pick the file you downloaded.</p></div>
-      <div class="mock fbgm"><div class="fbrow"><div class="fbcol"><div class="lab2">League name</div><div class="inp">League 1</div><div class="lab2">Pick your team</div><div class="inp sel">Atlanta Gold Club ▾</div></div>
-        <div class="fbcol"><div style="color:#fff;font-weight:700;margin-bottom:6px">Customize</div><div class="inp sel">Default ▾</div>
+    <div class="panel gstep"><div class="n">3</div><div><h3>Choose “Upload league file”</h3><p>In the <b>Customize</b> box, change <b>Default</b> to <b>Upload league file</b>, then pick the file you downloaded.</p></div>
+      <div class="mock"><div class="fbrow"><div class="fbcol"><div class="lab2">League name</div><div class="inp2">League 1</div><div class="lab2">Pick your team</div><div class="inp2">Atlanta Gold Club ▾</div></div>
+        <div class="fbcol"><div style="color:#fff;font-weight:700;margin:8px 0 6px">Customize</div><div class="inp2">Default ▾</div>
           <div class="menu"><div>Default</div><div class="hl">Upload league file</div><div>Enter league file URL</div></div></div></div></div></div>
-    <div class="step"><div class="num">4</div><div><h3>Pick your team and play</h3><p>The team list turns into the real NFL. Pick yours, tap <b>Create league</b>, and you're in the 2026 season as of today.</p></div>
-      <div class="mock fbgm"><div class="fbrow"><div class="fbcol"><div class="lab2">Pick your team</div><div class="inp sel hl">Buffalo Bills ▾</div><div class="btn2">Create league</div></div>
-        <div class="fbcol"><div style="color:#fff;font-weight:700;margin-bottom:6px">Customize</div><div class="inp">✓ NFL_2027_Live_FBGM.json.gz</div></div></div></div></div>
+    <div class="panel gstep"><div class="n">4</div><div><h3>Pick your team and play</h3><p>The team list turns into the real NFL. Pick yours, tap <b>Create league</b>, and you're in the 2026 season as of today.</p></div>
+      <div class="mock"><div class="fbrow"><div class="fbcol"><div class="lab2">Pick your team</div><div class="inp2 hl">Buffalo Bills ▾</div><div class="btn2">Create league</div></div>
+        <div class="fbcol"><div style="color:#fff;font-weight:700;margin:8px 0 6px">Customize</div><div class="inp2">✓ NFL_2027_Live_FBGM.json.gz</div></div></div></div></div>
   </div>
-  <div class="tip"><b>On a phone?</b> The file lands in your Downloads. In step 3, tap <b>Browse</b> and choose it from Downloads. Loading takes a minute: it's 60 years of football.</div>
+  <div class="gtip"><b>On a phone?</b> The file lands in your Downloads. In step 3, tap <b>Browse</b> and choose it from Downloads. Loading takes a minute: it's 60 years of football.</div>
 </div></section>
 
-<section class="path" id="season"><div class="wrap">
-  <div class="phead"><div class="em">📅</div><h2>Pick any season</h2></div>
-  <p class="lead">Build a league that starts in any season from 1967 to today, at any of five start points: preseason, week 1, the playoffs, after the playoffs, or draft day. It's built right into the NFL History site: no download needed to choose.</p>
-  <div class="chips"><span class="chip ok">✓ Phone</span><span class="chip ok">✓ Computer</span><span class="chip ok">✓ No mod needed</span><span class="chip">Best on a computer</span></div>
-  <div class="steps">
-    <div class="step"><div class="num">1</div><div><h3>Open Build a league</h3><p>Go to the <a href="build.html">NFL History site</a> and scroll to <b>Build a league</b> (or tap it in the menu).</p></div>
-      <div class="mock"><div class="bar"><i></i><i></i><i></i><div class="url">jenzimibruh.github.io/nfl-history-fbgm</div></div>
-        <div class="fbnav" style="background:#121915"><span class="logo" style="color:#2fd07a">🏈 NFL History</span><span style="margin-left:auto">Your team</span><span>Drafts</span><span class="hl below" style="padding:2px 6px">Build a league</span></div><div class="mbody" style="color:#93a39a">Start in any season</div></div></div>
-    <div class="step"><div class="num">2</div><div><h3>Load NFL history</h3><p>Tap <b>Load NFL history</b>. It downloads all 60 years once (92 MB) and takes a moment.</p></div>
-      <div class="mock"><div class="mbody"><div class="drop">📂 Drop NFL_Master_1966_2026.json.gz here<br><br><span style="display:inline-block;background:#1f9d55;color:#fff;border-radius:10px;padding:10px 16px;font-weight:700;outline:3px solid #2fd07a;outline-offset:3px">👆 Load NFL history (92 MB, one time)</span></div></div></div></div>
-    <div class="step"><div class="num">3</div><div><h3>Pick a season and a start point</h3><p>Choose the season (named by the year it ends: <b>2008</b> = the 2007 season), a start point (<b>Preseason</b>, <b>Week 1</b>, <b>Playoffs</b>, <b>After Playoffs</b> or <b>Draft</b>), and which real events you want. Tap a team to preview its roster.</p></div>
-      <div class="mock"><div class="mbody"><div class="lab2">Season</div><div class="inp sel hl">2008 · Patriots go for 19-0 ▾</div><div class="sel2" style="grid-template-columns:repeat(5,1fr)"><div>Preseason</div><div>Week 1</div><div style="background:#1f6b3f;color:#fff">Playoffs</div><div>After</div><div>Draft</div></div><div class="btn2" style="background:#2fd07a;color:#06210f">Generate &amp; download</div></div></div></div>
-    <div class="step"><div class="num">4</div><div><h3>Upload it to Football GM</h3><p>Same as Play today: <a href="https://play.football-gm.com">play.football-gm.com</a> → <b>New League</b> → Customize: <b>Upload league file</b> → choose your new file → pick a team → <b>Create league</b>.</p></div>
-      <div class="mock fbgm"><div class="fbrow"><div class="fbcol"><div class="lab2">Pick your team</div><div class="inp sel">New England Patriots ▾</div><div class="btn2">Create league</div></div>
-        <div class="fbcol"><div style="color:#fff;font-weight:700;margin-bottom:6px">Customize</div><div class="inp hl">Upload league file ▾</div></div></div></div></div>
+<section class="gpath band" id="season"><div class="wrap">
+  <div class="chy"><b>02</b><span>Any season</span></div>
+  <h2>Pick a year</h2>
+  <p class="lead">Build a league that starts in any season from 1967 to today: preseason, any week, the playoffs, after the playoffs, or draft day. It's built right into the site.</p>
+  <div class="facts"><span class="ok">✓ Phone</span><span class="ok">✓ Computer</span><span class="ok">✓ No mod needed</span><span>Easiest on a computer</span></div>
+  <div class="gsteps">
+    <div class="panel gstep"><div class="n">1</div><div><h3>Open Build a league</h3><a class="btn go" href="build.html">Build a league</a><p>Or tap <b>Build a league</b> in the menu at the top of any page.</p></div>
+      <div class="mock"><div class="bar"><i></i><i></i><i></i><div class="url">jenzimibruh.github.io/nfl-history-fbgm/build.html</div></div>
+        <div class="mbody"><div style="color:#fff;font-weight:700">Start in any season</div><div style="color:#adb5bd;margin-top:4px">Load NFL history, pick a season and a start point.</div></div></div></div>
+    <div class="panel gstep"><div class="n">2</div><div><h3>Load NFL history</h3><p>Tap <b>Load NFL history</b>. It downloads all 60 years once (about 19 MB) and takes a moment.</p></div>
+      <div class="mock"><div class="mbody"><div style="border:2px dashed #495057;border-radius:8px;padding:18px;text-align:center"><span class="btn2 hl" style="margin:0">Load NFL history</span><div style="color:#8b949e;margin-top:10px;font-size:12px">or drop NFL_Master_1966_2026.json.gz here</div></div></div></div></div>
+    <div class="panel gstep"><div class="n">3</div><div><h3>Pick a season and a start point</h3><p>Choose the season (named by the year it ends: <b>2008</b> = the 2007 season), a start point and which real events you want. Tap a team to preview its roster.</p></div>
+      <div class="mock"><div class="mbody"><div class="lab2">Season</div><div class="inp2 hl">2008 · Patriots go for 19-0 ▾</div><div class="chips2"><div>Preseason</div><div>Week 1</div><div class="on">Playoffs</div><div>After</div><div>Draft</div></div><div class="btn2">Generate &amp; download</div></div></div></div>
+    <div class="panel gstep"><div class="n">4</div><div><h3>Upload it to Football GM</h3><p>Same as This season: <a href="https://play.football-gm.com">play.football-gm.com</a> → <b>New League</b> → <b>Upload league file</b> → choose your new file → pick a team → <b>Create league</b>.</p></div>
+      <div class="mock"><div class="fbrow"><div class="fbcol"><div class="lab2">Pick your team</div><div class="inp2">New England Patriots ▾</div><div class="btn2">Create league</div></div>
+        <div class="fbcol"><div style="color:#fff;font-weight:700;margin:8px 0 6px">Customize</div><div class="inp2 hl">Upload league file ▾</div></div></div></div></div>
   </div>
-  <div class="tip"><b>Offline?</b> Download <code>nfl_season_selector.html</code> and <code>NFL_Master_1966_2026.json.gz</code> from the release, open the selector and drop the master file on it.</div>
-  <div class="tip"><b>Want history to keep happening after you start?</b> Stock Football GM makes up schedules and draft classes after day one. The <a href="#mod">mod</a> keeps them real.</div>
+  <div class="gtip"><b>Offline?</b> Get the offline selector and the seasons file from the <a href="download.html">Download page</a>, open the selector and drop the seasons file on it.</div>
+  <div class="gtip"><b>Want history to keep happening after you start?</b> Regular Football GM makes up schedules and draft classes after day one. <a href="#mod">The mod</a> keeps them real.</div>
 </div></section>
 
-<section class="path" id="mod"><div class="wrap">
-  <div class="phead"><div class="em">🏈</div><h2>Full experience (the mod)</h2></div>
-  <p class="lead">Everything above, plus history that keeps happening: the real schedule every season, real drafts, careers that follow the real one, real retirements and comebacks, and settings for all of it. It runs on your computer; your phone can play on it over Wi-Fi.</p>
-  <div class="chips"><span class="chip ok">✓ Windows</span><span class="chip ok">✓ Mac / Linux</span><span class="chip ok">✓ Phone over Wi-Fi</span><span class="chip">first run 5–10 min</span></div>
-  <div class="steps">
-    <div class="step"><div class="num">1</div><div><h3>Download and unzip</h3><p><a class="btn2" style="text-decoration:none;margin:4px 0 8px" data-goatcounter-click="download-NFL_History_Mod.zip" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_History_Mod.zip">Download the mod</a><br>Unzip it anywhere, like your Desktop.</p></div>
+<section class="gpath" id="mod"><div class="wrap">
+  <div class="chy"><b>03</b><span>Full experience</span></div>
+  <h2>The mod</h2>
+  <p class="lead">Everything above, plus history that keeps happening: the real schedule every season, real drafts, careers that follow the real one, real retirements, comebacks and suspensions, with a setting for each. It runs on your computer; your phone can play on it over Wi-Fi.</p>
+  <div class="facts"><span class="ok">✓ Windows</span><span class="ok">✓ Mac and Linux</span><span class="ok">✓ Phone over Wi-Fi</span><span>First run 5–10 min</span></div>
+  <div class="gsteps">
+    <div class="panel gstep"><div class="n">1</div><div><h3>Download and unzip</h3><a class="btn go" href="download.html">Get the mod</a><p>Unzip it anywhere, like your Desktop.</p></div>
       <div class="mock"><div class="bar"><i></i><i></i><i></i><div class="url">NFL_History_Mod</div></div>
-        <div class="mbody"><div class="row hl"><span class="ic">⚙️</span>Install_and_Play.bat</div><div class="row"><span class="ic">🐧</span>install_and_play.sh</div><div class="row"><span class="ic">📁</span>mod</div></div></div></div>
-    <div class="step"><div class="num">2</div><div><h3>Double-click Install_and_Play</h3><p>On Windows, double-click <code>Install_and_Play.bat</code> (on Mac or Linux, run <code>install_and_play.sh</code>). The first time, it installs what it needs and builds the game. That takes 5–10 minutes. After that it starts in seconds.</p></div>
+        <div class="mbody"><div class="row hl">Install_and_Play.bat</div><div class="row">install_and_play.sh</div><div class="row">mod</div></div></div></div>
+    <div class="panel gstep"><div class="n">2</div><div><h3>Double-click Install_and_Play</h3><p>On Windows, double-click <code>Install_and_Play.bat</code> (on Mac or Linux, run <code>install_and_play.sh</code>). The first time, it installs what it needs and builds the game in 5–10 minutes. After that it starts in seconds.</p></div>
       <div class="mock"><div class="term">  NFL History for Football GM<br>  ---------------------------<br>  Downloading Football GM source...<br>  Applying the NFL History mod...<br>  Installing packages...<br><span class="g">  Ready. Opening http://localhost:3000</span><br><span class="y">  On your phone (same Wi-Fi): http://192.168.1.20:3000</span><br>  Keep this window open while you play.</div></div></div>
-    <div class="step"><div class="num">3</div><div><h3>Pick a season, right in the game</h3><p>The game opens in your browser. Go to <b>New League</b> → <b>Upload league file</b>. The <b>NFL History</b> box asks for the master file once, then lets you pick any season, any start point and which events you want.</p></div>
-      <div class="mock fbgm"><div class="fbrow"><div class="fbcol hl" style="padding:8px"><div style="color:#fff;font-weight:700">NFL History</div><div class="lab2">Season</div><div class="inp sel">1985 ▾</div><div class="lab2">Start</div><div class="inp sel">Regular Season, Week 1 ▾</div><div class="btn2">Build league</div></div><div class="fbcol"><div class="lab2">Settings → Real Players</div><div class="inp">Real Player Determinism · 1.0</div><div class="inp" style="margin-top:6px">Real NFL Schedules · On</div><div class="inp" style="margin-top:6px">Real NFL Draft Picks · On</div></div></div></div></div>
-    <div class="step"><div class="num">4</div><div><h3>Play on your phone too</h3><p>Leave the window open. On your phone, on the same Wi-Fi, open the address it shows (like <code>http://192.168.1.20:3000</code>). Your phone keeps its own leagues.<br><br><b>Android and "This site can't be reached"?</b> Newer Android versions block Chrome from home-network addresses until you allow it: open <b>Settings → Apps → Chrome → Permissions</b>, set <b>Nearby devices</b> (or <b>Local network</b>) to <b>Allow</b>, then close Chrome fully and open the address again.</p></div>
-      <div class="mock"><div class="bar"><i></i><i></i><i></i><div class="url hl">192.168.1.20:3000</div></div><div class="mbody" style="color:#c9d1d9">📱 Football GM, with the NFL History mod, on your phone.</div></div></div>
+    <div class="panel gstep"><div class="n">3</div><div><h3>Pick a season, right in the game</h3><p>The game opens in your browser on <b>New League</b>, with the <b>NFL History</b> box ready: pick any season, any start point and which events you want, then <b>Build league</b>. Every season comes with the mod.</p></div>
+      <div class="mock"><div class="fbrow"><div class="fbcol hl nt" style="padding:8px"><div style="color:#fff;font-weight:700">NFL History</div><div class="lab2">Season</div><div class="inp2">1985 ▾</div><div class="lab2">Start</div><div class="inp2">Regular Season, Week 1 ▾</div><div class="btn2">Build league</div></div>
+        <div class="fbcol"><div class="lab2">NFL History settings</div><div class="inp2">Real Player Determinism · 100%</div><div class="inp2" style="margin-top:6px">Real NFL Schedules · On</div><div class="inp2" style="margin-top:6px">Scheduled Retirements · On</div></div></div></div></div>
+    <div class="panel gstep"><div class="n">4</div><div><h3>Play on your phone too</h3><p>Leave the window open. On your phone, on the same Wi-Fi, open the address it shows (like <code>http://192.168.1.20:3000</code>). Your phone keeps its own leagues.</p></div>
+      <div class="mock"><div class="bar"><i></i><i></i><i></i><div class="url hl nt">192.168.1.20:3000</div></div><div class="mbody">Football GM with the NFL History mod, on your phone.</div></div></div>
   </div>
-  <div class="tip"><b>Next time,</b> just double-click <code>Install_and_Play</code> again. It skips the setup and opens the game in seconds.</div>
-
-  <div class="android"><div class="em">🤖</div><div><h3>Yes, there's an Android app</h3><p>A native Android version exists: Football GM's engine running inside a real app, no browser. Football GM's license doesn't allow distributing builds, so it can't be released, but I'd love to put it out someday.</p></div></div>
+  <div class="gtip"><b>Android says “This site can't be reached”?</b> Newer Android versions block Chrome from home-network addresses until you allow it: open <b>Settings → Apps → Chrome → Permissions</b>, set <b>Nearby devices</b> (or <b>Local network</b>) to <b>Allow</b>, then close Chrome fully and open the address again.</div>
+  <div class="gtip"><b>Next time,</b> just double-click <code>Install_and_Play</code> again. It skips the setup, checks for updates and opens the game in seconds.</div>
+  <div class="gtip"><b>Is there an Android app?</b> A native Android version exists: Football GM's engine inside a real app, no browser. Football GM's license doesn't allow sharing builds, so it can't be released, but I'd love to put it out someday.</div>
 </div></section>
 
 <script>
 // ?only=today|season|mod shows one path on its own (used to make the README images)
-const only = new URLSearchParams(location.search).get("only");
-if (only) { document.querySelectorAll("header, footer, section.path").forEach(e => { if (e.id !== only) e.remove(); }); document.querySelector("section.path").style.borderTop = "0"; }
+const only = new URLSearchParams(location.search).get('only');
+if (only) addEventListener('DOMContentLoaded', () => setTimeout(() => { document.querySelectorAll('.nav,.ticker,.phead,footer,section.gpath,.flag-fab').forEach(e => { if (e.id !== only) e.remove(); }); }, 0));
 </script>
-<!-- Visitor stats (GoatCounter: no cookies, no personal data) -->
-<script data-goatcounter="https://galloade.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

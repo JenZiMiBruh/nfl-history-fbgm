@@ -206,6 +206,7 @@ for (const year of [SEASON, SEASON + 1, SEASON + 2]) {
     r.pot = Math.max(r.ovr, peak);
     r.pots[x.pos] = r.pot;
     r.skills = R.computeSkills({ ...r, pos: x.pos });
+    // A placeholder: src/prospect_ages.js (run after this) sets each prospect's real age from his high-school class
     const bornYear = year + 1 - 22;
     added.push({
       pid: nextPid++, firstName: x.first, lastName: x.last, tid: -2, pos: x.pos, hgt: x.hgt || 72, weight: x.wgt || 200,

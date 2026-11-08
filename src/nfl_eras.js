@@ -21,7 +21,7 @@
 
   const FIRST_SEASON = 1966;
   const LAST_SEASON = 2026;
-  const PHASE = { PRESEASON: 0, REGULAR_SEASON: 1, PLAYOFFS: 3, DRAFT_LOTTERY: 4, DRAFT: 5, AFTER_DRAFT: 6, RESIGN_PLAYERS: 7, FREE_AGENCY: 8 };
+  const PHASE = { PRESEASON: 0, REGULAR_SEASON: 1, AFTER_TRADE_DEADLINE: 2, PLAYOFFS: 3, DRAFT_LOTTERY: 4, DRAFT: 5, AFTER_DRAFT: 6, RESIGN_PLAYERS: 7, FREE_AGENCY: 8 };
 
   const ESPN = (a) => `https://a.espncdn.com/i/teamlogos/nfl/500/${a}.png`;
 
@@ -891,6 +891,8 @@
 
     // Football GM processes realignment before team changes within the same phase.
     const order = { gameAttributes: 0, confsDivs: 1, contraction: 2, expansionDraft: 3, teamInfo: 4, retirePlayer: 5, unretirePlayer: 6 };
+    // Every event needs a real phase: one with none is never run, and Football GM flags the file on upload
+    for (const e of ev) if (!Number.isInteger(e.phase)) throw new Error(`scheduled event without a phase: ${e.type} ${e.season} ${JSON.stringify(e.info).slice(0, 80)}`);
     return ev
       .filter(e => after(e.season, e.phase))
       .sort((x, y) => x.season - y.season || x.phase - y.phase || order[x.type] - order[y.type])

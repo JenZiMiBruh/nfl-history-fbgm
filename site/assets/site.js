@@ -121,7 +121,9 @@
   window.NFLH = { REPO, DL, esc, jersey, ovrColor, data, toast };
   // The Flag a rating button and search (assets/flag.js), on every page
   const flag = () => { const f = document.createElement('script'); f.src = 'assets/flag.js'; f.defer = true; document.body.append(f); };
-  const start = () => { chrome(); reveal(); flag(); };
+  // Capture mode (?shot= on the home, team and draft pages, ?only= on the guides): only the graphic, for the README images
+  const capture = /[?&](shot|only)=/.test(location.search);
+  const start = () => { if (!capture) { chrome(); flag(); } reveal(); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 
   // Visitor stats (GoatCounter: no cookies, no personal data)
