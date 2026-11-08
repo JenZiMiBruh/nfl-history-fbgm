@@ -2744,13 +2744,48 @@ index 8dd67389c..301c12c06 100644
  					if (!p) {
  						p = await player.genRandomFreeAgent();
 diff --git a/src/worker/core/team/genDepth.football.ts b/src/worker/core/team/genDepth.football.ts
-index 8536f14d1..df471d06d 100644
+index 8536f14d1..02dac392c 100644
 --- a/src/worker/core/team/genDepth.football.ts
 +++ b/src/worker/core/team/genDepth.football.ts
-@@ -20,8 +20,10 @@ type PlayerForDepth = {
- const score = (p: PlayerForDepth, pos: Position) => {
+@@ -17,11 +17,44 @@ type PlayerForDepth = {
+ 	};
+ };
+ 
+-const score = (p: PlayerForDepth, pos: Position) => {
++// NFL history mod: starters at each position, who teams keep off kick and punt returns
++const STARTERS: Partial<Record<string, number>> = {
++	QB: 1,
++	RB: 1,
++	WR: 3,
++	TE: 1,
++	OL: 5,
++	DL: 4,
++	LB: 3,
++	CB: 2,
++	S: 2,
++};
++const RETURN_STARTER_PENALTY = 10;
++
++const score = (
++	p: PlayerForDepth,
++	pos: Position,
++	depth?: Record<Position, number[]>,
++) => {
  	let tempScore = p.ratings.ovrs[pos];
  
++	// NFL history mod: returning is a job for the fastest backup, so a starter (by the depth chart at his own position)
++	// only returns kicks or punts if he's clearly the best at it, like real teams do
++	if ((pos === "KR" || pos === "PR") && depth) {
++		const ownPos = p.ratings.pos as Position;
++		const numStarters = STARTERS[ownPos];
++		if (
++			numStarters !== undefined &&
++			depth[ownPos]?.slice(0, numStarters).includes(p.pid)
++		) {
++			tempScore -= RETURN_STARTER_PENALTY;
++		}
++	}
++
 +	// NFL history mod: much stronger preference for a player's real position (was +15), so fast receivers with
 +	// high running back ratings stay at receiver instead of taking the running back carries
  	if (p.ratings.pos === pos) {
@@ -2759,6 +2794,31 @@ index 8536f14d1..df471d06d 100644
  	}
  
  	return tempScore;
+@@ -88,13 +121,13 @@ const genDepth = async (
+ 			);
+ 
+ 			for (const p of playersNotInDepth) {
+-				const pScore = score(p, pos2);
++				const pScore = score(p, pos2, depth);
+ 				let added = false;
+ 
+ 				for (let i = 0; i < depth[pos2].length; i++) {
+ 					const p2 = players.find((p3) => p3.pid === depth[pos2][i]);
+ 
+-					if (!p2 || pScore > score(p2, pos2)) {
++					if (!p2 || pScore > score(p2, pos2, depth)) {
+ 						depth[pos2].splice(i, 0, p.pid);
+ 						added = true;
+ 						break;
+@@ -109,7 +142,7 @@ const genDepth = async (
+ 		} else {
+ 			// Sort everything from scratch
+ 			players.sort((a, b) => {
+-				const diff = score(b, pos2) - score(a, pos2);
++				const diff = score(b, pos2, depth) - score(a, pos2, depth);
+ 				if (diff === 0) {
+ 					// Deterministic order
+ 					return b.pid - a.pid;
 diff --git a/src/worker/core/team/getTeamInfoCache.ts b/src/worker/core/team/getTeamInfoCache.ts
 index 9b4151645..05ec36f99 100644
 --- a/src/worker/core/team/getTeamInfoCache.ts
