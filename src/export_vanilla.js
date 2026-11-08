@@ -16,6 +16,14 @@ const { shiftSeasons } = require('./season_slicer');
 const ROOT = path.join(__dirname, '..');
 const label = process.argv[2] || 'Live';
 const m = JSON.parse(fs.readFileSync(path.join(ROOT, 'NFL_Master_1966_2026.json'), 'utf8'));
+// Football GM's "# Conference Games" doesn't count division games. Division plus conference games must fit in the season, or
+// Football GM resets both on upload ("settings were reset because the supplied values did not work")
+{
+  const ga = m.gameAttributes, at = v => Array.isArray(v) ? v[v.length - 1].value : v;
+  if (ga.numGamesDiv != null && ga.numGamesConf != null && ga.numGamesDiv + ga.numGamesConf > at(ga.numGames)) {
+    throw new Error(`${ga.numGamesDiv} division + ${ga.numGamesConf} conference games is more than the ${at(ga.numGames)}-game season`);
+  }
+}
 // The master keeps every scheduled event since 1966 for slicing. A league that starts today has already passed them:
 // apply each passed team change (logos, colors, jerseys, names) so the teams show today's look, then queue only
 // future events. Without this, changes like the 2026 Titans Shield never fire.

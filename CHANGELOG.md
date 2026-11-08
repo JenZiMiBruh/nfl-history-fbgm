@@ -6,6 +6,10 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.20.12 · Nov 7, 2026
+
+- **No more "# Division Games and # Conference Games settings were reset" message** when you upload this season's league file. The file asked for 6 division games plus 12 more conference games, 18 in a 17-game season, so Football GM threw both settings out and the schedule stopped favoring division and conference opponents. It's now the real NFL format: 6 division games and 6 other conference games. Leagues built with the season selector or the mod already had this right. A check now stops a release that gets it wrong.
+
 ## v1.20.11 · Nov 7, 2026
 
 - **Real kick and punt returners get the job.** Football GM gives returns to its fastest player, so a team's real returner (often a backup cornerback or a fifth receiver) almost never got them: the real kick returner did in about 1 of every 20 team-seasons. Now real returners get the speed and sure hands their return numbers show (a 25-yard kick returner is faster than a 19-yard one), and starters stay off returns unless they're clearly the best at it, like real teams do. The real kick returner now gets the job about 2 of every 3 team-seasons (in his team's top two almost 9 of 10), and the real punt returner about 7 of 10. Devin Hester's 2007 season: speed 95, ball security 92. Nobody's overall changed.
