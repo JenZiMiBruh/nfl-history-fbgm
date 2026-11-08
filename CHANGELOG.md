@@ -9,6 +9,7 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 ## v1.20.12 · Nov 7, 2026
 
 - **No more "# Division Games and # Conference Games settings were reset" message** when you upload this season's league file. The file asked for 6 division games plus 12 more conference games, 18 in a 17-game season, so Football GM threw both settings out and the schedule stopped favoring division and conference opponents. It's now the real NFL format: 6 division games and 6 other conference games. Leagues built with the season selector or the mod already had this right. A check now stops a release that gets it wrong.
+- **Have your say.** Vote on what gets built and fixed next, no account needed: [jenzimibruh.github.io/nfl-history-fbgm/updates.html#vote](https://jenzimibruh.github.io/nfl-history-fbgm/updates.html#vote)
 
 ## v1.20.11 · Nov 7, 2026
 

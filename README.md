@@ -11,10 +11,11 @@
 
 <p align="center"><b>🧪 Beta:</b> it works, but you may still hit bugs. Found one? <a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new/choose">Report it</a> and it gets fixed in the next update.</p>
 
-<h2 align="center"><a href="https://jenzimibruh.github.io/nfl-history-fbgm/">🌐 Open the NFL History site →</a></h2>
+<h2 align="center"><a href="https://jenzimibruh.github.io/nfl-history-fbgm/download.html">⬇️ Download</a> · <a href="https://jenzimibruh.github.io/nfl-history-fbgm/">🌐 Open the NFL History site</a></h2>
+<p align="center"><sub>Every download lives on one page: this season, any season, or the mod, always the latest version.</sub></p>
 <p align="center"><a href="https://jenzimibruh.github.io/nfl-history-fbgm/#fans"><img src="https://img.shields.io/badge/%F0%9F%9F%A2%20playing%20right%20now-see%20the%20live%20count-2ecc71?style=flat-square" alt="See how many people are playing the mod right now"></a></p>
 <p align="center"><a href="docs/roadmap.md"><b>📅 Roadmap & update calendar</b></a>: the file updates every Tuesday this season, the day after the NFL week ends</p>
-<p align="center"><a href="CHANGELOG.md"><b>🆕 What's new</b></a>: v1.20: QB vision raised, RB workloads capped, Brady is the 199th pick; v1.19: real traded picks, draft numbers fixed; v1.18: expansion drafts on offseason starts; v1.17: backup QBs fixed, changelog in the game, new mod defaults; v1.16: real draft ratings, schedules on Playoffs starts, no spoilers; v1.15: 0-0 games fixed; v1.14: picker and week-start fixes; v1.13: QB accuracy and pass rush retuned, real rosters and box scores for week starts; v1.12: Browns 1970-95 logo; v1.11: every season built into the mod, any week in the mod, 1976 expansion fixed; v1.10: Week 8 complete, real contracts, receivers stay at receiver, kickers rated on kicking, ratings by week</p>
+<p align="center"><a href="CHANGELOG.md"><b>🆕 What's new</b></a>: every fix and feature, newest first</p>
 <p align="center"><sub>Every team's logos, jerseys, records and ratings · the real draft classes · build a league for any season, right in your browser</sub></p>
 
 <table align="center"><tr>
@@ -54,7 +55,7 @@ Three ways in. Pick the one that sounds like you; every step is below with exact
 
 The real 2026 season as of Sunday, Nov 1: standings, stats, rosters and injuries, with all of NFL history since 1966 behind it. Regular Football GM, nothing to install.
 
-1. **Download** [`NFL_2027_Live_FBGM.json.gz`](../../releases/latest/download/NFL_2027_Live_FBGM.json.gz) from the latest release. Don't unzip it. On an older or low-memory phone, get [`NFL_2027_Live_Lite_FBGM.json.gz`](../../releases/latest/download/NFL_2027_Live_Lite_FBGM.json.gz) instead: the same season at 13 MB, without long-retired role players.
+1. **Download** this season from the [Download page](https://jenzimibruh.github.io/nfl-history-fbgm/download.html) (`NFL_2027_Live_FBGM.json.gz`). Don't unzip it. On an older or low-memory phone, get the phone-friendly version there instead: the same season at 13 MB, without long-retired role players.
 2. **Open** [play.football-gm.com](https://play.football-gm.com) and tap **New League**.
 3. In the **Customize** box, change **Default** to **Upload league file** and choose the file.
 4. **Pick your team** and tap **Create league**.
@@ -69,7 +70,7 @@ The real 2026 season as of Sunday, Nov 1: standings, stats, rosters and injuries
 
 Start in 1985, 2007, any season from 1967 on, at any of five start points, just like Basketball GM: **preseason**, **week 1**, **the playoffs** (real regular season already played), **after the playoffs** (real champion and awards) or **draft day** (real draft order). The season selector is one page that runs in your browser, even offline.
 
-1. **Open** [**Build a league** on the NFL History site](https://jenzimibruh.github.io/nfl-history-fbgm/build.html) and tap **Load NFL history**. (Offline instead? Download [`nfl_season_selector.html` and `NFL_Master_1966_2026.json.gz`](../../releases/latest), open the selector and drop the master file on it.)
+1. **Open** [**Build a league** on the NFL History site](https://jenzimibruh.github.io/nfl-history-fbgm/build.html) and tap **Load NFL history**. (Offline instead? Get the offline selector and the seasons file from the [Download page](https://jenzimibruh.github.io/nfl-history-fbgm/download.html), open the selector and drop the seasons file on it.)
 2. Wait a moment while 60 years of history load in your browser.
 3. **Pick** a season, a start point (Preseason, Week 1, Playoffs, After Playoffs or Draft) and the real events you want, then **Generate & download**.
 4. **Upload** your new file in Football GM, same as Play today, steps 2–4.
@@ -84,7 +85,7 @@ Start in 1985, 2007, any season from 1967 on, at any of five start points, just 
 
 Everything above, plus history that keeps happening: the real schedule every season, real drafts, careers that follow the real one, real retirements and comebacks, and settings for all of it.
 
-1. **Download** [`NFL_History_Mod.zip`](../../releases/latest) and unzip it.
+1. **Download** the mod from the [Download page](https://jenzimibruh.github.io/nfl-history-fbgm/download.html) and unzip it.
 2. **Double-click** `Install_and_Play.bat` (Mac or Linux: `install_and_play.sh`). The first run sets everything up in 5–10 minutes.
 3. The game opens in your browser: **New League → Upload league file**, and the **NFL History** box lets you pick any season. Every season comes with the mod: the first start downloads it for you (about 18 MB), so there is no file to choose.
 4. **On your phone**, open the address the window shows, on the same Wi-Fi.
@@ -220,6 +221,16 @@ And [the mod](mod/): every file it touches and why.
 <details><summary><b>Do I need the mod?</b></summary>
 
 No. The live file and any season from the selector work in stock Football GM. The mod is what keeps history behaving like history after you start simming: real schedules, real drafts, real careers.
+</details>
+
+<details><summary><b>What happens to the Browns and Ravens in 1995-96?</b></summary>
+
+After the 1995 season, Art Modell moved the Browns to Baltimore. The NFL's 1996 agreement kept the Browns' name, colors and history in Cleveland, so Baltimore started as a new team (the Ravens), and Cleveland came back in 1999 as the Browns with all of their history.
+
+- **With the mod:** the Browns players, their contracts and their draft picks move to Baltimore with the franchise, like they really did. Cleveland's history stays in Cleveland, and the Browns come back in 1999 with an expansion draft.
+- **In regular Football GM** (a league from the season selector, uploaded to play.football-gm.com): Football GM has no way to move a team without moving its history. So the Browns' history stays correct in Cleveland, but the 1995 Browns become free agents and Baltimore builds its roster in an expansion draft.
+
+Why not move the team and its history? Then the Browns' 1966-95 records, players and Hall of Famers would belong to the Ravens, which isn't true. For the full move, use the mod. Only leagues that start in 1995 or earlier are affected. Think regular Football GM should do it the other way? [Vote on the site](https://jenzimibruh.github.io/nfl-history-fbgm/updates.html#vote), no account needed.
 </details>
 
 <details><summary><b>Does it work on my phone?</b></summary>

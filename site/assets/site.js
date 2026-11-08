@@ -77,7 +77,7 @@
       <a class="brand" href="index.html">${ball}<span>NFL <em>History</em></span><span class="beta" title="It works, but you may still hit bugs">Beta</span></a>
       <button class="menu" aria-label="Menu" aria-expanded="false"><i></i><i></i><i></i></button>
       <nav class="links" aria-label="Site">${PAGES.slice(1).map(([href, id, label]) => `<a href="${href}"${id === page ? ' class="on" aria-current="page"' : ''}>${label}</a>`).join('')}
-        <a class="dl" data-goatcounter-click="download-nav" href="${DL}NFL_2027_Live_FBGM.json.gz" title="This season's league file, for Football GM">Download</a></nav>
+        <a class="dl${page === 'download' ? ' on' : ''}" href="download.html">Download</a></nav>
     </div>`;
     const tick = document.createElement('div');
     tick.className = 'ticker'; tick.setAttribute('aria-hidden', 'true');
@@ -94,7 +94,7 @@
         <div><a class="brand" href="index.html">${ball}<span>NFL <em>History</em></span></a>
           <small>Every NFL season since 1966 for Football GM. A passion project by <b style="color:var(--hero-ink)">JenZiMiBruh</b>. Thank you, dumbmatter.</small></div>
         <div><h4>Explore</h4>${PAGES.slice(1, 4).map(([h, , l]) => `<a href="${h}">${l}</a>`).join('')}</div>
-        <div><h4>Play</h4><a href="guide.html">How to play</a><a href="mod.html">The mod</a><a href="updates.html">Updates &amp; roadmap</a><a href="${DL}NFL_History_Mod.zip" data-goatcounter-click="download-NFL_History_Mod.zip">Download the mod</a></div>
+        <div><h4>Play</h4><a href="guide.html">How to play</a><a href="mod.html">The mod</a><a href="updates.html">Updates &amp; roadmap</a><a href="download.html">Download</a></div>
         <div><h4>Help out</h4><a href="${REPO}/issues/new/choose">Report a bug</a><a href="${REPO}/issues/new?template=rating.yml">Report a wrong rating</a><a href="${REPO}/issues/new?template=logo.yml">Report a wrong logo</a><a href="${REPO}">Star it on GitHub</a></div>
       </div>
       <div class="base"><span>Unofficial fan project. Team names and logos belong to the NFL and its teams. Not affiliated with the NFL or Football GM. Data: nflverse, Pro-Football-Reference via the Internet Archive, Wikipedia, OverTheCap.</span>

@@ -1,0 +1,82 @@
+{
+  "note": "Fan polls for the site (assets/vote.js) and the mod's What's new screen. inGame: the poll the game shows. Votes are counted at GoatCounter under /vote/<id>/<option>, so keep ids stable.",
+  "inGame": "next-feature",
+  "polls": [
+    {
+      "id": "browns-move",
+      "q": "Regular Football GM: how should the 1996 Browns move work?",
+      "note": "The mod already does the real move. This is only for leagues in regular Football GM.",
+      "options": [
+        {
+          "id": "history",
+          "label": "Keep history right",
+          "desc": "Browns history stays in Cleveland; their players go to free agency (now)"
+        },
+        {
+          "id": "roster",
+          "label": "Keep the roster together",
+          "desc": "The Browns become the Ravens, players and all, but their 1966-95 history goes with them"
+        }
+      ]
+    },
+    {
+      "id": "next-feature",
+      "q": "What should come next?",
+      "note": "Pick one. The most-wanted ideas go to the top of the roadmap.",
+      "options": [
+        {
+          "id": "calendar",
+          "label": "Real NFL calendar",
+          "desc": "Games on real dates: Thursday, Sunday, Monday, Thanksgiving, Christmas"
+        },
+        {
+          "id": "superbowls",
+          "label": "Named Super Bowls",
+          "desc": "Super Bowl I to LX by name, then numbered on in your league"
+        },
+        {
+          "id": "primetime",
+          "label": "Primetime slots",
+          "desc": "Monday, Sunday and Thursday night games with real kickoff times"
+        },
+        {
+          "id": "livegame",
+          "label": "Live game view",
+          "desc": "Watch games play out on a field with real broadcast graphics"
+        },
+        {
+          "id": "portraits",
+          "label": "Player photos",
+          "desc": "Real headshots on player pages"
+        }
+      ]
+    },
+    {
+      "id": "bug-priority",
+      "q": "What bugs you most right now?",
+      "note": "Hit something specific? Report it on GitHub so it can be fixed.",
+      "options": [
+        {
+          "id": "ratings",
+          "label": "Player ratings",
+          "desc": "Someone is rated way too high or too low"
+        },
+        {
+          "id": "rosters",
+          "label": "Rosters and depth charts",
+          "desc": "Wrong starters, missing players, odd cuts"
+        },
+        {
+          "id": "sim",
+          "label": "Game results",
+          "desc": "Scores or stats that don't look like the era"
+        },
+        {
+          "id": "setup",
+          "label": "Setting it up",
+          "desc": "Downloading, uploading or installing the mod"
+        }
+      ]
+    }
+  ]
+}

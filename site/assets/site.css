@@ -176,3 +176,23 @@ section.tight{padding:56px 0}
 
 .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);opacity:0;z-index:99;background:#97233F;color:#fff;font:600 15px var(--body);padding:12px 18px;border-radius:2px;box-shadow:0 10px 30px rgba(0,0,0,.4);transition:.35s;pointer-events:none;max-width:calc(100% - 32px);text-align:center}
 .toast.on{opacity:1;transform:translateX(-50%)}
+
+/* ---------- Fan polls (assets/vote.js) ---------- */
+.poll{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px}
+.poll h3{font-size:28px;line-height:1}
+.poll .pnote{color:var(--muted);font-size:15px;margin:10px 0 18px}
+.poll .opts{display:grid;gap:8px}
+.poll .opt{position:relative;overflow:hidden;display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--soft);border:1px solid var(--line);border-radius:2px;padding:12px 14px;color:var(--ink);font:inherit;cursor:pointer;transition:border-color .15s}
+.poll .opt:hover:not([disabled]){border-color:var(--signal)}
+.poll .opt[disabled]{cursor:default}
+.poll .opt .fill{position:absolute;inset:0 auto 0 0;background:color-mix(in srgb,var(--signal) 22%,transparent);transition:width .7s ease}
+.poll .opt.mine{border-color:var(--signal)}
+.poll .opt.mine .fill{background:color-mix(in srgb,var(--signal) 38%,transparent)}
+.poll .txt{position:relative;flex:1}
+.poll .txt b{display:block;font:800 18px/1.1 var(--display);text-transform:uppercase;letter-spacing:.4px}
+.poll .txt small{display:block;color:var(--muted);font-size:13.5px;margin-top:3px}
+.poll .pct{position:relative;font:900 22px/1 var(--display);min-width:52px;text-align:right}
+.poll .opt:not([disabled]) .pct{font:600 11px/1 var(--mono);letter-spacing:1.2px;text-transform:uppercase;color:var(--signal)}
+.poll .pfoot{margin:14px 0 0;font:500 12px/1.4 var(--mono);letter-spacing:.3px;color:var(--muted)}
+.polls{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:start}
+@media(max-width:1000px){.polls{grid-template-columns:1fr}}

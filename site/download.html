@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Download · NFL History</title>
+<meta name="description" content="Download NFL History for Football GM: this season's league file, any season since 1967, or the full mod.">
+<meta property="og:title" content="Download · NFL History for Football GM">
+<meta property="og:image" content="https://jenzimibruh.github.io/nfl-history-fbgm/og.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Big+Shoulders+Display:wght@700;800;900&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+.picks{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media(max-width:900px){.picks{grid-template-columns:1fr}}
+.pick{display:flex;flex-direction:column;padding:30px 28px 28px;position:relative}
+.pick.star{border-color:var(--signal);box-shadow:0 0 0 1px var(--signal),var(--shadow)}
+.pick .flag{position:absolute;top:-12px;left:24px;background:var(--signal);color:var(--signal-ink);font:600 11px/1 var(--mono);letter-spacing:1.4px;text-transform:uppercase;padding:6px 8px}
+.pick .k{font:600 12px/1 var(--mono);letter-spacing:1.6px;text-transform:uppercase;color:var(--muted)}
+.pick h2{font-size:clamp(40px,4.4vw,56px);margin:14px 0 12px}
+.pick p{color:var(--muted);font-size:16px}
+.pick ul{list-style:none;margin:4px 0 24px;padding:0}
+.pick li{padding:8px 0;border-top:1px dashed var(--line);font-size:15px;display:flex;gap:10px}
+.pick li::before{content:"✓";color:var(--field);font-weight:800}
+.pick li.no::before{content:"—";color:var(--muted)}
+.pick .btn{margin-top:auto;justify-content:center}
+.pick .meta{margin-top:12px;text-align:center;font:500 12px/1.4 var(--mono);color:var(--muted);letter-spacing:.3px}
+.files{width:100%;border-collapse:collapse}
+.files td{padding:16px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.files td:first-child{padding-left:0}
+.files b{display:block;font-size:16px}
+.files small{color:var(--muted);font-size:14px}
+.files code{font:500 13px var(--mono);color:var(--muted)}
+.files .go{text-align:right;white-space:nowrap}
+.files .go a{font:700 15px/1 var(--display);letter-spacing:1.2px;text-transform:uppercase;text-decoration:none;border-bottom:2px solid var(--signal);padding-bottom:3px}
+@media(max-width:640px){.files code{display:none}}
+</style>
+<script src="assets/site.js" defer></script>
+</head>
+<body data-page="download">
+<header class="phead"><div class="wrap">
+  <div class="chy"><b>Download</b><span>Pick one</span></div>
+  <h1>Get <em>NFL History</em></h1>
+  <p class="lede">Three ways to play. Not sure? Start with this season: it's one file and works on any phone or computer.</p>
+  <div class="yard" id="ver">v1</div>
+</div></header>
+
+<section class="tight"><div class="wrap">
+  <div class="picks">
+    <div class="panel pick star"><span class="flag">Start here</span>
+      <div class="k">Quick start · 2 min</div><h2>This season</h2>
+      <p>The real 2026 season as of the latest week, with all of NFL history since 1966 behind it.</p>
+      <ul><li>Works in regular Football GM</li><li>Phone or computer, nothing to install</li><li>Updated every week of the season</li></ul>
+      <a class="btn go" data-goatcounter-click="download-NFL_2027_Live_FBGM.json.gz" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_2027_Live_FBGM.json.gz">Download this season</a>
+      <div class="meta">About 85 MB · upload it in Football GM → New League<br>Older phone? <a data-goatcounter-click="download-NFL_2027_Live_Lite_FBGM.json.gz" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_2027_Live_Lite_FBGM.json.gz">Phone-friendly version</a> (13 MB)</div></div>
+    <div class="panel pick">
+      <div class="k">Any season · 5 min</div><h2>Pick a year</h2>
+      <p>Any season from 1967 on, starting at preseason, any week, the playoffs or draft day. Built right in your browser.</p>
+      <ul><li>Works in regular Football GM</li><li>Phone or computer, nothing to install</li><li class="no">Built on the site, not downloaded here</li></ul>
+      <a class="btn go" href="build.html">Build a league</a>
+      <div class="meta">You download the league you build</div></div>
+    <div class="panel pick">
+      <div class="k">Full experience · 10 min once</div><h2>The mod</h2>
+      <p>History keeps happening after day one: real schedules, drafts, careers, moves and events, every one a setting.</p>
+      <ul><li>Every season built in</li><li>Updates itself</li><li class="no">Needs a computer (phones join over Wi-Fi)</li></ul>
+      <a class="btn go" data-goatcounter-click="download-NFL_History_Mod.zip" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_History_Mod.zip">Download the mod</a>
+      <div class="meta">About 26 MB · unzip, then double-click Install_and_Play<br><a href="mod.html">What the mod adds</a></div></div>
+  </div>
+</div></section>
+
+<section class="band tight"><div class="wrap">
+  <div class="sh"><div><div class="chy"><b>Every file</b><span>Latest release</span></div><h2>All downloads</h2><p>Always the newest version. Every link here points at the latest release, so it never goes stale.</p></div><a class="more" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases">Older versions on GitHub →</a></div>
+  <table class="files">
+    <tr><td><b>This season's league file</b><small>For regular Football GM. Don't unzip it.</small></td><td><code>NFL_2027_Live_FBGM.json.gz</code></td><td class="go"><a data-goatcounter-click="download-NFL_2027_Live_FBGM.json.gz" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_2027_Live_FBGM.json.gz">Download</a></td></tr>
+    <tr><td><b>This season, phone-friendly</b><small>Same season, leaves out long-retired role players. For older or low-memory phones.</small></td><td><code>NFL_2027_Live_Lite_FBGM.json.gz</code></td><td class="go"><a data-goatcounter-click="download-NFL_2027_Live_Lite_FBGM.json.gz" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_2027_Live_Lite_FBGM.json.gz">Download</a></td></tr>
+    <tr><td><b>The mod</b><small>Windows, Mac or Linux. Unzip and double-click Install_and_Play.</small></td><td><code>NFL_History_Mod.zip</code></td><td class="go"><a data-goatcounter-click="download-NFL_History_Mod.zip" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_History_Mod.zip">Download</a></td></tr>
+    <tr><td><b>Season selector, offline</b><small>Build a league without the site. Needs the seasons file below: drop it on the selector.</small></td><td><code>nfl_season_selector.html</code></td><td class="go"><a data-goatcounter-click="download-nfl_season_selector.html" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/nfl_season_selector.html">Download</a></td></tr>
+    <tr><td><b>Seasons file</b><small>Every season since 1966, for the offline selector. Not a league file: don't upload it to Football GM.</small></td><td><code>NFL_Master_1966_2026.json.gz</code></td><td class="go"><a data-goatcounter-click="download-NFL_Master_1966_2026.json.gz" href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/latest/download/NFL_Master_1966_2026.json.gz">Download</a></td></tr>
+  </table>
+  <p class="muted" style="margin-top:22px;font-size:15px">Stuck? The <a href="guide.html">step-by-step guide</a> shows every screen. Found a bug? <a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new/choose">Report it</a>.</p>
+</div></section>
+
+<script>
+// The version on the latest release, so visitors can tell they're getting the newest one
+fetch('https://api.github.com/repos/JenZiMiBruh/nfl-history-fbgm/releases/latest').then(r => r.ok ? r.json() : null).then(j => { if (j && j.tag_name) document.getElementById('ver').textContent = j.tag_name; }).catch(() => {});
+</script>
+</body>
+</html>
