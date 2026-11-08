@@ -16,6 +16,9 @@
 <meta name="twitter:image" content="https://jenzimibruh.github.io/nfl-history-fbgm/og.jpg">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Big+Shoulders+Display:wght@700;800;900&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<script src="assets/site.js" defer></script>
 <style>
 :root{--bg:#0b0f0d;--panel:#121915;--soft:#18211c;--line:#223029;--ink:#e8efe9;--muted:#93a39a;--accent:#2fd07a;--gold:#f5c542;--red:#ff5d5d;--blue:#5aa9ff;--turf:#0f3d22}
 *{box-sizing:border-box}
@@ -89,10 +92,9 @@ section.path{padding:64px 0 30px;border-top:1px solid var(--line)}
 .android .em{font-size:64px}
 .android h3{font-size:30px}
 .android p{margin:8px 0 0;color:var(--muted)}
-footer{padding:40px 0 60px;color:var(--muted);text-align:center}
 </style>
 </head>
-<body>
+<body data-page="guide">
 <header class="top"><div class="wrap">
   <h1>How to play</h1>
   <p>Three ways in. Pick the one that sounds like you. Each takes a few minutes, and every step is below with exactly what you'll see.</p>
@@ -170,7 +172,6 @@ footer{padding:40px 0 60px;color:var(--muted);text-align:center}
   <div class="android"><div class="em">🤖</div><div><h3>Yes, there's an Android app</h3><p>A native Android version exists: Football GM's engine running inside a real app, no browser. Football GM's license doesn't allow distributing builds, so it can't be released, but I'd love to put it out someday.</p></div></div>
 </div></section>
 
-<footer>A passion project by <b style="color:var(--ink)">JenZiMiBruh</b> · <a href="index.html">Team explorer</a> · Thank you, dumbmatter.</footer>
 <script>
 // ?only=today|season|mod shows one path on its own (used to make the README images)
 const only = new URLSearchParams(location.search).get("only");

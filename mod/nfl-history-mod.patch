@@ -75,10 +75,10 @@ index 2116af8f4..c94f32060 100644
  
 diff --git a/src/ui/components/Controller/NflWhatsNew.tsx b/src/ui/components/Controller/NflWhatsNew.tsx
 new file mode 100644
-index 000000000..25decf4a5
+index 000000000..1e1d4e2cf
 --- /dev/null
 +++ b/src/ui/components/Controller/NflWhatsNew.tsx
-@@ -0,0 +1,151 @@
+@@ -0,0 +1,275 @@
 +import { useEffect, useState, type ReactNode } from "react";
 +import { Modal } from "react-bootstrap";
 +
@@ -98,8 +98,129 @@ index 000000000..25decf4a5
 +	return false;
 +};
 +
-+const bold = (text: string) =>
-+	text.split("**").map((part, i) => (i % 2 ? <b key={i}>{part}</b> : part));
++// **bold** and [links](https://...), the only formatting the changelog uses
++const inline = (text: string) =>
++	text.split("**").map((part, i) => {
++		const pieces: ReactNode[] = [];
++		let last = 0;
++		for (const m of part.matchAll(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g)) {
++			pieces.push(part.slice(last, m.index));
++			pieces.push(
++				<a key={m.index} href={m[2]} target="_blank" rel="noopener noreferrer">
++					{m[1]}
++				</a>,
++			);
++			last = m.index + m[0].length;
++		}
++		pieces.push(part.slice(last));
++		return i % 2 ? <b key={i}>{pieces}</b> : <span key={i}>{pieces}</span>;
++	});
++
++// Fan polls: the same ones as the site's Updates page, read from the site so a poll can change without a mod update.
++// A vote is one GoatCounter count on /vote/<poll>/<option> (no cookies, no account), and this browser remembers it.
++const POLLS = "https://jenzimibruh.github.io/nfl-history-fbgm/data/polls.json";
++const GOATCOUNTER = "https://galloade.goatcounter.com";
++type Poll = {
++	id: string;
++	q: string;
++	note: string;
++	options: { id: string; label: string; desc: string }[];
++};
++const voteKey = (id: string) => `nflh-vote-${id}`;
++const readCount = (path: string) =>
++	fetch(`${GOATCOUNTER}/counter/${encodeURIComponent(path)}.json`)
++		.then((r) => (r.ok ? r.json() : { count: "0" }))
++		.then((j) => Number(String(j.count).replace(/[^0-9]/g, "")) || 0)
++		.catch(() => 0);
++
++const NflPoll = () => {
++	const [poll, setPoll] = useState<Poll>();
++	const [voted, setVoted] = useState<string | null>(null);
++	const [totals, setTotals] = useState<number[]>();
++
++	useEffect(() => {
++		(async () => {
++			try {
++				const data = await fetch(POLLS, { cache: "no-cache" }).then((r) =>
++					r.json(),
++				);
++				const p: Poll | undefined = data.polls.find(
++					(x: Poll) => x.id === data.inGame,
++				);
++				if (!p) {
++					return;
++				}
++				let mine: string | null = null;
++				try {
++					mine = localStorage.getItem(voteKey(p.id));
++				} catch {}
++				setVoted(mine);
++				setPoll(p);
++				if (mine) {
++					setTotals(
++						await Promise.all(
++							p.options.map((o) => readCount(`/vote/${p.id}/${o.id}`)),
++						),
++					);
++				}
++			} catch {
++				// offline: no poll
++			}
++		})();
++	}, []);
++
++	if (!poll) {
++		return null;
++	}
++
++	const vote = async (option: string) => {
++		if (voted) {
++			return;
++		}
++		try {
++			localStorage.setItem(voteKey(poll.id), option);
++		} catch {}
++		setVoted(option);
++		new Image().src = `${GOATCOUNTER}/count?p=${encodeURIComponent(`/vote/${poll.id}/${option}`)}&t=${encodeURIComponent(`Vote: ${poll.id} ${option}`)}&rnd=${Math.random().toString(36).slice(2)}`;
++		const counts = await Promise.all(
++			poll.options.map((o) => readCount(`/vote/${poll.id}/${o.id}`)),
++		);
++		// Your own vote counts right away, before GoatCounter has it
++		setTotals(
++			counts.map((n, i) => n + (poll.options[i]!.id === option ? 1 : 0)),
++		);
++	};
++
++	const sum = totals ? totals.reduce((a, b) => a + b, 0) : 0;
++	return (
++		<div className="border-top pt-3 mt-3">
++			<h5 className="mb-1">Have your say: {poll.q}</h5>
++			<p className="text-body-secondary small mb-2">
++				{voted
++					? `Thanks for voting · ${sum.toLocaleString()} ${sum === 1 ? "vote" : "votes"} so far`
++					: "One tap, no account needed."}
++			</p>
++			<div className="d-flex flex-wrap gap-2">
++				{poll.options.map((o, i) => {
++					const pct = totals && sum ? Math.round((totals[i]! / sum) * 100) : 0;
++					return (
++						<button
++							key={o.id}
++							type="button"
++							title={o.desc}
++							disabled={!!voted}
++							className={`btn btn-sm ${voted === o.id ? "btn-primary" : "btn-outline-secondary"}`}
++							onClick={() => vote(o.id)}
++						>
++							{o.label}
++							{voted && totals ? ` · ${pct}%` : ""}
++						</button>
++					);
++				})}
++			</div>
++		</div>
++	);
++};
 +
 +const render = (md: string, newestOnly: boolean) => {
 +	const out: ReactNode[] = [];
@@ -120,7 +241,7 @@ index 000000000..25decf4a5
 +			flush();
 +			out.push(<h4 key={out.length}>{line.slice(3)}</h4>);
 +		} else if (sections > 0 && line.startsWith("- ")) {
-+			list.push(<li key={list.length}>{bold(line.slice(2))}</li>);
++			list.push(<li key={list.length}>{inline(line.slice(2))}</li>);
 +		}
 +	}
 +	flush();
@@ -215,7 +336,10 @@ index 000000000..25decf4a5
 +						{show === "new" ? "What's new in the NFL History mod" : "NFL History changelog"}
 +					</Modal.Title>
 +				</Modal.Header>
-+				<Modal.Body>{render(changelog, show === "new")}</Modal.Body>
++				<Modal.Body>
++					{render(changelog, show === "new")}
++					<NflPoll />
++				</Modal.Body>
 +				<Modal.Footer>
 +					{show === "new" ? (
 +						<button className="btn btn-secondary" type="button" onClick={() => setShow("all")}>
@@ -2219,16 +2343,10 @@ index e9d89db1f..24ca44d52 100644
  					contractAmount: p.contract.amount,
  				});
 diff --git a/src/worker/core/phase/processScheduledEvents.ts b/src/worker/core/phase/processScheduledEvents.ts
-index 9d9e5a586..a89cd7125 100644
+index 9d9e5a586..adf515a41 100644
 --- a/src/worker/core/phase/processScheduledEvents.ts
 +++ b/src/worker/core/phase/processScheduledEvents.ts
-@@ -10,11 +10,13 @@ import {
- 	player,
- 	finances,
- 	freeAgents,
-+	draft,
- } from "../../core/index.ts";
- import type {
+@@ -15,6 +15,7 @@ import type {
  	ScheduledEvent,
  	Conditions,
  	RealTeamInfo,
@@ -2236,7 +2354,7 @@ index 9d9e5a586..a89cd7125 100644
  } from "../../../common/types.ts";
  import { PHASE, PLAYER } from "../../../common/constants.ts";
  import local from "../../util/local.ts";
-@@ -528,14 +530,121 @@ const processExpansionDraft = async (
+@@ -528,14 +529,137 @@ const processExpansionDraft = async (
  	];
  };
  
@@ -2248,62 +2366,78 @@ index 9d9e5a586..a89cd7125 100644
 +// NFL history mod: a franchise moves to another city as a new franchise (the 1995 Browns became the Ravens, while the
 +// Browns' name and history stayed in Cleveland). The players, their contracts and the draft picks go to the new team,
 +// instead of free agency and an expansion draft. The expansion draft event for the new team is then skipped, since the
-+// team is already playing. Returns undefined if the move can't happen (the new team is already playing), so the old
-+// team just folds.
++// team is already playing. Returns undefined if the move can't happen (the new franchise isn't in the league as an
++// inactive team, or is already playing), so the old team just folds.
++//
++// The new franchise is switched on here directly rather than through addNewTeamToExistingLeague: that one generates
++// picks for it (on top of the old team's, which it takes over) and adds filler prospects to the next three draft
++// classes, both right for a new team but not for a team that moved.
 +const processRelocation = async (
 +	from: Team,
 +	teamInfo: RelocationTeam,
 +	realTeamInfo: RealTeamInfo | undefined,
 +) => {
 +	const tid = teamInfo.tid;
-+	if (tid === undefined) {
-+		return;
-+	}
-+	const prev = await idb.cache.teams.get(tid);
-+	if (prev && !prev.disabled) {
++	const prev = tid === undefined ? undefined : await idb.cache.teams.get(tid);
++	if (!prev || !prev.disabled) {
 +		return;
 +	}
 +	if (realTeamInfo) {
 +		applyRealTeamInfo(teamInfo as any, realTeamInfo, g.get("season"));
 +	}
 +
++	// Picks the old team owns, and its own picks that another team owns, become the new team's. Done before the new team
++	// is active, so no picks are ever generated for it alongside these
++	const draftPicks = (await idb.cache.draftPicks.getAll()).filter(
++		(dp) => dp.tid === from.tid || dp.originalTid === from.tid,
++	);
++	for (const dp of draftPicks) {
++		if (dp.tid === from.tid) {
++			dp.tid = prev.tid;
++		}
++		if (dp.originalTid === from.tid) {
++			dp.originalTid = prev.tid;
++		}
++	}
++	await idb.cache.draftPicks.putAll(draftPicks);
++
 +	// The new team takes the old team's place in the league until a realignment says otherwise
 +	const did = Number.parseInt(teamInfo.did);
-+	const to = await team.addNewTeamToExistingLeague(
-+		{
-+			...teamInfo,
-+			did: g.get("divs").some((div) => div.did === did) ? did : from.did,
-+			pop: Number(teamInfo.pop ?? from.pop),
-+			imgURL: teamInfo.imgURL,
-+			stadiumCapacity:
-+				teamInfo.stadiumCapacity === undefined
-+					? undefined
-+					: Number(teamInfo.stadiumCapacity),
-+			tid,
-+		},
-+		{ fromScheduledEvent: true },
-+	);
++	const div =
++		g.get("divs").find((d) => d.did === did) ??
++		g.get("divs").find((d) => d.did === from.did);
++	const to: Team = {
++		...prev,
++		region: teamInfo.region,
++		name: teamInfo.name,
++		abbrev: teamInfo.abbrev,
++		did: div ? div.did : from.did,
++		cid: div ? div.cid : from.cid,
++		pop: Number(teamInfo.pop ?? from.pop),
++		disabled: false,
++	};
++	if (teamInfo.imgURL !== undefined) {
++		to.imgURL = teamInfo.imgURL;
++	}
++	if (teamInfo.imgURLSmall !== undefined) {
++		to.imgURLSmall = teamInfo.imgURLSmall;
++	}
++	if (teamInfo.colors !== undefined) {
++		to.colors = teamInfo.colors;
++	}
++	if (teamInfo.jersey !== undefined) {
++		to.jersey = teamInfo.jersey;
++	}
++	if (teamInfo.stadiumCapacity !== undefined) {
++		to.stadiumCapacity = Number(teamInfo.stadiumCapacity);
++	}
++	await idb.cache.teams.put(to);
 +
 +	const players = await idb.cache.players.indexGetAll("playersByTid", from.tid);
 +	for (const p of players) {
 +		p.tid = to.tid;
 +	}
 +	await idb.cache.players.putAll(players);
-+
-+	// Picks the old team owns, and its own picks that another team owns, become the new team's
-+	await draft.genPicks();
-+	const draftPicks = (await idb.cache.draftPicks.getAll()).filter(
-+		(dp) => dp.tid === from.tid || dp.originalTid === from.tid,
-+	);
-+	for (const dp of draftPicks) {
-+		if (dp.tid === from.tid) {
-+			dp.tid = to.tid;
-+		}
-+		if (dp.originalTid === from.tid) {
-+			dp.originalTid = to.tid;
-+		}
-+	}
-+	await idb.cache.draftPicks.putAll(draftPicks);
 +
 +	// A user running the old team keeps running it in its new city
 +	const userTids = g.get("userTids");
@@ -2358,7 +2492,7 @@ index 9d9e5a586..a89cd7125 100644
  	await team.disable(t.tid);
  
  	const text = `<b>Contraction!</b> The ${t.region} ${t.name} franchise is disbanding. All their players will become free agents.`;
-@@ -543,7 +652,15 @@ const processContraction = async (
+@@ -543,7 +667,15 @@ const processContraction = async (
  	return [text];
  };
  
@@ -2375,7 +2509,7 @@ index 9d9e5a586..a89cd7125 100644
  	const p = await idb.merged.players.get(pid);
  
  	// Player might be deleted or already retired
-@@ -558,11 +675,11 @@ const processRetirePlayer = async (pid: number, conditions: Conditions) => {
+@@ -558,11 +690,11 @@ const processRetirePlayer = async (pid: number, conditions: Conditions) => {
  	await player.retire(p, conditions);
  	await idb.cache.players.put(p);
  
@@ -2390,7 +2524,7 @@ index 9d9e5a586..a89cd7125 100644
  
  		return [text];
  	}
-@@ -570,8 +687,48 @@ const processRetirePlayer = async (pid: number, conditions: Conditions) => {
+@@ -570,8 +702,48 @@ const processRetirePlayer = async (pid: number, conditions: Conditions) => {
  	return [];
  };
  
@@ -2440,7 +2574,7 @@ index 9d9e5a586..a89cd7125 100644
  	const p = await idb.merged.players.get(pid);
  
  	// Player might have been deleted or might not be retired. In both of those cases, there is nothing to do.
-@@ -605,16 +762,27 @@ const processUnretirePlayer = async (pid: number) => {
+@@ -605,16 +777,27 @@ const processUnretirePlayer = async (pid: number) => {
  
  	p.retiredYear = Infinity;
  	player.addToFreeAgents(p, await getNumPlayersTradedAwayNormalizedAll());
@@ -2470,7 +2604,7 @@ index 9d9e5a586..a89cd7125 100644
  
  		return [text];
  	}
-@@ -675,6 +843,15 @@ export const processScheduledEvents = async (
+@@ -675,6 +858,15 @@ export const processScheduledEvents = async (
  					confsDivsDids,
  				)),
  			);
@@ -2486,7 +2620,7 @@ index 9d9e5a586..a89cd7125 100644
  		} else if (scheduledEvent.type === "gameAttributes") {
  			eventLogTexts.push(...(await processGameAttributes(scheduledEvent.info)));
  		} else if (scheduledEvent.type === "awards") {
-@@ -697,13 +874,23 @@ export const processScheduledEvents = async (
+@@ -697,13 +889,23 @@ export const processScheduledEvents = async (
  				)),
  			);
  		} else if (scheduledEvent.type === "contraction") {

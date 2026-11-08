@@ -215,7 +215,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const out = [];
     for (const block of md.split(/\n## /).slice(1)) {
       const v = block.split('\n')[0];
-      for (const m of block.matchAll(/^- \*\*(.+?)\*\*\s*(.*)$/gm)) { if (!/^Limits/.test(m[1])) out.push({ v, t: m[1].replace(/\.$/, ''), d: m[2] }); if (out.length >= 3) break; }
+      for (const m of block.matchAll(/^- \*\*(.+?)\*\*\s*(.*)$/gm)) { if (!/^(Limits|Have your say)/.test(m[1])) out.push({ v, t: m[1].replace(/\.$/, ''), d: m[2] }); if (out.length >= 3) break; }
       if (out.length >= 3) break;
     }
     const { esc } = window.NFLH;

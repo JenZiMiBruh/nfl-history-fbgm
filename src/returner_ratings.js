@@ -78,13 +78,19 @@ for (const { p, season, spd, bsc } of targets.values()) {
   r.bsc = Math.max(r.bsc, bsc);
   let gain = Math.max(0, Math.min(MAX_SPD_GAIN, Math.round(spd) - r.spd));
   r.spd += gain;
-  // Bring his overall back: lower the give ratings one point at a time, whichever moves his overall at all, until it
-  // is back to where it was. If a point overshoots, take back speed until it matches
-  let guard = 0;
-  while (R.computeOvr(r, r.pos) > own && guard++ < 400) {
-    const k = GIVE.filter(k => r[k] > FLOOR).sort((a, b) => GIVE.indexOf(a) - GIVE.indexOf(b))
-      .find(k => { r[k]--; const moved = R.computeOvr(r, r.pos, true) < R.computeOvr({ ...r, [k]: r[k] + 1 }, r.pos, true); r[k]++; return moved; });
-    if (!k) break;
+  // Bring his overall back: one point at a time, lower whichever of the give ratings his position uses is highest right
+  // now, so the cost is spread out instead of draining one rating. If a point overshoots, take back speed until it
+  // matches
+  const used = GIVE.filter(k => {
+    if (r[k] === undefined) return false;
+    const base = R.computeOvr(r, r.pos, true);
+    r[k]--; const moved = R.computeOvr(r, r.pos, true) < base; r[k]++;
+    return moved;
+  });
+  while (R.computeOvr(r, r.pos) > own) {
+    let k;
+    for (const c of used) if (r[c] > FLOOR && (k === undefined || r[c] > r[k])) k = c;
+    if (k === undefined) break;
     r[k]--;
   }
   while (R.computeOvr(r, r.pos) < own && gain > 0) { r.spd--; gain--; }

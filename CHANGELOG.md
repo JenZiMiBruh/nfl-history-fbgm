@@ -9,7 +9,10 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 ## v1.20.12 · Nov 7, 2026
 
 - **No more "# Division Games and # Conference Games settings were reset" message** when you upload this season's league file. The file asked for 6 division games plus 12 more conference games, 18 in a 17-game season, so Football GM threw both settings out and the schedule stopped favoring division and conference opponents. It's now the real NFL format: 6 division games and 6 other conference games. Leagues built with the season selector or the mod already had this right. A check now stops a release that gets it wrong.
-- **Have your say.** Vote on what gets built and fixed next, no account needed: [jenzimibruh.github.io/nfl-history-fbgm/updates.html#vote](https://jenzimibruh.github.io/nfl-history-fbgm/updates.html#vote)
+- **Players traded mid-season start with the right team.** Some players' teams were listed out of order, so a league starting in that season put them on the team they were traded to: Bob Tucker started 1977 in Minnesota instead of New York, and took a real Viking's roster spot. 591 players' seasons are in the right order now.
+- **The Browns' move to Baltimore no longer doubles the Ravens' draft picks** (mod). The move gave Baltimore the Browns' picks on top of a fresh set of its own, and added filler prospects to the next three drafts as if it were an expansion team.
+- **Returners' ratings are spread out more evenly.** Keeping a returner's overall the same now takes a little from several of his ratings instead of a lot from one.
+- **Have your say.** Vote on what gets built and fixed next, no account needed: in the mod, right at the bottom of this What's new screen, or on the site at [jenzimibruh.github.io/nfl-history-fbgm/updates.html#vote](https://jenzimibruh.github.io/nfl-history-fbgm/updates.html#vote)
 
 ## v1.20.11 · Nov 7, 2026
 
