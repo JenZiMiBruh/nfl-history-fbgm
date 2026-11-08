@@ -270,7 +270,7 @@ Football GM, like Basketball GM, names a season by the year it ends. The 2008 NF
 
 <details><summary><b>How do I vote, and can I see the results?</b></summary>
 
-On the site's [Updates page](https://jenzimibruh.github.io/nfl-history-fbgm/updates.html#vote), or at the bottom of the mod's What's new screen. No account needed, one vote per browser. Results show after you vote, so the current leader doesn't sway anyone.
+On the site's [Updates page](https://jenzimibruh.github.io/nfl-history-fbgm/updates.html#vote), or at the bottom of the mod's What's new screen. No account needed: one vote in each poll. Results show after you vote, so the current leader doesn't sway anyone.
 </details>
 
 <details><summary><b>How do I uninstall the mod?</b></summary>

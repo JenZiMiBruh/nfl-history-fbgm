@@ -33,7 +33,7 @@
           <span class="txt"><b>${esc(o.label)}</b><small>${esc(o.desc)}</small></span>
           <span class="pct">${voted ? pct + '%' : 'Vote'}</span></button>`;
       }).join('')}</div>
-      <p class="pfoot">${voted ? `Thanks for voting · ${sum.toLocaleString()} ${sum === 1 ? 'vote' : 'votes'} so far` : 'No account needed. One vote per browser.'}</p>`;
+      <p class="pfoot">${voted ? `Thanks for voting · ${sum.toLocaleString()} ${sum === 1 ? 'vote' : 'votes'} so far` : 'No account needed. One vote per poll: vote in each one.'}</p>`;
     el.querySelectorAll('.opt').forEach(b => b.onclick = () => {
       if (mine(P.id)) return;
       remember(P.id, b.dataset.o);
