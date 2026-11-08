@@ -9,7 +9,8 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 ## v1.20.13 · Nov 8, 2026
 
 - **A "?" next to every NFL History setting** on the New League screen (mod), like Football GM's own settings. Tap it to see what the setting does.
-- **The poll is at the top of What's new** (mod), so you see it without scrolling past the changelog.
+- **A better poll on What's new** (mod): it's at the top now, each option shows what it means, and once you vote each one fills like a bar to its share, with your pick marked.
+- **More to vote on:** a draft day show, a record book, older seasons, real trades and signings, and network scoreboards; and logos, real events, and speed and crashes in the bugs poll.
 
 Only the mod changed: no need to start a new league.
 

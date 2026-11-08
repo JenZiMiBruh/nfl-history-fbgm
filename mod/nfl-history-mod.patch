@@ -75,10 +75,10 @@ index 2116af8f4..c94f32060 100644
  
 diff --git a/src/ui/components/Controller/NflWhatsNew.tsx b/src/ui/components/Controller/NflWhatsNew.tsx
 new file mode 100644
-index 000000000..3c319a2c3
+index 000000000..67190e37a
 --- /dev/null
 +++ b/src/ui/components/Controller/NflWhatsNew.tsx
-@@ -0,0 +1,295 @@
+@@ -0,0 +1,343 @@
 +import { useEffect, useState, type ReactNode } from "react";
 +import { Modal } from "react-bootstrap";
 +
@@ -219,20 +219,68 @@ index 000000000..3c319a2c3
 +					? `Thanks for voting · ${sum.toLocaleString()} ${sum === 1 ? "vote" : "votes"} so far`
 +					: problem || "One tap, no account needed."}
 +			</p>
-+			<div className="d-flex flex-wrap gap-2">
++			{/* Tiles: name and what it means; once voted, each fills like a bar to its share, your pick outlined */}
++			<div
++				style={{
++					display: "grid",
++					gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
++					gap: 8,
++				}}
++			>
 +				{poll.options.map((o, i) => {
 +					const pct = totals && sum ? Math.round((totals[i]! / sum) * 100) : 0;
++					const mine = voted === o.id;
++					const showResult = !!voted && !!totals;
 +					return (
 +						<button
 +							key={o.id}
 +							type="button"
-+							title={o.desc}
 +							disabled={!!voted || sending}
-+							className={`btn btn-sm ${voted === o.id ? "btn-primary" : "btn-outline-secondary"}`}
++							aria-pressed={mine}
 +							onClick={() => vote(o.id)}
++							className="text-start"
++							style={{
++								position: "relative",
++								overflow: "hidden",
++								display: "flex",
++								alignItems: "center",
++								gap: 10,
++								padding: "9px 12px",
++								borderRadius: 8,
++								border: `1px solid ${mine ? "var(--bs-primary)" : "var(--bs-border-color)"}`,
++								background: "var(--bs-tertiary-bg)",
++								color: "var(--bs-body-color)",
++								cursor: voted ? "default" : "pointer",
++								opacity: 1,
++							}}
 +						>
-+							{o.label}
-+							{voted && totals ? ` · ${pct}%` : ""}
++							<span
++								aria-hidden="true"
++								style={{
++									position: "absolute",
++									inset: "0 auto 0 0",
++									width: `${showResult ? pct : 0}%`,
++									background: mine
++										? "rgba(var(--bs-primary-rgb), 0.35)"
++										: "rgba(var(--bs-primary-rgb), 0.15)",
++									transition: "width 0.7s ease",
++								}}
++							/>
++							<span style={{ position: "relative", flex: 1, minWidth: 0 }}>
++								<span className="d-block fw-bold">
++									{o.label}
++									{mine ? " ✓" : ""}
++								</span>
++								<span className="d-block small text-body-secondary">
++									{o.desc}
++								</span>
++							</span>
++							<span
++								className={showResult ? "fw-bold" : "small text-primary"}
++								style={{ position: "relative", whiteSpace: "nowrap" }}
++							>
++								{showResult ? `${pct}%` : "Vote"}
++							</span>
 +						</button>
 +					);
 +				})}

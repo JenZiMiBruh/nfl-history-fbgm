@@ -48,6 +48,31 @@
           "id": "portraits",
           "label": "Player photos",
           "desc": "Real headshots on player pages"
+        },
+        {
+          "id": "draft-show",
+          "label": "Draft day show",
+          "desc": "Watch the real draft unfold pick by pick, with grades and reactions"
+        },
+        {
+          "id": "records",
+          "label": "Record book",
+          "desc": "All-time and single-season records, and alerts when your players chase them"
+        },
+        {
+          "id": "pre-1966",
+          "label": "Older seasons",
+          "desc": "The 1950s and early 1960s, before the AFL"
+        },
+        {
+          "id": "real-moves",
+          "label": "Real trades and signings",
+          "desc": "Mid-season trades and free-agent signings on the real dates, every season"
+        },
+        {
+          "id": "scoreboards",
+          "label": "Network scoreboards",
+          "desc": "Era-accurate TV scorebugs during games, from 1966 to today"
         }
       ]
     },
@@ -75,6 +100,21 @@
           "id": "setup",
           "label": "Setting it up",
           "desc": "Downloading, uploading or installing the mod"
+        },
+        {
+          "id": "logos",
+          "label": "Logos and uniforms",
+          "desc": "A wrong logo, jersey or color for a team or era"
+        },
+        {
+          "id": "events",
+          "label": "Real events",
+          "desc": "Retirements, comebacks or suspensions happening wrong or not at all"
+        },
+        {
+          "id": "performance",
+          "label": "Speed and crashes",
+          "desc": "Slow sims, freezes or errors"
         }
       ]
     }
