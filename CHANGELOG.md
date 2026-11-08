@@ -17,6 +17,8 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 - **The 2017 retirement goes to the right Steve Smith.** Two receivers named Steve Smith were born in 1979; the one with a 2002 season was retiring instead of Steve Smith Sr.
 - **Family ties.** 435 players now show their fathers, sons and brothers: Archie, Peyton and Eli Manning; Deion, Shedeur and Shilo Sanders; the Watts, Kelces, Bosas, Barbers and Matthews. The Relatives page works out grandfathers, uncles and cousins from those. Arch Manning isn't linked: his tie to Archie and Peyton runs through his father Cooper, who didn't play.
 - **Roster limits favor players who spent the season with the team.** A player traded away early no longer takes the spot of a regular who stayed.
+- **Only real Hall of Famers.** Tom Brady, Antonio Brown, J.J. Watt and 20 other recently retired players were marked as Hall of Famers in this season's file and on the site, though none have been inducted (Football GM marks a player the moment he retires if his stats clear its formula). Now only players really inducted count.
+- **Shilo Sanders' bio fixed:** born in 2000, played at Colorado (it said 2003 and Clemson).
 - **Have your say.** Vote on what gets built and fixed next, no account needed: in the mod, right at the bottom of this What's new screen, or on the site at [jenzimibruh.github.io/nfl-history-fbgm/updates.html#vote](https://jenzimibruh.github.io/nfl-history-fbgm/updates.html#vote)
 
 ## v1.20.11 · Nov 7, 2026

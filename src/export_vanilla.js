@@ -24,6 +24,12 @@ const m = JSON.parse(fs.readFileSync(path.join(ROOT, 'NFL_Master_1966_2026.json'
     throw new Error(`${ga.numGamesDiv} division + ${ga.numGamesConf} conference games is more than the ${at(ga.numGames)}-game season`);
   }
 }
+// Hall of Fame only for players really inducted by now (data_cache/hof_years.json). Football GM marks a player the
+// moment he retires if his career clears its formula, which had Tom Brady, Antonio Brown and 21 others in the Hall
+{
+  const hofYears = JSON.parse(fs.readFileSync(path.join(ROOT, 'data_cache', 'hof_years.json'), 'utf8'));
+  for (const p of m.players) p.hof = !!(hofYears[p.pid] && hofYears[p.pid] <= m.gameAttributes.season);
+}
 // The master keeps every scheduled event since 1966 for slicing. A league that starts today has already passed them:
 // apply each passed team change (logos, colors, jerseys, names) so the teams show today's look, then queue only
 // future events. Without this, changes like the 2026 Titans Shield never fire.
