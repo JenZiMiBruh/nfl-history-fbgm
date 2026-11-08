@@ -190,7 +190,12 @@ async function main() {
 
   const ip = Object.values(os.networkInterfaces()).flat().find(a => a && a.family === 'IPv4' && !a.internal)?.address;
   say('\n  Ready. Opening http://localhost:3000');
-  if (ip) say(`  On your phone (same Wi-Fi): http://${ip}:3000`);
+  if (ip) {
+    say(`  On your phone (same Wi-Fi): http://${ip}:3000`);
+    // Newer Android blocks Chrome from home-network addresses until it's allowed, with "This site can't be reached"
+    say("  Android says \"This site can't be reached\"? Phone Settings > Apps > Chrome > Permissions >");
+    say('  Nearby devices (or Local network) > Allow, then close Chrome fully and open the address again.');
+  }
   say('  Keep this window open while you play.\n');
   setTimeout(() => openUrl('http://localhost:3000'), 4000);
   let child;
