@@ -669,9 +669,21 @@
     // Football GM throws about 55% of plays at passFactor 1. Real NFL pass share (attempts / plays):
     // about 47% before 1978, 53% in 1978-89, 55-56% in 1990-2009, 58% from 2010.
     const era = ERA_FACTORS && (ERA_FACTORS[season] || ERA_FACTORS[Math.min(season, 2025)]);
-    const passFactor = era && era.passFactor !== undefined ? era.passFactor : season <= 1977 ? 0.9 : season <= 1989 ? 1 : season <= 2009 ? 1.05 : 1.1;
+    // More plays (pace, below) come out as runs, because passing volume was already right
+    const passFactor = Math.round((era && era.passFactor !== undefined ? era.passFactor : season <= 1977 ? 0.9 : season <= 1989 ? 1 : season <= 2009 ? 1.05 : 1.1) * 0.965 * 1000) / 1000;
+    // Time between plays. A full sim ran 4-8% too few plays, nearly all of it missing runs.
+    const pace = stepLookup({ 1966: 1.07, 1970: 1.13, 1980: 1.12, 1990: 1.07, 2000: 1.06, 2010: 1.08 }, season);
     const simFactors = {};
     for (const k of SIM_FACTOR_KEYS) simFactors[k] = era && era[k] !== undefined ? era[k] : 1;
+    // A full sim from 1966 threw this much too few interceptions per attempt, measured by decade
+    simFactors.intFactor = Math.round(simFactors.intFactor * stepLookup({ 1966: 1.24, 1970: 1.2, 1980: 1.23, 1990: 1.18, 2000: 1.19, 2010: 1.16, 2020: 1.22 }, season) * 1000) / 1000;
+    // How much AI teams keep their lead back on the field, from each era's real share of team carries. 0.95 gave about 43%
+    // in every era; real shares were 40% in the 1970s, 45% in the 1980s, 52-56% in 1990-2009, 50% in the 2010s, 48% since.
+    // With QB carries corrected, values below 1 move the share a lot and values above 1 barely at all (the lead back is already on the field). The last value stays in force after real history ends.
+    const nflLeadBackWorkload = season <= 1979 ? 0.82 : season <= 1989 ? 0.95 : season <= 1999 ? 1.2 : season <= 2009 ? 1.25 : season <= 2019 ? 1.12 : 1.05;
+    // How often the QB is an option on a designed run. 0.5 gave QBs about 22% of carries in every era; real shares were 7%
+    // before 1980, 8% in the 1980s, 10% in 1990-2009, 12% in the 2010s and 15% since. Scrambles add about 4 points on their own.
+    const nflQbRunRate = season <= 1979 ? 0.08 : season <= 1989 ? 0.11 : season <= 2009 ? 0.17 : season <= 2019 ? 0.22 : 0.31;
     const scrimmageTouchbackKickoff = season <= 2015 ? 20 : season <= 2023 ? 25 : season === 2024 ? 30 : 35;
     const maxOvertimes = season <= 1973 ? 0 : 1; // regular-season ties stood until 1974
     const footballOvertime = season <= 2011 ? 'suddenDeath' : season <= 2023 ? 'exceptFg' : 'bothPossess';
@@ -692,14 +704,14 @@
     return {
       numGames, numGamesPlayoffSeries, numPlayoffByes, numDraftRounds, maxRosterSize, minRosterSize: maxRosterSize - 8,
       salaryCap, salaryCapType, minPayroll: Math.round(salaryCap * 0.89), minContract, maxContract,
-      ...simFactors, twoPointConversions, passFactor, scrimmageTouchbackKickoff, maxOvertimes, footballOvertime, footballOvertimePlayoffs, overtimeLength,
+      ...simFactors, twoPointConversions, passFactor, pace, nflLeadBackWorkload, nflQbRunRate, scrimmageTouchbackKickoff, maxOvertimes, footballOvertime, footballOvertimePlayoffs, overtimeLength,
       overtimeLengthPlayoffs: 15, numGamesConf, numGamesDiv, rookieContractLengths,
       draftPickAutoContract: true // Football GM's Rookie Scale setting, on (it's off by default in football)
     };
   }
   // Rule keys that scheduled gameAttributes events keep in sync with getRules().
   const RULE_KEYS = ['numGames', 'numPlayoffByes', 'numDraftRounds', 'maxRosterSize', 'minRosterSize', 'salaryCap', 'salaryCapType',
-    'minPayroll', 'minContract', 'maxContract', 'numGamesPlayoffSeries', 'twoPointConversions', 'passFactor', 'completionFactor', 'intFactor', 'sackFactor', 'fumbleFactor', 'rushYdsFactor', 'passYdsFactor', 'scrimmageTouchbackKickoff', 'maxOvertimes',
+    'minPayroll', 'minContract', 'maxContract', 'numGamesPlayoffSeries', 'twoPointConversions', 'passFactor', 'pace', 'nflLeadBackWorkload', 'nflQbRunRate', 'completionFactor', 'intFactor', 'sackFactor', 'fumbleFactor', 'rushYdsFactor', 'passYdsFactor', 'scrimmageTouchbackKickoff', 'maxOvertimes',
     'footballOvertime', 'footballOvertimePlayoffs', 'overtimeLength', 'numGamesConf', 'numGamesDiv', 'rookieContractLengths'];
 
   // ---------------------------------------------------------------------------
@@ -709,6 +721,10 @@
   // Phases: Football GM runs events as it enters a phase, so an event during the season is filed under the regular
   // season (it happened by week 1) or after the trade deadline (later in the season, the nearest it gets)
   const PLAYER_EVENTS = [
+    { season: 1998, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Leon Bender', born: 1976 }, // died before his first game
+    { season: 1999, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Brandon Burlsworth', born: 1977 }, // died before his first game
+    { season: 2022, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Otis Anderson', born: 1998 }, // died before his first game
+    { season: 2024, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Khyree Jackson', born: 1999 }, // died before his first game
     { season: 1999, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Reggie White', born: 1961 },
     { season: 2000, phase: PHASE.PRESEASON, type: 'unretirePlayer', name: 'Reggie White', born: 1961, tid: 4 },
     { season: 2001, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Reggie White', born: 1961 },
@@ -779,15 +795,11 @@
     { season: 2008, phase: PHASE.FREE_AGENCY, type: 'unretirePlayer', name: 'Michael Vick', born: 1980, tid: 25 },
     { season: 2007, phase: 2, type: 'retirePlayer', name: 'Sean Taylor', born: 1983 },
     { season: 2008, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Kevin Everett', born: 1982 },
-    { season: 2011, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Peyton Manning', born: 1976 }, // neck surgeries, missed 2011
-    { season: 2011, phase: PHASE.FREE_AGENCY, type: 'unretirePlayer', name: 'Peyton Manning', born: 1976, tid: 9 },
     { season: 2015, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Patrick Willis', born: 1985 },
     { season: 2015, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Chris Borland', born: 1990 },
     { season: 2016, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Calvin Johnson', born: 1985 },
     { season: 2018, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Ryan Shazier', born: 1992 },
     { season: 2019, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Andrew Luck', born: 1989 },
-    { season: 2019, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Alex Smith', born: 1984 }, // leg infection, returned 2020
-    { season: 2019, phase: PHASE.FREE_AGENCY, type: 'unretirePlayer', name: 'Alex Smith', born: 1984, tid: 31 },
     { season: 2020, phase: PHASE.PRESEASON, type: 'retirePlayer', name: 'Luke Kuechly', born: 1991 },
     // Brady retired for 40 days after the 2021 season, then came back to Tampa
     { season: 2021, phase: PHASE.DRAFT_LOTTERY, type: 'retirePlayer', name: "Tom Brady", born: 1977 },
@@ -798,12 +810,8 @@
     { season: 2010, phase: PHASE.PRESEASON, type: 'retirePlayer', name: "Junior Seau", born: 1969 },
     { season: 1980, phase: PHASE.PRESEASON, type: 'retirePlayer', name: "John Riggins", born: 1949 },
     { season: 1981, phase: PHASE.PRESEASON, type: 'unretirePlayer', name: "John Riggins", born: 1949, tid: 31 },
-    { season: 2018, phase: PHASE.PRESEASON, type: 'retirePlayer', name: "Le'Veon Bell", born: 1992 },
-    { season: 2018, phase: PHASE.FREE_AGENCY, type: 'unretirePlayer', name: "Le'Veon Bell", born: 1992, tid: 24 },
     { season: 2015, phase: PHASE.PRESEASON, type: 'retirePlayer', name: "Josh Gordon", born: 1991 },
     { season: 2016, phase: PHASE.PRESEASON, type: 'unretirePlayer', name: "Josh Gordon", born: 1991, tid: 7 },
-    { season: 2022, phase: PHASE.PRESEASON, type: 'retirePlayer', name: "Calvin Ridley", born: 1994 },
-    { season: 2022, phase: PHASE.FREE_AGENCY, type: 'unretirePlayer', name: "Calvin Ridley", born: 1994, tid: 14 },
     // Careers that ended off the field
     { season: 2014, phase: PHASE.REGULAR_SEASON, type: 'retirePlayer', name: "Ray Rice", born: 1987 },
     { season: 2017, phase: PHASE.PRESEASON, type: 'retirePlayer', name: "Colin Kaepernick", born: 1987 },
@@ -837,7 +845,8 @@
     { season: 2016, phase: PHASE.REGULAR_SEASON, type: 'suspension', name: "Tom Brady", born: 1977, games: 4, reason: 'Suspended (Deflategate)' },
     { season: 2017, phase: PHASE.AFTER_TRADE_DEADLINE, type: 'suspension', name: "Ezekiel Elliott", born: 1995, games: 6, reason: 'Suspended (personal conduct policy)' },
     { season: 2022, phase: PHASE.REGULAR_SEASON, type: 'suspension', name: "Deshaun Watson", born: 1995, games: 11, reason: 'Suspended (personal conduct policy)' },
-    { season: 2022, phase: PHASE.REGULAR_SEASON, type: 'suspension', name: "DeAndre Hopkins", born: 1992, games: 6, reason: 'Suspended (PED policy)' }
+    { season: 2022, phase: PHASE.REGULAR_SEASON, type: 'suspension', name: "DeAndre Hopkins", born: 1992, games: 6, reason: 'Suspended (PED policy)' },
+    { season: 2025, phase: PHASE.REGULAR_SEASON, type: 'suspension', name: "Justin Tucker", born: 1989, games: 10, reason: 'Suspended (personal conduct policy)' }
   ];
 
   // Why each player event happened (shown in the news by the NFL history mod). Key: type|name|season.
@@ -904,6 +913,15 @@
 
   // Major injuries in league history: [name, born, season, games missed, type, died?]
   // Stored in each player's injury history (shown on the player page).
+  // Absences that didn't simply end the season: [team games before it, games out, injury], checked against game logs
+  const INJURY_TIMING = {
+    'Johnny Unitas|1968': [[0, 9, 'Elbow']], 'Joe Namath|1971': [[0, 10, 'Knee']], 'Jerry Rice|1997': [[1, 14, 'Torn ACL']],
+    'Troy Aikman|2000': [[1, 2, 'Concussions'], [5, 1, 'Concussions'], [14, 2, 'Concussions']],
+    'Wes Welker|2009': [], 'Adrian Peterson|2011': [[15, 1, 'Torn ACL']],
+    'Rob Gronkowski|2013': [[0, 6, 'Forearm and back'], [13, 3, 'Torn ACL']],
+    'Christian McCaffrey|2020': [[2, 6, 'Ankle'], [9, 7, 'Shoulder and thigh']],
+    'Tua Tagovailoa|2022': [[4, 2, 'Concussions'], [15, 2, 'Concussions']],
+  };
   const HISTORICAL_INJURIES = [
     ['Joe Namath', 1943, 1970, 9, 'Broken wrist'], ['Joe Namath', 1943, 1971, 10, 'Knee'],
     ['Gale Sayers', 1943, 1968, 5, 'Torn knee ligaments'], ['Gale Sayers', 1943, 1970, 12, 'Knee'],
@@ -1025,6 +1043,16 @@
       const reason = EVENT_REASONS[pe.type + '|' + pe.name + '|' + pe.season];
       if (reason) info.reason = reason;
       ev.push({ season: pe.season, phase: pe.phase, type: pe.type, info });
+    }
+
+    // Famous real injuries, sent like suspensions. Most ended the player's season, so he's hurt after the games he
+    // really played. Deaths are handled by retirement and the real death year; playoff injuries have no regular-season games to miss.
+    for (const [name, born, season, games, type, died] of HISTORICAL_INJURIES) {
+      if (died || games <= 0 || /playoffs|super bowl/i.test(type)) continue;
+      const pid = resolvePid ? resolvePid(name, born, season) : undefined;
+      if (pid === undefined) continue;
+      const stints = INJURY_TIMING[name + '|' + season] || [[Math.max(0, getRules(season).numGames - games), games, type]];
+      for (const [afterGames, out, label] of stints) ev.push({ season, phase: PHASE.REGULAR_SEASON, type: 'gameAttributes', info: { nflInjury: { pid, type: label, games: out, afterGames } } });
     }
 
     // Football GM processes realignment before team changes within the same phase.
@@ -1184,10 +1212,16 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       const p = Object.assign({}, src);
       // Real ratings for later seasons, followed by the NFL history mod as the league is simmed.
       const realRatings = {};
+      // A real move to receiver (Jimmy Smith, Devin Hester, Marlin Briscoe) changes his position in the league too. Only
+      // with a real receiver season behind it: elsewhere the position column has one-year blips from the ratings.
+      let lastPos;
       for (const r of src.ratings || []) {
-        if (r.season <= S) continue;
+        if (r.season <= S) { lastPos = r.pos; continue; }
         const row = {};
         for (const k of RATING_KEYS) if (typeof r[k] === 'number') row[k] = r[k];
+        const catches = (src.stats || []).filter(s => !s.playoffs && s.season === r.season).reduce((a, s) => a + (s.rec || 0), 0);
+        if (r.pos === 'WR' && lastPos !== undefined && lastPos !== 'WR' && catches >= 10) { row.pos = 'WR'; lastPos = 'WR'; }
+        if (lastPos === undefined) lastPos = r.pos;
         realRatings[r.season] = row;
       }
       if (Object.keys(realRatings).length) p.realRatings = realRatings; else delete p.realRatings;
@@ -1219,6 +1253,9 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       if (Object.keys(realJerseys).length) p.realJerseys = realJerseys; else delete p.realJerseys;
       if (realMoves.length) p.realMoves = realMoves; else delete p.realMoves;
       // Kept even when empty: an empty list means his real career ends here.
+      // A season with no games but a real roster spot: he stays on that team (Andrew Luck, injured reserve 2017)
+      for (const [season, g] of Object.entries(src.gapSeasons || {})) if (+season > S) realTeams[season] = g.tid;
+      delete p.gapSeasons;
       p.realTeams = realTeams;
       p.injury = { type: 'Healthy', gamesRemaining: 0 };
       delete p.gamesUntilTradable;
@@ -1232,7 +1269,8 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
         const r0 = (opts.realDraftRatings !== false && src.draftRow) || src.ratings.find(r => r.season === debut) || src.ratings[0];
         p.tid = -2;
         p.ratings = [Object.assign({}, r0, { season: debut - 1 })];
-        p.stats = []; p.awards = []; p.transactions = []; p.salaries = []; p.statsTids = []; p.injuries = []; delete p.diedYear;
+        p.stats = []; p.awards = []; p.transactions = []; p.salaries = []; p.statsTids = []; p.injuries = [];
+        p.nflDeath = p.diedYear !== undefined ? p.diedYear + 1 : 0; delete p.diedYear;
         p.draft = Object.assign({}, src.draft, { year: debut - 1, round: 0, pick: 0, tid: -1, originalTid: -1 });
         // Where he was really drafted, so the NFL history mod can have that team pick him.
         if (src.draft && src.draft.round > 0 && src.draft.tid >= 0) p.realDraft = { year: debut - 1, round: src.draft.round, pick: src.draft.pick, tid: src.draft.tid };
@@ -1251,7 +1289,9 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       p.transactions = (src.transactions || []).filter(t => t.season < S || (t.season === S && (DONE || (t.phase !== undefined && t.phase <= P))));
       p.salaries = (src.salaries || []).filter(s => s.season <= S);
       p.injuries = (src.injuries || []).filter(i => i.season < S || (DONE && i.season === S));
-      if (p.diedYear !== undefined && p.diedYear >= S) delete p.diedYear;
+      // A death still to come happens in the league the year it really did (nflDeath: league season; 0: none known)
+      if (p.diedYear === undefined) p.nflDeath = 0;
+      else if (p.diedYear >= S) { p.nflDeath = p.diedYear + 1; delete p.diedYear; }
       p.ratings = src.ratings.filter(r => r.season <= S);
       if (!p.ratings.length) p.ratings = [Object.assign({}, src.ratings[0], { season: S })];
       // Starting partway through the live season: the ratings he had going into that week (week_ratings.js)
@@ -1297,7 +1337,12 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
           const row = byTid.get(tid);
           for (const [k, v] of Object.entries(l)) row[k] = k.endsWith('Lng') ? Math.max(row[k] || 0, v) : (row[k] || 0) + v;
           row.gp = (row.gp || 0) + 1;
-          if (qbStart.has(src.pid + '|' + day + '|' + tid)) { row.gs = (row.gs || 0) + 1; }
+          if (qbStart.has(src.pid + '|' + day + '|' + tid)) {
+            row.gs = (row.gs || 0) + 1;
+            // His record as the starter, from that game's real score
+            const game = (opts.weekly.games || []).find(g => g[0] === day && (g[1] === tid || g[2] === tid));
+            if (game) { const mine = game[1] === tid ? game[3] : game[4], theirs = game[1] === tid ? game[4] : game[3]; const k = mine > theirs ? 'qbW' : mine < theirs ? 'qbL' : 'qbT'; row[k] = (row[k] || 0) + 1; }
+          }
         }
         p.stats.push(...byTid.values());
         p.statsTids = [...new Set(p.stats.map(s => s.tid))];
@@ -1321,11 +1366,24 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
           if (ls.some(x => x[0] < W) && ls.some(x => x[0] >= W)) p._gp += 100;
           else if (!ls.some(x => Math.abs(x[0] - W) <= 2)) p._gp *= 0.25;
         }
+        // A starter hurt early keeps his roster spot: a few games this year doesn't make him a fringe player (Brady 2008)
+        {
+          const full = E.getRules(S).numGames, prev = reg.filter(st => st.season === S - 1), sum = (rs, k) => rs.reduce((x, st) => x + (st[k] || 0), 0);
+          // And a season-long starter keeps it even if most of his games came after a trade (Dave Casper, 1980)
+          if (!W && sum(rowsS, 'gs') >= full / 2) p._gp = Math.max(p._gp, full);
+          if (!W && total < full / 2 && sum(rowsS, 'gs') >= total / 2 && sum(prev, 'gp') >= full / 2 && sum(prev, 'gs') >= sum(prev, 'gp') / 2) p._gp = Math.max(p._gp, full);
+        }
         p._ovr = p.ratings[p.ratings.length - 1].ovr;
         (rosterByTid[p.tid] = rosterByTid[p.tid] || []).push(p);
       } else if (last < S) {
         p.tid = -3;
         p.retiredYear = last + 1;
+      } else if ((src.gapSeasons || {})[S]) {
+        // A season with no games but a real roster spot: he starts on that team (Peyton Manning, Colts, 2011)
+        p.tid = src.gapSeasons[S].tid;
+        p._gp = E.getRules(S).numGames;
+        p._ovr = p.ratings[p.ratings.length - 1].ovr;
+        (rosterByTid[p.tid] = rosterByTid[p.tid] || []).push(p);
       } else {
         p.tid = -1; // between stints: free agent
       }
@@ -1433,7 +1491,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       }
       // Family links only to players still in the league (a dropped father would be a link to nobody)
       const kept = new Set(players.map(p => p.pid));
-      for (const p of players) if (p.relatives) { p.relatives = p.relatives.filter(r => kept.has(r.pid)); if (!p.relatives.length) delete p.relatives; }
+      for (const p of players) { if (p.relatives) { p.relatives = p.relatives.filter(r => kept.has(r.pid)); if (!p.relatives.length) delete p.relatives; } if (p.nflFamily) { p.nflFamily = p.nflFamily.filter(r => kept.has(r.pid)); if (!p.nflFamily.length) delete p.nflFamily; } }
       if (typeof console !== 'undefined') console.log('phone-friendly: kept ' + players.length + ' of ' + before + ' players');
     }
     fitPayrolls(players, rules);
@@ -1538,6 +1596,8 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     ga.useRealSchedules = true;
     // Last season with real data: after it, real retirements and historical rosters leave players to the game.
     ga.nflRealDataLastSeason = E.LAST_SEASON;
+    // Starting at the playoffs: the real seeds, not Football GM's tiebreakers
+    if (phaseName === 'playoffs' && master.playoffSeeds && master.playoffSeeds[S]) ga.nflRealSeeds = { season: S + 1, seeds: master.playoffSeeds[S] };
     // Real jersey retirements after the start season, applied by the mod on schedule (Fitzgerald's #11, 2026); the
     // game's own invented retirements are off.
     ga.aiJerseyRetirement = false;
@@ -1608,14 +1668,73 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     // the draft would miss them, so they fire at the next phase instead (Panthers and Jaguars from After Playoffs 1994).
     const scheduledEvents = (P >= 4 ? E.buildScheduledEvents(S, 3, resolvePid).filter(e => !(e.season === S && e.phase <= P && !['expansionDraft', 'contraction'].includes(e.type)))
       .map(e => (e.season === S && e.phase <= P ? Object.assign({}, e, { phase: P + 1 }) : e)) : E.buildScheduledEvents(S, P, resolvePid));
+    // Comebacks to the team he really left: Your Team First sends these back to whoever had him (Favre moving on doesn't count)
+    for (const e of scheduledEvents) {
+      if (e.type !== 'unretirePlayer' || e.info.tid === undefined) continue;
+      const src = (master.players.find(x => x.pid === e.info.pid) || {}).stats || [];
+      const before = src.filter(s => !s.playoffs && s.gp > 0 && s.season < e.season).sort((a, b) => a.season - b.season).pop();
+      if (before && before.tid === e.info.tid) e.info.sameTeam = true;
+    }
+
+    // Out for a whole real season while on a roster (named injuries already have their own event)
+    {
+      // Each event needs its own id: the selector's checkboxes and league files go by it
+      let nextId = Math.max(0, ...scheduledEvents.map(e => e.id || 0)) + 1;
+      const OUT = { RES: 'Injured reserve', PUP: 'Physically unable to perform', NWT: 'Not with team', SUS: 'Suspended', EXE: 'Commissioner exempt list', RSN: 'Reserve list', RSR: 'Reserve list', E14: 'Reserve list' };
+      for (const src of master.players) {
+        for (const [season, g] of Object.entries(src.gapSeasons || {})) {
+          const label = OUT[g.status];
+          if (!label || +season < S) continue;
+          if (+season === S && phaseName === 'regular') {
+            // Already into the season: he's out for the games left
+            const q = players.find(x => x.pid === src.pid);
+            if (q && q.tid >= 0) q.injury = { type: label, gamesRemaining: Math.max(1, E.getRules(S).numGames + 1 - ((W || 1) - 1)) };
+            continue;
+          }
+          if (+season === S && P > 0) continue;
+          scheduledEvents.push({ id: nextId++, season: +season, phase: E.PHASE.REGULAR_SEASON, type: 'gameAttributes', info: { nflInjury: { pid: src.pid, type: label, games: E.getRules(+season).numGames, afterGames: 0 } } });
+        }
+      }
+    }
+
+    // Real deaths still to come, by league season and NFL week (99: the offseason)
+    ga.nflDeathWeeks = {};
+    for (const p of players) {
+      if (p.nflDeath > 0 && p.diedDate) {
+        const [y, mo, d] = p.diedDate.split('-').map(Number);
+        const inSeason = mo >= 8 || (mo === 1 && d <= 7);
+        const week = inSeason ? Math.min(18, Math.max(1, Math.floor((Date.UTC(y, mo - 1, d) - Date.UTC(p.nflDeath - 1, 8, 8)) / 604800000) + 1)) : 99;
+        (ga.nflDeathWeeks[p.nflDeath] = ga.nflDeathWeeks[p.nflDeath] || []).push([p.pid, week]);
+      }
+      delete p.diedDate;
+      if (p.nflDeath > 0 && p.diedCause) p.nflDeathCause = p.diedCause;
+      delete p.diedCause;
+    }
+
     // A league starting at week W of the regular season has already passed this season's week-1 suspensions, so the
     // games still to serve start out as an absence (Josh Gordon from week 3 of 2014: 8 of his 10 games left)
-    if (W) {
+    // Starting at the regular season itself counts as week 1: those events' moment has already passed
+    const startWeek = W || (phaseName === 'regular' ? 1 : 0);
+    if (startWeek) {
       for (const e of E.buildScheduledEvents(S, 0, resolvePid)) {
+        const inj = e.info && e.info.nflInjury;
+        if (inj && e.season === S) {
+          // Already hurt by week W: the games still to miss. Otherwise it's still to come, W-1 games closer.
+          const q = players.find(x => x.pid === inj.pid);
+          if (q && q.tid >= 0) {
+            const done = startWeek - 1 - inj.afterGames;
+            if (done < 0) (q.nflPendingInjuries = q.nflPendingInjuries || []).push({ type: inj.type, games: inj.games, weeks: -done, span: inj.games, season: S + 1 });
+            else if (inj.games > done) {
+              // Out through the end of the season: countdowns tick on a bye too, so count the weeks left, not the games
+              const numGames = E.getRules(S).numGames, toEnd = inj.afterGames + inj.games >= numGames;
+              q.injury = { type: inj.type, gamesRemaining: toEnd ? numGames + 1 - (startWeek - 1) : inj.games - done };
+            }
+          }
+        }
         const s = e.info && e.info.nflSuspension;
         if (!s || e.season !== S || e.phase !== PHASES.regular) continue;
         const p = players.find(x => x.pid === s.pid);
-        const left = s.games - (W - 1);
+        const left = s.games - (startWeek - 1);
         if (p && p.tid >= 0 && left > 0) p.injury = { type: s.reason, gamesRemaining: Math.max(left, (p.injury && p.injury.gamesRemaining) || 0) };
       }
     }
@@ -1761,10 +1880,10 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
   const EVENT_CATEGORIES = [
     ['rules', 'Rule changes'], ['realignment', 'Realignment'], ['expansion', 'Expansion and folding'],
     ['relocation', 'Relocations and renames'], ['branding', 'Logos, colors, jerseys, markets'],
-    ['retire', 'Retirements'], ['comeback', 'Comebacks'], ['suspension', 'Suspensions']
+    ['retire', 'Retirements'], ['comeback', 'Comebacks'], ['suspension', 'Suspensions'], ['injury', 'Injuries']
   ];
   function eventCategory(e) {
-    if (e.type === 'gameAttributes') return e.info.nflSuspension ? 'suspension' : 'rules';
+    if (e.type === 'gameAttributes') return e.info.nflSuspension ? 'suspension' : e.info.nflInjury ? 'injury' : 'rules';
     if (e.type === 'confsDivs') return 'realignment';
     if (e.type === 'contraction' && e.info.nflRelocateTo) return 'relocation';
     if (e.type === 'expansionDraft' || e.type === 'contraction') return 'expansion';
@@ -1790,6 +1909,10 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     if (e.type === 'gameAttributes' && i.nflSuspension) {
       const n = (nameByPid && nameByPid[i.nflSuspension.pid]) || 'Player ' + i.nflSuspension.pid;
       return n + ': ' + i.nflSuspension.reason + ', ' + i.nflSuspension.games + ' games';
+    }
+    if (e.type === 'gameAttributes' && i.nflInjury) {
+      const n = (nameByPid && nameByPid[i.nflInjury.pid]) || 'Player ' + i.nflInjury.pid;
+      return n + ': ' + i.nflInjury.type + ', out ' + i.nflInjury.games + ' games';
     }
     if (e.type === 'gameAttributes') return 'Rules: ' + Object.entries(i).map(([k, v]) => k + ' ' + (Array.isArray(v) ? '[' + v + ']' : v)).join(', ');
     const name = (nameByPid && nameByPid[i.pid]) || 'Player ' + i.pid;

@@ -85,6 +85,10 @@ Every player who played in 2025, one dot each. Most of the league sits in the 40
 
 Because every season is rated on its own, careers tell their real story: Brady's slow start and two-decade peak, Rice's longevity, Mahomes arriving at the top.
 
+## Injury seasons and data holes
+
+A starter who plays a quarter of a season or less keeps last year's level, and his next season decides whether he really lost anything: Tom Brady stays near his 2007 level in 2008, while Terrell Davis drops when he comes back worse. A league's top three at a position's main stat are never rated like backups, and a full season as a starter far below the years around it is treated as a hole in the data. All of these only ever raise a rating.
+
 ## Players with thin stats
 
 Linemen and short careers fall back on their AV rank alone, with skills in their position's typical shape. A player who was on rosters but never played gets a low rating, not a missing one.

@@ -18,4 +18,10 @@ Combining sources means combining their mistakes. Stat heads *will* notice, so [
 | Draft years | Undrafted players listed as drafted in their debut year | Normalized per player |
 | Positions and weights | One source's typo | Taken from the source with the most games |
 
+| Playoff seeds | Saved seeds were positions, not real seeds | Real seeds from each season's playoff page, 1975 on; an order that reproduces the real games before that; the 1968 bracket repaired |
+| Position listings | Late-career receivers rated as linemen, backup QBs as receivers | Each season takes the position and skills of his nearest correct season |
+| Two Ron Smiths | A quarterback and a returner shared a record | Split into two players |
+| Death data | Two wrong matches and games credited after death | Removed; exact dates and causes added where known |
+| Seasons with no games | Players on injured reserve, suspended or holding out left their team | The real rosters keep them on it, out for the year |
+
 Left alone on purpose: supplemental draft picks, namesakes who really were two people, real gaps in the sources, and Taysom Hill being whatever position Taysom Hill is.

@@ -164,6 +164,42 @@ for (let S = FROM; S <= TO; S++) {
         if (n !== (played[t.tid] || 0)) bad('record vs real games', `${tag} ${t.abbrev} ${n} vs ${played[t.tid] || 0}`);
       }
     }
+    // History checks: is the right person in the right place? Each of these was a bug a clean sweep once missed.
+    {
+      const ids = (L.scheduledEvents || []).map(e => e.id);
+      if (new Set(ids).size !== ids.length || ids.some(x => x === undefined)) bad('scheduled events without unique ids', tag);
+      const lp = new Map(L.players.map(p => [p.pid, p]));
+      const pidOf = e => e.info.pid ?? e.info.nflSuspension?.pid ?? e.info.nflInjury?.pid;
+      if (!lite) for (const e of L.scheduledEvents || []) { const id = pidOf(e); if (id !== undefined && !lp.has(id)) bad('scheduled event for a player not in the league', tag + ' ' + e.type + ' ' + id); }
+      for (const p of L.players) if (typeof p.diedYear === 'number' && p.tid >= 0) bad('dead player on a team', tag + ' ' + p.lastName);
+      const early = ph === 'preseason' || (ph === 'regular' && w <= 1);
+      // Every saved playoff seed matches the real table
+      for (const ps of L.playoffSeries || []) { const real = (m.playoffSeeds || {})[ps.season - 1]; if (!real) continue; const seedOf = {}; for (const list of Object.values(real)) list.forEach((tid, i) => { seedOf[tid] = i + 1; }); for (const round of ps.series || []) for (const g of round) for (const x of [g.home, g.away]) if (x && seedOf[x.tid] !== undefined && x.seed !== seedOf[x.tid]) bad('saved playoff seed is wrong', `${tag} ${ps.season} tid ${x.tid} seed ${x.seed}`); }
+      if (ph === 'playoffs' && (m.playoffSeeds || {})[S] && !ga.nflRealSeeds) bad('playoff start without real seeds', tag);
+      if (!lite && (ph === 'preseason' || ph === 'regular')) {
+        const full = E.getRules(S).numGames, OUT = new Set(['RES', 'PUP', 'NWT', 'SUS', 'EXE', 'RSN', 'RSR', 'E14', 'KNOWN']);
+        const statsOf = (src, y) => (src.stats || []).filter(x => !x.playoffs && x.season === y), sum = (r, k) => r.reduce((a2, x) => a2 + (x[k] || 0), 0);
+        const out = q => (q.injury && q.injury.gamesRemaining > 0) || (q.nflPendingInjuries || []).length > 0;
+        const eventFor = pid => (L.scheduledEvents || []).some(e => e.info.nflInjury && e.info.nflInjury.pid === pid && e.season === season);
+        for (const src of m.players) {
+          const q = lp.get(src.pid);
+          if (!q) continue;
+          const prev = statsOf(src, S - 1), starter = sum(prev, 'gp') >= full / 2 && sum(prev, 'gs') >= sum(prev, 'gp') / 2;
+          const g = (src.gapSeasons || {})[S];
+          if (g) {
+            if (early && starter && q.tid !== g.tid) bad('starter who really sat out is not on his real team', `${tag} ${q.firstName} ${q.lastName} tid ${q.tid}, real ${g.tid}`);
+            if (OUT.has(g.status) && q.tid >= 0 && !out(q) && !(ph === 'preseason' && eventFor(src.pid))) bad('player out for the season is not out', `${tag} ${q.firstName} ${q.lastName} ${g.status}`);
+          }
+          if (early && sum(statsOf(src, S), 'gs') >= full / 2 && q.tid < 0) bad('real starter that season in free agency', `${tag} ${q.firstName} ${q.lastName}`);
+          if (ph === 'regular' && w > 1 && S >= 1999 && (q.ratings.at(-1) || {}).pos === 'QB') for (const r of (q.stats || []).filter(x => x.season === season && !x.playoffs)) if ((r.gs || 0) > 0 && (r.qbW || 0) + (r.qbL || 0) + (r.qbT || 0) !== r.gs) bad('QB record does not add up to his starts', `${tag} ${q.lastName} ${r.gs} starts, ${r.qbW || 0}-${r.qbL || 0}`);
+        }
+        if (early) for (const [name, born, y, games, type, died] of E.HISTORICAL_INJURIES) {
+          if (y !== S || died || games <= 0 || /playoffs|super bowl/i.test(type) || (name === 'Wes Welker' && y === 2009)) continue; // Welker: last game of the season, no games to miss
+          const q = L.players.find(x => `${x.firstName} ${x.lastName}`.replace(/ (Jr\.?|Sr\.?|II|III|IV)$/, '') === name.replace(/ (Jr\.?|Sr\.?|II|III|IV)$/, '') && Math.abs(x.born.year - born) <= 1);
+          if (q && q.tid >= 0 && !out(q) && !eventFor(q.pid)) bad('known injury will never happen', `${tag} ${name} ${type}`);
+        }
+      }
+    }
     const ex = {}; for (const e of L.scheduledEvents || []) if (e.type === 'expansionDraft') { const k = e.season + '|' + e.phase; if (ex[k]) bad('duplicate expansion draft', tag + ' ' + k); ex[k] = 1; }
   }
   process.stdout.write(S + ' ');

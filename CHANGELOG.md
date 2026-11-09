@@ -6,6 +6,28 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.21.0 · Nov 8, 2026
+
+**Start a new league to get all of this.**
+
+- **Real injuries happen.** Brady in 2008, Theismann, Peyton Manning in 2011 and more strike when they really did and keep the player out for the real games, including injuries with more than one absence. Setting: Scheduled Injuries.
+- **Players who really missed a season stay on their team.** Injured reserve, suspensions and holdouts come from the real rosters: Andrew Luck stays a Colt in 2017 instead of leaving the league.
+- **Real deaths, on their real week,** with causes where known. Young and in-career deaths appear under Frivolities > Tragic Deaths. Setting: Scheduled Deaths.
+- **Comebacks: Your Team First (new default).** If a player really returned to the team he left, he comes back to you when he retired on your team. If he really moved on, like Favre to the Jets, he goes where he really went.
+- **Comebacks leave the Hall of Fame** and go back in when they retire again.
+- **Injury seasons no longer sink a rating.** A star who barely played keeps his level, and his next season decides: Brady 2008 goes from 71 to 82.
+- **Running backs get more of the ball.** Quarterbacks took twice their real share of carries, teams ran too few plays, and workhorse backs now get real workloads. Plays, passes and runs land within about 1% of real, and running back careers went from 69% to 89% of real.
+- **Interceptions by era** now land within a few percent of real, and linebackers get their real share of them.
+- **Suspensions no longer count bye weeks** as games served.
+- **Real moves to receiver happen in the sim** (Jimmy Smith, Devin Hester), and false position listings were corrected (Bob Hayes, Paul Warfield).
+- **Arch Manning is linked to Archie, Peyton and Eli** as their grandson and nephew.
+- **AFC, NFC, AFL and NFL logos** on All-Star box scores, for the right era.
+- **Scan to play on your phone:** the mod's window now shows a QR code, plus what to check if the phone can't connect.
+- **Real playoff brackets.** Every saved season has its real seeds, and a league that starts at the playoffs plays the real bracket.
+- **Real starters keep their roster spots.** Dan Marino in 1983, Brady in 2008 and others no longer start in free agency, and players who really missed a whole year stay on their team.
+- **Early stars rated like stars,** including the AFL's Jim Nance, Daryle Lamonica and Joe Namath.
+- **Fixed player records:** two Ron Smiths were one player; wrong death data for Jake Scott and Steve Henry.
+
 ## v1.20.16 · Nov 8, 2026
 
 - **No more "JSON schema validation errors" warning** when you load a league. Four in-season events (Marshawn Lynch's and Philip Rivers' comebacks, Chuck Hughes, Ezekiel Elliott's suspension) were missing the phase they happen in, so they could never fire, and one player's birth record was missing a field. Every league is now checked against Football GM's own file format before release.

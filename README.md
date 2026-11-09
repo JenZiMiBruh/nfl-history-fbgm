@@ -93,7 +93,7 @@ Everything above, plus history that keeps happening: the real schedule every sea
 1. **Download** the mod from the [Download page](https://jenzimibruh.github.io/nfl-history-fbgm/download.html) and unzip it.
 2. **Double-click** `Install_and_Play.bat` (Mac or Linux: `install_and_play.sh`). The first run sets up in 5–10 minutes.
 3. The game opens in your browser. In **New League**, the **NFL History** box lets you pick any season.
-4. **On your phone**, open the address the window shows, on the same Wi-Fi.
+4. **On your phone**, scan the QR code in the window, or open the address it shows, on the same Wi-Fi. If it won't load, see the [phone FAQ](#faq).
 
 The mod checks for updates every time you start it and shows what's new.
 
@@ -176,6 +176,11 @@ The league file works anywhere, but stock Football GM forgets history the moment
 | 🗓️ **Real schedules** | Every real game, in order, since 1966 |
 | 🎯 **Real drafts** | The real players go to the teams that really took them |
 | 📰 **Real events** | Retirements, comebacks, and suspensions for the real number of games, during the season when they really happened |
+| 🏥 **Real injuries** | Famous injuries strike when they really did, and players who missed a whole season stay on their real team, out for the year (setting: Scheduled Injuries) |
+| 🕯️ **Real deaths** | On their real week, with the cause where known. Young and in-career deaths appear in Tragic Deaths (setting: Scheduled Deaths) |
+| 🔙 **Your Team First** | A player who really returned to the team he left comes back to you if he retired on your team. One who really moved on goes where he really went (setting: Comeback Destination) |
+| 🏃 **Era football** | Lead back workload, QB runs, pace and interceptions change by era (settings: Lead Back Workload, QB Designed Run Rate) |
+| 🏆 **Real playoff seeds** | Every saved bracket has the real seeds, and a league that starts at the playoffs plays the real bracket |
 | 🔁 **Moves on the real date** | The Browns' players and picks move to Baltimore in 1996, expansion drafts, mid-season trades, numbers retired when they really were |
 | ⚙️ **Era calibration** | Seven sim factors retuned every season: 1972 plays like 1972 |
 | 🎨 **Your team's colors** | The whole interface takes your team's colors, and changes when theirs do |
@@ -199,7 +204,7 @@ The test: start in 1966, sim all the way to today, and compare with what really 
 
 - League-wide stats per era land within a few tenths of real
 - Team ratings line up with real records (median correlation 0.83 by season), and 94% of All-Pros rate top 5 at their position
-- Quarterbacks finish at 97% and running backs at 99% of their real careers (median)
+- Quarterbacks finish at 103% and running backs at 89% of their real careers (median), with league-wide plays, passes and runs each within about 1% of real
 
 Details in [docs/results.md](docs/results.md).
 
@@ -210,7 +215,12 @@ It's a beta, so here's what's known and not fixed yet. Seen something not on thi
 | Issue | Where | Details |
 |---|---|---|
 | **The Browns' move needs the mod** | Regular Football GM | Football GM can't move a team without its history, so in a league from 1995 or earlier the Browns' players go to free agency and Baltimore holds an expansion draft. History stays right in Cleveland. [Why, and vote on it](#faq) |
-| **Arch Manning isn't linked to his family** | Everywhere | His tie to Archie, Peyton and Eli runs through his father Cooper, who didn't play, so Football GM can't connect them |
+| **Arch Manning's family needs the mod** | Regular Football GM | His tie to Archie, Peyton and Eli runs through his father Cooper, who didn't play. The mod shows it on player pages; regular Football GM can't |
+| **Windows warns about the mod** | Installing the mod | The mod isn't signed with a paid certificate. Choose Keep if the browser warns, then More info → Run anyway on the blue screen |
+| **Running backs finish a bit short** | The mod | Star running back careers land around 89% of real, and workhorse seasons can run a little high |
+| **Some ratings follow a stat that likes good teams** | Everywhere | Ratings lean on Approximate Value, so a great player in a quieter year can rate low (Patrick Mahomes in 2024). Use the Flag a rating button |
+| **Everyday injuries in past seasons** | The mod | Famous and season-long injuries are in. Ordinary short injuries from past seasons aren't, so a mid-season start only shows those |
+| **Seasons with no roster record** | The mod | Mostly before 2002: a player who missed a whole year with no record of where he was is a free agent that year |
 | **Mod on an Android phone: "This site can't be reached"** | The mod, played on a phone | Android blocks Chrome from local addresses until you allow it: Settings → Apps → Chrome → Permissions → Nearby devices (or Local network) → Allow. [More](#faq) |
 | **Practice-squad call-ups** | Leagues starting mid-season, mostly 2020–21 | Football GM has no practice squad. Players who were only called up for games may start as free agents |
 | **Late-season events happen at the trade deadline** | The mod | Football GM runs events between phases, so something from December (Marshawn Lynch's 2019 return) happens at the trade deadline |
@@ -259,6 +269,8 @@ Why not move the team and its history? Then the Browns' 1966-95 records, players
 Yes. Download this season or build any season on the site, then upload it in Football GM's New League screen. The mod runs on a computer, and your phone can play on it over Wi-Fi: open the address the mod window shows, on the same Wi-Fi.
 
 **"This site can't be reached" (ERR_TOO_MANY_RETRIES) on Android?** Newer Android versions stop Chrome from opening addresses on your home network until you allow it. On the phone, open **Settings → Apps → Chrome → Permissions**, set **Nearby devices** (or **Local network**) to **Allow**, then close Chrome fully and open the address again. If the router's page (192.168.0.1 or similar) also won't open on the phone, this is the fix.
+
+Still stuck? Check that the phone and computer are on the same Wi-Fi (not mobile data or a guest network), that Windows Firewall allows Node.js on private networks, and that no VPN is on. **After a mod update,** force stop Chrome on the phone (Settings > Apps > Chrome > Force stop), or it keeps running the old version in the background.
 </details>
 
 <details><summary><b>How current is this season's file?</b></summary>

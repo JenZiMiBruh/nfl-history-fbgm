@@ -67,12 +67,17 @@
         {
           "id": "real-moves",
           "label": "Real trades and signings",
-          "desc": "Mid-season trades and free-agent signings on the real dates, every season"
+          "desc": "Players already change teams when they really did, counted in games played. This adds the real dates, trade news, and who was traded for whom"
         },
         {
           "id": "scoreboards",
           "label": "Network scoreboards",
           "desc": "Era-accurate TV scorebugs during games, from 1966 to today"
+        },
+        {
+          "id": "future-nfl",
+          "label": "Future NFL eras",
+          "desc": "After real history ends the league keeps evolving: by 2045 teams might run far more than they did in 2020"
         }
       ]
     },

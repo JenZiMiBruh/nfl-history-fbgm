@@ -20,20 +20,20 @@ The test: start in 1966, sim to today with the mod on, and compare with real his
 
 Simmed win % correlates with the real records at **0.66** across 1,770 team-seasons.
 
-### Careers (sim total as % of real; each position's 60 biggest real careers)
+### Careers (sim total as % of real; each position's 60 biggest real careers, from the v1.21 full sim)
 
 | Position | Stat | Median | Middle half |
 |---|---|---|---|
-| QB | passing yards | **97%** | 85–106% |
-| RB | rushing yards | **99%** | 82–110% |
-| WR | receiving yards | 85% | 78–94% |
-| TE | receiving yards | 91% | 79–108% |
-| LB | tackles | 93% | 86–101% |
-| CB | interceptions | 91% | 77–109% |
-| S | interceptions | 82% | 66–97% |
-| DL | sacks | 70% | 60–87% |
+| QB | passing yards | **103%** | 94–111% |
+| RB | rushing yards | **89%** | 77–99% |
+| WR | receiving yards | 100% | 92–108% |
+| TE | receiving yards | 91% | 84–109% |
+| LB | tackles | 96% | 87–107% |
+| CB | interceptions | 84% | 71–104% |
+| S | interceptions | 85% | 70–98% |
+| DL | sacks | 81% | 71–94% |
 
-Running backs went from 71–86% in the previous sim to 99% after the lead-back change.
+Getting running backs right took three changes: quarterbacks were taking twice their real share of carries, lead backs needed more of the two-back snaps in the workhorse era, and teams were running 4–8% too few plays. Plays, passes and runs now land within about 1% of real in every decade.
 
 ## Where it's still off
 

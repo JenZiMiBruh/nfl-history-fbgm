@@ -192,9 +192,21 @@ async function main() {
   say('\n  Ready. Opening http://localhost:3000');
   if (ip) {
     say(`  On your phone (same Wi-Fi): http://${ip}:3000`);
+    // A QR code to scan instead of typing it. Never let a problem here stop the game from starting.
+    try {
+      const { qrLines } = await import('./qr.mjs');
+      console.log('\n  Or scan this with your phone\'s camera:\n');
+      for (const line of qrLines(`http://${ip}:3000`)) console.log(line);
+      console.log('');
+    } catch (e) { log(String(e)); }
     // Newer Android blocks Chrome from home-network addresses until it's allowed, with "This site can't be reached"
-    say("  Android says \"This site can't be reached\"? Phone Settings > Apps > Chrome > Permissions >");
-    say('  Nearby devices (or Local network) > Allow, then close Chrome fully and open the address again.');
+    say("  Phone says \"This site can't be reached\"? Check these in order:");
+    say('    1. Phone and computer are on the same Wi-Fi (not mobile data or a guest network).');
+    say('    2. Android: Settings > Apps > Chrome > Permissions > Nearby devices (or Local network) > Allow,');
+    say('       then force stop Chrome (Settings > Apps > Chrome > Force stop) and try again.');
+    say('    3. Windows asked about the firewall? Allow Node.js on private networks.');
+    say('    4. Still no? A VPN on either device can block it. Turn it off and try again.');
+    say('  After a mod update, force stop Chrome on your phone so it loads the new version.');
   }
   say('  Keep this window open while you play.\n');
   setTimeout(() => openUrl('http://localhost:3000'), 4000);
