@@ -6,6 +6,16 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## Logo update · Nov 9, 2026
+
+**Live on the site's Build a league page now. Downloads and the mod get it in the next release.**
+
+- **Secondary logos by era.** Teams now carry their real alternate logo for each era, used for the small logo and midfield. Not every team had one in every era: if a team didn't, it uses its primary, and the Raiders and Steelers have none.
+- **Wrong primary logos fixed.** Bears: bear head from 2023. Giants: GIANTS script, 1976-99, replacing an anniversary logo. Jets: plane wordmark from 2024, with the oval as the secondary. Chiefs, Eagles, Rams, Broncos and Lions eras now match the record too.
+- **Cleaner Browns helmets.** The white halo is gone from 1970-2014.
+
+---
+
 ## v1.21.0 · Nov 8, 2026
 
 **Start a new league to get all of this.**

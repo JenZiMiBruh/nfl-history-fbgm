@@ -24,4 +24,7 @@ Combining sources means combining their mistakes. Stat heads *will* notice, so [
 | Death data | Two wrong matches and games credited after death | Removed; exact dates and causes added where known |
 | Seasons with no games | Players on injured reserve, suspended or holding out left their team | The real rosters keep them on it, out for the year |
 
+| Wrong primary logos | Bears' C after 2023, a Giants anniversary logo for 1976-99, Jets' primary and secondary swapped from 2024 | Every era compared by eye against SportsLogos.net and Wikipedia ([`fix_logos_bears_giants.js`](../src/fix_logos_bears_giants.js)) |
+| Secondary logos | One secondary for one team, applied to every season | `secondary: { tid: [{ from, to, data }] }` in the logo data, chosen per season. A team with none uses its primary. Every change gets a scheduled event ([`apply_logos_to_master.js`](../src/apply_logos_to_master.js), run by `finish_master`) |
+
 Left alone on purpose: supplemental draft picks, namesakes who really were two people, real gaps in the sources, and Taysom Hill being whatever position Taysom Hill is.

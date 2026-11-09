@@ -9,7 +9,9 @@ No single source covers 60 years of the NFL, so every player is matched across s
 | [nflverse](https://github.com/nflverse) | 1966–2027 rosters, 1999+ stats, games, weekly injuries | The backbone: player IDs, birthdates, heights, weights, modern stats, the live season |
 | Pro-Football-Reference (via the Internet Archive) | 1966–98 season, roster, team and draft pages | Pre-1999 stats, Approximate Value for every season |
 | Wikipedia | Awards, All-Pro and Pro Bowl teams, drafts, Hall of Fame, retired numbers, uniform histories | Honors, drafts, jersey eras, events and their reasons |
-| Logopedia, Wikimedia Commons | Logos | 146 era looks, rebuilt at high resolution from vector originals where they exist |
+| Logopedia, Wikimedia Commons | Primary logos | Era looks, rebuilt at high resolution from vector originals where they exist |
+| SportsLogos.net | Logo dates, secondary logos | Dated primary and alternate logos for every franchise, used to audit primaries and to choose secondaries |
+| Wikipedia | Logo overrides | Used over SportsLogos where it is explicit and cited (Bears, Giants, Jets, Patriots) |
 | Wikidata | Deaths, photos | 2,229 dates of death and 4,700 player photos |
 | ESPN | College football | Rosters, recruiting grades, the 2027 draft board and headshots for the draft classes |
 | spreadspoke, nflverse games | Scores and schedules 1966+ | Team results and real schedules |
@@ -28,3 +30,6 @@ Football has no single stat that works across positions the way win shares do in
 
 - Tackles weren't tracked league-wide before 1994, or forced fumbles and passes defended before 1999. Sacks are unofficial before 1982.
 - About 15 team eras use the current logo because no historical image could be found.
+- The game holds one secondary per season, so a season with several alternates uses the longest-running one, and wordmarks are not counted. The Panthers' 1995-2011 alternate is left out because it exists only on a white background.
+- About half the secondaries come from small source files (under 256 pixels), because no full-size file was available.
+- Bears, 1962-2022: SportsLogos lists bears as primary for 1955-88, while Wikipedia lists the C from 1962. The project keeps the C.
