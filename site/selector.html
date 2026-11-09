@@ -570,9 +570,8 @@
     delete b.from;
     const era = eraLogo(tid, season);
     const logo = era || (b.logo && LOGOS[b.logo]) || LOGOS['CURRENT_' + tid] || CURRENT_LOGO[tid];
-    // Secondary logo for this season if the team had one, otherwise its primary
-    const sec = (LOGO_ERAS.secondary[tid] || []).find(e => e.from <= season && season <= e.to);
-    const small = sec ? sec.data : logo;
+    // Football GM shows the small logo on most screens, so it has to be the primary. LOGO_ERAS.secondary is kept for places that want it.
+    const small = logo;
     b._logoKnown = !!era || !b.logo || !!LOGOS[b.logo] || SAME_AS_CURRENT.has(b.logo);
     delete b.logo;
     const hj = homeJersey(tid, season);

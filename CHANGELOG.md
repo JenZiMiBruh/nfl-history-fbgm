@@ -6,6 +6,15 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.21.2 · Nov 9, 2026
+
+**Start a new league to get these fixes.**
+
+- **Normal logos are back.** The last update put alternate logos on standings, rosters and other screens for about half the teams. Every team now shows its primary logo there.
+- **Real contracts for players who share a name.** Josh Allen, Lamar Jackson, Justin Jefferson, Chris Jones and others had no real contract, so some ran out after one season. They now have their real end years, as do Matthew Stafford and Cam Ward.
+
+---
+
 ## v1.21.1 · Nov 9, 2026
 
 **Start a new league to get the new logos.**

@@ -159,7 +159,7 @@ Sim past today and you're not drafting made-up players. The 2027, 2028 and 2029 
 | ⭐ **Ratings for everyone** | Built from real production, including players with almost no stats; real returners return kicks ([how](docs/ratings.md)) |
 | 👨‍👦 **Families** | 435 players linked to their fathers, sons and brothers: the Mannings, the Sanders, the Watts, the Bosas. The Relatives page works out grandfathers, uncles and cousins |
 | 🏆 **Awards & honors** | MVP (with the AFL's before the merger), OPOY/DPOY, rookies, Super Bowl MVP, All-Pro, Pro Bowl, Hall of Fame by induction year, retired numbers |
-| 🎨 **Logos & jerseys by era** | Primary logos by era, real secondary logos where a team had one, and today's uniforms matched to the real 2026 ones |
+| 🎨 **Logos & jerseys by era** | Primary logos by era, and today's uniforms matched to the real 2026 ones |
 | 🗓️ **Real schedules** | Every game since 1966, in order, including the pre-merger AFL and NFL and the strike seasons |
 | 📰 **121 real-life events** | Each with its reason: retirements, comebacks, suspensions (Deflategate), relocations and expansions |
 | 🔴 **This season, live** | Standings, stats, rosters, injured reserve and injuries, updated every week |
