@@ -11,7 +11,7 @@ index 16a2fbe0f..2e19f9f38 100644
  	},
  	"engines": {
 diff --git a/src/common/defaultGameAttributes.ts b/src/common/defaultGameAttributes.ts
-index 11273855b..67f26dc7c 100644
+index 11273855b..72e027731 100644
 --- a/src/common/defaultGameAttributes.ts
 +++ b/src/common/defaultGameAttributes.ts
 @@ -81,7 +81,6 @@ const gameAttributesKeysSportSpecific = {
@@ -22,7 +22,7 @@ index 11273855b..67f26dc7c 100644
  		"rpdPot",
  		"foulRateFactor",
  		"foulsNeededToFoulOut",
-@@ -585,7 +584,23 @@ export const defaultGameAttributes: GameAttributesLeagueWithHistory = {
+@@ -585,7 +584,24 @@ export const defaultGameAttributes: GameAttributesLeagueWithHistory = {
  	thanosCooldownEnd: undefined,
  	repeatSeason: undefined,
  	equalizeRegions: false,
@@ -42,16 +42,17 @@ index 11273855b..67f26dc7c 100644
 +	nflLeadBackWorkload: 0.95,
 +	nflQbRunRate: 0.5,
 +	nflRealRetirements: true,
++	nflSecondaryLogos: false,
 +	nflHistoricalRosters: false,
 +	nflRealDraftRatings: true,
  	spectator: false,
  	elam: false,
  	elamASG: false,
 diff --git a/src/common/types.ts b/src/common/types.ts
-index 2116af8f4..70b7dfbc2 100644
+index 2116af8f4..f7d703249 100644
 --- a/src/common/types.ts
 +++ b/src/common/types.ts
-@@ -720,6 +720,19 @@ export type GameAttributesLeague = {
+@@ -720,6 +720,20 @@ export type GameAttributesLeague = {
  	randomDebutsForever?: number;
  	realDraftRatings?: RealDraftRatingsSetting;
  	realPlayerDeterminism: number;
@@ -66,12 +67,13 @@ index 2116af8f4..70b7dfbc2 100644
 +	nflLeadBackWorkload: number;
 +	nflQbRunRate: number;
 +	nflRealRetirements: boolean;
++	nflSecondaryLogos: boolean;
 +	nflHistoricalRosters: boolean;
 +	nflRealDraftRatings: boolean;
  	repeatSeason:
  		| undefined
  		| {
-@@ -1282,6 +1295,21 @@ export type PlayerWithoutKey<PlayerRatings = MinimalPlayerRatings> = {
+@@ -1282,6 +1296,21 @@ export type PlayerWithoutKey<PlayerRatings = MinimalPlayerRatings> = {
  	ptModifier: number;
  	ratings: NonEmptyArray<PlayerRatings>;
  	real?: boolean;
@@ -93,7 +95,7 @@ index 2116af8f4..70b7dfbc2 100644
  	relatives: Relative[];
  	retiredYear: number;
  	rosterOrder: number;
-@@ -2060,6 +2088,9 @@ export type Team = {
+@@ -2060,6 +2089,9 @@ export type Team = {
  	// [regular season, playoffs]
  	playThroughInjuries: [number, number];
  
@@ -103,6 +105,24 @@ index 2116af8f4..70b7dfbc2 100644
  	// Optional because no upgrade
  	autoTicketPrice?: boolean;
  
+diff --git a/src/ui/components/BoxScore.football.tsx b/src/ui/components/BoxScore.football.tsx
+index 95cd55553..98571e11b 100644
+--- a/src/ui/components/BoxScore.football.tsx
++++ b/src/ui/components/BoxScore.football.tsx
+@@ -1,3 +1,4 @@
++import { chooseSmallLogo } from "../util/chooseSmallLogo.ts";
+ import { memo, Fragment, type ReactNode, type CSSProperties } from "react";
+ import { ResponsiveTableWrapper } from "./ResponsiveTableWrapper.tsx";
+ import { getCols } from "../../common/getCols.ts";
+@@ -451,7 +452,7 @@ const FieldBackground = ({
+ 	if (neutralSite) {
+ 		midfieldLogo = `https://zengm.com/files/logo-${__SPORT}.svg`;
+ 	} else {
+-		midfieldLogo = t2.imgURLSmall ?? t2.imgURL;
++		midfieldLogo = chooseSmallLogo(t2.imgURLSmall, t2.imgURL);
+ 	}
+ 
+ 	return (
 diff --git a/src/ui/components/BoxScoreWrapper.tsx b/src/ui/components/BoxScoreWrapper.tsx
 index 81330176f..8cfa82d88 100644
 --- a/src/ui/components/BoxScoreWrapper.tsx
@@ -607,10 +627,10 @@ index fc14a9fc3..b0c12d458 100644
  						<NagModal close={closeNagModal} show={showNagModal} />
  					</div>
 diff --git a/src/ui/components/LeagueFileUpload.tsx b/src/ui/components/LeagueFileUpload.tsx
-index 5694d6dad..e523c64eb 100644
+index 5694d6dad..1b4c77d49 100644
 --- a/src/ui/components/LeagueFileUpload.tsx
 +++ b/src/ui/components/LeagueFileUpload.tsx
-@@ -109,13 +109,474 @@ class LeagueFileVersionError extends Error {
+@@ -109,13 +109,475 @@ class LeagueFileVersionError extends Error {
  	}
  }
  
@@ -785,6 +805,7 @@ index 5694d6dad..e523c64eb 100644
 +				phase: live ? "regular" : phase,
 +				week: startWeek,
 +				realDraftRatings,
++				secondaryLogos: true,
 +				weekly: weekly ?? undefined,
 +				...data,
 +			});
@@ -1085,7 +1106,7 @@ index 5694d6dad..e523c64eb 100644
  	onDone: (b: Error | LeagueFileUploadOutput) => void;
  	disabled?: boolean;
  	enterURL?: boolean;
-@@ -257,8 +718,10 @@ export const LeagueFileUpload = ({
+@@ -257,8 +719,10 @@ export const LeagueFileUpload = ({
  
  	const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
  		beforeFile();
@@ -1097,7 +1118,7 @@ index 5694d6dad..e523c64eb 100644
  		if (!file) {
  			dispatch({
  				type: "init",
-@@ -327,13 +790,24 @@ export const LeagueFileUpload = ({
+@@ -327,13 +791,24 @@ export const LeagueFileUpload = ({
  					</button>
  				</div>
  			) : (
@@ -1129,11 +1150,88 @@ index 5694d6dad..e523c64eb 100644
  			)}
  			<div style={styleStatus}>
  				{state.status === "error" ? (
+diff --git a/src/ui/components/NewsBlock.tsx b/src/ui/components/NewsBlock.tsx
+index 32259db8f..b7d1af0ba 100644
+--- a/src/ui/components/NewsBlock.tsx
++++ b/src/ui/components/NewsBlock.tsx
+@@ -1,3 +1,4 @@
++import { chooseSmallLogo } from "../util/chooseSmallLogo.ts";
+ import { PlayerPicture } from "./PlayerPicture.tsx";
+ import { SafeHtml } from "./SafeHtml.tsx";
+ import clsx from "clsx";
+@@ -52,7 +53,7 @@ export const NewsBlock = ({
+ 					{teamInfo.imgURL || teamInfo.imgURLSmall ? (
+ 						<a href={rosterURL} className="p-1">
+ 							<img
+-								src={teamInfo.imgURLSmall ?? teamInfo.imgURL}
++								src={chooseSmallLogo(teamInfo.imgURLSmall, teamInfo.imgURL)}
+ 								alt=""
+ 								style={logoStyle}
+ 							/>
+@@ -82,7 +83,7 @@ export const NewsBlock = ({
+ 				<a key={tid} href={rosterURL} className="p-1">
+ 					{teamInfo.imgURL || teamInfo.imgURLSmall ? (
+ 						<img
+-							src={teamInfo.imgURLSmall ?? teamInfo.imgURL}
++							src={chooseSmallLogo(teamInfo.imgURLSmall, teamInfo.imgURL)}
+ 							alt=""
+ 							style={logoStyle}
+ 						/>
+diff --git a/src/ui/components/PlayoffMatchup.tsx b/src/ui/components/PlayoffMatchup.tsx
+index 09864863b..845320bfd 100644
+--- a/src/ui/components/PlayoffMatchup.tsx
++++ b/src/ui/components/PlayoffMatchup.tsx
+@@ -1,3 +1,4 @@
++import { chooseSmallLogo } from "../util/chooseSmallLogo.ts";
+ import clsx from "clsx";
+ import type {
+ 	ByConf,
+@@ -43,7 +44,7 @@ const TeamLogo = ({
+ 				<img
+ 					className="mw-100 mh-100"
+ 					style={lost ? faded : notFaded}
+-					src={team.imgURLSmall ?? team.imgURL}
++					src={chooseSmallLogo(team.imgURLSmall, team.imgURL)}
+ 					alt=""
+ 				/>
+ 			) : null}
+diff --git a/src/ui/components/ScoreBox/index.tsx b/src/ui/components/ScoreBox/index.tsx
+index 938d3b556..1dd10e97e 100644
+--- a/src/ui/components/ScoreBox/index.tsx
++++ b/src/ui/components/ScoreBox/index.tsx
+@@ -1,3 +1,4 @@
++import { chooseSmallLogo } from "../../util/chooseSmallLogo.ts";
+ import clsx from "clsx";
+ import { PHASE } from "../../../common/constants.ts";
+ import { helpers } from "../../util/helpers.ts";
+@@ -312,7 +313,7 @@ export const ScoreBox = memo(
+ 							} else {
+ 								const branding = t.branding ?? teamInfoCache[t.tid];
+ 								if (branding) {
+-									imgURL = branding.imgURLSmall ?? branding.imgURL;
++									imgURL = chooseSmallLogo(branding.imgURLSmall, branding.imgURL);
+ 									teamName = small
+ 										? branding.abbrev
+ 										: `${branding.region} ${branding.name}`;
 diff --git a/src/ui/components/TeamLogoInline.tsx b/src/ui/components/TeamLogoInline.tsx
-index 3d9e51eff..9a36ef2f5 100644
+index 3d9e51eff..f00e3c1ca 100644
 --- a/src/ui/components/TeamLogoInline.tsx
 +++ b/src/ui/components/TeamLogoInline.tsx
-@@ -30,7 +30,13 @@ export const TeamLogoInline = ({
+@@ -1,3 +1,4 @@
++import { chooseSmallLogo } from "../util/chooseSmallLogo.ts";
+ import type { CSSProperties } from "react";
+ 
+ export const TeamLogoInline = ({
+@@ -17,7 +18,7 @@ export const TeamLogoInline = ({
+ 	size?: number;
+ 	style?: CSSProperties;
+ }) => {
+-	const actualImgURL = imgURLSmall ?? imgURL;
++	const actualImgURL = chooseSmallLogo(imgURLSmall, imgURL);
+ 	if (!actualImgURL && !includePlaceholderIfNoLogo) {
+ 		return null;
+ 	}
+@@ -30,7 +31,13 @@ export const TeamLogoInline = ({
  			style={{ height: size, width: size, ...style }}
  		>
  			{actualImgURL ? (
@@ -1148,8 +1246,43 @@ index 3d9e51eff..9a36ef2f5 100644
  			) : null}
  		</div>
  	);
+diff --git a/src/ui/util/chooseSmallLogo.ts b/src/ui/util/chooseSmallLogo.ts
+new file mode 100644
+index 000000000..ec899d194
+--- /dev/null
++++ b/src/ui/util/chooseSmallLogo.ts
+@@ -0,0 +1,11 @@
++// NFL history mod: the small logo slot holds a team's secondary logo; the "Secondary Logos" setting can turn that off
++export const chooseSmallLogo = (
++	small: string | undefined,
++	big: string | undefined,
++) => {
++	let on = false;
++	try {
++		on = localStorage.getItem("nflSecondaryLogos") === "true";
++	} catch {}
++	return on ? (small ?? big) : (big ?? small);
++};
+diff --git a/src/ui/views/EightyTwoZeroDraft.tsx b/src/ui/views/EightyTwoZeroDraft.tsx
+index 04cb46407..6cd2cb011 100644
+--- a/src/ui/views/EightyTwoZeroDraft.tsx
++++ b/src/ui/views/EightyTwoZeroDraft.tsx
+@@ -1,3 +1,4 @@
++import { chooseSmallLogo } from "../util/chooseSmallLogo.ts";
+ import { useState, type Dispatch, type SetStateAction } from "react";
+ import { getCols } from "../../common/getCols.ts";
+ import type { View } from "../../common/types.ts";
+@@ -514,7 +515,7 @@ const EightyTwoZeroDraft = (props: View<"eightyTwoZeroDraft">) => {
+ 		};
+ 	});
+ 
+-	const logoURL = currentTeam.imgURLSmall ?? currentTeam.imgURL;
++	const logoURL = chooseSmallLogo(currentTeam.imgURLSmall, currentTeam.imgURL);
+ 
+ 	return (
+ 		<div style={{ maxWidth: MAX_WIDTH }}>
 diff --git a/src/ui/views/NewLeague/index.tsx b/src/ui/views/NewLeague/index.tsx
-index 949d2ba3a..2ea4ce84f 100644
+index 949d2ba3a..ba7ceeef8 100644
 --- a/src/ui/views/NewLeague/index.tsx
 +++ b/src/ui/views/NewLeague/index.tsx
 @@ -18,6 +18,7 @@ import {
@@ -1172,7 +1305,7 @@ index 949d2ba3a..2ea4ce84f 100644
  	| {
  			type: "error";
  	  }
-@@ -406,8 +412,69 @@ const getSettingsFromGameAttributes = (
+@@ -406,8 +412,74 @@ const getSettingsFromGameAttributes = (
  	return newSettings;
  };
  
@@ -1221,6 +1354,11 @@ index 949d2ba3a..2ea4ce84f 100644
 +		help: "Real players die in the year they really did, and nobody with no known death dies before the real data ends. Off: deaths of retired players are left to chance, as in normal Football GM.",
 +	},
 +	{
++		key: "nflSecondaryLogos",
++		name: "Secondary Logos",
++		help: "Small logos use each team's real alternate logo where it has one. Off uses primary logos everywhere. These are real alternates, but older eras are best available.",
++	},
++	{
 +		key: "nflRealRetirements",
 +		name: "Real Retirements",
 +		help: "Real players never retire before their real last season (Brady plays into his 40s) and retire right after it. Seasons they really sat out are skipped. After the real data ends, Football GM decides.",
@@ -1242,7 +1380,7 @@ index 949d2ba3a..2ea4ce84f 100644
  		case "submit":
  			return {
  				...state,
-@@ -701,7 +768,10 @@ const NewLeague = (props: View<"newLeague">) => {
+@@ -701,7 +773,10 @@ const NewLeague = (props: View<"newLeague">) => {
  		reducer,
  		props,
  		(props: View<"newLeague">): State => {
@@ -1254,7 +1392,21 @@ index 949d2ba3a..2ea4ce84f 100644
  			if (importing) {
  				customize = "custom-rosters";
  			}
-@@ -1518,6 +1588,113 @@ const NewLeague = (props: View<"newLeague">) => {
+@@ -804,6 +879,13 @@ const NewLeague = (props: View<"newLeague">) => {
+ 			: teamsDefault;
+ 
+ 	const createLeague = async (settingsOverride?: State["settings"]) => {
++		// NFL history mod: logos are drawn in the UI, which reads this choice directly
++		try {
++			localStorage.setItem(
++				"nflSecondaryLogos",
++				String((settingsOverride ?? state.settings).nflSecondaryLogos),
++			);
++		} catch {}
+ 		if (importing) {
+ 			const result = await confirm(
+ 				`Are you sure you want to import this league? All the data currently in "${props.name}" will be overwritten.`,
+@@ -1518,6 +1600,113 @@ const NewLeague = (props: View<"newLeague">) => {
  								) : null}
  							</div>
  
@@ -1368,7 +1520,7 @@ index 949d2ba3a..2ea4ce84f 100644
  							<div className="mb-3">
  								<label className="form-label" htmlFor="new-league-difficulty">
  									Difficulty
-@@ -1765,6 +1942,7 @@ const NewLeague = (props: View<"newLeague">) => {
+@@ -1765,6 +1954,7 @@ const NewLeague = (props: View<"newLeague">) => {
  											state.customize === "custom-url" ? (
  												<div className="my-3">
  													<LeagueFileUpload
@@ -1509,8 +1661,26 @@ index b56ad1081..2d1086f23 100644
  	{
  		name: "Teams",
  	},
+diff --git a/src/ui/views/Settings/index.tsx b/src/ui/views/Settings/index.tsx
+index b83c3736f..6cb0b8063 100644
+--- a/src/ui/views/Settings/index.tsx
++++ b/src/ui/views/Settings/index.tsx
+@@ -18,6 +18,13 @@ const Settings = ({ initialSettings }: View<"settings">) => {
+ 			}}
+ 			onSave={async (settings) => {
+ 				await toWorker("main", "updateGameAttributesGodMode", settings);
++				// NFL history mod: logos are drawn in the UI, which reads this choice directly (nflSecondaryLogos)
++				try {
++					localStorage.setItem(
++						"nflSecondaryLogos",
++						String(settings.nflSecondaryLogos),
++					);
++				} catch {}
+ 
+ 				setDirty(false);
+ 
 diff --git a/src/ui/views/Settings/settings.tsx b/src/ui/views/Settings/settings.tsx
-index 4e86c441c..837cf1322 100644
+index 4e86c441c..88ea4d6ca 100644
 --- a/src/ui/views/Settings/settings.tsx
 +++ b/src/ui/views/Settings/settings.tsx
 @@ -2308,13 +2308,22 @@ export const settings: Setting[] = (
@@ -1538,7 +1708,7 @@ index 4e86c441c..837cf1322 100644
  					<p>
  						By default, BBGM's player development algorithm does not take into
  						account what we know about a real player's future performance. That
-@@ -2339,7 +2348,120 @@ export const settings: Setting[] = (
+@@ -2339,7 +2348,128 @@ export const settings: Setting[] = (
  			},
  		},
  		{
@@ -1633,6 +1803,14 @@ index 4e86c441c..837cf1322 100644
 +		},
 +		{
 +			category: "NFL History",
++			key: "nflSecondaryLogos",
++			name: "Secondary Logos",
++			type: "bool",
++			description:
++				"NFL history mod: small logos use each team's real alternate logo where it has one. Turn off to use primary logos everywhere.",
++		},
++		{
++			category: "NFL History",
 +			key: "nflRealRetirements",
 +			name: "Real Retirements",
 +			type: "bool",
@@ -1660,7 +1838,7 @@ index 4e86c441c..837cf1322 100644
  			key: "rpdPot",
  			name: "RPD Affects Potential",
  			godModeRequired: "always",
-@@ -2371,7 +2493,7 @@ export const settings: Setting[] = (
+@@ -2371,7 +2501,7 @@ export const settings: Setting[] = (
  			),
  		},
  		{
@@ -1669,7 +1847,7 @@ index 4e86c441c..837cf1322 100644
  			key: "forceRetireRealPlayers",
  			name: "Force Retire Real Players",
  			godModeRequired: "always",
-@@ -2380,7 +2502,7 @@ export const settings: Setting[] = (
+@@ -2380,7 +2510,7 @@ export const settings: Setting[] = (
  				"This makes real players retire at the same age they did in real life.",
  		},
  		{
@@ -1679,10 +1857,10 @@ index 4e86c441c..837cf1322 100644
  			name: "Force Historical Rosters",
  			godModeRequired: "always",
 diff --git a/src/ui/views/Settings/types.ts b/src/ui/views/Settings/types.ts
-index 8ac606a83..40dc0f8c6 100644
+index 8ac606a83..946135679 100644
 --- a/src/ui/views/Settings/types.ts
 +++ b/src/ui/views/Settings/types.ts
-@@ -58,6 +58,19 @@ export type Key =
+@@ -58,6 +58,20 @@ export type Key =
  	| "challengeSisyphusMode"
  	| "challengeThanosMode"
  	| "realPlayerDeterminism"
@@ -1697,12 +1875,13 @@ index 8ac606a83..40dc0f8c6 100644
 +	| "nflLeadBackWorkload"
 +	| "nflQbRunRate"
 +	| "nflRealRetirements"
++	| "nflSecondaryLogos"
 +	| "nflHistoricalRosters"
 +	| "nflRealDraftRatings"
  	| "repeatSeason"
  	| "maxOvertimes"
  	| "maxOvertimesPlayoffs"
-@@ -197,7 +210,7 @@ export type Category =
+@@ -197,7 +211,7 @@ export type Category =
  	| "Challenge Modes"
  	| "Game Modes"
  	| "Players"
@@ -1711,6 +1890,24 @@ index 8ac606a83..40dc0f8c6 100644
  	| "UI";
  
  export type FieldType =
+diff --git a/src/ui/views/TeamGraphs/index.tsx b/src/ui/views/TeamGraphs/index.tsx
+index 25be8abcc..f613a70df 100644
+--- a/src/ui/views/TeamGraphs/index.tsx
++++ b/src/ui/views/TeamGraphs/index.tsx
+@@ -1,3 +1,4 @@
++import { chooseSmallLogo } from "../../util/chooseSmallLogo.ts";
+ import type { View } from "../../../common/types.ts";
+ import useTitleBar from "../../hooks/useTitleBar.tsx";
+ import { StatGraph, type TooltipData } from "../PlayerGraphs/ScatterPlot.tsx";
+@@ -250,7 +251,7 @@ const GraphCreation = <Team extends ViewProps["teamsX"][number]>({
+ 			data={data}
+ 			descShort={descShort}
+ 			descLong={[titleX.desc, titleY.desc]}
+-			getImageUrl={(t) => t.seasonAttrs.imgURLSmall ?? t.seasonAttrs.imgURL}
++			getImageUrl={(t) => chooseSmallLogo(t.seasonAttrs.imgURLSmall, t.seasonAttrs.imgURL)}
+ 			getKey={(t) => t.tid}
+ 			getLink={(t) =>
+ 				helpers.leagueUrl([
 diff --git a/src/worker/api/index.ts b/src/worker/api/index.ts
 index 12dd36b47..1a3165ef2 100644
 --- a/src/worker/api/index.ts
@@ -3905,10 +4102,10 @@ index 41c6d3c40..673a05337 100644
  		for (const p of t.players) {
  			const entry = allStars.teams[ind].find((p2) => p2.pid === p.pid);
 diff --git a/src/worker/views/newLeague.ts b/src/worker/views/newLeague.ts
-index 3000371a6..fa128661e 100644
+index 3000371a6..ddecb3504 100644
 --- a/src/worker/views/newLeague.ts
 +++ b/src/worker/views/newLeague.ts
-@@ -433,6 +433,20 @@ export const getDefaultSettings = () => {
+@@ -433,6 +433,24 @@ export const getDefaultSettings = () => {
  		),
  		neutralSite: unwrapGameAttribute(defaultGameAttributes, "neutralSite"),
  		rpdPot: unwrapGameAttribute(defaultGameAttributes, "rpdPot"),
@@ -3924,6 +4121,10 @@ index 3000371a6..fa128661e 100644
 +		nflQbRunRate: unwrapGameAttribute(defaultGameAttributes, "nflQbRunRate"),
 +		nflDeaths: unwrapGameAttribute(defaultGameAttributes, "nflDeaths"),
 +		nflRealRetirements: unwrapGameAttribute(defaultGameAttributes, "nflRealRetirements"),
++		nflSecondaryLogos: unwrapGameAttribute(
++			defaultGameAttributes,
++			"nflSecondaryLogos",
++		),
 +		nflHistoricalRosters: unwrapGameAttribute(defaultGameAttributes, "nflHistoricalRosters"),
 +		nflRealDraftRatings: unwrapGameAttribute(defaultGameAttributes, "nflRealDraftRatings"),
  		saveOldBoxScores: unwrapGameAttribute(
@@ -3951,10 +4152,10 @@ index 0a755488b..37b74ba13 100644
  			// tid and draft are used for checking if a player can be released without paying his salary
  			const attrs = [
 diff --git a/src/worker/views/settings.ts b/src/worker/views/settings.ts
-index 7656605ff..689c2f18b 100644
+index 7656605ff..53c242aaf 100644
 --- a/src/worker/views/settings.ts
 +++ b/src/worker/views/settings.ts
-@@ -73,6 +73,19 @@ type Key =
+@@ -73,6 +73,20 @@ type Key =
  	| "challengeSisyphusMode"
  	| "challengeThanosMode"
  	| "realPlayerDeterminism"
@@ -3969,12 +4170,13 @@ index 7656605ff..689c2f18b 100644
 +	| "nflLeadBackWorkload"
 +	| "nflQbRunRate"
 +	| "nflRealRetirements"
++	| "nflSecondaryLogos"
 +	| "nflHistoricalRosters"
 +	| "nflRealDraftRatings"
  	| "repeatSeason"
  	| "maxOvertimes"
  	| "maxOvertimesPlayoffs"
-@@ -290,6 +303,19 @@ export const getInitialSettings = (): Settings => {
+@@ -290,6 +304,20 @@ export const getInitialSettings = (): Settings => {
  		challengeSisyphusMode: g.get("challengeSisyphusMode"),
  		challengeThanosMode: g.get("challengeThanosMode"),
  		realPlayerDeterminism: g.get("realPlayerDeterminism"),
@@ -3989,6 +4191,7 @@ index 7656605ff..689c2f18b 100644
 +		nflLeadBackWorkload: g.get("nflLeadBackWorkload"),
 +		nflQbRunRate: g.get("nflQbRunRate"),
 +		nflRealRetirements: g.get("nflRealRetirements"),
++		nflSecondaryLogos: g.get("nflSecondaryLogos"),
 +		nflHistoricalRosters: g.get("nflHistoricalRosters"),
 +		nflRealDraftRatings: g.get("nflRealDraftRatings"),
  		repeatSeason: g.get("repeatSeason")?.type ?? "disabled",

@@ -30,6 +30,7 @@ Football has no single stat that works across positions the way win shares do in
 
 - Tackles weren't tracked league-wide before 1994, or forced fumbles and passes defended before 1999. Sacks are unofficial before 1982.
 - About 15 team eras use the current logo because no historical image could be found.
-- Football GM shows its small logo on most screens, so league files use the primary there. Secondary logos are kept in the logo data for places that can show them. Where a season has several alternates, the longest-running one is kept, and wordmarks are not counted. The Panthers' 1995-2011 alternate is left out because it exists only on a white background.
+- Secondary logos are off by default. With the option on they fill Football GM's small logo slot, as its default teams do. Where a season has several alternates, the longest-running one is kept, and wordmarks are not counted. Ones that don't read at small size use the primary.
+- Only the Bears publish a brand page that names their secondary, so secondaries otherwise rest on SportsLogos.net and Wikipedia. Older eras are less certain. The Panthers' 1995-2011 alternate is left out because it exists only on a white background.
 - About half the secondaries come from small source files (under 256 pixels), because no full-size file was available.
 - Bears, 1962-2022: SportsLogos lists bears as primary for 1955-88, while Wikipedia lists the C from 1962. The project keeps the C.

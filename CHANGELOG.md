@@ -6,6 +6,18 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.21.3 · Nov 9, 2026
+
+**Start a new league to get all of this.**
+
+- **Real contract amounts.** Players now earn the yearly pay of their real deal: Josh Allen $55M, Patrick Mahomes $64M, Dak Prescott $60M. A new extension signed in a deal's last year starts paying the next season, so rookies stay on rookie pay until then. Seasons before 2011 keep estimated pay, because real deal data is thin.
+- **Soft cap from 2011.** Real yearly pay adds up past the cap, as it does before real teams restructure deals, so teams can now go over it. Over-the-cap teams can re-sign their own players and sign minimum deals. Seasons before 2011 keep the old cap rules.
+- **Cap inflation after the real data ends.** The cap grows about 7% a year (3% to 12%). You can change this in Settings under Inflation. The luxury tax line moves with the cap, and sits high enough that real payrolls aren't taxed.
+- **Secondary Logos option, off by default.** Football GM's small logo spots can show a team's real alternate logo instead of its primary. Turn it on when building a league, or later in Settings under NFL History. Not every team had an alternate in every era, and older eras are best available.
+- **Logos.** The Browns' dawg and 2015-22 dog are in for that option, and small logos that don't read at tiny sizes use the primary.
+
+---
+
 ## v1.21.2 · Nov 9, 2026
 
 **Start a new league to get these fixes.**

@@ -16,6 +16,7 @@ const SL = require(path.join(ROOT, 'src/season_slicer')), E = require(path.join(
 const SCHED = require(path.join(ROOT, 'data_cache/real_schedules.json'));
 const LIVE = require(path.join(ROOT, 'src/live_info')).liveInfo();
 const m = JSON.parse(zlib.gunzipSync(fs.readFileSync(path.join(SITE, 'NFL_Selector_Master.json.gz'))));
+const dealSourceById = new Map(m.players.map(p => [p.pid, p]));
 const probs = {}; let built = 0;
 const bad = (k, s) => { (probs[k] = probs[k] || []).push(s); };
 const weeklyOf = s => { const f = path.join(SITE, 'weekly', s + '.json'); return fs.existsSync(f) ? JSON.parse(fs.readFileSync(f)) : undefined; };
@@ -173,6 +174,8 @@ for (let S = FROM; S <= TO; S++) {
       if (!lite) for (const e of L.scheduledEvents || []) { const id = pidOf(e); if (id !== undefined && !lp.has(id)) bad('scheduled event for a player not in the league', tag + ' ' + e.type + ' ' + id); }
       for (const p of L.players) if (typeof p.diedYear === 'number' && p.tid >= 0) bad('dead player on a team', tag + ' ' + p.lastName);
       const early = ph === 'preseason' || (ph === 'regular' && w <= 1);
+      // Everyone with a real deal in a soft-cap season is paid it
+      if (E.getRules(S).salaryCapType === 'soft') { const R0 = E.getRules(S); for (const p of L.players) { if (p.tid < 0 || !p.contract) continue; const o = dealSourceById.get(p.pid); const pay = o && E.dealPay(o.realDeals, S); if (pay && p.contract.amount !== Math.max(R0.minContract, Math.min(R0.maxContract, pay))) bad('contract is not the real deal', tag + ' ' + p.firstName + ' ' + p.lastName + ' ' + p.contract.amount + ' vs ' + pay); } }
       // Every saved playoff seed matches the real table
       for (const ps of L.playoffSeries || []) { const real = (m.playoffSeeds || {})[ps.season - 1]; if (!real) continue; const seedOf = {}; for (const list of Object.values(real)) list.forEach((tid, i) => { seedOf[tid] = i + 1; }); for (const round of ps.series || []) for (const g of round) for (const x of [g.home, g.away]) if (x && seedOf[x.tid] !== undefined && x.seed !== seedOf[x.tid]) bad('saved playoff seed is wrong', `${tag} ${ps.season} tid ${x.tid} seed ${x.seed}`); }
       if (ph === 'playoffs' && (m.playoffSeeds || {})[S] && !ga.nflRealSeeds) bad('playoff start without real seeds', tag);
