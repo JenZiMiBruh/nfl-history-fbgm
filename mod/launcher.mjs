@@ -153,6 +153,11 @@ function install(cfg) {
     run('git', ['clone', 'https://github.com/zengm-games/zengm.git', GAME]);
   }
   // A clean copy every time the mod changes, so a run that stopped halfway can't block the next one
+  // A copy cloned for an older mod version doesn't have a newer base yet: fetch it first
+  try { run('git', ['cat-file', '-e', cfg.base + '^{commit}'], { cwd: GAME }); } catch {
+    say('Updating Football GM source...');
+    run('git', ['fetch', '-q', 'origin'], { cwd: GAME });
+  }
   run('git', ['checkout', '-q', '-f', cfg.base], { cwd: GAME });
   run('git', ['clean', '-q', '-fd', '-e', 'node_modules'], { cwd: GAME });
   say('Applying the NFL History mod...');

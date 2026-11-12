@@ -1,11 +1,11 @@
 diff --git a/package.json b/package.json
-index 16a2fbe0f..2e19f9f38 100644
+index f7aab339e..7112dd47d 100644
 --- a/package.json
 +++ b/package.json
 @@ -124,6 +124,7 @@
  		"typescript": "npm:@typescript/typescript6@6.0.2",
  		"typescript-7": "npm:typescript@7.0.2",
- 		"vitest": "5.0.5",
+ 		"vitest": "5.1.0",
 +		"web-streams-polyfill": "^4.3.0",
  		"workbox-build": "7.4.1"
  	},
@@ -49,7 +49,7 @@ index 11273855b..72e027731 100644
  	elam: false,
  	elamASG: false,
 diff --git a/src/common/types.ts b/src/common/types.ts
-index 2116af8f4..f7d703249 100644
+index 2d10bc4da..a70f1c559 100644
 --- a/src/common/types.ts
 +++ b/src/common/types.ts
 @@ -720,6 +720,20 @@ export type GameAttributesLeague = {
@@ -73,7 +73,15 @@ index 2116af8f4..f7d703249 100644
  	repeatSeason:
  		| undefined
  		| {
-@@ -1282,6 +1296,21 @@ export type PlayerWithoutKey<PlayerRatings = MinimalPlayerRatings> = {
+@@ -767,6 +781,7 @@ export type GameAttributesLeague = {
+ 		imgURL: string | undefined;
+ 		imgURLSmall: string | undefined;
+ 		disabled: boolean | undefined;
++		colors?: [string, string, string];
+ 	}[];
+ 	tradeDeadline: number;
+ 	tradeProposalsSeed: number;
+@@ -1308,6 +1323,21 @@ export type PlayerWithoutKey<PlayerRatings = MinimalPlayerRatings> = {
  	ptModifier: number;
  	ratings: NonEmptyArray<PlayerRatings>;
  	real?: boolean;
@@ -95,7 +103,7 @@ index 2116af8f4..f7d703249 100644
  	relatives: Relative[];
  	retiredYear: number;
  	rosterOrder: number;
-@@ -2060,6 +2089,9 @@ export type Team = {
+@@ -2113,6 +2143,9 @@ export type Team = {
  	// [regular season, playoffs]
  	playThroughInjuries: [number, number];
  
@@ -106,7 +114,7 @@ index 2116af8f4..f7d703249 100644
  	autoTicketPrice?: boolean;
  
 diff --git a/src/ui/components/BoxScore.football.tsx b/src/ui/components/BoxScore.football.tsx
-index 95cd55553..98571e11b 100644
+index 94d4033c3..ef7e1af32 100644
 --- a/src/ui/components/BoxScore.football.tsx
 +++ b/src/ui/components/BoxScore.football.tsx
 @@ -1,3 +1,4 @@
@@ -114,7 +122,7 @@ index 95cd55553..98571e11b 100644
  import { memo, Fragment, type ReactNode, type CSSProperties } from "react";
  import { ResponsiveTableWrapper } from "./ResponsiveTableWrapper.tsx";
  import { getCols } from "../../common/getCols.ts";
-@@ -451,7 +452,7 @@ const FieldBackground = ({
+@@ -452,7 +453,7 @@ const FieldBackground = ({
  	if (neutralSite) {
  		midfieldLogo = `https://zengm.com/files/logo-${__SPORT}.svg`;
  	} else {
@@ -124,7 +132,7 @@ index 95cd55553..98571e11b 100644
  
  	return (
 diff --git a/src/ui/components/BoxScoreWrapper.tsx b/src/ui/components/BoxScoreWrapper.tsx
-index 81330176f..8cfa82d88 100644
+index 8d10a9884..3c9572ac6 100644
 --- a/src/ui/components/BoxScoreWrapper.tsx
 +++ b/src/ui/components/BoxScoreWrapper.tsx
 @@ -86,7 +86,12 @@ const TeamLogo = ({
@@ -505,10 +513,10 @@ index 000000000..67190e37a
 +};
 diff --git a/src/ui/components/Controller/TeamTheme.tsx b/src/ui/components/Controller/TeamTheme.tsx
 new file mode 100644
-index 000000000..3a5e35c45
+index 000000000..020362979
 --- /dev/null
 +++ b/src/ui/components/Controller/TeamTheme.tsx
-@@ -0,0 +1,95 @@
+@@ -0,0 +1,96 @@
 +import { useEffect, useState } from "react";
 +import { toWorker } from "../../util/toWorker.ts";
 +import { useLocal } from "../../util/local.ts";
@@ -550,7 +558,8 @@ index 000000000..3a5e35c45
 +			return;
 +		}
 +		toWorker("main", "getUserTeamColors", undefined)
-+			.then((result) => {
++			.then(async (resultMaybePromise) => {
++				const result = await resultMaybePromise;
 +				if (!cancelled) {
 +					setColors(result ?? teamInfoCache[userTid]?.colors);
 +				}
@@ -627,7 +636,7 @@ index fc14a9fc3..b0c12d458 100644
  						<NagModal close={closeNagModal} show={showNagModal} />
  					</div>
 diff --git a/src/ui/components/LeagueFileUpload.tsx b/src/ui/components/LeagueFileUpload.tsx
-index 5694d6dad..6b550aa39 100644
+index af69f435b..10009c866 100644
 --- a/src/ui/components/LeagueFileUpload.tsx
 +++ b/src/ui/components/LeagueFileUpload.tsx
 @@ -109,13 +109,526 @@ class LeagueFileVersionError extends Error {
@@ -1154,7 +1163,7 @@ index 5694d6dad..6b550aa39 100644
  	onLoading,
  }: {
 +	nflHistory?: boolean;
- 	onDone: (b: Error | LeagueFileUploadOutput) => void;
+ 	onDone: (b: Error | LeagueFileUploadOutput) => void | Promise<void>;
  	disabled?: boolean;
  	enterURL?: boolean;
 @@ -257,8 +770,10 @@ export const LeagueFileUpload = ({
@@ -1247,15 +1256,37 @@ index 09864863b..845320bfd 100644
  				/>
  			) : null}
 diff --git a/src/ui/components/ScoreBox/index.tsx b/src/ui/components/ScoreBox/index.tsx
-index 938d3b556..1dd10e97e 100644
+index 8339e7621..5c9f69b79 100644
 --- a/src/ui/components/ScoreBox/index.tsx
 +++ b/src/ui/components/ScoreBox/index.tsx
-@@ -1,3 +1,4 @@
+@@ -1,5 +1,7 @@
 +import { chooseSmallLogo } from "../../util/chooseSmallLogo.ts";
  import clsx from "clsx";
  import { PHASE } from "../../../common/constants.ts";
++import { ALL_STAR_GAME_TIDS } from "../../../common/specialGames.ts";
  import { helpers } from "../../util/helpers.ts";
-@@ -312,7 +313,7 @@ export const ScoreBox = memo(
+ import { useLocal } from "../../util/local.ts";
+ import React, { memo, type ReactNode } from "react";
+@@ -313,10 +315,26 @@ export const ScoreBox = memo(
+ 									? `AS${i === 0 ? 2 : 1}`
+ 									: `All-Stars ${i === 0 ? 2 : 1}`;
+ 								rosterURL = helpers.leagueUrl(["all_star", "history"]);
++								// NFL history mod: the Pro Bowl is conference against conference (the first all-star team is
++								// the lower cid: AFC, or the AFL before the 1970 merger, league season 1971), each era's logo
++								if (__SPORT === "football") {
++									const ind = t.tid === ALL_STAR_GAME_TIDS[0] ? 0 : 1;
++									const conf =
++										gameSeason < 1971
++											? (["AFL", "NFL"] as const)[ind]
++											: (["AFC", "NFC"] as const)[ind];
++									imgURL =
++										conf === "AFL"
++											? "/nfl/conference/afl.png"
++											: conf === "NFL"
++												? "/nfl/conference/nfl-1962.svg"
++												: `/nfl/conference/${conf.toLowerCase()}-${gameSeason >= 2011 ? 2010 : 1970}.svg`;
++									teamName = conf;
++								}
  							} else {
  								const branding = t.branding ?? teamInfoCache[t.tid];
  								if (branding) {
@@ -1315,7 +1346,7 @@ index 000000000..ec899d194
 +	return on ? (small ?? big) : (big ?? small);
 +};
 diff --git a/src/ui/views/EightyTwoZeroDraft.tsx b/src/ui/views/EightyTwoZeroDraft.tsx
-index 04cb46407..6cd2cb011 100644
+index 23e1cb178..1a266f924 100644
 --- a/src/ui/views/EightyTwoZeroDraft.tsx
 +++ b/src/ui/views/EightyTwoZeroDraft.tsx
 @@ -1,3 +1,4 @@
@@ -1333,7 +1364,7 @@ index 04cb46407..6cd2cb011 100644
  	return (
  		<div style={{ maxWidth: MAX_WIDTH }}>
 diff --git a/src/ui/views/NewLeague/index.tsx b/src/ui/views/NewLeague/index.tsx
-index 949d2ba3a..ba7ceeef8 100644
+index 3ad568c8c..4a7c2c2d4 100644
 --- a/src/ui/views/NewLeague/index.tsx
 +++ b/src/ui/views/NewLeague/index.tsx
 @@ -18,6 +18,7 @@ import {
@@ -1667,18 +1698,24 @@ index 000000000..a7e6c6912
 +
 +export default RbWorkloadSlider;
 diff --git a/src/ui/views/Roster/TopStuff.tsx b/src/ui/views/Roster/TopStuff.tsx
-index bfaf2fc52..3dafeaba4 100644
+index b73289aed..82243457e 100644
 --- a/src/ui/views/Roster/TopStuff.tsx
 +++ b/src/ui/views/Roster/TopStuff.tsx
-@@ -5,6 +5,7 @@ import { helpers } from "../../util/helpers.ts";
+@@ -5,11 +5,13 @@ import { helpers } from "../../util/helpers.ts";
  import { toWorker } from "../../util/toWorker.ts";
  import InstructionsAndSortButtons from "./InstructionsAndSortButtons.tsx";
  import PlayThroughInjurySliders from "./PlayThroughInjuriesSliders.tsx";
 +import RbWorkloadSlider from "./RbWorkloadSlider.tsx";
  import { type LocalStateUI, type View } from "../../../common/types.ts";
- import { bySport } from "../../../common/sportFunctions.ts";
  import Note from "../Player/Note.tsx";
-@@ -357,6 +358,9 @@ const TopStuff = ({
+ import { RosterComposition } from "../../components/RosterComposition.tsx";
+ import { PlusMinus } from "../../components/PlusMinus.tsx";
+ import { useLocal } from "../../util/local.ts";
++import { bySport } from "../../../common/sportFunctions.ts";
+ import { getTeamMov } from "../../components/MovOrDiff.tsx";
+ 
+ const fontSizeLarger = { fontSize: "larger" };
+@@ -339,6 +341,9 @@ const TopStuff = ({
  							{showTradingBlock ? (
  								<div>
  									<PlayThroughInjurySliders key={tid} t={t} />
@@ -1908,31 +1945,10 @@ index 4e86c441c..88ea4d6ca 100644
  			name: "Force Historical Rosters",
  			godModeRequired: "always",
 diff --git a/src/ui/views/Settings/types.ts b/src/ui/views/Settings/types.ts
-index 8ac606a83..946135679 100644
+index 2b2c02b3b..b468c4e8b 100644
 --- a/src/ui/views/Settings/types.ts
 +++ b/src/ui/views/Settings/types.ts
-@@ -58,6 +58,20 @@ export type Key =
- 	| "challengeSisyphusMode"
- 	| "challengeThanosMode"
- 	| "realPlayerDeterminism"
-+	| "useRealSchedules"
-+	| "useRealDrafts"
-+	| "nflRetirements"
-+	| "nflComebacks"
-+	| "nflComebackDestination"
-+	| "nflSuspensions"
-+	| "nflInjuries"
-+	| "nflDeaths"
-+	| "nflLeadBackWorkload"
-+	| "nflQbRunRate"
-+	| "nflRealRetirements"
-+	| "nflSecondaryLogos"
-+	| "nflHistoricalRosters"
-+	| "nflRealDraftRatings"
- 	| "repeatSeason"
- 	| "maxOvertimes"
- 	| "maxOvertimesPlayoffs"
-@@ -197,7 +211,7 @@ export type Category =
+@@ -28,7 +28,7 @@ export type Category =
  	| "Challenge Modes"
  	| "Game Modes"
  	| "Players"
@@ -1942,7 +1958,7 @@ index 8ac606a83..946135679 100644
  
  export type FieldType =
 diff --git a/src/ui/views/TeamGraphs/index.tsx b/src/ui/views/TeamGraphs/index.tsx
-index 25be8abcc..f613a70df 100644
+index 4a411d8c7..d78a3e48e 100644
 --- a/src/ui/views/TeamGraphs/index.tsx
 +++ b/src/ui/views/TeamGraphs/index.tsx
 @@ -1,3 +1,4 @@
@@ -1950,7 +1966,7 @@ index 25be8abcc..f613a70df 100644
  import type { View } from "../../../common/types.ts";
  import useTitleBar from "../../hooks/useTitleBar.tsx";
  import { StatGraph, type TooltipData } from "../PlayerGraphs/ScatterPlot.tsx";
-@@ -250,7 +251,7 @@ const GraphCreation = <Team extends ViewProps["teamsX"][number]>({
+@@ -251,7 +252,7 @@ const GraphCreation = <Team extends ViewProps["teamsX"][number]>({
  			data={data}
  			descShort={descShort}
  			descLong={[titleX.desc, titleY.desc]}
@@ -1960,23 +1976,23 @@ index 25be8abcc..f613a70df 100644
  			getLink={(t) =>
  				helpers.leagueUrl([
 diff --git a/src/worker/api/index.ts b/src/worker/api/index.ts
-index 12dd36b47..dee7179fb 100644
+index 08b75b7d0..c62d7fa0a 100644
 --- a/src/worker/api/index.ts
 +++ b/src/worker/api/index.ts
 @@ -1,3 +1,4 @@
 +import nflStartBracket from "../core/season/nflStartBracket.ts";
  import { csvFormat, csvFormatRows } from "d3-dsv";
- import type { PlayerStatAttr } from "../../common/types.ts";
- import {
-@@ -159,6 +160,7 @@ import { formatScheduleForEditor } from "../views/scheduleEditor.ts";
+ import type {
+ 	Contract,
+@@ -159,6 +160,7 @@ import { getCols } from "../../common/getCols.ts";
+ import { formatScheduleForEditor } from "../views/scheduleEditor.ts";
  import type { KeyboardShortcutsLocal } from "../../ui/util/keyboardShortcuts.ts";
  import { getNumPlayoffTeamsRaw } from "../core/season/getNumPlayoffTeams.ts";
- import type { NewLeagueSettings } from "../views/newLeague.ts";
 +import { makeCreateLeagueFromFile } from "./native.ts";
  import { getNumPlayersTradedAwayNormalizedAll } from "../core/player/getNumPlayersTradedAwayNormalized.ts";
  import { getAdjustedTicketPrice } from "../../common/getAdjustedTicketPrice.ts";
  import { gameAttributesArrayToObject } from "../../common/gameAttributesArrayToObject.ts";
-@@ -801,6 +803,18 @@ const createLeague = async (
+@@ -821,6 +823,25 @@ const createLeague = async (
  			await league.swapWorstRoster(false);
  		}
  
@@ -1992,10 +2008,17 @@ index 12dd36b47..dee7179fb 100644
 +			await nflStartBracket();
 +		}
 +
++		// A league file that sets its own phase skips these in createStream, and the page's league load doesn't run
++		// again for the league that was just created, so the header's season and phase and the Play menu stayed empty
++		// until a reload
++		await updateStatus();
++		updatePhase(conditions);
++		await updatePlayMenu();
++
  		return lid;
  	} finally {
  		delete self.stream0;
-@@ -4184,9 +4198,50 @@ const updateDefaultSettingsOverrides = async (
+@@ -4179,9 +4200,50 @@ const updateDefaultSettingsOverrides = async (
  	}
  };
  
@@ -2009,7 +2032,7 @@ index 12dd36b47..dee7179fb 100644
 +		return;
 +	}
 +	const prospects: any[] = await idb.cache.players.indexGetAll(
-+		"playersByTeam",
++		"playersByTid",
 +		PLAYER.UNDRAFTED,
 +	);
 +	for (const p of prospects) {
@@ -2046,7 +2069,7 @@ index 12dd36b47..dee7179fb 100644
  	await league.setGameAttributes(gameAttributes);
  	await toUI("realtimeUpdate", [["gameAttributes"]]);
  };
-@@ -4194,6 +4249,7 @@ const updateGameAttributesGodMode = async (
+@@ -4189,6 +4251,7 @@ const updateGameAttributesGodMode = async (
  	settings: Settings,
  	conditions: Conditions,
  ) => {
@@ -2054,7 +2077,7 @@ index 12dd36b47..dee7179fb 100644
  	const gameAttributes: Partial<GameAttributesLeague> = omit(settings, [
  		"repeatSeason",
  	]);
-@@ -4381,6 +4437,15 @@ const updateOptions = async (
+@@ -4379,6 +4442,15 @@ const updateOptions = async (
  	await toUI("realtimeUpdate", [["options"]]);
  };
  
@@ -2070,8 +2093,8 @@ index 12dd36b47..dee7179fb 100644
  const updatePlayThroughInjuries = async ({
  	tid,
  	value,
-@@ -4871,6 +4936,17 @@ const upgrade65 = async () => {
- 	console.timeEnd("upgrade65");
+@@ -5002,6 +5074,17 @@ const checkContractSeasonsStart = (
+ 	}
  };
  
 +// NFL history mod: the user's team colors, for the team-color interface
@@ -2087,8 +2110,8 @@ index 12dd36b47..dee7179fb 100644
 +
  const upsertCustomizedPlayer = async (
  	{
- 		p,
-@@ -4920,6 +4996,17 @@ const upsertCustomizedPlayer = async (
+ 		p: pInput,
+@@ -5073,6 +5156,17 @@ const upsertCustomizedPlayer = async (
  
  	p.imgURL = helpers.stripBbcode(p.imgURL);
  
@@ -2106,7 +2129,7 @@ index 12dd36b47..dee7179fb 100644
  	// Fix draft and ratings season
  	if (p.tid === PLAYER.UNDRAFTED) {
  		if (p.draft.year < season) {
-@@ -5381,8 +5468,86 @@ const whileWorkerBusy =
+@@ -5532,8 +5626,86 @@ const whileWorkerBusy =
  	(...args: Args) =>
  		lock.whileWorkerBusy(() => cb(...args));
  
@@ -2124,7 +2147,7 @@ index 12dd36b47..dee7179fb 100644
 +					lid: g.get("lid"),
 +					season: g.get("season"),
 +					phase: g.get("phase"),
-+					phaseText: PHASE_TEXT[g.get("phase") as keyof typeof PHASE_TEXT],
++					phaseText: PHASE_TEXT[g.get("phase")],
 +					userTid: g.get("userTid"),
 +				},
 +	// Everything needed to compare a simmed league with real history (players, team seasons and stats, playoffs)
@@ -2154,7 +2177,7 @@ index 12dd36b47..dee7179fb 100644
 +		};
 +	},
 +	// Is a sim running right now?
-+	isSimming: async () => lock.get("gameSim"),
++	isSimming: async () => sim.isActive(),
 +	// Current standings, one row per active team
 +	standings: async () => {
 +		const season = g.get("season");
@@ -2193,7 +2216,7 @@ index 12dd36b47..dee7179fb 100644
  	awardSettings,
  	eightyTwoZeroDraft,
  	exhibitionGame,
-@@ -5523,6 +5688,7 @@ const api = {
+@@ -5673,6 +5845,7 @@ const api = {
  		updateMultiTeamMode,
  		updateOptions,
  		updatePlayThroughInjuries,
@@ -2201,7 +2224,7 @@ index 12dd36b47..dee7179fb 100644
  		updatePlayerWatch,
  		updatePlayersWatch,
  		updatePlayingTime,
-@@ -5531,6 +5697,7 @@ const api = {
+@@ -5681,6 +5854,7 @@ const api = {
  		updateTrade,
  		upgrade65,
  		upgrade65Estimate,
@@ -2312,7 +2335,7 @@ index 000000000..eee408519
 +		);
 +	};
 diff --git a/src/worker/core/GameSim.football/index.ts b/src/worker/core/GameSim.football/index.ts
-index ccdc4ee51..6608163ad 100644
+index 0c9ba380e..19ed45ec2 100644
 --- a/src/worker/core/GameSim.football/index.ts
 +++ b/src/worker/core/GameSim.football/index.ts
 @@ -10,6 +10,18 @@ import {
@@ -2334,7 +2357,7 @@ index ccdc4ee51..6608163ad 100644
  import { penaltiesByPlayType } from "./penalties.ts";
  import type { Position } from "../../../common/types.football.ts";
  import type {
-@@ -561,7 +573,21 @@ class GameSim extends GameSimBase {
+@@ -524,7 +536,21 @@ class GameSim extends GameSimBase {
  		const players = this.playersOnField[t][pos];
  
  		if (!players || !players[0]) {
@@ -2357,7 +2380,7 @@ index ccdc4ee51..6608163ad 100644
  		}
  
  		return players[0];
-@@ -1430,10 +1456,28 @@ class GameSim extends GameSimBase {
+@@ -1393,10 +1419,28 @@ class GameSim extends GameSimBase {
  				const numPlayers = formation[side][pos]!;
  
  				// Not sure why this adjustment is needed, but without it, basically only the top 3 WR play. Maybe because formations with fewer than 3 WR let some of them rest, so you'd need 3 WR sets called very frequently to ever get them all tired.
@@ -2389,7 +2412,7 @@ index ccdc4ee51..6608163ad 100644
  				if (FATIGUE_POS.has(pos)) {
  					for (let depthIndex = 0; depthIndex < depth.length; depthIndex++) {
  						if (players.length >= numPlayers) {
-@@ -1441,7 +1485,7 @@ class GameSim extends GameSimBase {
+@@ -1404,7 +1448,7 @@ class GameSim extends GameSimBase {
  						}
  
  						const p = depth[depthIndex]!;
@@ -2398,7 +2421,7 @@ index ccdc4ee51..6608163ad 100644
  							continue;
  						}
  
-@@ -2259,7 +2303,8 @@ class GameSim extends GameSimBase {
+@@ -2222,7 +2266,8 @@ class GameSim extends GameSimBase {
  	) {
  		const { d } = this.currentPlay.state.initial;
  
@@ -2408,7 +2431,7 @@ index ccdc4ee51..6608163ad 100644
  		const ydsRaw = randInt(-1, -12);
  		const yds = this.currentPlay.boundedYds(ydsRaw);
  
-@@ -2461,7 +2506,8 @@ class GameSim extends GameSimBase {
+@@ -2424,7 +2469,8 @@ class GameSim extends GameSimBase {
  			o,
  			Math.random() < 0.2 ? "catching" : "gettingOpen",
  			["WR", "TE", "RB"],
@@ -2418,7 +2441,7 @@ index ccdc4ee51..6608163ad 100644
  		);
  
  		// RB passes are often short, so 50% chance of a decrease in yardage, which is more severe for players with low gettingOpen
-@@ -2506,7 +2552,16 @@ class GameSim extends GameSimBase {
+@@ -2469,7 +2515,16 @@ class GameSim extends GameSimBase {
  
  		const yds = this.boundedYdsBallCarrier(ydsRaw);
  
@@ -2436,7 +2459,7 @@ index ccdc4ee51..6608163ad 100644
  		const complete = Math.random() < this.probComplete(qb, target, defender);
  		const interception = Math.random() < this.probInt(qb, defender);
  
-@@ -2611,8 +2666,7 @@ class GameSim extends GameSimBase {
+@@ -2574,8 +2629,7 @@ class GameSim extends GameSimBase {
  		const d = this.d;
  
  		let rbw:
@@ -2446,7 +2469,7 @@ index ccdc4ee51..6608163ad 100644
  		const rbCounts = { aOL: 0, aOther: 0, wOL: 0, wOther: 0 };
  
  		// Usually do normal run, but sometimes do special stuff
-@@ -2625,9 +2679,14 @@ class GameSim extends GameSimBase {
+@@ -2588,9 +2642,14 @@ class GameSim extends GameSimBase {
  
  			const rbs = this.playersOnField[o].RB ?? [];
  
@@ -2463,7 +2486,7 @@ index ccdc4ee51..6608163ad 100644
  				positions.push("WR");
  			}
  
-@@ -2642,7 +2701,17 @@ class GameSim extends GameSimBase {
+@@ -2605,7 +2664,17 @@ class GameSim extends GameSimBase {
  		// Scrambles tend to be longer runs
  		const scrambleModifier = qbScramble ? 3 : 1;
  
@@ -2482,7 +2505,7 @@ index ccdc4ee51..6608163ad 100644
  
  		if (!qbScramble) {
  			rbw = new Map();
-@@ -3066,13 +3135,19 @@ class GameSim extends GameSimBase {
+@@ -3028,13 +3097,19 @@ class GameSim extends GameSimBase {
  		rating?: CompositeRating,
  		positions: Position[] = POSITIONS,
  		power: number = 1,
@@ -2546,53 +2569,53 @@ index ad86f1744..85e7bf51c 100644
  	// With forceHistoricalRosters enabled, we only want picks after this mode will turn off
  	const skipForceHistoricalRosters =
 diff --git a/src/worker/core/draft/runPicks.ts b/src/worker/core/draft/runPicks.ts
-index 260dbbdd8..d2514cd76 100644
+index c04251784..970e664e8 100644
 --- a/src/worker/core/draft/runPicks.ts
 +++ b/src/worker/core/draft/runPicks.ts
-@@ -198,7 +198,29 @@ const runPicks = async (
+@@ -194,7 +194,29 @@ const runPicks = async (
  			}
  			console.log(sum);*/
  
--			const selection = choice(playersAll, score);
-+			// NFL history mod: the team takes the player it really drafted this year, if he's still there. With none
-+			// left, it takes the earliest real pick whose real team has no picks left in this draft. Then normal logic.
-+			let selection: Player | undefined;
-+			if (__SPORT === "football" && g.get("useRealDrafts")) {
-+				const season = g.get("season");
-+				const real = playersAll.filter(
-+					(p) => (p as any).realDraft?.year === season,
-+				);
-+				const order = (p: Player) =>
-+					(p as any).realDraft.round * 1000 + (p as any).realDraft.pick;
-+				const byOrder = (a: Player, b: Player) => order(a) - order(b);
-+				const own = real.filter((p) => (p as any).realDraft.tid === dp.tid);
-+				if (own.length > 0) {
-+					selection = own.sort(byOrder)[0];
-+				} else {
-+					const tidsWithPicksLeft = new Set(draftPicks.map((dp2) => dp2.tid));
-+					const orphans = real.filter(
-+						(p) => !tidsWithPicksLeft.has((p as any).realDraft.tid),
+-				const selection = choice(playersAll, score);
++				// NFL history mod: the team takes the player it really drafted this year, if he's still there. With none
++				// left, it takes the earliest real pick whose real team has no picks left in this draft. Then normal logic.
++				let selection: Player | undefined;
++				if (__SPORT === "football" && g.get("useRealDrafts")) {
++					const season = g.get("season");
++					const real = playersAll.filter(
++						(p) => (p as any).realDraft?.year === season,
 +					);
-+					selection = orphans.sort(byOrder)[0];
++					const order = (p: Player) =>
++						(p as any).realDraft.round * 1000 + (p as any).realDraft.pick;
++					const byOrder = (a: Player, b: Player) => order(a) - order(b);
++					const own = real.filter((p) => (p as any).realDraft.tid === dp.tid);
++					if (own.length > 0) {
++						selection = own.sort(byOrder)[0];
++					} else {
++						const tidsWithPicksLeft = new Set(draftPicks.map((dp2) => dp2.tid));
++						const orphans = real.filter(
++							(p) => !tidsWithPicksLeft.has((p as any).realDraft.tid),
++						);
++						selection = orphans.sort(byOrder)[0];
++					}
 +				}
-+			}
-+			selection ??= choice(playersAll, score);
++				selection ??= choice(playersAll, score);
  
- 			const pid = selection.pid;
- 			await selectPlayer(dp, pid);
+ 				const pid = selection.pid;
+ 				await selectPlayer(dp, pid);
 diff --git a/src/worker/core/freeAgents/autoSign.ts b/src/worker/core/freeAgents/autoSign.ts
-index 26983abfc..f0b100629 100644
+index d82b97e7a..26007cf05 100644
 --- a/src/worker/core/freeAgents/autoSign.ts
 +++ b/src/worker/core/freeAgents/autoSign.ts
-@@ -5,6 +5,7 @@ import { idb } from "../../db/index.ts";
- import { g, local } from "../../util/index.ts";
+@@ -7,6 +7,7 @@ import { g } from "../../util/index.ts";
  import { orderBy } from "../../../common/utils.ts";
  import { shuffle } from "../../../common/random.ts";
+ import { userControlsTeam } from "../../util/userControlsTeam.ts";
 +import { nflCanJoin } from "../nflRealRosters.ts";
  
  /**
   * AI teams sign free agents.
-@@ -72,7 +73,12 @@ const autoSign = async () => {
+@@ -70,7 +71,12 @@ const autoSign = async () => {
  
  		// Ignore roster size, will drop bad player if necessary in checkRosterSizes, and getBest won't sign min contract player unless under the roster limit
  		const payroll = await team.getPayroll(t.tid);
@@ -2607,10 +2630,10 @@ index 26983abfc..f0b100629 100644
  			// Remove from list of free agents
  			playersSorted = playersSorted.filter((p2) => p2 !== p);
 diff --git a/src/worker/core/game/loadTeams.ts b/src/worker/core/game/loadTeams.ts
-index b261af494..83f5aef29 100644
+index 120e4998f..d510f9e30 100644
 --- a/src/worker/core/game/loadTeams.ts
 +++ b/src/worker/core/game/loadTeams.ts
-@@ -129,11 +129,21 @@ const SEASON_STATS_KEYS = bySport({
+@@ -133,11 +133,21 @@ const SEASON_STATS_KEYS = bySport({
  	hockey: ["shG", "evG", "ppG", "shA", "evA", "ppA"],
  } as const);
  
@@ -2632,7 +2655,7 @@ index b261af494..83f5aef29 100644
  	},
  	teamSeason: {
  		won: number;
-@@ -239,6 +249,8 @@ export const processTeam = async (
+@@ -243,6 +253,8 @@ export const processTeam = async (
  		},
  		compositeRating,
  		depth: teamInput.depth,
@@ -2641,7 +2664,7 @@ index b261af494..83f5aef29 100644
  	};
  
  	const playThroughInjuries = actualPlayThroughInjuries[playoffs ? 1 : 0];
-@@ -264,8 +276,15 @@ export const processTeam = async (
+@@ -268,8 +280,15 @@ export const processTeam = async (
  		const injuryFactor = playThroughInjuriesFactor(p.injury.gamesRemaining);
  
  		// p.jerseyNumber fallback is for exhibition game players for the current season with no stats
@@ -2660,10 +2683,10 @@ index b261af494..83f5aef29 100644
  		const playerCompositeRatings: any = {};
 diff --git a/src/worker/core/game/nflRealMoves.ts b/src/worker/core/game/nflRealMoves.ts
 new file mode 100644
-index 000000000..728410280
+index 000000000..3eb3360e2
 --- /dev/null
 +++ b/src/worker/core/game/nflRealMoves.ts
-@@ -0,0 +1,81 @@
+@@ -0,0 +1,100 @@
 +// NFL history mod: real moves during a season (Jerry Rice to Seattle after 3 games in 2004). Each player's
 +// realMoves lists [season, games played with his first team, new team, jersey]; after each day of games, players
 +// whose team has played that many games move to the new team.
@@ -2671,6 +2694,28 @@ index 000000000..728410280
 +import { idb } from "../../db/index.ts";
 +import { g } from "../../util/index.ts";
 +import { player, team } from "../index.ts";
++import {
++	getContractExp,
++	getCurrentContract,
++	getNearestContractAmount,
++} from "../../../common/contracts.ts";
++import { endContract } from "../contract/index.ts";
++import type { FlatContractInfo, Player } from "../../../common/types.ts";
++
++// The contract a player takes on a real move: what's left of his current one (which ends here, owed by nobody, since
++// the new team takes it over at the same pay), or a one-year deal at his value if it has run out
++export const nflMoveContract = (p: Player, season: number): FlatContractInfo => {
++	const current = getCurrentContract(p);
++	if (current && getContractExp(current) >= season) {
++		const carried = {
++			amount: getNearestContractAmount(current, season),
++			exp: getContractExp(current),
++		};
++		endContract(current, { season: g.get("season"), phase: g.get("phase") });
++		return carried;
++	}
++	return { amount: player.genContract(p).amount, exp: season };
++};
 +
 +type RealMove = {
 +	season: number;
@@ -2726,10 +2771,7 @@ index 000000000..728410280
 +			if (p.tid >= 0) {
 +				moved.add(p.tid);
 +			}
-+			const contract =
-+				p.contract.exp >= season
-+					? p.contract
-+					: { amount: player.genContract(p).amount, exp: season };
++			const contract = nflMoveContract(p, season);
 +			await player.sign(p, m.tid, contract, PHASE.REGULAR_SEASON);
 +			if (m.jerseyNumber !== undefined) {
 +				p.jerseyNumber = m.jerseyNumber;
@@ -2746,7 +2788,7 @@ index 000000000..728410280
 +	return moved.size > 0;
 +};
 diff --git a/src/worker/core/game/play.ts b/src/worker/core/game/play.ts
-index 03277b04b..7cb6d4c8b 100644
+index 144143bce..312b272fb 100644
 --- a/src/worker/core/game/play.ts
 +++ b/src/worker/core/game/play.ts
 @@ -1,3 +1,5 @@
@@ -2763,7 +2805,7 @@ index 03277b04b..7cb6d4c8b 100644
  import updatePlayoffSeries from "./updatePlayoffSeries.ts";
  import writeGameStats from "./writeGameStats.ts";
  import writePlayerStats, {
-@@ -195,6 +198,28 @@ const play = async (
+@@ -190,6 +193,28 @@ const playDays = async (
  					changed = true;
  				}
  
@@ -2792,7 +2834,7 @@ index 03277b04b..7cb6d4c8b 100644
  				if (
  					__SPORT === "baseball" &&
  					p.pFatigue !== undefined &&
-@@ -261,6 +286,8 @@ const play = async (
+@@ -256,6 +281,8 @@ const playDays = async (
  			}
  			await idb.cache.players.putAll(playersToSave);
  
@@ -2801,7 +2843,7 @@ index 03277b04b..7cb6d4c8b 100644
  			if (healedTexts.length > 0) {
  				logEvent(
  					{
-@@ -301,6 +328,15 @@ const play = async (
+@@ -296,6 +323,15 @@ const playDays = async (
  			if (phase === PHASE.REGULAR_SEASON) {
  				await trade.betweenAiTeams();
  			}
@@ -2818,7 +2860,7 @@ index 03277b04b..7cb6d4c8b 100644
  
  		// More stuff for LeagueTopBar - update ovrs based on injuries, and (if user just played a game) update the score of the user's last game and add their next game
 diff --git a/src/worker/core/league/createGameAttributes.ts b/src/worker/core/league/createGameAttributes.ts
-index a23718bcd..60e393752 100644
+index e90ebbf82..452be0a25 100644
 --- a/src/worker/core/league/createGameAttributes.ts
 +++ b/src/worker/core/league/createGameAttributes.ts
 @@ -285,7 +285,8 @@ const createGameAttributes = async (
@@ -2832,10 +2874,10 @@ index a23718bcd..60e393752 100644
  			divs: unwrapGameAttribute(gameAttributes, "divs"),
  			numGames: unwrapGameAttribute(gameAttributes, "numGames"),
 diff --git a/src/worker/core/league/createStream.ts b/src/worker/core/league/createStream.ts
-index 864aaa030..680dc3a36 100644
+index e9674b16b..a63aececa 100644
 --- a/src/worker/core/league/createStream.ts
 +++ b/src/worker/core/league/createStream.ts
-@@ -1334,6 +1334,7 @@ const beforeDBStream = async ({
+@@ -1461,6 +1461,7 @@ const beforeDBStream = async ({
  	// Update after applying real team info and any other changes in processTeamInfos
  	gameAttributes.teamInfoCache = teams.map((t) => ({
  		abbrev: t.abbrev,
@@ -2844,23 +2886,32 @@ index 864aaa030..680dc3a36 100644
  		imgURL: t.imgURL,
  		imgURLSmall: t.imgURLSmall,
 diff --git a/src/worker/core/league/loadGameAttributes.ts b/src/worker/core/league/loadGameAttributes.ts
-index 517f4c69a..655faf06a 100644
+index 517f4c69a..8f86d3044 100644
 --- a/src/worker/core/league/loadGameAttributes.ts
 +++ b/src/worker/core/league/loadGameAttributes.ts
-@@ -101,6 +101,18 @@ const loadGameAttributes = async () => {
+@@ -101,6 +101,27 @@ const loadGameAttributes = async () => {
  		}
  	}
  
 +	// NFL history mod: make sure team colors are in teamInfoCache (for the team-color interface), including leagues made before the mod
-+	{
-+		const teams = await idb.cache.teams.getAll();
-+		g.setWithoutSavingToDB(
-+			"teamInfoCache",
-+			g.get("teamInfoCache").map((t, tid) => ({
-+				...t,
-+				colors: teams.find((t2) => t2.tid === tid)?.colors,
-+			})),
-+		);
++	// Never allowed to stop the league from loading: on a new league's first load teamInfoCache can be missing, and an error
++	// here skipped the header and Play menu setup until a reload
++	try {
++		const teamInfoCache = Object.hasOwn(g, "teamInfoCache")
++			? g.get("teamInfoCache")
++			: undefined;
++		if (Array.isArray(teamInfoCache)) {
++			const teams = await idb.cache.teams.getAll();
++			g.setWithoutSavingToDB(
++				"teamInfoCache",
++				teamInfoCache.map((t, tid) => ({
++					...t,
++					colors: teams.find((t2) => t2.tid === tid)?.colors,
++				})),
++			);
++		}
++	} catch (error) {
++		console.error(error);
 +	}
 +
  	// Avoid IDB upgrade
@@ -2901,10 +2952,10 @@ index 000000000..3730cc5d6
 +	return p.realTeams[season] === tid;
 +};
 diff --git a/src/worker/core/phase/finalize.ts b/src/worker/core/phase/finalize.ts
-index 24de3d174..0b1781672 100644
+index aefe6af52..15ef7585c 100644
 --- a/src/worker/core/phase/finalize.ts
 +++ b/src/worker/core/phase/finalize.ts
-@@ -65,8 +65,14 @@ const finalize = async (
+@@ -66,8 +66,14 @@ const finalize = async (
  
  	updateEvents.push("newPhase");
  
@@ -2920,72 +2971,67 @@ index 24de3d174..0b1781672 100644
  		phase === PHASE.FREE_AGENCY
  	) {
 diff --git a/src/worker/core/phase/newPhaseDraft.ts b/src/worker/core/phase/newPhaseDraft.ts
-index ccef26173..9d512f4cb 100644
+index 260f2eb0c..d1fcee7bf 100644
 --- a/src/worker/core/phase/newPhaseDraft.ts
 +++ b/src/worker/core/phase/newPhaseDraft.ts
 @@ -1,3 +1,4 @@
 +import { logRealDeath, processOffseasonDeaths } from "../player/realDeaths.ts";
- import { PLAYER } from "../../../common/constants.ts";
  import { draft, league } from "../index.ts";
  import { idb } from "../../db/index.ts";
-@@ -16,17 +17,52 @@ const newPhaseDraft = async (conditions: Conditions): Promise<PhaseReturn> => {
- 	const promises: Promise<unknown>[] = [];
- 
+ import { g, helpers } from "../../util/index.ts";
+@@ -12,16 +13,47 @@ const newPhaseDraft = async (conditions: Conditions): Promise<PhaseReturn> => {
+ 	// slower is fine). For performance reasons, this assumes that any player drafted more than 110 years ago is dead
+ 	// already. If that's not true, congrats on immortality!
  	const currentSeason = g.get("season");
-+	// NFL history mod: deaths from this season's weekly check may not be saved yet, and the loop below reads saved players
++	// NFL history mod: deaths from this season's weekly check may not be saved yet
 +	const alreadyDead = new Set(
 +		(await idb.cache.players.getAll())
 +			.filter((p) => typeof p.diedYear === "number")
 +			.map((p) => p.pid),
 +	);
- 	for await (const { value: p } of idb.league
- 		.transaction("players")
- 		.store.index("draft.year, retiredYear")
- 		.iterate(IDBKeyRange.bound([currentSeason - 110], [""]))) {
- 		// Skip non-retired players and dead players
--		if (p.tid !== PLAYER.RETIRED || typeof p.diedYear === "number") {
-+		if (
-+			p.tid !== PLAYER.RETIRED ||
-+			typeof p.diedYear === "number" ||
-+			alreadyDead.has(p.pid)
-+		) {
- 			continue;
- 		}
+ 	const playersWhoDied: Player[] = [];
+ 	await idb.merged.players.forEach(
+ 		{ retired: true, minDraftYear: currentSeason - 110 },
+ 		(p) => {
+-			if (typeof p.diedYear === "number") {
++			if (typeof p.diedYear === "number" || alreadyDead.has(p.pid)) {
+ 				return;
+ 			}
  
-+		// NFL history mod: a real player dies the year he really did. Anyone with no known death lives on until the real
-+		// data runs out, then follows the normal rules. Death years are real-life years, one behind league seasons.
-+		if (
-+			p.nflDeath !== undefined &&
-+			(!Object.hasOwn(g, "nflDeaths") || g.get("nflDeaths"))
-+		) {
-+			if (p.nflDeath > 0) {
-+				if (currentSeason >= p.nflDeath) {
-+					p.diedYear = Math.max(p.nflDeath, p.retiredYear) - 1;
-+					logRealDeath(p, conditions);
-+					promises.push(idb.cache.players.put(p));
++			// NFL history mod: a real player dies the year he really did. Anyone with no known death lives on until the
++			// real data runs out, then follows the normal rules. Death years are real-life years, one behind league seasons.
++			if (
++				p.nflDeath !== undefined &&
++				(!Object.hasOwn(g, "nflDeaths") || g.get("nflDeaths"))
++			) {
++				if (p.nflDeath > 0) {
++					if (currentSeason >= p.nflDeath) {
++						p.diedYear = Math.max(p.nflDeath, p.retiredYear) - 1;
++						logRealDeath(p, conditions);
++						playersWhoDied.push(p);
++					}
++					return;
 +				}
-+				continue;
++				const lastReal = Object.hasOwn(g, "nflRealDataLastSeason")
++					? ((g as any).nflRealDataLastSeason as number)
++					: Infinity;
++				if (currentSeason <= lastReal) {
++					return;
++				}
 +			}
-+			const lastReal = Object.hasOwn(g, "nflRealDataLastSeason")
-+				? ((g as any).nflRealDataLastSeason as number)
-+				: Infinity;
-+			if (currentSeason <= lastReal) {
-+				continue;
-+			}
-+		}
 +
- 		// Skip real players dying young
--		if (p.real && currentSeason - p.born.year < 70) {
-+		if (
-+			(p.real || p.nflDeath !== undefined) &&
-+			currentSeason - p.born.year < 70
-+		) {
- 			continue;
- 		}
+ 			// Skip real players dying young
+-			if (p.real && currentSeason - p.born.year < 70) {
++			if (
++				(p.real || p.nflDeath !== undefined) &&
++				currentSeason - p.born.year < 70
++			) {
+ 				return;
+ 			}
  
-@@ -42,6 +78,9 @@ const newPhaseDraft = async (conditions: Conditions): Promise<PhaseReturn> => {
+@@ -38,6 +70,9 @@ const newPhaseDraft = async (conditions: Conditions): Promise<PhaseReturn> => {
  
- 	await Promise.all(promises);
+ 	await idb.cache.players.putAll(playersWhoDied);
  
 +	// Offseason deaths, and anyone who retired too recently for the loop above to see
 +	await processOffseasonDeaths(conditions);
@@ -2993,7 +3039,7 @@ index ccef26173..9d512f4cb 100644
  	await draft.genPlayers(currentSeason);
  
  	if (g.get("draftType") !== "freeAgents") {
-@@ -49,7 +88,15 @@ const newPhaseDraft = async (conditions: Conditions): Promise<PhaseReturn> => {
+@@ -45,7 +80,15 @@ const newPhaseDraft = async (conditions: Conditions): Promise<PhaseReturn> => {
  		const draftLotteryResult =
  			await idb.merged.draftLotteryResults.get(currentSeason);
  
@@ -3011,10 +3057,18 @@ index ccef26173..9d512f4cb 100644
  				await draft.genOrder(false, conditions);
  			} catch (error) {
 diff --git a/src/worker/core/phase/newPhasePreseason.ts b/src/worker/core/phase/newPhasePreseason.ts
-index 22a20236f..4f5b7a5d1 100644
+index 0e2c5dee3..4713f46a2 100644
 --- a/src/worker/core/phase/newPhasePreseason.ts
 +++ b/src/worker/core/phase/newPhasePreseason.ts
-@@ -409,6 +409,76 @@ const newPhasePreseason = async (
+@@ -40,6 +40,7 @@ import {
+ 	getNearestContractAmount,
+ } from "../../../common/contracts.ts";
+ import { userControlsTeam } from "../../util/userControlsTeam.ts";
++import { nflMoveContract } from "../game/nflRealMoves.ts";
+ 
+ // When a player changes teams or leaves his team at the start of a new season without a normal signing or release (repeat season, forced historical rosters), his contract just ends before this season
+ const endContractBeforeNewSeason = (
+@@ -510,6 +511,73 @@ const newPhasePreseason = async (
  		}
  	}
  
@@ -3054,10 +3108,7 @@ index 22a20236f..4f5b7a5d1 100644
 +			if (p.tid >= 0) {
 +				moved.add(p.tid);
 +			}
-+			const contract =
-+				p.contract.exp >= newSeason
-+					? p.contract
-+					: { amount: player.genContract(p).amount, exp: newSeason };
++			const contract = nflMoveContract(p, newSeason);
 +			await player.sign(p, target, contract, PHASE.PRESEASON);
 +			moved.add(target);
 +			await idb.cache.players.put(p);
@@ -3069,7 +3120,7 @@ index 22a20236f..4f5b7a5d1 100644
 +			}
 +			if ((p as any).realTeams[newSeason] !== p.tid) {
 +				moved.add(p.tid);
-+				player.addToFreeAgents(p, {});
++				player.addToFreeAgents(p, {}, p.tid);
 +				await idb.cache.players.put(p);
 +			}
 +		}
@@ -3091,7 +3142,7 @@ index 22a20236f..4f5b7a5d1 100644
  	// Again, so updateValues can happen after new mean/std is calculated
  	local.playerOvrMeanStdStale = true;
  	for (const p of players) {
-@@ -429,6 +499,23 @@ const newPhasePreseason = async (
+@@ -530,6 +598,23 @@ const newPhasePreseason = async (
  
  	local.minFractionDiffs = undefined;
  
@@ -3115,7 +3166,7 @@ index 22a20236f..4f5b7a5d1 100644
  	// Handle jersey number conflicts
  	const playersByTeam = Map.groupBy(
  		players.filter((p) => p.tid >= 0),
-@@ -460,10 +547,11 @@ const newPhasePreseason = async (
+@@ -561,10 +646,11 @@ const newPhasePreseason = async (
  				);
  				if (conflicts.length > 1) {
  					// Conflict! Who gets to keep the number? The one with the highest career peak ovr!
@@ -3132,10 +3183,10 @@ index 22a20236f..4f5b7a5d1 100644
  					for (const p of conflicts) {
  						if (p !== playerWhoKeepsIt) {
 diff --git a/src/worker/core/phase/newPhaseResignPlayers.ts b/src/worker/core/phase/newPhaseResignPlayers.ts
-index e9d89db1f..24ca44d52 100644
+index a62306cbd..15014199b 100644
 --- a/src/worker/core/phase/newPhaseResignPlayers.ts
 +++ b/src/worker/core/phase/newPhaseResignPlayers.ts
-@@ -148,6 +148,27 @@ const newPhaseResignPlayers = async (
+@@ -142,6 +142,27 @@ const newPhaseResignPlayers = async (
  
  	await contractNegotiation.cancelAll();
  
@@ -3163,7 +3214,7 @@ index e9d89db1f..24ca44d52 100644
  	const valueChangeCalculator = new ValueChangeCalculator();
  	for (const pid of expiringPids) {
  		// Re-fetch players, because normalizeContractDemands might have changed some objects
-@@ -247,7 +268,23 @@ const newPhaseResignPlayers = async (
+@@ -243,7 +264,23 @@ const newPhaseResignPlayers = async (
  				}
  			}
  
@@ -3186,10 +3237,10 @@ index e9d89db1f..24ca44d52 100644
 +				});
 +			} else if (reSignPlayer) {
  				const mood = await player.moodInfo(p, p.tid, {
- 					contractAmount: p.contract.amount,
+ 					contractAmount: contractDemand.amount,
  				});
 diff --git a/src/worker/core/phase/processScheduledEvents.ts b/src/worker/core/phase/processScheduledEvents.ts
-index 9d9e5a586..15af54fed 100644
+index c1af3f439..42496a9aa 100644
 --- a/src/worker/core/phase/processScheduledEvents.ts
 +++ b/src/worker/core/phase/processScheduledEvents.ts
 @@ -1,3 +1,7 @@
@@ -3488,7 +3539,7 @@ index 9d9e5a586..15af54fed 100644
  	// Player might need some new ratings rows added
  	const lastRatingsSeason = last(p.ratings).season;
  	const diff = g.get("season") - lastRatingsSeason;
-@@ -604,17 +833,43 @@ const processUnretirePlayer = async (pid: number) => {
+@@ -604,21 +833,46 @@ const processUnretirePlayer = async (pid: number) => {
  	}
  
  	p.retiredYear = Infinity;
@@ -3497,20 +3548,23 @@ index 9d9e5a586..15af54fed 100644
 +	p.awards = p.awards.filter(
 +		(award) => award.type !== "Inducted into the Hall of Fame",
 +	);
- 	player.addToFreeAgents(p, await getNumPlayersTradedAwayNormalizedAll());
+ 	player.addToFreeAgents(
+ 		p,
+ 		await getNumPlayersTradedAwayNormalizedAll(),
+ 		"noContractToEnd",
+ 	);
 +
 +	const t = tid !== undefined ? await idb.cache.teams.get(tid) : undefined;
 +	if (t && !t.disabled) {
-+		// A fresh one-year deal at what he's worth now: his contract from before he retired ended years ago (an end year
-+		// in the past). After the playoffs it's for next season
-+		p.contract = {
++		// A fresh one-year deal at what he's worth now. After the playoffs it's for next season
++		const contract = {
 +			...player.genContract(p),
 +			exp: g.get("season") + (g.get("phase") > PHASE.PLAYOFFS ? 1 : 0),
 +		};
-+		await player.sign(p, t.tid, p.contract, g.get("phase"));
++		await player.sign(p, t.tid, contract, g.get("phase"));
 +		if (returningToUser) {
 +			// Historical Rosters leaves him with you for this deal
-+			p.nflStayUntil = p.contract.exp;
++			p.nflStayUntil = contract.exp;
 +		}
 +	}
  	await idb.cache.players.put(p);
@@ -3534,7 +3588,7 @@ index 9d9e5a586..15af54fed 100644
  
  		return [text];
  	}
-@@ -675,6 +930,20 @@ export const processScheduledEvents = async (
+@@ -679,6 +933,20 @@ export const processScheduledEvents = async (
  					confsDivsDids,
  				)),
  			);
@@ -3555,7 +3609,7 @@ index 9d9e5a586..15af54fed 100644
  		} else if (scheduledEvent.type === "gameAttributes") {
  			eventLogTexts.push(...(await processGameAttributes(scheduledEvent.info)));
  		} else if (scheduledEvent.type === "awards") {
-@@ -697,13 +966,24 @@ export const processScheduledEvents = async (
+@@ -701,13 +969,24 @@ export const processScheduledEvents = async (
  				)),
  			);
  		} else if (scheduledEvent.type === "contraction") {
@@ -3622,10 +3676,10 @@ index 324e001dd..ca6350452 100644
  	if (!ratings.locked || years === 0) {
  		// Run these even for players developing 0 seasons
 diff --git a/src/worker/core/player/format.ts b/src/worker/core/player/format.ts
-index 8542aa0bc..23afa521c 100644
+index f94b55335..fedfe0a5d 100644
 --- a/src/worker/core/player/format.ts
 +++ b/src/worker/core/player/format.ts
-@@ -207,6 +207,9 @@ const processAttrs = (
+@@ -324,6 +324,9 @@ const processAttrs = (
  		} else if (attr === "ageAtDeath") {
  			output.ageAtDeath =
  				typeof p.diedYear === "number" ? p.diedYear - p.born.year : null;
@@ -3635,7 +3689,7 @@ index 8542aa0bc..23afa521c 100644
  		} else if (attr === "diedYear") {
  			// Non-dead players wil not have any diedYear property
  			output.diedYear = typeof p.diedYear === "number" ? p.diedYear : null;
-@@ -233,6 +236,8 @@ const processAttrs = (
+@@ -350,6 +353,8 @@ const processAttrs = (
  			// Estimate pick number from draft round and pick. Would be better to store the real value
  			if (p.draft.round > 0 && p.draft.pick > 0) {
  				output.draftPosition =
@@ -3900,10 +3954,10 @@ index 000000000..bea2ea95f
 +	);
 +});
 diff --git a/src/worker/core/season/addDaysToSchedule.ts b/src/worker/core/season/addDaysToSchedule.ts
-index 4904656ab..aadaba86b 100644
+index 697545670..cf1ebbdfd 100644
 --- a/src/worker/core/season/addDaysToSchedule.ts
 +++ b/src/worker/core/season/addDaysToSchedule.ts
-@@ -28,12 +28,22 @@ const addDaysToSchedule = (
+@@ -32,12 +32,22 @@ const addDaysToSchedule = (
  		}
  	}
  
@@ -3920,14 +3974,14 @@ index 4904656ab..aadaba86b 100644
 +			continue;
 +		}
 +
- 		const allStarGame = awayTid === -2 && homeTid === -1;
- 		const tradeDeadline = awayTid === -3 && homeTid === -3;
+ 		const allStarGame = isAllStarGame(homeTid, awayTid);
+ 		const tradeDeadline = isTradeDeadline(homeTid, awayTid);
  		if (
 +			weekBreak ||
  			dayTids.has(homeTid) ||
  			dayTids.has(awayTid) ||
  			allStarGame ||
-@@ -44,6 +54,7 @@ const addDaysToSchedule = (
+@@ -48,6 +58,7 @@ const addDaysToSchedule = (
  			day += 1;
  			dayTids.clear();
  		}
@@ -3935,7 +3989,7 @@ index 4904656ab..aadaba86b 100644
  
  		dayTids.add(homeTid);
  		dayTids.add(awayTid);
-@@ -51,11 +62,12 @@ const addDaysToSchedule = (
+@@ -55,11 +66,12 @@ const addDaysToSchedule = (
  		prevDayAllStarGame = allStarGame;
  		prevDayTradeDeadline = tradeDeadline;
  
@@ -3952,10 +4006,10 @@ index 4904656ab..aadaba86b 100644
  
  export default addDaysToSchedule;
 diff --git a/src/worker/core/season/genPlayoffSeries.ts b/src/worker/core/season/genPlayoffSeries.ts
-index 845bffced..29ea4fdc8 100644
+index 1ab0107b8..2ab6bc8a9 100644
 --- a/src/worker/core/season/genPlayoffSeries.ts
 +++ b/src/worker/core/season/genPlayoffSeries.ts
-@@ -48,6 +48,24 @@ export class InvalidPlayoffSettingsError extends Error {
+@@ -35,6 +35,24 @@ export class InvalidPlayoffSettingsError extends Error {
  
  type MinimalTeam = TeamFiltered<["tid"], ["cid", "winp"], any, number>;
  
@@ -3980,10 +4034,10 @@ index 845bffced..29ea4fdc8 100644
  const genTeam = (t: MinimalTeam, seed: number): PlayoffSeriesTeam => {
  	return {
  		tid: t.tid,
-@@ -265,10 +283,26 @@ export const genPlayoffSeriesFromTeams = async (
+@@ -252,10 +270,26 @@ export const genPlayoffSeriesFromTeams = async (
  					teamsConf.length >= numPlayoffAndPlayInTeams / byConf
  				) {
- 					const { round, playIn } = await makeMatchups(
+ 					const { round, playIn } = makeMatchups(
 -						await orderTeams(teamsConf, teams, orderTeamsOptions),
 +						nflRealSeedOrder(
 +							await orderTeams(teamsConf, teams, orderTeamsOptions),
@@ -4009,10 +4063,10 @@ index 845bffced..29ea4fdc8 100644
  					if (playIn) {
  						playIns.push(playIn);
 diff --git a/src/worker/core/season/newSchedule.ts b/src/worker/core/season/newSchedule.ts
-index 5959814f4..0fa73064e 100644
+index be0a37acf..6f57a25e0 100644
 --- a/src/worker/core/season/newSchedule.ts
 +++ b/src/worker/core/season/newSchedule.ts
-@@ -15,6 +15,45 @@ const newSchedule = (
+@@ -19,6 +19,45 @@ const newSchedule = (
  	conditions?: Conditions,
  ) => {
  	if (__SPORT === "football") {
@@ -4125,18 +4179,18 @@ index 000000000..83b99ff3a
 +
 +export default nflStartBracket;
 diff --git a/src/worker/core/team/checkRosterSizes.ts b/src/worker/core/team/checkRosterSizes.ts
-index 8dd67389c..301c12c06 100644
+index fa0ba9368..fc587818c 100644
 --- a/src/worker/core/team/checkRosterSizes.ts
 +++ b/src/worker/core/team/checkRosterSizes.ts
-@@ -5,6 +5,7 @@ import { idb } from "../../db/index.ts";
- import { g, helpers, local } from "../../util/index.ts";
+@@ -6,6 +6,7 @@ import { g, helpers } from "../../util/index.ts";
  import type { Player } from "../../../common/types.ts";
  import { KEY_POSITIONS_NEEDED } from "../freeAgents/getBest.ts";
+ import { getContractDemand } from "../contract/index.ts";
 +import { nflCanJoin } from "../nflRealRosters.ts";
  import { bySport } from "../../../common/sportFunctions.ts";
  import { last } from "../../../common/utils.ts";
- 
-@@ -64,7 +65,13 @@ const dropPlayers = async (players: Player[], numToDrop: number) => {
+ import { userControlsTeam } from "../../util/userControlsTeam.ts";
+@@ -66,7 +67,13 @@ const dropPlayers = async (players: Player[], numToDrop: number) => {
  		}
  	}
  
@@ -4151,7 +4205,7 @@ index 8dd67389c..301c12c06 100644
  
  	const releasedPIDs = [];
  	for (const p of players) {
-@@ -135,7 +142,17 @@ const checkRosterSizes = async (
+@@ -137,7 +144,17 @@ const checkRosterSizes = async (
  		const players = await idb.cache.players.indexGetAll("playersByTid", tid);
  		let numPlayersOnRoster = players.length;
  
@@ -4170,7 +4224,7 @@ index 8dd67389c..301c12c06 100644
  			if (userTeamAndActive) {
  				if (g.get("userTids").length <= 1) {
  					userTeamSizeError = "Your team has ";
-@@ -145,17 +162,15 @@ const checkRosterSizes = async (
+@@ -147,17 +164,15 @@ const checkRosterSizes = async (
  					} have `;
  				}
  
@@ -4192,7 +4246,7 @@ index 8dd67389c..301c12c06 100644
  				);
  				releasedPIDs.push(...releasedPIDsTemp);
  			}
-@@ -184,7 +199,9 @@ const checkRosterSizes = async (
+@@ -186,7 +201,9 @@ const checkRosterSizes = async (
  				// Auto-add players
  				while (numPlayersOnRoster < g.get("minRosterSize")) {
  					// See also core.phase
@@ -4204,7 +4258,7 @@ index 8dd67389c..301c12c06 100644
  					if (!p) {
  						p = await player.genRandomFreeAgent();
 diff --git a/src/worker/core/team/genDepth.football.ts b/src/worker/core/team/genDepth.football.ts
-index 8536f14d1..02dac392c 100644
+index 86195d0a9..56d16b5db 100644
 --- a/src/worker/core/team/genDepth.football.ts
 +++ b/src/worker/core/team/genDepth.football.ts
 @@ -17,11 +17,44 @@ type PlayerForDepth = {
@@ -4254,7 +4308,7 @@ index 8536f14d1..02dac392c 100644
  	}
  
  	return tempScore;
-@@ -88,13 +121,13 @@ const genDepth = async (
+@@ -86,13 +119,13 @@ const genDepth = async (
  			);
  
  			for (const p of playersNotInDepth) {
@@ -4270,7 +4324,7 @@ index 8536f14d1..02dac392c 100644
  						depth[pos2].splice(i, 0, p.pid);
  						added = true;
  						break;
-@@ -109,7 +142,7 @@ const genDepth = async (
+@@ -107,7 +140,7 @@ const genDepth = async (
  		} else {
  			// Sort everything from scratch
  			players.sort((a, b) => {
@@ -4341,10 +4395,10 @@ index fd1ef9680..a7ee686a7 100644
  			gid: row.gid,
  			mvp: row.mvp ? addAbbrevAndCount(row.mvp) : undefined,
 diff --git a/src/worker/views/gameLog.ts b/src/worker/views/gameLog.ts
-index 41c6d3c40..673a05337 100644
+index a5551df4a..1c196f4c0 100644
 --- a/src/worker/views/gameLog.ts
 +++ b/src/worker/views/gameLog.ts
-@@ -36,6 +36,16 @@ export type TeamSeasonOverride = {
+@@ -37,6 +37,16 @@ export type TeamSeasonOverride = {
  	colors?: [string, string, string];
  };
  
@@ -4361,7 +4415,7 @@ index 41c6d3c40..673a05337 100644
  export const setTeamInfo = async (
  	t: any,
  	i: number,
-@@ -64,7 +74,14 @@ export const setTeamInfo = async (
+@@ -65,7 +75,14 @@ export const setTeamInfo = async (
  			}
  		}
  
@@ -4377,40 +4431,11 @@ index 41c6d3c40..673a05337 100644
  
  		for (const p of t.players) {
  			const entry = allStars.teams[ind].find((p2) => p2.pid === p.pid);
-diff --git a/src/worker/views/newLeague.ts b/src/worker/views/newLeague.ts
-index 3000371a6..ddecb3504 100644
---- a/src/worker/views/newLeague.ts
-+++ b/src/worker/views/newLeague.ts
-@@ -433,6 +433,24 @@ export const getDefaultSettings = () => {
- 		),
- 		neutralSite: unwrapGameAttribute(defaultGameAttributes, "neutralSite"),
- 		rpdPot: unwrapGameAttribute(defaultGameAttributes, "rpdPot"),
-+		// NFL history mod settings
-+		useRealSchedules: unwrapGameAttribute(defaultGameAttributes, "useRealSchedules"),
-+		useRealDrafts: unwrapGameAttribute(defaultGameAttributes, "useRealDrafts"),
-+		nflRetirements: unwrapGameAttribute(defaultGameAttributes, "nflRetirements"),
-+		nflComebacks: unwrapGameAttribute(defaultGameAttributes, "nflComebacks"),
-+		nflComebackDestination: unwrapGameAttribute(defaultGameAttributes, "nflComebackDestination"),
-+		nflSuspensions: unwrapGameAttribute(defaultGameAttributes, "nflSuspensions"),
-+		nflInjuries: unwrapGameAttribute(defaultGameAttributes, "nflInjuries"),
-+		nflLeadBackWorkload: unwrapGameAttribute(defaultGameAttributes, "nflLeadBackWorkload"),
-+		nflQbRunRate: unwrapGameAttribute(defaultGameAttributes, "nflQbRunRate"),
-+		nflDeaths: unwrapGameAttribute(defaultGameAttributes, "nflDeaths"),
-+		nflRealRetirements: unwrapGameAttribute(defaultGameAttributes, "nflRealRetirements"),
-+		nflSecondaryLogos: unwrapGameAttribute(
-+			defaultGameAttributes,
-+			"nflSecondaryLogos",
-+		),
-+		nflHistoricalRosters: unwrapGameAttribute(defaultGameAttributes, "nflHistoricalRosters"),
-+		nflRealDraftRatings: unwrapGameAttribute(defaultGameAttributes, "nflRealDraftRatings"),
- 		saveOldBoxScores: unwrapGameAttribute(
- 			defaultGameAttributes,
- 			"saveOldBoxScores",
 diff --git a/src/worker/views/roster.ts b/src/worker/views/roster.ts
-index 0a755488b..37b74ba13 100644
+index 96e926d87..e13cfb1a4 100644
 --- a/src/worker/views/roster.ts
 +++ b/src/worker/views/roster.ts
-@@ -199,6 +199,7 @@ export default defineView({
+@@ -185,6 +185,7 @@ export default defineView({
  					"name",
  					"keepRosterSorted",
  					"playThroughInjuries",
@@ -4418,7 +4443,7 @@ index 0a755488b..37b74ba13 100644
  				],
  				seasonAttrs,
  				stats: ["pts", "oppPts", "gp"],
-@@ -211,6 +212,8 @@ export default defineView({
+@@ -197,6 +198,8 @@ export default defineView({
  				};
  				return returnValue;
  			}
@@ -4428,51 +4453,30 @@ index 0a755488b..37b74ba13 100644
  			// tid and draft are used for checking if a player can be released without paying his salary
  			const attrs = [
 diff --git a/src/worker/views/settings.ts b/src/worker/views/settings.ts
-index 7656605ff..53c242aaf 100644
+index 146046dd5..e328d14a4 100644
 --- a/src/worker/views/settings.ts
 +++ b/src/worker/views/settings.ts
-@@ -73,6 +73,20 @@ type Key =
- 	| "challengeSisyphusMode"
- 	| "challengeThanosMode"
- 	| "realPlayerDeterminism"
-+	| "useRealSchedules"
-+	| "useRealDrafts"
-+	| "nflRetirements"
-+	| "nflComebacks"
-+	| "nflComebackDestination"
-+	| "nflSuspensions"
-+	| "nflInjuries"
-+	| "nflDeaths"
-+	| "nflLeadBackWorkload"
-+	| "nflQbRunRate"
-+	| "nflRealRetirements"
-+	| "nflSecondaryLogos"
-+	| "nflHistoricalRosters"
-+	| "nflRealDraftRatings"
- 	| "repeatSeason"
- 	| "maxOvertimes"
- 	| "maxOvertimesPlayoffs"
-@@ -290,6 +304,20 @@ export const getInitialSettings = (): Settings => {
- 		challengeSisyphusMode: g.get("challengeSisyphusMode"),
- 		challengeThanosMode: g.get("challengeThanosMode"),
- 		realPlayerDeterminism: g.get("realPlayerDeterminism"),
-+		useRealSchedules: g.get("useRealSchedules"),
-+		useRealDrafts: g.get("useRealDrafts"),
-+		nflRetirements: g.get("nflRetirements"),
-+		nflComebacks: g.get("nflComebacks"),
-+		nflComebackDestination: g.get("nflComebackDestination"),
-+		nflSuspensions: g.get("nflSuspensions"),
-+		nflInjuries: g.get("nflInjuries"),
-+		nflDeaths: g.get("nflDeaths"),
-+		nflLeadBackWorkload: g.get("nflLeadBackWorkload"),
-+		nflQbRunRate: g.get("nflQbRunRate"),
-+		nflRealRetirements: g.get("nflRealRetirements"),
-+		nflSecondaryLogos: g.get("nflSecondaryLogos"),
-+		nflHistoricalRosters: g.get("nflHistoricalRosters"),
-+		nflRealDraftRatings: g.get("nflRealDraftRatings"),
- 		repeatSeason: g.get("repeatSeason")?.type ?? "disabled",
- 		maxOvertimes: g.get("maxOvertimes"),
- 		maxOvertimesPlayoffs: g.get("maxOvertimesPlayoffs"),
+@@ -180,6 +180,20 @@ const gameAttributeKeys = [
+ 	"footballOvertimePlayoffs",
+ 	"easterEggPlayers",
+ 	"fakeAgeProb",
++	"useRealSchedules",
++	"useRealDrafts",
++	"nflRetirements",
++	"nflComebacks",
++	"nflComebackDestination",
++	"nflSuspensions",
++	"nflInjuries",
++	"nflDeaths",
++	"nflLeadBackWorkload",
++	"nflQbRunRate",
++	"nflRealRetirements",
++	"nflSecondaryLogos",
++	"nflHistoricalRosters",
++	"nflRealDraftRatings",
+ ] as const satisfies readonly (keyof GameAttributesLeague)[];
+ 
+ type GameAttributeKey = (typeof gameAttributeKeys)[number];
 diff --git a/tools/lib/server.ts b/tools/lib/server.ts
 index dd727b3c3..9ae2ee159 100644
 --- a/tools/lib/server.ts

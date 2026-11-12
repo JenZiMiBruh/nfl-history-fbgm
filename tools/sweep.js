@@ -6,6 +6,8 @@
 //
 // Usage: node --max-old-space-size=8000 tools/sweep.js <NFL Official folder> [quick|full] [from=1966] [to=2026]
 // Checks that find intended cases (roster limits, practice squads) say so in their name, so a new kind stands out.
+// A player's current contract in either format: the new one (p.contracts, a yearly amount each season) or the old one
+const cur = (p, season) => { if (p.contract) return p.contract; const c = (p.contracts || [])[(p.contracts || []).length - 1]; if (!c || c.endedEarly || p.contractDemand) return null; const exp = c.start + c.amounts.length - 1; return { exp, amount: c.amounts[Math.min(Math.max(season - c.start, 0), c.amounts.length - 1)] }; };
 const zlib = require('zlib'), fs = require('fs'), path = require('path'), os = require('os');
 const ROOT = process.argv[2];
 if (!ROOT) throw new Error('usage: sweep.js <NFL Official folder> [quick|full] [from] [to]');
@@ -58,7 +60,7 @@ for (let S = FROM; S <= TO; S++) {
       if (p.tid >= 0) {
         const t = L.teams[p.tid]; if (!t || t.disabled) bad('player on missing/disabled team', tag + ' ' + p.firstName + ' ' + p.lastName + ' tid ' + p.tid);
         (byTeam[p.tid] = byTeam[p.tid] || []).push(p);
-        if (!p.contract || p.contract.exp < season || p.contract.exp > season + 5) bad('contract end', tag + ' ' + p.lastName + ' ' + (p.contract && p.contract.exp));
+        { const c = cur(p, season); if (!c || c.exp < season || c.exp > season + 5) bad('contract end', tag + ' ' + p.lastName + ' ' + (c && c.exp)); }
         // Ages: a player on a team, by birth year (kickers and punters can play into their late 40s)
         const age = season - ((p.born && p.born.year) || season - 25);
         // ...unless he really played that season (George Blanda at 46)
@@ -89,7 +91,7 @@ for (let S = FROM; S <= TO; S++) {
       for (const [num, who] of Object.entries(nums)) if (who.length > 1) bad('shared jersey number (cosmetic)', `${tag} ${t.abbrev} #${num} ${who.join('/')}`);
       // Payroll: far over the cap makes the AI dump players and refuse to sign anyone
       const cap = at(ga.salaryCap, season);
-      const payroll = roster.reduce((a, p) => a + ((p.contract && p.contract.amount) || 0), 0);
+      const payroll = roster.reduce((a, p) => a + ((cur(p, season) || {}).amount || 0), 0);
       if (cap && payroll > cap * 1.3) bad('payroll far over the cap', `${tag} ${t.abbrev} ${Math.round(payroll)} vs cap ${cap}`);
       if (!t.imgURL) bad('team without a logo', `${tag} ${t.abbrev}`);
       const ts = (t.seasons || []).find(x => x.season === season);
@@ -175,7 +177,8 @@ for (let S = FROM; S <= TO; S++) {
       for (const p of L.players) if (typeof p.diedYear === 'number' && p.tid >= 0) bad('dead player on a team', tag + ' ' + p.lastName);
       const early = ph === 'preseason' || (ph === 'regular' && w <= 1);
       // Everyone with a real deal in a soft-cap season is paid it
-      if (E.getRules(S).salaryCapType === 'soft') { const R0 = E.getRules(S); for (const p of L.players) { if (p.tid < 0 || !p.contract) continue; const o = dealSourceById.get(p.pid); const pay = o && E.dealPay(o.realDeals, S); if (pay && p.contract.amount !== Math.max(R0.minContract, Math.min(R0.maxContract, pay))) bad('contract is not the real deal', tag + ' ' + p.firstName + ' ' + p.lastName + ' ' + p.contract.amount + ' vs ' + pay); } }
+      if (E.getRules(S).salaryCapType === 'soft') { const R0 = E.getRules(S); for (const p of L.players) { if (p.tid < 0 || !p.contract) continue; // old-format files only: contracts now carry each season's real cap hit (season_slicer.js writeContracts)
+ const o = dealSourceById.get(p.pid); const pay = o && E.dealPay(o.realDeals, S); if (pay && p.contract.amount !== Math.max(R0.minContract, Math.min(R0.maxContract, pay))) bad('contract is not the real deal', tag + ' ' + p.firstName + ' ' + p.lastName + ' ' + p.contract.amount + ' vs ' + pay); } }
       // Every saved playoff seed matches the real table
       for (const ps of L.playoffSeries || []) { const real = (m.playoffSeeds || {})[ps.season - 1]; if (!real) continue; const seedOf = {}; for (const list of Object.values(real)) list.forEach((tid, i) => { seedOf[tid] = i + 1; }); for (const round of ps.series || []) for (const g of round) for (const x of [g.home, g.away]) if (x && seedOf[x.tid] !== undefined && x.seed !== seedOf[x.tid]) bad('saved playoff seed is wrong', `${tag} ${ps.season} tid ${x.tid} seed ${x.seed}`); }
       if (ph === 'playoffs' && (m.playoffSeeds || {})[S] && !ga.nflRealSeeds) bad('playoff start without real seeds', tag);

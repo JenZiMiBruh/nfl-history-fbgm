@@ -1,4 +1,4 @@
-window.NFL_MOD_BUILT = "Nov 11, 2026, 10:03 PM";
+window.NFL_MOD_BUILT = "Nov 12, 2026, 2:04 AM";
 ;
 window.NFL_ERA_FACTORS = {"1966":{"completionFactor":0.86,"intFactor":1.69,"sackFactor":1.1,"fumbleFactor":1.8,"rushYdsFactor":0.82,"passYdsFactor":1.02,"passFactor":0.98},"1967":{"completionFactor":0.9,"intFactor":1.62,"sackFactor":1.16,"fumbleFactor":1.82,"rushYdsFactor":0.82,"passYdsFactor":1.02,"passFactor":0.96},"1968":{"completionFactor":0.9,"intFactor":1.58,"sackFactor":1.16,"fumbleFactor":1.88,"rushYdsFactor":0.82,"passYdsFactor":0.98,"passFactor":0.92},"1969":{"completionFactor":0.92,"intFactor":1.67,"sackFactor":1.16,"fumbleFactor":2.06,"rushYdsFactor":0.82,"passYdsFactor":0.96,"passFactor":0.88},"1970":{"completionFactor":0.84,"intFactor":1.82,"sackFactor":1.22,"fumbleFactor":1.82,"rushYdsFactor":0.82,"passYdsFactor":1.06,"passFactor":0.94},"1971":{"completionFactor":0.88,"intFactor":1.76,"sackFactor":1.3,"fumbleFactor":2,"rushYdsFactor":0.84,"passYdsFactor":0.98,"passFactor":0.88},"1972":{"completionFactor":0.88,"intFactor":1.76,"sackFactor":1.24,"fumbleFactor":1.94,"rushYdsFactor":0.8,"passYdsFactor":0.94,"passFactor":0.82},"1973":{"completionFactor":0.88,"intFactor":1.78,"sackFactor":1.3,"fumbleFactor":2.08,"rushYdsFactor":0.84,"passYdsFactor":0.9,"passFactor":0.78},"1974":{"completionFactor":0.9,"intFactor":1.58,"sackFactor":1.42,"fumbleFactor":2.26,"rushYdsFactor":0.86,"passYdsFactor":0.88,"passFactor":0.74},"1975":{"completionFactor":0.9,"intFactor":1.67,"sackFactor":1.54,"fumbleFactor":2.34,"rushYdsFactor":0.8,"passYdsFactor":0.84,"passFactor":0.72},"1976":{"completionFactor":0.92,"intFactor":1.69,"sackFactor":1.2,"fumbleFactor":2.32,"rushYdsFactor":0.8,"passYdsFactor":0.84,"passFactor":0.74},"1977":{"completionFactor":0.94,"intFactor":1.57,"sackFactor":1,"fumbleFactor":2.38,"rushYdsFactor":0.8,"passYdsFactor":0.88,"passFactor":0.78},"1978":{"completionFactor":1,"intFactor":1.42,"sackFactor":0.74,"fumbleFactor":2.12,"rushYdsFactor":0.8,"passYdsFactor":0.88,"passFactor":0.96},"1979":{"completionFactor":1.02,"intFactor":1.3,"sackFactor":0.5,"fumbleFactor":2,"rushYdsFactor":0.8,"passYdsFactor":0.9,"passFactor":1.02},"1980":{"completionFactor":0.96,"intFactor":1.73,"sackFactor":0.56,"fumbleFactor":2,"rushYdsFactor":0.78,"passYdsFactor":0.9,"passFactor":0.8},"1981":{"completionFactor":1,"intFactor":1.51,"sackFactor":0.52,"fumbleFactor":1.98,"rushYdsFactor":0.82,"passYdsFactor":0.9,"passFactor":0.86},"1982":{"completionFactor":1.04,"intFactor":1.4,"sackFactor":0.5,"fumbleFactor":1.86,"rushYdsFactor":0.82,"passYdsFactor":0.9,"passFactor":0.92},"1983":{"completionFactor":1,"intFactor":1.33,"sackFactor":0.66,"fumbleFactor":1.96,"rushYdsFactor":0.84,"passYdsFactor":0.9,"passFactor":0.98},"1984":{"completionFactor":1.02,"intFactor":1.28,"sackFactor":0.84,"fumbleFactor":1.7,"rushYdsFactor":0.82,"passYdsFactor":0.9,"passFactor":0.98},"1985":{"completionFactor":1,"intFactor":1.22,"sackFactor":0.96,"fumbleFactor":1.72,"rushYdsFactor":0.82,"passYdsFactor":0.9,"passFactor":0.98},"1986":{"completionFactor":0.98,"intFactor":1.12,"sackFactor":1.02,"fumbleFactor":1.52,"rushYdsFactor":0.82,"passYdsFactor":0.9,"passFactor":1.04},"1987":{"completionFactor":0.98,"intFactor":1.1,"sackFactor":1.2,"fumbleFactor":1.5,"rushYdsFactor":0.8,"passYdsFactor":0.94,"passFactor":1.04},"1988":{"completionFactor":0.98,"intFactor":0.99,"sackFactor":1.22,"fumbleFactor":1.44,"rushYdsFactor":0.8,"passYdsFactor":0.94,"passFactor":1.04},"1989":{"completionFactor":1,"intFactor":0.92,"sackFactor":1.16,"fumbleFactor":1.44,"rushYdsFactor":0.8,"passYdsFactor":0.9,"passFactor":1.04},"1990":{"completionFactor":0.96,"intFactor":1.44,"sackFactor":1.02,"fumbleFactor":1.86,"rushYdsFactor":0.84,"passYdsFactor":0.94,"passFactor":0.94},"1991":{"completionFactor":0.98,"intFactor":1.26,"sackFactor":1.08,"fumbleFactor":1.78,"rushYdsFactor":0.82,"passYdsFactor":0.88,"passFactor":0.96},"1992":{"completionFactor":1.04,"intFactor":1.1,"sackFactor":1,"fumbleFactor":1.62,"rushYdsFactor":0.8,"passYdsFactor":0.88,"passFactor":1},"1993":{"completionFactor":1.04,"intFactor":1.01,"sackFactor":0.9,"fumbleFactor":1.52,"rushYdsFactor":0.78,"passYdsFactor":0.82,"passFactor":1.02},"1994":{"completionFactor":1.04,"intFactor":0.99,"sackFactor":0.9,"fumbleFactor":1.4,"rushYdsFactor":0.76,"passYdsFactor":0.82,"passFactor":1.02},"1995":{"completionFactor":1.04,"intFactor":0.88,"sackFactor":0.88,"fumbleFactor":1.28,"rushYdsFactor":0.76,"passYdsFactor":0.82,"passFactor":1.06},"1996":{"completionFactor":1.04,"intFactor":0.88,"sackFactor":0.9,"fumbleFactor":1.18,"rushYdsFactor":0.78,"passYdsFactor":0.84,"passFactor":1.06},"1997":{"completionFactor":1,"intFactor":0.9,"sackFactor":0.98,"fumbleFactor":1.18,"rushYdsFactor":0.8,"passYdsFactor":0.88,"passFactor":1.06},"1998":{"completionFactor":1,"intFactor":0.95,"sackFactor":1.06,"fumbleFactor":1.14,"rushYdsFactor":0.8,"passYdsFactor":0.92,"passFactor":1.04},"1999":{"completionFactor":1.04,"intFactor":0.94,"sackFactor":1.1,"fumbleFactor":1.14,"rushYdsFactor":0.84,"passYdsFactor":0.94,"passFactor":1.06},"2000":{"completionFactor":0.98,"intFactor":1.04,"sackFactor":1.12,"fumbleFactor":1.58,"rushYdsFactor":0.82,"passYdsFactor":0.9,"passFactor":1.1},"2001":{"completionFactor":1,"intFactor":1.04,"sackFactor":1,"fumbleFactor":1.54,"rushYdsFactor":0.82,"passYdsFactor":0.9,"passFactor":1.08},"2002":{"completionFactor":1.02,"intFactor":1.03,"sackFactor":1,"fumbleFactor":1.48,"rushYdsFactor":0.86,"passYdsFactor":0.9,"passFactor":1.04},"2003":{"completionFactor":1.04,"intFactor":0.97,"sackFactor":1,"fumbleFactor":1.42,"rushYdsFactor":0.84,"passYdsFactor":0.9,"passFactor":1.04},"2004":{"completionFactor":1.04,"intFactor":0.97,"sackFactor":0.94,"fumbleFactor":1.36,"rushYdsFactor":0.86,"passYdsFactor":0.9,"passFactor":1.04},"2005":{"completionFactor":1.06,"intFactor":0.97,"sackFactor":0.94,"fumbleFactor":1.32,"rushYdsFactor":0.84,"passYdsFactor":0.9,"passFactor":1.04},"2006":{"completionFactor":1.08,"intFactor":0.9,"sackFactor":0.9,"fumbleFactor":1.22,"rushYdsFactor":0.84,"passYdsFactor":0.9,"passFactor":1.04},"2007":{"completionFactor":1.1,"intFactor":0.88,"sackFactor":0.82,"fumbleFactor":1.16,"rushYdsFactor":0.86,"passYdsFactor":0.88,"passFactor":1.04},"2008":{"completionFactor":1.12,"intFactor":0.85,"sackFactor":0.82,"fumbleFactor":1.1,"rushYdsFactor":0.88,"passYdsFactor":0.9,"passFactor":1.08},"2009":{"completionFactor":1.14,"intFactor":0.81,"sackFactor":0.78,"fumbleFactor":0.96,"rushYdsFactor":0.9,"passYdsFactor":0.9,"passFactor":1.1},"2010":{"completionFactor":1.02,"intFactor":1.13,"sackFactor":0.84,"fumbleFactor":1.32,"rushYdsFactor":0.88,"passYdsFactor":0.94,"passFactor":1.04},"2011":{"completionFactor":1.02,"intFactor":1.12,"sackFactor":0.9,"fumbleFactor":1.26,"rushYdsFactor":0.86,"passYdsFactor":0.94,"passFactor":1.08},"2012":{"completionFactor":1.04,"intFactor":0.99,"sackFactor":0.92,"fumbleFactor":1.16,"rushYdsFactor":0.86,"passYdsFactor":0.94,"passFactor":1.1},"2013":{"completionFactor":1.06,"intFactor":0.86,"sackFactor":0.92,"fumbleFactor":1.1,"rushYdsFactor":0.86,"passYdsFactor":0.94,"passFactor":1.1},"2014":{"completionFactor":1.1,"intFactor":0.74,"sackFactor":0.86,"fumbleFactor":1.04,"rushYdsFactor":0.86,"passYdsFactor":0.88,"passFactor":1.14},"2015":{"completionFactor":1.1,"intFactor":0.72,"sackFactor":0.9,"fumbleFactor":0.94,"rushYdsFactor":0.82,"passYdsFactor":0.88,"passFactor":1.14},"2016":{"completionFactor":1.14,"intFactor":0.65,"sackFactor":0.9,"fumbleFactor":0.86,"rushYdsFactor":0.86,"passYdsFactor":0.88,"passFactor":1.14},"2017":{"completionFactor":1.16,"intFactor":0.61,"sackFactor":0.92,"fumbleFactor":0.86,"rushYdsFactor":0.86,"passYdsFactor":0.88,"passFactor":1.16},"2018":{"completionFactor":1.18,"intFactor":0.58,"sackFactor":0.9,"fumbleFactor":0.8,"rushYdsFactor":0.92,"passYdsFactor":0.84,"passFactor":1.14},"2019":{"completionFactor":1.18,"intFactor":0.61,"sackFactor":0.96,"fumbleFactor":0.74,"rushYdsFactor":0.92,"passYdsFactor":0.82,"passFactor":1.12},"2020":{"completionFactor":1.12,"intFactor":0.7,"sackFactor":0.86,"fumbleFactor":0.96,"rushYdsFactor":0.94,"passYdsFactor":0.88,"passFactor":1.12},"2021":{"completionFactor":1.12,"intFactor":0.7,"sackFactor":0.9,"fumbleFactor":0.96,"rushYdsFactor":0.88,"passYdsFactor":0.86,"passFactor":1.12},"2022":{"completionFactor":1.14,"intFactor":0.66,"sackFactor":0.92,"fumbleFactor":0.88,"rushYdsFactor":0.9,"passYdsFactor":0.84,"passFactor":1.1},"2023":{"completionFactor":1.12,"intFactor":0.66,"sackFactor":1,"fumbleFactor":0.8,"rushYdsFactor":0.88,"passYdsFactor":0.84,"passFactor":1.06},"2024":{"completionFactor":1.12,"intFactor":0.66,"sackFactor":1.06,"fumbleFactor":0.82,"rushYdsFactor":0.9,"passYdsFactor":0.84,"passFactor":1.06},"2025":{"completionFactor":1.14,"intFactor":0.62,"sackFactor":1.1,"fumbleFactor":0.8,"rushYdsFactor":0.88,"passYdsFactor":0.84,"passFactor":1.06},"2026":{"completionFactor":1.14,"intFactor":0.58,"sackFactor":1.04,"fumbleFactor":0.68,"rushYdsFactor":0.94,"passYdsFactor":0.84,"passFactor":1.04}};
 ;
@@ -582,7 +582,13 @@ window.NFL_ERA_FACTORS = {"1966":{"completionFactor":0.86,"intFactor":1.69,"sack
       salaryCap, salaryCapType, minPayroll: Math.round(salaryCap * 0.89), minContract, maxContract,
       ...simFactors, twoPointConversions, passFactor, pace, nflLeadBackWorkload, nflQbRunRate, scrimmageTouchbackKickoff, maxOvertimes, footballOvertime, footballOvertimePlayoffs, overtimeLength,
       overtimeLengthPlayoffs: 15, numGamesConf, numGamesDiv, rookieContractLengths,
-      draftPickAutoContract: true // Football GM's Rookie Scale setting, on (it's off by default in football)
+      // Football GM's Rookie Scale (off by default in football). Since the 2011 CBA's rookie wage scale the #1 pick earns
+      // about a fifth of a top veteran deal (Cam Ward, 2025: 4 years, $48.8M) and only the first two rounds clear the
+      // minimum by much; before it, top picks negotiated far bigger deals (Sam Bradford, 2010: 6 years, $78M)
+      draftPickAutoContract: true,
+      draftPickAutoContractPercent: season >= 2011 ? 20 : 45,
+      draftPickAutoContractRounds: season >= 2011 ? 2 : 3,
+      rookiesCanRefuse: true
     };
   }
   // Rule keys that scheduled gameAttributes events keep in sync with getRules().
@@ -594,7 +600,8 @@ window.NFL_ERA_FACTORS = {"1966":{"completionFactor":0.86,"intFactor":1.69,"sack
 
   const RULE_KEYS = ['luxuryPayroll', 'numGames', 'numPlayoffByes', 'numDraftRounds', 'maxRosterSize', 'minRosterSize', 'salaryCap', 'salaryCapType',
     'minPayroll', 'minContract', 'maxContract', 'numGamesPlayoffSeries', 'twoPointConversions', 'passFactor', 'pace', 'nflLeadBackWorkload', 'nflQbRunRate', 'completionFactor', 'intFactor', 'sackFactor', 'fumbleFactor', 'rushYdsFactor', 'passYdsFactor', 'scrimmageTouchbackKickoff', 'maxOvertimes',
-    'footballOvertime', 'footballOvertimePlayoffs', 'overtimeLength', 'numGamesConf', 'numGamesDiv', 'rookieContractLengths'];
+    'footballOvertime', 'footballOvertimePlayoffs', 'overtimeLength', 'numGamesConf', 'numGamesDiv', 'rookieContractLengths',
+    'draftPickAutoContract', 'draftPickAutoContractPercent', 'draftPickAutoContractRounds', 'rookiesCanRefuse'];
 
   // ---------------------------------------------------------------------------
   // Famous retirements / comebacks (resolved to pids by name+birth year).
@@ -1658,7 +1665,6 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     const startDate = phaseName === 'draft' ? (S + 1) + '-05-01' : phaseName === 'afterplayoffs' ? (S + 1) + '-02-20' : phaseName === 'playoffs' ? (S + 1) + '-01-05'
       : W ? new Date(Date.UTC(S, 8, 5 + 7 * (W - 1))).toISOString().slice(0, 10) : S + '-08-31';
     applyPickTrades(draftPicks, master.pickTrades, startDate, realOrder.length ? S + 1 : S);
-    syncSalaries(players, S, P);
     const league = {
       version: master.version,
       startingSeason: E.FIRST_SEASON,
@@ -1685,6 +1691,8 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       games: playedGames()
     };
     shiftSeasons(league, 1, true);
+    // contracts in the game's current format, with real yearly amounts (writeContracts)
+    writeContracts(league, new Map(master.players.filter(x => x.realCap).map(x => [x.pid, x.realCap])), undefined, new Map(master.players.filter(x => x.realDeals).map(x => [x.pid, x.realDeals])));
     // From the slim selector master (zero stats left out): toJsonChunks puts the zeros back while writing
     if (master.statKeys) league.__statKeys = master.statKeys; // plain fields, so a copy ({...league}) keeps them: without them the file goes out unexpanded and every game ends 0-0
     if (master.ratingPos) league.__ratingPos = master.ratingPos;
@@ -1827,9 +1835,76 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     return league;
   }
 
-  // The salary log the way the game writes it: past seasons keep what was really paid; the contract's seasons (this one
-  // on, or next one once the trade deadline has passed) are the contract amount. The real cap hit left in this season's
-  // row made the game show the season twice, at two amounts (Budda Baker: 2027 $29.25M, then 2027 ARI $18M).
+  // Contracts in Football GM's current format (league DB version 75: p.contracts and p.contractDemand), which can hold a
+  // different amount each season, so real contracts keep their real yearly cap hits (Mahomes: $34.7M in 2026, $90.4M in
+  // 2027) instead of one average. Run on a finished league, whose season labels are one ahead of real years.
+  //   - paid seasons: one contract per run of seasons at one amount for one team, paid by that team. The amount is the
+  //     real cap hit where OverTheCap has it for that team, else the salary log
+  //   - the current contract (players on a team): each season's real cap hit with his team, else the deal's yearly pay;
+  //     this season's part already paid (games played) is paid
+  //   - free agents and draft prospects: a contract demand. Retired players: nothing current
+  // capByPid: pid -> { realYear: [cap $K, team nickname] }.
+  // dealsByPid: pid -> realDeals ([first, last, yearly pay, first season at that pay], real_contracts.js)
+  function writeContracts(league, capByPid, opts, dealsByPid) {
+    const ga = league.gameAttributes, season = ga.season, phase = ga.phase, OFF = 1, DNE = -7;
+    const start = season + (phase > 3 ? 1 : 0);
+    const minC = ga.minContract || 0, numGames = Array.isArray(ga.numGames) ? ga.numGames[ga.numGames.length - 1].value : ga.numGames;
+    const fractionPaid = opts && typeof opts.fractionPaid === 'number' ? opts.fractionPaid : null;
+    const nick = (tid, y) => { const t = league.teams[tid]; if (!t) return ''; const s = (t.seasons || []).find(x => x.season === y); return String((s && s.name) || t.name || '').toLowerCase(); };
+    // The yearly pay of the real deal in force in league season y (nfl_eras.js dealPay; real years are one behind)
+    const dealPayAt = (pid, y) => { const d = ((dealsByPid && dealsByPid.get(pid)) || []).filter(x => x[3] !== undefined && x[3] <= y - OFF && x[1] >= y - OFF && x[2] > 0).sort((a, b) => b[0] - a[0] || (b[1] - b[0]) - (a[1] - a[0]))[0]; return d ? d[2] : 0; };
+    const capFor = (pid, y, tid) => { const c = capByPid && capByPid.get(pid), row = c && c[y - OFF]; if (!row || !(row[0] > 0)) return 0; const n = String(row[1] || '').toLowerCase(); return !n || n === nick(tid, y) ? row[0] : 0; };
+    const gamesBy = new Map();
+    for (const t of league.teams) { const s = (t.seasons || []).find(x => x.season === season); if (s) gamesBy.set(t.tid, (s.won || 0) + (s.lost || 0) + (s.tied || 0) + (s.otl || 0)); }
+    let real = 0, flat = 0;
+    for (const p of league.players) {
+      const contracts = [];
+      const teamOf = y => {
+        const rows = (p.stats || []).filter(s => s.season === y && !s.playoffs && s.tid >= 0).sort((a, b) => (b.gp || 0) - (a.gp || 0));
+        if (rows.length) return rows[0].tid;
+        const t = (p.transactions || []).filter(x => x.tid >= 0 && x.season < y).pop();
+        return t ? t.tid : DNE;
+      };
+      const past = (p.salaries || []).filter(s => s.season < start && !(p.tid === -3 && p.retiredYear != null && s.season > p.retiredYear)).sort((a, b) => a.season - b.season);
+      for (const s of past) {
+        const tid = teamOf(s.season);
+        const amount = (tid >= 0 && capFor(p.pid, s.season, tid)) || s.amount;
+        const last = contracts[contracts.length - 1];
+        if (last && last.start + last.amounts.length === s.season && last.amounts[last.amounts.length - 1] === amount && last.payments[last.payments.length - 1].tid === tid) {
+          last.amounts.push(amount); last.payments.push({ season: s.season, tid, amount });
+        } else contracts.push({ type: 'unknown', start: s.season, amounts: [amount], payments: [{ season: s.season, tid, amount }] });
+      }
+      delete p.contractDemand;
+      if (p.tid >= 0 && p.contract) {
+        const exp = Math.max(p.contract.exp, start), amounts = [];
+        // Later seasons never above the deal's yearly average: backloaded deals (Mahomes: $90.4M in 2027) are written to be
+        // restructured before the big years, and Football GM can't restructure, so the full number would sink the team.
+        // Real lower years stay (this season's $34.7M). This season is always the real cap hit.
+        for (let y = start; y <= exp; y++) {
+          const c = capFor(p.pid, y, p.tid);
+          if (c) real++; else flat++;
+          const amt = c ? Math.max(minC, c) : p.contract.amount;
+          // the cap is the deal in force that season: an extension that starts next year is capped at its own pay, not the
+          // rookie deal's (Jaxon Smith-Njigba: $15.6M, $32.9M, $36.5M, not $3.6M)
+          const avg = dealPayAt(p.pid, y) || p.contract.amount;
+          amounts.push(y > season ? Math.min(amt, Math.max(avg, minC)) : amt);
+        }
+        const cur = { type: p.contract.rookie ? 'rookie' : 'unknown', start, amounts, payments: [] };
+        const f = fractionPaid != null ? fractionPaid : (phase >= 1 && phase <= 3 && start === season && numGames ? Math.min(1, (gamesBy.get(p.tid) || 0) / numGames) : 0);
+        if (f > 0) cur.payments.push({ season, tid: p.tid, amount: Math.round(amounts[0] * f) });
+        contracts.push(cur);
+      } else if (p.tid !== -3 && p.contract) {
+        p.contractDemand = { amount: p.contract.amount, exp: Math.max(p.contract.exp, start) };
+        if (p.contract.rookie) p.contractDemand.rookie = true;
+      }
+      p.contracts = contracts;
+      delete p.contract; delete p.salaries;
+    }
+    league.releasedPlayers = [];
+    return { real, flat };
+  }
+
+  // (kept for the old format: the salary log the way the old game wrote it)
   function syncSalaries(players, season, phase) {
     // the game's own rule for the first season a current contract can cover (playoffs still count as this season)
     const start = season + (phase > 3 ? 1 : 0);
@@ -1842,7 +1917,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     }
   }
 
-  const api = { syncSalaries, applyPickTrades, sliceLeague, shiftSeasons, toJsonChunks, buildDepth, fitPayrolls, PHASES, PHASE_LABELS, EVENT_CATEGORIES, eventCategory, describeEvent, keepEvents };
+  const api = { writeContracts, syncSalaries, applyPickTrades, sliceLeague, shiftSeasons, toJsonChunks, buildDepth, fitPayrolls, PHASES, PHASE_LABELS, EVENT_CATEGORIES, eventCategory, describeEvent, keepEvents };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.SEASON_SLICER = api;
 

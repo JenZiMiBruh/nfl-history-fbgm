@@ -6,6 +6,17 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.23.0 · Nov 12, 2026
+
+**Start a new league to get all of this.**
+
+- **Real contracts, year by year.** Football GM can now hold a different amount each season, so contracts carry their real cap hits from OverTheCap instead of one flat average. This season is the real number (Patrick Mahomes: $34.7M); later seasons are real too, but never above the deal's yearly average, since backloaded deals get restructured in real life and Football GM can't restructure. Past seasons show what each team really paid.
+- **Built on the newest Football GM.** The mod moves up to the latest version of the game, with everything upstream has added since late October, including its new contract system.
+- **Rookie Salary Scale is on**, with each era's rules: since the 2011 CBA the #1 pick earns about a fifth of a top deal and only the first two rounds are well above the minimum; before 2011, top picks got far bigger deals.
+- **Pro Bowl logos.** The All-Star game shows AFC and NFC (AFL and NFL before the merger) with each era's logo, not the Football GM logo.
+- **Fixed: a new league's header and Play menu were blank** until you reloaded the page.
+- **Daiyan Henley stays a Charger.** Denver called off the trade after his physical.
+
 ## v1.22.3 · Nov 11, 2026
 
 **Start a new league to get this fix.**
