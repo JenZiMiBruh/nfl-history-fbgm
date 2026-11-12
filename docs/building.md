@@ -47,3 +47,7 @@ To slice one season from the command line (the same code the selector uses):
 ```bash
 node --max-old-space-size=14000 src/season_slicer.js --season 1986 --phase regular
 ```
+
+## Weekly update
+
+`node src/run_update.js <next start week>` runs the whole data update and stops at the first failure. It only changes data, never game code. Then `node src/release_check.js` checks the known truths and reports what changed. `node tools/game_check.js <folder> [seasons]` opens the league in the real game for screenshots and an optional sim. `node src/build_ledger.js` records the season's moves and injuries.

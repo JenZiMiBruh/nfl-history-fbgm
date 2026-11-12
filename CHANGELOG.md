@@ -6,6 +6,21 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.22.0 · Nov 11, 2026
+
+**Start a new league to get all of this.**
+
+- **Rosters through the trade deadline.** Every deadline deal is in (Kirk Cousins to the Vikings, Josh Downs to the Chiefs, Keenan Allen to the 49ers, Jordan Davis and Jessie Bates to the Jaguars, and the rest), plus injuries, signings and releases through Nov 11 and stats through Week 9.
+- **Start at any playoff round.** Pick the round when building a league and the bracket starts there, with the real results of the rounds before it. The choices follow each era's real playoff format.
+- **Every real draft pick, in the real order.** Leagues started at the draft or right after the playoffs were losing picks when a team held two in one round (2000: Washington's #3, Baltimore's #10), and could get extra picks for teams that had traded theirs away. They now keep the real draft exactly.
+- **Bye weeks in the right week.** In 18 seasons, a game between two teams coming off a bye could slip into the bye week. Games now stay in their real week, and two 1990 games that the source data put in week 4 are back in week 5.
+- **Offseason retirements happen on time.** Barry Sanders, John Elway and Reggie White were already retired in leagues started after the playoffs. They now retire when they really did, with the real reason in the news, and turning off Scheduled Retirements keeps them playing.
+- **Clean draft history.** Leagues started before a draft no longer list that draft's real picks in the history log.
+- **History fixes.** Season and career totals checked against the official record book, with corrections for players who were off.
+- **Out of beta.** Thank you to everyone who reported bugs.
+
+---
+
 ## v1.21.3 · Nov 9, 2026
 
 **Start a new league to get all of this.**

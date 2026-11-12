@@ -2,7 +2,6 @@
 
 <p align="center">
   <a href="https://jenzimibruh.github.io/nfl-history-fbgm/download.html"><img src="https://img.shields.io/github/v/release/JenZiMiBruh/nfl-history-fbgm?style=for-the-badge&label=latest&color=ffb81c&labelColor=0a0e14" alt="Latest release"></a>
-  <img src="https://img.shields.io/badge/status-beta-d7263d?style=for-the-badge&labelColor=0a0e14" alt="Beta">
   <img src="https://img.shields.io/badge/seasons-1966%E2%80%932027-2c8a54?style=for-the-badge&labelColor=0a0e14" alt="Seasons 1966 to 2027">
   <img src="https://img.shields.io/badge/real%20players-28%2C700%2B-2c8a54?style=for-the-badge&labelColor=0a0e14" alt="28,700+ real players">
   <img src="https://img.shields.io/github/downloads/JenZiMiBruh/nfl-history-fbgm/total?style=for-the-badge&label=downloads&color=ffb81c&labelColor=0a0e14" alt="Total downloads">
@@ -18,7 +17,13 @@
 
 <p align="center"><b>Every NFL season since 1966 for <a href="https://football-gm.com">Football GM</a>.</b> Real players with ratings built from their real careers, real schedules and drafts, every logo and jersey switching on the real date, and the things that really happened: moves, expansions, retirements, comebacks and suspensions.</p>
 
-<p align="center"><sub>🧪 <b>Beta:</b> it works, but you may still hit bugs. <a href="#known-issues">Known issues</a> are listed below; anything else, <a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new/choose">report it</a> and it gets fixed in the next update.</sub></p>
+---
+
+## 🎬 The trailer
+
+<p align="center"><a href="https://youtu.be/osboZgSy4L8"><img src="https://img.youtube.com/vi/osboZgSy4L8/maxresdefault.jpg" alt="NFL History: Official Trailer" width="100%"></a></p>
+
+<p align="center"><b><a href="https://youtu.be/osboZgSy4L8">▶ Watch the trailer</a></b> · Premieres Thursday, Nov. 12 at 12:00 PM ET</p>
 
 ---
 
@@ -210,7 +215,7 @@ Details in [docs/results.md](docs/results.md).
 
 ## Known issues
 
-It's a beta, so here's what's known and not fixed yet. Seen something not on this list? [Report it](https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new/choose).
+Here's what's known and not fixed yet. Seen something not on this list? [Report it](https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new/choose).
 
 | Issue | Where | Details |
 |---|---|---|

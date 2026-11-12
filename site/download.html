@@ -85,5 +85,7 @@
 // The version on the latest release, so visitors can tell they're getting the newest one
 fetch('https://api.github.com/repos/JenZiMiBruh/nfl-history-fbgm/releases/latest').then(r => r.ok ? r.json() : null).then(j => { if (j && j.tag_name) document.getElementById('ver').textContent = j.tag_name; }).catch(() => {});
 </script>
+<p id="dataFresh" style="text-align:center;font-size:13px;opacity:.7;margin:18px 0"></p>
+<script>fetch('data/freshness.json').then(r=>r.ok?r.json():null).then(d=>{if(d)document.getElementById('dataFresh').textContent='Rosters '+d.label.toLowerCase()+', updated '+d.updated+'. Known issues are listed on GitHub.'}).catch(()=>{})</script>
 </body>
 </html>

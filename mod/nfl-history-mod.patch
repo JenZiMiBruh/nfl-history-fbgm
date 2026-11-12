@@ -627,10 +627,10 @@ index fc14a9fc3..b0c12d458 100644
  						<NagModal close={closeNagModal} show={showNagModal} />
  					</div>
 diff --git a/src/ui/components/LeagueFileUpload.tsx b/src/ui/components/LeagueFileUpload.tsx
-index 5694d6dad..1b4c77d49 100644
+index 5694d6dad..6b550aa39 100644
 --- a/src/ui/components/LeagueFileUpload.tsx
 +++ b/src/ui/components/LeagueFileUpload.tsx
-@@ -109,13 +109,475 @@ class LeagueFileVersionError extends Error {
+@@ -109,13 +109,526 @@ class LeagueFileVersionError extends Error {
  	}
  }
  
@@ -705,6 +705,33 @@ index 5694d6dad..1b4c77d49 100644
 +	const [phase, setPhase] = useState("regular");
 +	const [week, setWeek] = useState(1);
 +	const [realDraftRatings, setRealDraftRatings] = useState(true);
++	// NFL history mod: 0 = the start of the playoffs; otherwise how many rounds are left (1 = the Super Bowl)
++	const [playoffRound, setPlayoffRound] = useState(0);
++	// The rounds that existed that season: two in 1966, three through 1977, four after that
++	const roundOptions: [number, string][] =
++		season <= 1966
++			? [
++					[0, "League championships"],
++					[1, "Super Bowl"],
++				]
++			: season <= 1969
++				? [
++						[0, "Conference round"],
++						[2, "League championships"],
++						[1, "Super Bowl"],
++					]
++				: season <= 1977
++					? [
++							[0, "Divisional round"],
++							[2, "Conference championships"],
++							[1, "Super Bowl"],
++						]
++					: [
++							[0, season === 1982 ? "First round" : "Wild card round"],
++							[3, season === 1982 ? "Second round" : "Divisional round"],
++							[2, "Conference championships"],
++							[1, "Super Bowl"],
++						];
 +	const [autoTried, setAutoTried] = useState(nflMaster !== undefined);
 +
 +	// The master file comes with the mod: load it on its own, so there's nothing to pick
@@ -805,6 +832,10 @@ index 5694d6dad..1b4c77d49 100644
 +				phase: live ? "regular" : phase,
 +				week: startWeek,
 +				realDraftRatings,
++				playoffRound:
++					phase === "playoffs" && roundOptions.some(([v]) => v === playoffRound)
++						? playoffRound
++						: 0,
 +				secondaryLogos: true,
 +				weekly: weekly ?? undefined,
 +				...data,
@@ -1043,6 +1074,26 @@ index 5694d6dad..1b4c77d49 100644
 +								</option>
 +							) : null}
 +						</select>
++						{phase === "playoffs" ? (
++							<select
++								className="form-select w-auto"
++								value={
++									roundOptions.some(([v]) => v === playoffRound)
++										? playoffRound
++										: 0
++								}
++								onChange={(event) => {
++									setPlayoffRound(Number.parseInt(event.target.value));
++									setLeague(undefined);
++								}}
++							>
++								{roundOptions.map(([value, label]) => (
++									<option key={value} value={value}>
++										{label}
++									</option>
++								))}
++							</select>
++						) : null}
 +						{phase === "regular" ? (
 +							<select
 +								className="form-select w-auto"
@@ -1106,7 +1157,7 @@ index 5694d6dad..1b4c77d49 100644
  	onDone: (b: Error | LeagueFileUploadOutput) => void;
  	disabled?: boolean;
  	enterURL?: boolean;
-@@ -257,8 +719,10 @@ export const LeagueFileUpload = ({
+@@ -257,8 +770,10 @@ export const LeagueFileUpload = ({
  
  	const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
  		beforeFile();
@@ -1118,7 +1169,7 @@ index 5694d6dad..1b4c77d49 100644
  		if (!file) {
  			dispatch({
  				type: "init",
-@@ -327,13 +791,24 @@ export const LeagueFileUpload = ({
+@@ -327,13 +842,24 @@ export const LeagueFileUpload = ({
  					</button>
  				</div>
  			) : (
@@ -1909,10 +1960,15 @@ index 25be8abcc..f613a70df 100644
  			getLink={(t) =>
  				helpers.leagueUrl([
 diff --git a/src/worker/api/index.ts b/src/worker/api/index.ts
-index 12dd36b47..1a3165ef2 100644
+index 12dd36b47..dee7179fb 100644
 --- a/src/worker/api/index.ts
 +++ b/src/worker/api/index.ts
-@@ -159,6 +159,7 @@ import { formatScheduleForEditor } from "../views/scheduleEditor.ts";
+@@ -1,3 +1,4 @@
++import nflStartBracket from "../core/season/nflStartBracket.ts";
+ import { csvFormat, csvFormatRows } from "d3-dsv";
+ import type { PlayerStatAttr } from "../../common/types.ts";
+ import {
+@@ -159,6 +160,7 @@ import { formatScheduleForEditor } from "../views/scheduleEditor.ts";
  import type { KeyboardShortcutsLocal } from "../../ui/util/keyboardShortcuts.ts";
  import { getNumPlayoffTeamsRaw } from "../core/season/getNumPlayoffTeams.ts";
  import type { NewLeagueSettings } from "../views/newLeague.ts";
@@ -1920,7 +1976,7 @@ index 12dd36b47..1a3165ef2 100644
  import { getNumPlayersTradedAwayNormalizedAll } from "../core/player/getNumPlayersTradedAwayNormalized.ts";
  import { getAdjustedTicketPrice } from "../../common/getAdjustedTicketPrice.ts";
  import { gameAttributesArrayToObject } from "../../common/gameAttributesArrayToObject.ts";
-@@ -801,6 +802,17 @@ const createLeague = async (
+@@ -801,6 +803,18 @@ const createLeague = async (
  			await league.swapWorstRoster(false);
  		}
  
@@ -1933,12 +1989,13 @@ index 12dd36b47..1a3165ef2 100644
 +			(await season.getSchedule()).length === 0
 +		) {
 +			await phase.newPhase(PHASE.PLAYOFFS, conditions);
++			await nflStartBracket();
 +		}
 +
  		return lid;
  	} finally {
  		delete self.stream0;
-@@ -4184,9 +4196,50 @@ const updateDefaultSettingsOverrides = async (
+@@ -4184,9 +4198,50 @@ const updateDefaultSettingsOverrides = async (
  	}
  };
  
@@ -1989,7 +2046,7 @@ index 12dd36b47..1a3165ef2 100644
  	await league.setGameAttributes(gameAttributes);
  	await toUI("realtimeUpdate", [["gameAttributes"]]);
  };
-@@ -4194,6 +4247,7 @@ const updateGameAttributesGodMode = async (
+@@ -4194,6 +4249,7 @@ const updateGameAttributesGodMode = async (
  	settings: Settings,
  	conditions: Conditions,
  ) => {
@@ -1997,7 +2054,7 @@ index 12dd36b47..1a3165ef2 100644
  	const gameAttributes: Partial<GameAttributesLeague> = omit(settings, [
  		"repeatSeason",
  	]);
-@@ -4381,6 +4435,15 @@ const updateOptions = async (
+@@ -4381,6 +4437,15 @@ const updateOptions = async (
  	await toUI("realtimeUpdate", [["options"]]);
  };
  
@@ -2013,7 +2070,7 @@ index 12dd36b47..1a3165ef2 100644
  const updatePlayThroughInjuries = async ({
  	tid,
  	value,
-@@ -4871,6 +4934,17 @@ const upgrade65 = async () => {
+@@ -4871,6 +4936,17 @@ const upgrade65 = async () => {
  	console.timeEnd("upgrade65");
  };
  
@@ -2031,7 +2088,7 @@ index 12dd36b47..1a3165ef2 100644
  const upsertCustomizedPlayer = async (
  	{
  		p,
-@@ -4920,6 +4994,17 @@ const upsertCustomizedPlayer = async (
+@@ -4920,6 +4996,17 @@ const upsertCustomizedPlayer = async (
  
  	p.imgURL = helpers.stripBbcode(p.imgURL);
  
@@ -2049,7 +2106,7 @@ index 12dd36b47..1a3165ef2 100644
  	// Fix draft and ratings season
  	if (p.tid === PLAYER.UNDRAFTED) {
  		if (p.draft.year < season) {
-@@ -5381,8 +5466,86 @@ const whileWorkerBusy =
+@@ -5381,8 +5468,86 @@ const whileWorkerBusy =
  	(...args: Args) =>
  		lock.whileWorkerBusy(() => cb(...args));
  
@@ -2136,7 +2193,7 @@ index 12dd36b47..1a3165ef2 100644
  	awardSettings,
  	eightyTwoZeroDraft,
  	exhibitionGame,
-@@ -5523,6 +5686,7 @@ const api = {
+@@ -5523,6 +5688,7 @@ const api = {
  		updateMultiTeamMode,
  		updateOptions,
  		updatePlayThroughInjuries,
@@ -2144,7 +2201,7 @@ index 12dd36b47..1a3165ef2 100644
  		updatePlayerWatch,
  		updatePlayersWatch,
  		updatePlayingTime,
-@@ -5531,6 +5695,7 @@ const api = {
+@@ -5531,6 +5697,7 @@ const api = {
  		updateTrade,
  		upgrade65,
  		upgrade65Estimate,
@@ -2459,6 +2516,35 @@ index 65a1a3f92..753c098a5 100644
  };
  
  export type Formation = {
+diff --git a/src/worker/core/draft/genPicks.ts b/src/worker/core/draft/genPicks.ts
+index ad86f1744..85e7bf51c 100644
+--- a/src/worker/core/draft/genPicks.ts
++++ b/src/worker/core/draft/genPicks.ts
+@@ -19,11 +19,23 @@ const doSeason = async (
+ 		return;
+ 	}
+ 
++	// NFL history mod: a real draft order gives some teams two picks in a round (trades, compensatory picks), and those
++	// picks all share the team as originalTid. Keep every pick that already has its slot in the order, not just the
++	// first one per team and round, or a league started at the draft loses them (2000: Washington's #3, Baltimore's #10).
++	for (const dp of existingPicks) {
++		if (dp.pick > 0) {
++			dp.keep = true;
++		}
++	}
++
+ 	const teams = await idb.cache.teams.getAll();
+ 
+ 	// If draft is ongoing, don't create picks because some may have already been used. And in the case that all have been used, there's no way to know for sure, so this is the best we can do.
++	// NFL history mod: a draft that already has its real order (slotted picks) is treated the same way, so teams that
++	// really traded their pick away don't get a new one
+ 	const ongoingDraft =
+-		g.get("season") === season && g.get("phase") === PHASE.DRAFT;
++		(g.get("season") === season && g.get("phase") === PHASE.DRAFT) ||
++		existingPicks.some((dp) => dp.pick > 0);
+ 
+ 	// With forceHistoricalRosters enabled, we only want picks after this mode will turn off
+ 	const skipForceHistoricalRosters =
 diff --git a/src/worker/core/draft/runPicks.ts b/src/worker/core/draft/runPicks.ts
 index 260dbbdd8..d2514cd76 100644
 --- a/src/worker/core/draft/runPicks.ts
@@ -2834,7 +2920,7 @@ index 24de3d174..0b1781672 100644
  		phase === PHASE.FREE_AGENCY
  	) {
 diff --git a/src/worker/core/phase/newPhaseDraft.ts b/src/worker/core/phase/newPhaseDraft.ts
-index ccef26173..2fd984f71 100644
+index ccef26173..9d512f4cb 100644
 --- a/src/worker/core/phase/newPhaseDraft.ts
 +++ b/src/worker/core/phase/newPhaseDraft.ts
 @@ -1,3 +1,4 @@
@@ -2907,6 +2993,23 @@ index ccef26173..2fd984f71 100644
  	await draft.genPlayers(currentSeason);
  
  	if (g.get("draftType") !== "freeAgents") {
+@@ -49,7 +88,15 @@ const newPhaseDraft = async (conditions: Conditions): Promise<PhaseReturn> => {
+ 		const draftLotteryResult =
+ 			await idb.merged.draftLotteryResults.get(currentSeason);
+ 
+-		if (!draftLotteryResult) {
++		// NFL history mod: a league that started after the playoffs already has this draft's real order (every pick
++		// slotted, traded and compensatory picks included). Don't replace it with an order by record.
++		const seasonPicks = (await idb.cache.draftPicks.getAll()).filter(
++			(dp) => dp.season === currentSeason,
++		);
++		const realOrder =
++			seasonPicks.length > 0 && seasonPicks.every((dp) => dp.pick > 0);
++
++		if (!draftLotteryResult && !realOrder) {
+ 			try {
+ 				await draft.genOrder(false, conditions);
+ 			} catch (error) {
 diff --git a/src/worker/core/phase/newPhasePreseason.ts b/src/worker/core/phase/newPhasePreseason.ts
 index 22a20236f..4f5b7a5d1 100644
 --- a/src/worker/core/phase/newPhasePreseason.ts
@@ -3743,6 +3846,111 @@ index 1b490500a..b787c9251 100644
  	const season = g.get("season");
  	const forceRetireAge = g.get("forceRetireAge");
  
+diff --git a/src/worker/core/season/addDaysToSchedule.test.ts b/src/worker/core/season/addDaysToSchedule.test.ts
+new file mode 100644
+index 000000000..bea2ea95f
+--- /dev/null
++++ b/src/worker/core/season/addDaysToSchedule.test.ts
+@@ -0,0 +1,47 @@
++import { assert, test } from "vitest";
++import addDaysToSchedule from "./addDaysToSchedule.ts";
++
++// NFL history mod: teams 0 and 1 have a bye in week 1. Their week 2 game must stay in week 2.
++const week1 = [
++	{ homeTid: 2, awayTid: 3 },
++	{ homeTid: 4, awayTid: 5 },
++];
++const week2 = [
++	{ homeTid: 0, awayTid: 1 },
++	{ homeTid: 2, awayTid: 4 },
++];
++
++test("a game between two teams coming off a bye stays in its week", () => {
++	const days = addDaysToSchedule([
++		...week1,
++		{ homeTid: -5, awayTid: -5 },
++		...week2,
++	]);
++	assert.deepStrictEqual(
++		days.map((game) => game.day),
++		[1, 1, 2, 2],
++	);
++	assert.strictEqual(days.length, 4, "week markers are not games");
++});
++
++test("without a week marker the old behavior is unchanged", () => {
++	const days = addDaysToSchedule([...week1, ...week2]);
++	assert.deepStrictEqual(
++		days.map((game) => game.day),
++		[1, 1, 1, 2],
++	);
++});
++
++test("a week marker at the start or twice in a row adds no empty day", () => {
++	const days = addDaysToSchedule([
++		{ homeTid: -5, awayTid: -5 },
++		...week1,
++		{ homeTid: -5, awayTid: -5 },
++		{ homeTid: -5, awayTid: -5 },
++		...week2,
++	]);
++	assert.deepStrictEqual(
++		days.map((game) => game.day),
++		[1, 1, 2, 2],
++	);
++});
+diff --git a/src/worker/core/season/addDaysToSchedule.ts b/src/worker/core/season/addDaysToSchedule.ts
+index 4904656ab..aadaba86b 100644
+--- a/src/worker/core/season/addDaysToSchedule.ts
++++ b/src/worker/core/season/addDaysToSchedule.ts
+@@ -28,12 +28,22 @@ const addDaysToSchedule = (
+ 		}
+ 	}
+ 
+-	return games.map((game) => {
++	// NFL history mod: [-5, -5] marks the start of a new week. Without it, a game between two teams coming off a bye
++	// is pulled back into their bye week, because a new day only starts when a team would play twice.
++	let weekBreak = false;
++	const out: ScheduleGameWithoutKey[] = [];
++	for (const game of games) {
+ 		const { awayTid, homeTid } = game;
+ 
++		if (awayTid === -5 && homeTid === -5) {
++			weekBreak = dayTids.size > 0;
++			continue;
++		}
++
+ 		const allStarGame = awayTid === -2 && homeTid === -1;
+ 		const tradeDeadline = awayTid === -3 && homeTid === -3;
+ 		if (
++			weekBreak ||
+ 			dayTids.has(homeTid) ||
+ 			dayTids.has(awayTid) ||
+ 			allStarGame ||
+@@ -44,6 +54,7 @@ const addDaysToSchedule = (
+ 			day += 1;
+ 			dayTids.clear();
+ 		}
++		weekBreak = false;
+ 
+ 		dayTids.add(homeTid);
+ 		dayTids.add(awayTid);
+@@ -51,11 +62,12 @@ const addDaysToSchedule = (
+ 		prevDayAllStarGame = allStarGame;
+ 		prevDayTradeDeadline = tradeDeadline;
+ 
+-		return {
++		out.push({
+ 			...game,
+ 			day,
+-		};
+-	});
++		});
++	}
++	return out;
+ };
+ 
+ export default addDaysToSchedule;
 diff --git a/src/worker/core/season/genPlayoffSeries.ts b/src/worker/core/season/genPlayoffSeries.ts
 index 845bffced..29ea4fdc8 100644
 --- a/src/worker/core/season/genPlayoffSeries.ts
@@ -3801,10 +4009,10 @@ index 845bffced..29ea4fdc8 100644
  					if (playIn) {
  						playIns.push(playIn);
 diff --git a/src/worker/core/season/newSchedule.ts b/src/worker/core/season/newSchedule.ts
-index 5959814f4..6a5d64d59 100644
+index 5959814f4..0fa73064e 100644
 --- a/src/worker/core/season/newSchedule.ts
 +++ b/src/worker/core/season/newSchedule.ts
-@@ -15,6 +15,43 @@ const newSchedule = (
+@@ -15,6 +15,45 @@ const newSchedule = (
  	conditions?: Conditions,
  ) => {
  	if (__SPORT === "football") {
@@ -3837,6 +4045,8 @@ index 5959814f4..6a5d64d59 100644
 +						day >= tradeDeadlineDay
 +					) {
 +						tids.push([-3, -3]);
++					} else if (lastDay > 0 && day !== lastDay) {
++						tids.push([-5, -5]); // new week (see addDaysToSchedule)
 +					}
 +					lastDay = day;
 +					tids.push([homeTid, awayTid]);
@@ -3848,6 +4058,72 @@ index 5959814f4..6a5d64d59 100644
  		const tids = getRealSchedule(teams);
  		if (tids) {
  			return tids;
+diff --git a/src/worker/core/season/nflStartBracket.ts b/src/worker/core/season/nflStartBracket.ts
+new file mode 100644
+index 000000000..83b99ff3a
+--- /dev/null
++++ b/src/worker/core/season/nflStartBracket.ts
+@@ -0,0 +1,60 @@
++import { idb } from "../../db/index.ts";
++import { g } from "../../util/index.ts";
++import newSchedulePlayoffsDay from "./newSchedulePlayoffsDay.ts";
++
++// NFL history mod: a league started at a later playoff round. The rounds before it are filled in from the real bracket
++// and the chosen round is left to play, with the real matchups. Runs once, right after the playoffs are set up.
++const nflStartBracket = async () => {
++	const start = (g as any).nflStartBracket as
++		| { season: number; round: number; series: any[][] }
++		| undefined;
++	const season = g.get("season");
++	if (!start || start.season !== season) {
++		return;
++	}
++	const playoffSeries = await idb.cache.playoffSeries.get(season);
++	if (!playoffSeries || playoffSeries.series.length <= start.round) {
++		return;
++	}
++
++	for (let r = 0; r <= start.round; r++) {
++		playoffSeries.series[r] = start.series[r]!.map((matchup) => {
++			const copy = JSON.parse(JSON.stringify(matchup));
++			if (r === start.round) {
++				for (const side of [copy.home, copy.away]) {
++					if (side) {
++						side.won = 0;
++						delete side.pts;
++					}
++				}
++			}
++			return copy;
++		});
++	}
++	playoffSeries.currentRound = start.round;
++	await idb.cache.playoffSeries.put(playoffSeries);
++
++	// Rounds won so far: a team reaching round r has won (or had a bye through) r rounds
++	const teamSeasons = await idb.cache.teamSeasons.indexGetAll(
++		"teamSeasonsBySeasonTid",
++		[[season], [season, "Z"]],
++	);
++	for (let r = 1; r <= start.round; r++) {
++		for (const { home, away } of playoffSeries.series[r]!) {
++			for (const side of [home, away]) {
++				const teamSeason = side
++					? teamSeasons.find((ts) => ts.tid === side.tid)
++					: undefined;
++				if (teamSeason) {
++					teamSeason.playoffRoundsWon = r;
++					await idb.cache.teamSeasons.put(teamSeason);
++				}
++			}
++		}
++	}
++
++	await idb.cache.schedule.clear();
++	await newSchedulePlayoffsDay();
++};
++
++export default nflStartBracket;
 diff --git a/src/worker/core/team/checkRosterSizes.ts b/src/worker/core/team/checkRosterSizes.ts
 index 8dd67389c..301c12c06 100644
 --- a/src/worker/core/team/checkRosterSizes.ts

@@ -17,7 +17,7 @@
     'Every NFL season since 1966', '28,700+ real players', 'Ratings built from real careers',
     'Every logo and jersey, switching on the real date', 'Real schedules, game for game', 'The real 2027–2029 drafts',
     'Start in any season, any week', 'Retirements, comebacks and suspensions on the real date',
-    'Beta: found a bug? Report it on GitHub', 'Updated every week of the season',
+'Updated every week of the season',
   ];
 
   const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -74,7 +74,7 @@
     const nav = document.createElement('header');
     nav.className = 'nav';
     nav.innerHTML = `<div class="wrap">
-      <a class="brand" href="index.html">${ball}<span>NFL <em>History</em></span><span class="beta" title="It works, but you may still hit bugs">Beta</span></a>
+      <a class="brand" href="index.html">${ball}<span>NFL <em>History</em></span></a>
       <button class="menu" aria-label="Menu" aria-expanded="false"><i></i><i></i><i></i></button>
       <nav class="links" aria-label="Site">${PAGES.slice(1).map(([href, id, label]) => `<a href="${href}"${id === page ? ' class="on" aria-current="page"' : ''}>${label}</a>`).join('')}
         <a class="dl${page === 'download' ? ' on' : ''}" href="download.html">Download</a></nav>
