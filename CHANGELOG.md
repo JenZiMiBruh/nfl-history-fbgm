@@ -6,6 +6,13 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.22.2 · Nov 11, 2026
+
+**Start a new league to get these fixes.**
+
+- **The last "How acquired" gaps on 2026 rosters.** A few players had no record of joining their current team, so they showed the team that drafted them (Harrison Butker read as a Panthers draft pick on the Chiefs). Every rostered player now shows how he really got to his team.
+- **No more doubled 2026 moves.** About 120 players had their 2026 signings and trades listed twice in their transaction history. Each move is listed once now.
+
 ## v1.22.1 · Nov 11, 2026
 
 **Start a new league to get these fixes.**
