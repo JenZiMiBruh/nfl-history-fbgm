@@ -6,6 +6,14 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.22.3 · Nov 11, 2026
+
+**Start a new league to get this fix.**
+
+- **Salaries list each season once.** This season's salary showed the player's real cap hit while his contract showed the yearly value of his deal, so the newest game version listed the season twice at two amounts (Budda Baker: 2027 at $29.25M, then 2027 at $18M). This season and the rest of the contract now match the contract, the way the game writes them; past seasons keep what was really paid. Fixed in every starting season.
+- **No more fake dead money in the 2026 league files.** The same false releases fixed in v1.22.1 had also left each team paying the "released" players: $36M to $58M of every team's cap space (Detroit was paying dead money on Keith Abney, a rookie still on its roster). That's gone, so every team has its real cap room in free agency. The mod's leagues didn't have this.
+- **Retired players aren't paid after retiring.** About 110 long-retired players carried a placeholder minimum salary for this season.
+
 ## v1.22.2 · Nov 11, 2026
 
 **Start a new league to get these fixes.**

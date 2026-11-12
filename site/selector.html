@@ -1792,6 +1792,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     const startDate = phaseName === 'draft' ? (S + 1) + '-05-01' : phaseName === 'afterplayoffs' ? (S + 1) + '-02-20' : phaseName === 'playoffs' ? (S + 1) + '-01-05'
       : W ? new Date(Date.UTC(S, 8, 5 + 7 * (W - 1))).toISOString().slice(0, 10) : S + '-08-31';
     applyPickTrades(draftPicks, master.pickTrades, startDate, realOrder.length ? S + 1 : S);
+    syncSalaries(players, S, P);
     const league = {
       version: master.version,
       startingSeason: E.FIRST_SEASON,
@@ -1960,7 +1961,22 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     return league;
   }
 
-  const api = { applyPickTrades, sliceLeague, shiftSeasons, toJsonChunks, buildDepth, fitPayrolls, PHASES, PHASE_LABELS, EVENT_CATEGORIES, eventCategory, describeEvent, keepEvents };
+  // The salary log the way the game writes it: past seasons keep what was really paid; the contract's seasons (this one
+  // on, or next one once the trade deadline has passed) are the contract amount. The real cap hit left in this season's
+  // row made the game show the season twice, at two amounts (Budda Baker: 2027 $29.25M, then 2027 ARI $18M).
+  function syncSalaries(players, season, phase) {
+    // the game's own rule for the first season a current contract can cover (playoffs still count as this season)
+    const start = season + (phase > 3 ? 1 : 0);
+    for (const p of players) {
+      if (!p.contract || p.tid === undefined) continue;
+      // a retired player is paid through the season he retired, no later (113 long-retired players carried a
+      // placeholder league-minimum row for the current season)
+      p.salaries = (p.salaries || []).filter(s => s.season < start && !(p.tid === -3 && p.retiredYear != null && s.season > p.retiredYear));
+      if (p.tid >= 0) for (let y = start; y <= p.contract.exp; y++) p.salaries.push({ season: y, amount: p.contract.amount });
+    }
+  }
+
+  const api = { syncSalaries, applyPickTrades, sliceLeague, shiftSeasons, toJsonChunks, buildDepth, fitPayrolls, PHASES, PHASE_LABELS, EVENT_CATEGORIES, eventCategory, describeEvent, keepEvents };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.SEASON_SLICER = api;
 
