@@ -6,6 +6,13 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.22.1 · Nov 11, 2026
+
+**Start a new league to get these fixes.**
+
+- **"How acquired" fixed for 2026 rosters.** About 600 players on 2026 rosters had a release that never happened, so the roster page called them free agent signings and the news said their own team had cut them. Carson Beck, a Cardinals 3rd-round pick, read "2027 free agent signing." Drafted players now show their draft pick, and the false release news is gone.
+- **Team changes dated correctly through history.** Every move to a new team was dated a season late, so in a league started in a past season many players showed their old team under "How acquired." Offseason moves are now in the offseason before, and midseason trades fall during the season. (Moves before about 1978 aren't in the source data, so those players still show their draft team.)
+
 ## v1.22.0 · Nov 11, 2026
 
 **Start a new league to get all of this.**
