@@ -6,6 +6,12 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.23.1 · Nov 12, 2026
+
+**Start a new league to get this fix.**
+
+- **Deadline trades show up in a Live league.** A league started at Week 10 left out the moves made right before Week 10, the trade deadline included, so Kirk Cousins read "Free agent signing" on the Vikings and the deadline trades were missing from the news. They're back.
+
 ## v1.23.0 · Nov 12, 2026
 
 **Start a new league to get all of this.**

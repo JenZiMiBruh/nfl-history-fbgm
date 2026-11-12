@@ -61,6 +61,10 @@ for (let S = FROM; S <= TO; S++) {
         const t = L.teams[p.tid]; if (!t || t.disabled) bad('player on missing/disabled team', tag + ' ' + p.firstName + ' ' + p.lastName + ' tid ' + p.tid);
         (byTeam[p.tid] = byTeam[p.tid] || []).push(p);
         { const c = cur(p, season); if (!c || c.exp < season || c.exp > season + 5) bad('contract end', tag + ' ' + p.lastName + ' ' + (c && c.exp)); }
+        // "How acquired" is the last transaction: in the live season it should be with his team (Kirk Cousins, traded to
+        // Minnesota at the deadline, read "Free agent signing" because the start week's trades were left out). Older
+        // seasons lack move records before about 1978 and for some returns to an old team, so only from 2020 on.
+        if (season >= 2021) { const tr = p.transactions || [], l = tr[tr.length - 1]; if (l && l.tid !== p.tid) bad('last transaction with another team', tag + ' ' + p.firstName + ' ' + p.lastName); }
         // Ages: a player on a team, by birth year (kickers and punters can play into their late 40s)
         const age = season - ((p.born && p.born.year) || season - 25);
         // ...unless he really played that season (George Blanda at 46)

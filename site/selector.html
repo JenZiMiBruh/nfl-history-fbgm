@@ -1311,7 +1311,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       const rowsS = reg.filter(s => s.season === S);
       p.stats = (src.stats || []).filter(keepStat);
       p.awards = (src.awards || []).filter(a => a.season < S || (DONE === 2 && a.season === S));
-      p.transactions = (src.transactions || []).filter(t => t.season < S || (t.season === S && (DONE || (t.phase !== undefined && t.phase <= P && (t.week === undefined || (W && t.week < W))))));
+      p.transactions = (src.transactions || []).filter(t => t.season < S || (t.season === S && (DONE || (t.phase !== undefined && t.phase <= P && (t.week === undefined || (W && t.week <= W))))));
       p.salaries = (src.salaries || []).filter(s => s.season <= S);
       p.injuries = (src.injuries || []).filter(i => i.season < S || (DONE && i.season === S));
       // A death still to come happens in the league the year it really did (nflDeath: league season; 0: none known)
@@ -1815,7 +1815,7 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       playoffSeries: (master.playoffSeries || []).filter(s => s.season < S || (DONE === 2 && s.season === S)),
       // (a Playoffs start hasn't seen this season's Super Bowl or awards yet)
       // A start at the draft (or just before it) hasn't had that draft yet: its real draft entries stay out of the log
-      events: (master.events || []).filter(e => e.season < S || (DONE && e.season === S && e.type !== 'draft' && (DONE === 2 || !['champion', 'award'].includes(e.type))) || (W && e.season === S && e.week !== undefined && e.week < W)),
+      events: (master.events || []).filter(e => e.season < S || (DONE && e.season === S && e.type !== 'draft' && (DONE === 2 || !['champion', 'award'].includes(e.type))) || (W && e.season === S && e.week !== undefined && e.week <= W)),
       // Real head-to-head records for the seasons already played (this season's once its games are done)
       headToHeads: (master.headToHeads || []).filter(h => h.season < S || (DONE && h.season === S))
         .map(h => h.season === S && DONE !== 2 ? { ...h, playoffs: {} } : h)
