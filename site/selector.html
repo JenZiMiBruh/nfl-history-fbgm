@@ -1841,6 +1841,22 @@ function sliceLeague(master, E, opts) {
       // Box scores of the weeks already played, where they exist (the live season: build_live_games.js)
       games: playedGames()
     };
+    // "How acquired" agrees with where each player is, once every roster move is done. A move dated too early (Pat
+    // Elflein: claimed by the Jets in October 2020, but dated to the offseason) is held back while he's still with his
+    // old team; a stint with no move at all gets a signing dated to the start (from 2002 on, where trades are complete).
+    for (const p of league.players) {
+      if (p.tid < 0 || !p.transactions) continue;
+      const src = srcByPid.get(p.pid);
+      if (!src) continue;
+      const later = new Set();
+      for (const x of wkLines[p.pid] || []) if (!W || x[0] >= W) later.add(x[1]);
+      if (!W) for (const s of (src.stats || []).filter(s => !s.playoffs && s.season === S).slice(1)) later.add(s.tid);
+      let tr = p.transactions;
+      while (tr.length) { const l = tr[tr.length - 1]; if (l.tid === p.tid || l.tid < 0 || l.type === 'draft' || !later.has(l.tid)) break; tr = tr.slice(0, -1); }
+      const last = tr[tr.length - 1];
+      if ((!last || last.tid !== p.tid) && S >= 2002) tr = [...tr, W ? { season: S, phase: P, week: W, tid: p.tid, type: 'freeAgent', dated: 2, stint: 1 } : { season: S - 1, phase: 8, tid: p.tid, type: 'freeAgent', dated: 2, stint: 1 }];
+      p.transactions = tr;
+    }
     shiftSeasons(league, 1, true);
     // contracts in the game's current format, with real yearly amounts (writeContracts)
     writeContracts(league, new Map(master.players.filter(x => x.realCap).map(x => [x.pid, x.realCap])), undefined, new Map(master.players.filter(x => x.realDeals).map(x => [x.pid, x.realDeals])));

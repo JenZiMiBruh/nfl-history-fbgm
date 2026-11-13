@@ -6,6 +6,14 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.25.0 · Nov 12, 2026
+
+**Start a new league to get this update.**
+
+- Jersey retirements fixed.** A team only retires a real legend's number if he earned it in your league, and only after he retires. On default settings, a player who spends his career somewhere new (Brady in Arizona) gets his number retired by that team. With Historical Rosters on, only the real retirements happen.
+- "How acquired" is right in every season.** Players who moved midseason or signed as free agents no longer show their old team's move (about 12,000 cases from 2019 on).
+- Old salary data fixed.** Two bad cap figures (Albert Haynesworth's 2006 season among them) no longer push team payrolls far over the cap.
+
 ## v1.24.0 · Nov 12, 2026
 
 **Start a new league to get this update.**

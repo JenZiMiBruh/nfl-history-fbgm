@@ -3057,7 +3057,7 @@ index 260f2eb0c..d1fcee7bf 100644
  				await draft.genOrder(false, conditions);
  			} catch (error) {
 diff --git a/src/worker/core/phase/newPhasePreseason.ts b/src/worker/core/phase/newPhasePreseason.ts
-index 0e2c5dee3..4713f46a2 100644
+index 0e2c5dee3..1be61c41b 100644
 --- a/src/worker/core/phase/newPhasePreseason.ts
 +++ b/src/worker/core/phase/newPhasePreseason.ts
 @@ -40,6 +40,7 @@ import {
@@ -3142,7 +3142,7 @@ index 0e2c5dee3..4713f46a2 100644
  	// Again, so updateValues can happen after new mean/std is calculated
  	local.playerOvrMeanStdStale = true;
  	for (const p of players) {
-@@ -530,6 +598,23 @@ const newPhasePreseason = async (
+@@ -530,6 +598,48 @@ const newPhasePreseason = async (
  
  	local.minFractionDiffs = undefined;
  
@@ -3157,6 +3157,31 @@ index 0e2c5dee3..4713f46a2 100644
 +			if (t.retiredJerseyNumbers.some((row) => row.number === j.number)) {
 +				continue;
 +			}
++			// Only if this league's history earned it: the player has retired (if he's still playing, check again next
++			// year) and was really this team's, at least 32 games and a third of his career there (Reggie White counts
++			// for both the Eagles and the Packers). A player another team drafted, or who never made it, gets nothing.
++			if (j.pid !== undefined) {
++				const p =
++					(await idb.cache.players.get(j.pid)) ??
++					(await idb.league.get("players", j.pid));
++				if (!p || p.tid !== PLAYER.RETIRED) {
++					continue;
++				}
++				let gpTeam = 0;
++				let gpAll = 0;
++				for (const ps of p.stats) {
++					if (ps.playoffs) {
++						continue;
++					}
++					gpAll += ps.gp ?? 0;
++					if (ps.tid === j.tid) {
++						gpTeam += ps.gp ?? 0;
++					}
++				}
++				if (gpTeam < 32 || gpTeam < gpAll / 3) {
++					continue;
++				}
++			}
 +			const { tid, ...row } = j;
 +			t.retiredJerseyNumbers.push(row);
 +			await idb.cache.teams.put(t);
@@ -3166,7 +3191,7 @@ index 0e2c5dee3..4713f46a2 100644
  	// Handle jersey number conflicts
  	const playersByTeam = Map.groupBy(
  		players.filter((p) => p.tid >= 0),
-@@ -561,10 +646,11 @@ const newPhasePreseason = async (
+@@ -561,10 +671,11 @@ const newPhasePreseason = async (
  				);
  				if (conflicts.length > 1) {
  					// Conflict! Who gets to keep the number? The one with the highest career peak ovr!
@@ -3638,12 +3663,14 @@ index c1af3f439..42496a9aa 100644
  				unretiredPids.push(scheduledEvent.info.pid);
  				eventLogTexts.push(...texts);
 diff --git a/src/worker/core/player/checkJerseyNumberRetirement.ts b/src/worker/core/player/checkJerseyNumberRetirement.ts
-index 0961543f6..6cf061091 100644
+index 0961543f6..66c00526a 100644
 --- a/src/worker/core/player/checkJerseyNumberRetirement.ts
 +++ b/src/worker/core/player/checkJerseyNumberRetirement.ts
-@@ -6,9 +6,9 @@ import { g, logEvent, helpers } from "../../util/index.ts";
+@@ -5,10 +5,11 @@ import { idb } from "../../db/index.ts";
+ import { g, logEvent, helpers } from "../../util/index.ts";
  import { getThreshold } from "./madeHof.football.ts";
  import { userControlsTeam } from "../../util/userControlsTeam.ts";
++import { nflRealRostersActive } from "../nflRealRosters.ts";
  
 -// Higher in basketball, because real player leagues have a lot
 -const MAX_RETIRED_JERSEY_NUMBERS_PER_AI_TEAM =
@@ -3654,21 +3681,48 @@ index 0961543f6..6cf061091 100644
  
  // Just the stats used here, so this works with a row from p.stats or a processed stats row. Missing stats (like in historical data, or a custom league file) are treated as 0
  export const getValueStatsRow = (
-@@ -238,6 +238,15 @@ const checkJerseyNumberRetirement = async (p: Player) => {
+@@ -172,6 +173,10 @@ const retireJerseyNumber = async ({
+ 	if (!t.retiredJerseyNumbers) {
+ 		t.retiredJerseyNumbers = [];
+ 	}
++	// NFL history mod: a number the team has already retired stays retired once
++	if (t.retiredJerseyNumbers.some((row) => row.number === number)) {
++		return;
++	}
+ 
+ 	// If too many retired jerseys, delete them until we have a free space
+ 	while (
+@@ -238,6 +243,21 @@ const checkJerseyNumberRetirement = async (p: Player) => {
  		return;
  	}
  
-+	// NFL history mod: while the league replays real seasons, the real retirements come on schedule (Marino's #13 in
-+	// 2000), so AI teams retire numbers of their own only once the real data runs out
-+	if (
-+		Object.hasOwn(g, "nflRealDataLastSeason") &&
-+		g.get("season") <= (g as any).nflRealDataLastSeason
-+	) {
++	// NFL history mod. With Historical Rosters on, careers follow real life while the real data lasts, so only the real
++	// retirements happen (on schedule, newPhasePreseason). Otherwise teams retire numbers the normal way: Tom Brady
++	// spending his career in Arizona gets his number retired by the Cardinals, real seasons or not.
++	if (nflRealRostersActive(g.get("season"))) {
 +		return;
 +	}
++	// A real retirement already scheduled for this player and team (Fitzgerald's #11 in Arizona, 2026) keeps its real
++	// date and is checked there, so the game doesn't also do it early on its own
++	const scheduled: { pid?: number; tid: number }[] = Object.hasOwn(
++		g,
++		"nflRetiredNumbers",
++	)
++		? (g as any).nflRetiredNumbers
++		: [];
 +
  	// Find team he played the most with
  	const scoresByTid = new Map<number, number>();
+ 
+@@ -255,6 +275,9 @@ const checkJerseyNumberRetirement = async (p: Player) => {
+ 		if (score <= 1) {
+ 			continue;
+ 		}
++		if (scheduled.some((j) => j.pid === p.pid && j.tid === tid)) {
++			continue;
++		}
+ 
+ 		let number;
  
 diff --git a/src/worker/core/player/develop.ts b/src/worker/core/player/develop.ts
 index 324e001dd..ca6350452 100644
