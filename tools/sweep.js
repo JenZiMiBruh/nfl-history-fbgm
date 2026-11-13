@@ -13,6 +13,37 @@ const ROOT = process.argv[2];
 if (!ROOT) throw new Error('usage: sweep.js <NFL Official folder> [quick|full] [from] [to]');
 const MODE = process.argv[3] === 'full' ? 'full' : 'quick';
 const FROM = +(process.argv[4] || 1966), TO = +(process.argv[5] || 2026);
+
+// The full sweep in parallel: the seasons are split between a few copies of this script, as many as the free memory
+// allows (each needs about 4.5 GB), and their findings are merged into the same report. Same checks, same output.
+if (MODE === 'full' && !process.env.NFLH_SWEEP_CHILD && TO - FROM >= 8) {
+  const K = Math.max(1, Math.min(4, os.cpus().length - 1, Math.floor((os.freemem() / 1e9 - 2) / 4.5)));
+  if (K >= 2) {
+    const { spawn } = require('child_process');
+    // newer seasons have weekly starts to build, so they weigh more: split by weight, not by count
+    const wt = s => (s >= 1999 ? 2 : 1), total = Array.from({ length: TO - FROM + 1 }, (_, i) => wt(FROM + i)).reduce((a, b) => a + b, 0);
+    const parts = []; let a = FROM, acc = 0;
+    for (let s = FROM; s <= TO; s++) { acc += wt(s); if (acc >= total / K * (parts.length + 1) && parts.length < K - 1) { parts.push([a, s]); a = s + 1; } }
+    parts.push([a, TO]);
+    console.log(`sweep in ${parts.length} parts at once: ${parts.map(p => p.join('-')).join(', ')}`);
+    const outs = parts.map((_, i) => path.join(os.tmpdir(), `nflh_sweep_part${i}.json`));
+    Promise.all(parts.map(([x, y], i) => new Promise(res => {
+      try { fs.unlinkSync(outs[i]); } catch (e) {}
+      spawn(process.execPath, ['--max-old-space-size=8000', __filename, ROOT, 'full', String(x), String(y)], { stdio: ['ignore', 'inherit', 'inherit'], env: { ...process.env, NFLH_SWEEP_CHILD: '1', NFLH_SWEEP_OUT: outs[i] } }).on('exit', code => res(code));
+    }))).then(codes => {
+      const probs = {}; let built = 0;
+      outs.forEach((f, i) => {
+        let r; try { r = JSON.parse(fs.readFileSync(f, 'utf8')); } catch (e) { r = { probs: { ['sweep part did not finish (' + parts[i].join('-') + ', exit ' + codes[i] + ')']: ['rerun the sweep'] }, built: 0 }; }
+        built += r.built; for (const [k, v] of Object.entries(r.probs)) (probs[k] = probs[k] || []).push(...v);
+      });
+      console.log(`\n${built} leagues built (${MODE})`);
+      fs.writeFileSync(path.join(os.tmpdir(), 'nflh_sweep_out.json'), JSON.stringify(probs));
+      if (!Object.keys(probs).length) console.log('NO PROBLEMS');
+      for (const [k, v] of Object.entries(probs).sort((a, b) => b[1].length - a[1].length)) console.log(`${k}: ${v.length}\n   ${v.slice(0, 6).join('\n   ')}`);
+    });
+    return;
+  }
+}
 const SITE = path.join(__dirname, '..', 'site', 'data');
 const SL = require(path.join(ROOT, 'src/season_slicer')), E = require(path.join(ROOT, 'src/nfl_eras'));
 const SCHED = require(path.join(ROOT, 'data_cache/real_schedules.json'));
@@ -216,6 +247,7 @@ for (let S = FROM; S <= TO; S++) {
 }
 console.log = log;
 console.log(`\n${built} leagues built (${MODE})`);
+if (process.env.NFLH_SWEEP_OUT) { fs.writeFileSync(process.env.NFLH_SWEEP_OUT, JSON.stringify({ probs, built })); return; } // one part of a parallel sweep
 fs.writeFileSync(path.join(os.tmpdir(), 'nflh_sweep_out.json'), JSON.stringify(probs));
 if (!Object.keys(probs).length) console.log('NO PROBLEMS');
 for (const [k, v] of Object.entries(probs).sort((a, b) => b[1].length - a[1].length)) console.log(`${k}: ${v.length}\n   ${v.slice(0, 6).join('\n   ')}`);
