@@ -1097,8 +1097,13 @@
   // running back needs about 2,050 rushing yards (or 30 touchdowns) on a winning team, a defender about 30 sacks, a
   // receiver close to 2,000 yards. Everything is multiplied by the team's win percentage, like the real voting.
   // The other awards are Football GM's own.
+  // GOAT Lab formula (Nov 12, 2026), calibrated on every career since 1966 so the top 100 covers every position: All-Pro
+  // and Pro Bowl selections carry the most (they exist for linemen too), MVPs, player-of-the-year awards, Super Bowl
+  // MVPs and titles add on, and each position's own stats are scaled so the greats at every spot land close together.
+  // Real top 100: Brady, Manning, Rice, Rodgers, Sanders; 11 QB, 13 RB, 11 WR, 7 TE, 11 OL, 12 DL, 13 LB, 8 CB, 11 S, 2 K, 2 P (Tucker, Vinatieri, Lechler, Hekker).
+  const GOAT_FORMULA = "15*allLeague1 + 7*allLeague2 + 4*allStar + 20*mvp + 10*(opoy+dpoy) + 6*finalsMvp + 6*champ + pssYds/2200 + pssTD/10 - pssInt/25 + rusYds/500 + rusTD/4 + recYds/420 + recTD/3.5 + defSk/3 + 1.5*defInt + defPssDef/10 + (fg0+fg20+fg30+fg40+fg50)/8 + pntYds/1000";
   const AWARDS = [{"shortName":"MVP","name":"Most Valuable Player","formula":"0","formulaByPos":{"QB":"(pssYds/25+4*pssTD-3*pssInt-2*fmbLost+rusYds/10+6*rusTD)*2*winp","RB":"(0.35*(rusYds/10+6*rusTD+recYds/10+6*recTD)-2*fmbLost+max(0,rusYds-1800)+12*max(0,rusTD+recTD-18))*2*winp","WR":"(0.5*(recYds/10+6*recTD)+0.4*max(0,recYds-1700)+10*max(0,recTD-17)+6*(prTD+krTD))*2*winp","DL":"(0.6*(6*defSk+8*defInt+5*(defFmbFrc+defFmbRec)+0.5*defTckSolo+defTckLoss+2*defPssDef+6*(defIntTD+defFmbTD))+22*max(0,defSk-20))*2*winp","CB":"(0.6*(6*defSk+8*defInt+5*(defFmbFrc+defFmbRec)+0.5*defTckSolo+defTckLoss+2*defPssDef+6*(defIntTD+defFmbTD))+15*max(0,defInt-11))*2*winp","TE":"(0.5*(recYds/10+6*recTD)+0.4*max(0,recYds-1700)+10*max(0,recTD-17)+6*(prTD+krTD))*2*winp","LB":"(0.6*(6*defSk+8*defInt+5*(defFmbFrc+defFmbRec)+0.5*defTckSolo+defTckLoss+2*defPssDef+6*(defIntTD+defFmbTD))+22*max(0,defSk-20))*2*winp","S":"(0.6*(6*defSk+8*defInt+5*(defFmbFrc+defFmbRec)+0.5*defTckSolo+defTckLoss+2*defPssDef+6*(defIntTD+defFmbTD))+15*max(0,defInt-11))*2*winp","OL":"0","K":"0","P":"0","KR":"0","PR":"0"},"showStats":"overall","actAs":"mvp"},{"shortName":"OPOY","name":"Offensive Player of the Year","formula":"0.125*rusYds+6*rusTD-2*fmbLost + 0.0975*recYds+6*recTD","showStats":"overall","opoyFormula":"0.125*rusYds+6*rusTD-2*fmbLost + 0.0975*recYds+6*recTD + 1.1*(0.04*pssYds+4*pssTD-2.5*pssInt)"},{"shortName":"POY","name":"Protector of the Year","formula":"(pbw+rbw)/(0.1+pba+rba)*(pba+rba)^(1/2)","showStats":"blocking"},{"shortName":"DPOY","name":"Defensive Player of the Year","formula":"4*defSk+0.4*defTckLoss+0.2*defTckAst+0.4*defTckSolo+3*defFmbFrc+3*defFmbRec+6*defInt+2*defPssDef","showStats":"defense"},{"shortName":"OROY","name":"Offensive Rookie of the Year","formula":"0.125*rusYds+6*rusTD-2*fmbLost + 0.0975*recYds+6*recTD + 1.1*(0.04*pssYds+4*pssTD-2.5*pssInt)","formulaByPos":{"QB":"0.5*(0.125*rusYds+6*rusTD-2*fmbLost) + 0.0975*recYds+6*recTD + 1.1*(0.04*pssYds+4*pssTD-2.5*pssInt)"},"showStats":"overall","rookie":true,"actAs":"roy"},{"shortName":"DROY","name":"Defensive Rookie of the Year","formula":"4*defSk+0.4*defTckLoss+0.2*defTckAst+0.4*defTckSolo+3*defFmbFrc+3*defFmbRec+6*defInt+2*defPssDef","showStats":"defense","rookie":true,"actAs":"roy"},{"shortName":"FMVP","name":"Finals MVP","formula":"(pssYds/25 + 4*pssTD + (recYds+rusYds)/10 + 6*(recTD+rusTD+prTD+krTD+defIntTD+defFmbTD) + 1.75*(1.75*defSk + (defTckSolo + defTckAst)/10 + 2*defInt + defPssDef + 2*defFmbFrc + 2*defFmbRec + 5*defSft)) * (1+0.5*won)","showStats":"overall","statRange":-1},{"shortName":"ALL","name":"All-League","formula":"4*defSk+0.4*defTckLoss+0.2*defTckAst+0.4*defTckSolo+3*defFmbFrc+3*defFmbRec+6*defInt+2*defPssDef","formulaByPos":{"QB":"0.5*(0.125*rusYds+6*rusTD-2*fmbLost) + 1.1*(0.04*pssYds+4*pssTD-2.5*pssInt)","RB":"0.125*rusYds+6*rusTD-2*fmbLost + 0.5*(0.0975*recYds+6*recTD)","WR":"0.0975*recYds+6*recTD","TE":"0.0975*recYds+6*recTD","OL":"(pbw+rbw)/(0.1+pba+rba)*(pba+rba)^(1/2)","K":"fg","P":"pntYds"},"showStats":"overall","numTeams":2},{"shortName":"ALR","name":"All-Rookie","formula":"4*defSk+0.4*defTckLoss+0.2*defTckAst+0.4*defTckSolo+3*defFmbFrc+3*defFmbRec+6*defInt+2*defPssDef","formulaByPos":{"QB":"0.5*(0.125*rusYds+6*rusTD-2*fmbLost) + 1.1*(0.04*pssYds+4*pssTD-2.5*pssInt)","RB":"0.125*rusYds+6*rusTD-2*fmbLost + 0.5*(0.0975*recYds+6*recTD)","WR":"0.0975*recYds+6*recTD","TE":"0.0975*recYds+6*recTD","OL":"(pbw+rbw)/(0.1+pba+rba)*(pba+rba)^(1/2)"},"showStats":"overall","rookie":true,"numTeams":1}];
-  const api = { AWARDS, FIRST_SEASON, LAST_SEASON, PHASE, TEAMS, CURRENT_LOGO, setLogos, setSecondaryLogos, dealPay, getPop, isActive, getTeamBranding, getAlignment, getRules, RULE_KEYS, HOME_JERSEYS, buildScheduledEvents, PLAYER_EVENTS, HISTORICAL_INJURIES };
+  const api = { AWARDS, GOAT_FORMULA, FIRST_SEASON, LAST_SEASON, PHASE, TEAMS, CURRENT_LOGO, setLogos, setSecondaryLogos, dealPay, getPop, isActive, getTeamBranding, getAlignment, getRules, RULE_KEYS, HOME_JERSEYS, buildScheduledEvents, PLAYER_EVENTS, HISTORICAL_INJURIES };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.NFL_ERAS = api;
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -1186,7 +1191,8 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
   let RATING_POS = null;
   const ovrAt = (r, pos) => (Array.isArray(r.ovrs) ? r.ovrs[RATING_POS.indexOf(pos)] : (r.ovrs || {})[pos]) || 0;
 
-  function sliceLeague(master, E, opts) {
+  const REAL_JERSEY_SCORE = 1000;
+function sliceLeague(master, E, opts) {
     const S = opts.season;
     RATING_POS = master.ratingPos || null;
     const phaseName = opts.phase;
@@ -1595,7 +1601,8 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
         Object.assign(row, { season: S, playoffs: false, tid: src.tid }, teamSum[src.tid] || {}, { gp: rec[src.tid].gp, pts: rec[src.tid].pts, oppPts: rec[src.tid].oppPts });
         t.stats.push(row);
       }
-      t.retiredJerseyNumbers = (src.retiredJerseyNumbers || []).filter(j => j.seasonRetired < S);
+      // a real retired number scores above any simulated career, so the game never drops one to make room
+      t.retiredJerseyNumbers = (src.retiredJerseyNumbers || []).filter(j => j.seasonRetired < S).map(j => ({ ...j, score: REAL_JERSEY_SCORE }));
       return t;
     });
 
@@ -1610,13 +1617,13 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
       return out;
     };
     const ga = Object.assign({}, master.gameAttributes, {
-      season: S, phase: P, startingSeason: E.FIRST_SEASON, ...(E.AWARDS ? { awards: E.AWARDS } : {}), draftAges: [21, 24], /* real draftees are 21 to 23, many 24 (Football GM's default 21-22 is too young) */
+      season: S, phase: P, startingSeason: E.FIRST_SEASON, ...(E.AWARDS ? { awards: E.AWARDS } : {}), ...(E.GOAT_FORMULA ? { goatFormula: E.GOAT_FORMULA } : {}), draftAges: [21, 24], /* real draftees are 21 to 23, many 24 (Football GM's default 21-22 is too young) */
       numGames: timeline(y => E.getRules(y).numGames),
       numGamesPlayoffSeries: timeline(y => E.getRules(y).numGamesPlayoffSeries),
       numPlayoffByes: timeline(y => E.getRules(y).numPlayoffByes),
       confs: timeline(y => E.getAlignment(y).confs),
       divs: timeline(y => E.getAlignment(y).divs),
-      numDraftRounds: rules.numDraftRounds, maxRosterSize: rules.maxRosterSize, minRosterSize: rules.minRosterSize, salaryCap: rules.salaryCap, salaryCapType: rules.salaryCapType, luxuryPayroll: rules.salaryCap * 3, inflationAvg: 7, inflationMax: 12, inflationMin: 3, inflationStd: 2,
+      numDraftRounds: rules.numDraftRounds, maxRosterSize: rules.maxRosterSize, minRosterSize: rules.minRosterSize, salaryCap: rules.salaryCap, salaryCapType: rules.salaryCapType, luxuryPayroll: rules.salaryCap * 3, inflationAvg: 4, inflationMax: 10, inflationMin: -6, inflationStd: 3,
       minPayroll: rules.minPayroll, minContract: rules.minContract, maxContract: rules.maxContract,
       leagueName: `NFL ${S}`
     });
@@ -1636,11 +1643,12 @@ const RATING_KEYS = ['hgt', 'stre', 'spd', 'endu', 'thv', 'thp', 'tha', 'bsc', '
     if (phaseName === 'playoffs' && master.playoffSeeds && master.playoffSeeds[S]) ga.nflRealSeeds = { season: S + 1, seeds: master.playoffSeeds[S] };
     // Starting at a later round: the real results up to it, and the real matchups of the round itself (1 = the final)
     if (phaseName === 'playoffs' && opts.playoffRound > 0 && ga.nflRealSeeds) { const ps = (master.playoffSeries || []).find(p => p.season === S), first = ps ? ps.series.length - opts.playoffRound : 0; if (first > 0) ga.nflStartBracket = { season: S + 1, round: first, series: ps.series.slice(0, first + 1) }; }
-    // Real jersey retirements after the start season, applied by the mod on schedule (Fitzgerald's #11, 2026); the
-    // game's own invented retirements are off.
-    ga.aiJerseyRetirement = false;
+    // Real jersey retirements after the start season, applied by the mod on schedule (Fitzgerald's #11, 2026). AI teams
+    // retire numbers of their own too, but the mod holds those back until the real data runs out (they used to be off
+    // for good, so nobody ever retired a number in the simulated future).
+    ga.aiJerseyRetirement = true;
     ga.nflRetiredNumbers = [];
-    for (const src of master.teams) for (const j of src.retiredJerseyNumbers || []) if (j.seasonRetired >= S) ga.nflRetiredNumbers.push(Object.assign({ tid: src.tid }, j));
+    for (const src of master.teams) for (const j of src.retiredJerseyNumbers || []) if (j.seasonRetired >= S) ga.nflRetiredNumbers.push(Object.assign({ tid: src.tid }, j, { score: REAL_JERSEY_SCORE }));
     if (opts.schedules) {
       ga.realSchedules = {};
       for (const [season, games] of Object.entries(opts.schedules)) {

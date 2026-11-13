@@ -3637,6 +3637,39 @@ index c1af3f439..42496a9aa 100644
  			if (texts) {
  				unretiredPids.push(scheduledEvent.info.pid);
  				eventLogTexts.push(...texts);
+diff --git a/src/worker/core/player/checkJerseyNumberRetirement.ts b/src/worker/core/player/checkJerseyNumberRetirement.ts
+index 0961543f6..6cf061091 100644
+--- a/src/worker/core/player/checkJerseyNumberRetirement.ts
++++ b/src/worker/core/player/checkJerseyNumberRetirement.ts
+@@ -6,9 +6,9 @@ import { g, logEvent, helpers } from "../../util/index.ts";
+ import { getThreshold } from "./madeHof.football.ts";
+ import { userControlsTeam } from "../../util/userControlsTeam.ts";
+ 
+-// Higher in basketball, because real player leagues have a lot
+-const MAX_RETIRED_JERSEY_NUMBERS_PER_AI_TEAM =
+-	__SPORT === "basketball" ? 30 : 12;
++// Higher in basketball, because real player leagues have a lot. NFL history mod: 30 in football too, since real
++// franchises already have up to 14 (the Bears), and at the limit the game drops a retired number to make room.
++const MAX_RETIRED_JERSEY_NUMBERS_PER_AI_TEAM = 30;
+ 
+ // Just the stats used here, so this works with a row from p.stats or a processed stats row. Missing stats (like in historical data, or a custom league file) are treated as 0
+ export const getValueStatsRow = (
+@@ -238,6 +238,15 @@ const checkJerseyNumberRetirement = async (p: Player) => {
+ 		return;
+ 	}
+ 
++	// NFL history mod: while the league replays real seasons, the real retirements come on schedule (Marino's #13 in
++	// 2000), so AI teams retire numbers of their own only once the real data runs out
++	if (
++		Object.hasOwn(g, "nflRealDataLastSeason") &&
++		g.get("season") <= (g as any).nflRealDataLastSeason
++	) {
++		return;
++	}
++
+ 	// Find team he played the most with
+ 	const scoresByTid = new Map<number, number>();
+ 
 diff --git a/src/worker/core/player/develop.ts b/src/worker/core/player/develop.ts
 index 324e001dd..ca6350452 100644
 --- a/src/worker/core/player/develop.ts

@@ -6,6 +6,14 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.24.0 · Nov 12, 2026
+
+**Start a new league to get this update.**
+
+- AI teams retire jersey numbers again.** Once a league moves past real history, computer teams retire numbers for their own legends. Real retired numbers are protected and can never be dropped, and each team can hold up to 30.
+- New GOAT Lab formula.** Built for the NFL and tested on every career since 1966, so the top 100 covers every position: Brady, Manning and Rice on top, plus linemen, corners, safeties, kickers and punters.
+- Salary cap grows more slowly.** About 4% a year on average instead of 7%, and some years it goes down, like the real cap did in 2011 and 2021.
+
 ## v1.23.2 · Nov 12, 2026
 
 **Start a new league to get this update.**
