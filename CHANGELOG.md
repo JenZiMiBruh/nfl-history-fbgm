@@ -6,6 +6,16 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.23.2 · Nov 12, 2026
+
+**Start a new league to get this update.**
+
+- Offseason trades fixed.** 21 trades from after mid-April (Myles Garrett to the Rams, A.J. Brown to the Patriots, Jonathan Greenard to the Eagles and more) now show as trades with news, instead of free agent signings.
+- Missed moves found.** 70 players whose names ESPN misspelled or listed at another position now get their real moves (Chidobe Awuzie, Trey Hendrickson, Bo Melton and more).
+- New MVP formula.** Made for the NFL and tested on every real season since 1970: quarterbacks win most years, a running back needs a 2,000-yard season and a defender about 30 sacks.
+- More NFL-like settings.** Draft prospects are 21 to 24, and young stars no longer walk away after their rookie deal (standing in for the fifth-year option and franchise tag).
+- Jessie Bates is no longer listed twice in his trade.
+
 ## v1.23.1 · Nov 12, 2026
 
 **Start a new league to get this fix.**
