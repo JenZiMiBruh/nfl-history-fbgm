@@ -96,7 +96,7 @@ Offline? Get the offline selector and the seasons file from the [Download page](
 Everything above, plus history that keeps happening: the real schedule every season, real drafts, careers that follow the real one, real retirements, comebacks and suspensions, with a setting for each.
 
 1. **Download** the mod from the [Download page](https://jenzimibruh.github.io/nfl-history-fbgm/download.html) and unzip it.
-2. **Double-click** `Install_and_Play.bat` (Mac or Linux: `install_and_play.sh`). The first run sets up in 5–10 minutes.
+2. **Double-click** `NFL History.exe` (Mac or Linux: `install_and_play.sh`). The first run sets up in 5–10 minutes; after that it starts in seconds. It can add itself to your Start menu and desktop, and it's safe to pin. If the app won't open, `Install_and_Play.bat` does the same in a terminal window.
 3. The game opens in your browser. In **New League**, the **NFL History** box lets you pick any season.
 4. **On your phone**, scan the QR code in the window, or open the address it shows, on the same Wi-Fi. If it won't load, see the [phone FAQ](#faq).
 
@@ -219,6 +219,7 @@ Here's what's known and not fixed yet. Seen something not on this list? [Report 
 
 | Issue | Where | Details |
 |---|---|---|
+| **Windows warns about NFL History.exe** | The mod (Windows) | The app isn't code-signed (signing costs money every year), so the first time Windows SmartScreen may say "Windows protected your PC". Click **More info**, then **Run anyway**. It's built from the source in the `app` folder of this repo. Rather not? `Install_and_Play.bat` does the same thing |
 | **The Browns' move needs the mod** | Regular Football GM | Football GM can't move a team without its history, so in a league from 1995 or earlier the Browns' players go to free agency and Baltimore holds an expansion draft. History stays right in Cleveland. [Why, and vote on it](#faq) |
 | **Arch Manning's family needs the mod** | Regular Football GM | His tie to Archie, Peyton and Eli runs through his father Cooper, who didn't play. The mod shows it on player pages; regular Football GM can't |
 | **Windows warns about the mod** | Installing the mod | The mod isn't signed with a paid certificate. Choose Keep if the browser warns, then More info → Run anyway on the blue screen |

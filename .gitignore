@@ -14,3 +14,8 @@ football-gm/
 # The site's own data (explorer, charts, and the master league for the built-in season selector)
 !site/data/
 !site/data/**
+
+# built by app/build_exe.bat (publish builds it fresh for the zip)
+/NFL History.exe
+/NFL History.exe.old
+.shortcuts-asked

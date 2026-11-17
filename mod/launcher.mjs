@@ -20,6 +20,30 @@ const LOG = path.join(DIR, 'install_log.txt');
 const MARKER = path.join(GAME, '.nfl-installed');
 const API = process.env.NFL_RELEASE_API || 'https://api.github.com/repos/JenZiMiBruh/nfl-history-fbgm/releases/latest';
 const WIN = process.platform === 'win32';
+// NFL History.exe runs this hidden (NFL_APP=1) and shows its own window: lines starting with @@ are for that window
+// (@@STEP n|text, @@READY local|phone, @@QR rows, @@FAIL text); everything else is shown there as progress text.
+const APP = !!process.env.NFL_APP;
+const RERUN = APP ? 'Open NFL History again' : 'Run Install_and_Play again';
+const app = (s) => { if (APP) console.log('@@' + s); };
+const step = (n, text) => { app(`STEP ${n}|${text}`); log(`step ${n}/5: ${text}`); };
+// Live Football alpha: channel.txt in this folder says "alpha" to run the newest live-alpha prerelease instead of the
+// latest release. The game's announcement switches it with one click (POST /channel), and "Back to the regular mod" undoes it.
+const CHANNEL_FILE = path.join(DIR, 'channel.txt');
+const RELEASES_API = 'https://api.github.com/repos/JenZiMiBruh/nfl-history-fbgm/releases?per_page=30';
+const channel = () => { try { return fs.readFileSync(CHANNEL_FILE, 'utf8').trim() === 'alpha' ? 'alpha' : 'stable'; } catch { return 'stable'; } };
+async function fetchRelease() {
+  const headers = { 'User-Agent': 'nfl-history-fbgm-launcher' };
+  if (channel() !== 'alpha' || process.env.NFL_RELEASE_API) {
+    const res = await fetch(API, { headers, signal: AbortSignal.timeout(8000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  }
+  const res = await fetch(RELEASES_API, { headers, signal: AbortSignal.timeout(8000) });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const rel = (await res.json()).find(r => r.prerelease && !r.draft && /^live-alpha/.test(r.tag_name));
+  if (!rel) throw new Error('no Live Football alpha is out yet');
+  return rel;
+}
 
 const readJson = (f) => JSON.parse(fs.readFileSync(f, 'utf8'));
 const log = (s) => fs.appendFileSync(LOG, `[${new Date().toISOString()}] ${s}\n`);
@@ -68,17 +92,21 @@ function heartbeat(version) {
   setInterval(ping, 4 * 60000);
 }
 
-async function checkForUpdate(current) {
+async function checkForUpdate(current, force = false) {
   let rel;
   try {
-    const res = await fetch(API, { headers: { 'User-Agent': 'nfl-history-fbgm-launcher' }, signal: AbortSignal.timeout(8000) });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    rel = await res.json();
+    rel = await fetchRelease();
   } catch (e) {
     say(`  (Couldn't check for updates: ${e.message}. Starting what's installed.)`);
+    if (force) throw e;
     return null;
   }
-  if (!newer(rel.tag_name, current)) { say(`  Up to date (v${current}).`); return null; }
+  // On the alpha channel any other alpha build is the update (alpha versions like 1.25.0-alpha.2 don't compare as numbers);
+  // a channel switch (force) always installs
+  const isAlpha = channel() === 'alpha';
+  const want = String(rel.tag_name).replace(/^v/, '').replace(/^live-alpha-/, '');
+  const differs = isAlpha ? want !== current : newer(rel.tag_name, current);
+  if (!force && !differs) { say(`  Up to date (v${current}).`); return null; }
   const asset = (rel.assets || []).find(a => a.name === 'NFL_History_Mod.zip');
   if (!asset) return null;
   say(`  Updating the mod: v${current} -> ${rel.tag_name}...`);
@@ -94,7 +122,23 @@ async function checkForUpdate(current) {
     try { run('tar', ['-xf', zip, '-C', out]); } catch { run('powershell', ['-NoProfile', '-Command', `Expand-Archive -LiteralPath '${zip}' -DestinationPath '${out}' -Force`]); }
   }
   else run('unzip', ['-q', '-o', zip, '-d', out]);
-  // Copy everything over this folder; football-gm/ and node/ are never in the zip, so they stay
+  // The app (NFL History.exe) is swapped on its own, never half-written: the new copy goes in as .new first, then a
+  // rename puts it in place. A running exe can't be overwritten but can be renamed, so the old one becomes .old
+  // (the app deletes that when it next starts). If anything fails, the old exe goes back.
+  const newExe = path.join(out, 'NFL History.exe');
+  if (WIN && fs.existsSync(newExe)) {
+    const exe = path.join(DIR, 'NFL History.exe');
+    try {
+      fs.copyFileSync(newExe, exe + '.new');
+      if (fs.existsSync(exe)) { fs.rmSync(exe + '.old', { force: true }); fs.renameSync(exe, exe + '.old'); }
+      fs.renameSync(exe + '.new', exe);
+    } catch (e) {
+      log('could not update the app: ' + e.message);
+      if (!fs.existsSync(exe) && fs.existsSync(exe + '.old')) try { fs.renameSync(exe + '.old', exe); } catch { /* the .bat still works */ }
+      fs.rmSync(exe + '.new', { force: true });
+    }
+    fs.rmSync(newExe, { force: true }); // already handled: keep it out of the copy below
+  }
   fs.cpSync(out, DIR, { recursive: true, force: true });
   fs.rmSync(tmp, { recursive: true, force: true });
   return rel;
@@ -149,6 +193,7 @@ async function ensureMaster() {
 
 function install(cfg) {
   if (!fs.existsSync(path.join(GAME, '.git'))) {
+    step(2, 'Downloading Football GM');
     say('Downloading Football GM source...');
     run('git', ['clone', 'https://github.com/zengm-games/zengm.git', GAME]);
   }
@@ -160,11 +205,13 @@ function install(cfg) {
   }
   run('git', ['checkout', '-q', '-f', cfg.base], { cwd: GAME });
   run('git', ['clean', '-q', '-fd', '-e', 'node_modules'], { cwd: GAME });
+  step(3, 'Applying the NFL History mod');
   say('Applying the NFL History mod...');
   run('git', ['apply', '--whitespace=nowarn', path.join(MOD, 'nfl-history-mod.patch')], { cwd: GAME });
   // The picker's script, the master file (any season, loaded on its own) and the week-by-week games (mid-season starts)
   fs.mkdirSync(path.join(GAME, 'public', 'football', 'nfl'), { recursive: true });
   fs.cpSync(path.join(MOD, 'public', 'nfl'), path.join(GAME, 'public', 'football', 'nfl'), { recursive: true, force: true });
+  step(4, 'Installing packages (the longest step)');
   say('Installing packages, the longest step...');
   try { run('corepack', ['enable'], { cwd: GAME, shell: true }); } catch { /* not needed when pnpm is reachable */ }
   run('corepack', ['pnpm', 'install'], { cwd: GAME, shell: true });
@@ -174,6 +221,7 @@ function install(cfg) {
 async function main() {
   console.log('\n  NFL History for Football GM\n  ---------------------------');
   let cfg = readJson(path.join(MOD, 'version.json'));
+  step(1, 'Checking for updates');
   // A failed update (a bad download, a full disk) never stops the game: it starts what's installed
   let rel = null;
   try { rel = await checkForUpdate(cfg.version); } catch (e) {
@@ -189,13 +237,18 @@ async function main() {
   }
   if (rel) showWhatsNew(rel);
   await ensureMaster();
+  step(5, 'Starting the game');
   if (process.env.NFL_NO_START) { say('INSTALL_OK v' + cfg.version); return; }
   await countStart(cfg.version);
   heartbeat(cfg.version);
 
   const ip = Object.values(os.networkInterfaces()).flat().find(a => a && a.family === 'IPv4' && !a.internal)?.address;
   say('\n  Ready. Opening http://localhost:3000');
-  if (ip) {
+  if (ip && APP) {
+    try { const { qrMatrix } = await import('./qr.mjs'); app('QR ' + qrMatrix(`http://${ip}:3000`).map(r => r.join('')).join(',')); } catch (e) { log(String(e)); }
+  }
+  app(`READY http://localhost:3000|${ip ? `http://${ip}:3000` : ''}`);
+  if (ip && !APP) {
     say(`  On your phone (same Wi-Fi): http://${ip}:3000`);
     // A QR code to scan instead of typing it. Never let a problem here stop the game from starting.
     try {
@@ -213,12 +266,16 @@ async function main() {
     say('    4. Still no? A VPN on either device can block it. Turn it off and try again.');
     say('  After a mod update, force stop Chrome on your phone so it loads the new version.');
   }
-  say('  Keep this window open while you play.\n');
-  setTimeout(() => openUrl('http://localhost:3000'), 4000);
+  if (!APP) {
+    say('  Keep this window open while you play.\n');
+    setTimeout(() => openUrl('http://localhost:3000'), 4000);
+  }
   let child;
   let updating = false;
   const startGame = () => {
-    child = spawn(WIN ? 'node.exe' : 'node', ['--run', 'dev', '--', '--host'], { cwd: GAME, stdio: 'inherit', env: { ...process.env, SPORT: 'football' } });
+    // In the app the game server's own output goes to the log instead of the window
+    const out = APP ? fs.openSync(LOG, 'a') : 'inherit';
+    child = spawn(WIN ? 'node.exe' : 'node', ['--run', 'dev', '--', '--host'], { cwd: GAME, stdio: APP ? ['ignore', out, out] : 'inherit', env: { ...process.env, SPORT: 'football' } });
     child.on('exit', (code) => { if (!updating) process.exit(code ?? 0); });
   };
   const stopGame = () => {
@@ -226,7 +283,7 @@ async function main() {
     else child.kill();
   };
   startGame();
-  // The game's Update now button, and its fan poll: only these two requests, and only from the game's own page
+  // The game's Update now button, the Live Football alpha switch, and its fan poll: only these requests, and only from the game's own page
   http.createServer(async (req, res) => {
     const origin = req.headers.origin || '';
     if (/:3000$/.test(origin)) res.setHeader('Access-Control-Allow-Origin', origin);
@@ -242,32 +299,48 @@ async function main() {
       res.end();
       return;
     }
-    if (req.method !== 'POST' || req.url !== '/update' || !/:3000$/.test(origin)) { res.writeHead(404); res.end(); return; }
+    // Live Football alpha: switch channel (alpha or stable) and install that build right away
+    const to = req.method === 'POST' && /:3000$/.test(origin) && /^\/channel\?/.test(req.url || '') ? new URLSearchParams(req.url.slice(9)).get('to') : undefined;
+    const isUpdate = req.method === 'POST' && req.url === '/update' && /:3000$/.test(origin);
+    if (!isUpdate && to !== 'alpha' && to !== 'stable') { res.writeHead(404); res.end(); return; }
     if (updating) { res.writeHead(409); res.end(); return; }
     updating = true;
+    const before = channel();
+    if (to) {
+      if (to === 'alpha') fs.writeFileSync(CHANNEL_FILE, 'alpha\n'); else fs.rmSync(CHANNEL_FILE, { force: true });
+      say(to === 'alpha' ? '\n  Switching to the Live Football alpha...' : '\n  Switching back to the regular mod...');
+    }
     res.writeHead(202); res.end('updating');
     // The game keeps running until the update is ready, so a failed download changes nothing
     try {
       const current = readJson(path.join(MOD, 'version.json'));
-      const update = await checkForUpdate(current.version);
+      const update = await checkForUpdate(current.version, !!to && to !== before);
       if (update) {
+        app('STEP 4|Installing the update');
         stopGame();
         install(readJson(path.join(MOD, 'version.json')));
         showWhatsNew(update);
         startGame();
+        app('STEP 5|Starting the game');
+        app('READY http://localhost:3000|');
       }
     } catch (e) {
       log(String(e && e.stack || e));
-      say('  (The update did not work: ' + e.message + '. Run Install_and_Play again to try once more.)');
+      // a channel switch that failed goes back to the channel it came from
+      if (to) { if (before === 'alpha') fs.writeFileSync(CHANNEL_FILE, 'alpha\n'); else fs.rmSync(CHANNEL_FILE, { force: true }); }
+      say('  (The update did not work: ' + e.message + '. ' + RERUN + ' to try once more.)');
+      app('UPDATE_FAILED ' + e.message);
       if (child.exitCode !== null) startGame();
     }
     updating = false;
+    app('IDLE'); // the app goes back to its "running" screen (an update that found nothing new ends here too)
   }).listen(3099).on('error', (e) => log('update button unavailable: ' + e.message));
 }
 
 main().catch((e) => {
   log(String(e && e.stack || e));
-  console.log('\nSomething went wrong. Run Install_and_Play again first (it picks up where it stopped).');
+  app('FAIL ' + (e && e.message || e));
+  console.log('\nSomething went wrong. ' + RERUN + ' first (it picks up where it stopped).');
   console.log('If it still fails, open an issue on GitHub and attach install_log.txt from this folder:');
   console.log('  https://github.com/JenZiMiBruh/nfl-history-fbgm/issues');
   process.exit(1);

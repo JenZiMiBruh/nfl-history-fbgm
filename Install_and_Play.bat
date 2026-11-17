@@ -2,6 +2,12 @@
 setlocal
 title NFL History for Football GM
 cd /d "%~dp0"
+rem NFL History.exe does everything below without a terminal window, so open it when it's here (old shortcuts to this
+rem file land here too). Fallback if the app won't open: run  Install_and_Play.bat --terminal
+if exist "%~dp0NFL History.exe" if /i not "%~1"=="--terminal" (
+  start "" "%~dp0NFL History.exe"
+  exit /b
+)
 rem Gets a private Node 24 (Football GM needs exactly 24; newer versions dropped corepack) and Git, then hands over to
 rem mod\launcher.mjs, which updates the mod automatically, sets up Football GM and starts the game.
 set "NODEVER=v24.22.2"
