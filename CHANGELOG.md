@@ -6,6 +6,13 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.26.0 · Nov 16, 2026
+
+**Start a new league to get this update.**
+
+- NFL History now has its own app: open NFL History.exe in your mod folder (your old Install_and_Play shortcut opens it too). Windows may warn the first time because the app isn't code-signed: click More info, then Run anyway.
+- The Live Football alpha is out: a card in the game switches you to it in one click, and the bar at the bottom brings you back to the regular mod any time.
+
 ## v1.25.0 · Nov 12, 2026
 
 **Start a new league to get this update.**

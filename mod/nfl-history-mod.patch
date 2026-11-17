@@ -162,14 +162,468 @@ index 8d10a9884..3c9572ac6 100644
  					/>
  					<div>
  						{t.season !== undefined ? `${t.season} ` : null}
+diff --git a/src/ui/components/Controller/NflLiveAlpha.tsx b/src/ui/components/Controller/NflLiveAlpha.tsx
+new file mode 100644
+index 000000000..b5b93fd29
+--- /dev/null
++++ b/src/ui/components/Controller/NflLiveAlpha.tsx
+@@ -0,0 +1,447 @@
++import { useEffect, useRef, useState } from "react";
++import { Modal } from "react-bootstrap";
++
++// NFL history mod: the Live Football alpha announcement. On the regular mod it opens once (a big card with a short
++// confetti burst) and offers a one-click switch: the launcher downloads the alpha build and restarts the game, and
++// leagues stay where they are (same browser storage). On the alpha build it shows a small bar instead, with a way back.
++// It only appears while the site's live-alpha.json says the alpha is out, so it can be turned on or off without a release.
++const CONFIG =
++	"https://jenzimibruh.github.io/nfl-history-fbgm/data/live-alpha.json";
++const HERO =
++	"https://jenzimibruh.github.io/nfl-history-fbgm/assets/live/field.jpg";
++const SEEN_KEY = "nflLiveAlphaSeen";
++// set just before NFL History reopens itself as the new app, so the switch carries on by itself afterwards
++const REOPEN_KEY = "nflLiveAlphaAfterReopen";
++const LATER_KEY = "nflLiveAlphaLater";
++const LATER_DAYS = 3;
++const ISSUES =
++	"https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new/choose";
++
++type Config = {
++	active?: boolean;
++	// the GitHub release page, for people the one-click switch can't reach (an old launcher, an odd network)
++	release?: string;
++	trailer?: string;
++};
++
++const store = {
++	get: (k: string) => {
++		try {
++			return localStorage.getItem(k);
++		} catch {
++			return null;
++		}
++	},
++	set: (k: string, v: string) => {
++		try {
++			localStorage.setItem(k, v);
++		} catch {}
++	},
++};
++
++// A short burst, then it stops: celebration, not a screensaver. Skipped with reduced motion.
++const Burst = () => {
++	const ref = useRef<HTMLCanvasElement>(null);
++	useEffect(() => {
++		const canvas = ref.current;
++		if (
++			!canvas ||
++			window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
++		) {
++			return;
++		}
++		const ctx = canvas.getContext("2d");
++		if (!ctx) {
++			return;
++		}
++		const dpr = Math.min(window.devicePixelRatio || 1, 2);
++		const w = canvas.clientWidth;
++		const h = canvas.clientHeight;
++		canvas.width = w * dpr;
++		canvas.height = h * dpr;
++		ctx.scale(dpr, dpr);
++		const colors = ["#ffb81c", "#ffffff", "#2c8a54", "#d50a0a", "#013369"];
++		const bits = Array.from({ length: 140 }, (_, i) => {
++			const fromLeft = i % 2 === 0;
++			const angle =
++				(fromLeft ? -1 : -Math.PI + 1) + (Math.random() - 0.5) * 0.9;
++			const speed = 7 + Math.random() * 7;
++			return {
++				x: fromLeft ? 0 : w,
++				y: h * 0.75,
++				vx: Math.cos(angle) * speed,
++				vy: Math.sin(angle) * speed - 3,
++				r: Math.random() * Math.PI,
++				vr: (Math.random() - 0.5) * 0.4,
++				s: 5 + Math.random() * 5,
++				c: colors[i % colors.length]!,
++			};
++		});
++		let frame = 0;
++		let raf = 0;
++		const tick = () => {
++			frame += 1;
++			ctx.clearRect(0, 0, w, h);
++			const fade = Math.max(0, 1 - Math.max(0, frame - 90) / 60);
++			ctx.globalAlpha = fade;
++			for (const b of bits) {
++				b.vy += 0.22;
++				b.vx *= 0.99;
++				b.x += b.vx;
++				b.y += b.vy;
++				b.r += b.vr;
++				ctx.save();
++				ctx.translate(b.x, b.y);
++				ctx.rotate(b.r);
++				ctx.fillStyle = b.c;
++				ctx.fillRect(-b.s / 2, -b.s / 4, b.s, b.s / 2);
++				ctx.restore();
++			}
++			if (fade > 0) {
++				raf = requestAnimationFrame(tick);
++			}
++		};
++		raf = requestAnimationFrame(tick);
++		return () => cancelAnimationFrame(raf);
++	}, []);
++	return (
++		<canvas
++			ref={ref}
++			aria-hidden="true"
++			style={{
++				position: "absolute",
++				inset: 0,
++				width: "100%",
++				height: "100%",
++				pointerEvents: "none",
++				zIndex: 2,
++			}}
++		/>
++	);
++};
++
++// Ask the launcher to switch, then wait for the game to come back on the other build and reload
++const useSwitch = (to: "alpha" | "stable") => {
++	const [status, setStatus] = useState<
++		"idle" | "working" | "reopening" | "failed"
++	>("idle");
++	const go = async () => {
++		setStatus("working");
++		const ok = await fetch(
++			`http://${location.hostname}:3099/channel?to=${to}`,
++			{
++				method: "POST",
++			},
++		)
++			.then((r) => r.ok)
++			.catch(() => false);
++		if (!ok) {
++			// An older launcher (players who updated from v1.25.0 or before) can't switch. The update brought the new
++			// app, NFL History.exe: the game's server reopens it, and the switch carries on once it's back.
++			const reopening =
++				to === "alpha" &&
++				(await fetch("/nfl-reopen", { method: "POST" })
++					.then((r) => r.status === 202)
++					.catch(() => false));
++			if (!reopening) {
++				setStatus("failed");
++				return;
++			}
++			store.set(REOPEN_KEY, "1");
++			setStatus("reopening");
++			let wentDown = false;
++			const since = Date.now();
++			const wait = setInterval(async () => {
++				const up = await fetch("/nfl/version.json", { cache: "no-store" })
++					.then((r) => r.ok)
++					.catch(() => false);
++				if (!up) {
++					wentDown = true;
++				} else if (wentDown) {
++					clearInterval(wait);
++					location.reload();
++				}
++				if (Date.now() - since > 5 * 60 * 1000) {
++					clearInterval(wait);
++					store.set(REOPEN_KEY, "");
++					setStatus("failed");
++				}
++			}, 2000);
++			return;
++		}
++		const started = Date.now();
++		const timer = setInterval(async () => {
++			try {
++				const v = await fetch("/nfl/version.json", { cache: "no-store" }).then(
++					(r) => r.json(),
++				);
++				const onAlpha = String(v.version).includes("alpha");
++				if (onAlpha === (to === "alpha")) {
++					clearInterval(timer);
++					location.reload();
++				}
++			} catch {
++				// restarting
++			}
++			if (Date.now() - started > 20 * 60 * 1000) {
++				clearInterval(timer);
++				setStatus("failed");
++			}
++		}, 4000);
++	};
++	return { status, go };
++};
++
++const AlphaBar = () => {
++	const back = useSwitch("stable");
++	return (
++		<div
++			className="d-flex flex-wrap align-items-center gap-2 small px-3 py-2 mx-3 mb-3 rounded"
++			style={{
++				background: "#0a0e14",
++				color: "#fff",
++				borderLeft: "4px solid #ffb81c",
++			}}
++		>
++			<b style={{ color: "#ffb81c" }}>LIVE FOOTBALL ALPHA</b>
++			<span className="opacity-75">
++				Thanks for testing! Found something off?
++			</span>
++			<a
++				href={ISSUES}
++				target="_blank"
++				rel="noopener noreferrer"
++				style={{ color: "#ffb81c" }}
++			>
++				Report a bug
++			</a>
++			<span className="opacity-50">·</span>
++			{back.status === "working" ? (
++				<span>Switching back... the game restarts by itself.</span>
++			) : back.status === "failed" ? (
++				<span>
++					Couldn't switch from here: delete channel.txt in the mod folder, then
++					run Install_and_Play.
++				</span>
++			) : (
++				<button
++					type="button"
++					className="btn btn-link btn-sm p-0"
++					style={{ color: "#fff" }}
++					onClick={back.go}
++				>
++					Back to the regular mod
++				</button>
++			)}
++		</div>
++	);
++};
++
++export const NflLiveAlpha = ({ version }: { version: string }) => {
++	const onAlpha = version.includes("alpha");
++	const [config, setConfig] = useState<Config>();
++	const [show, setShow] = useState(false);
++	const [dismissed, setDismissed] = useState(false);
++	const sw = useSwitch("alpha");
++
++	// Back after reopening as the new app: carry on with the switch
++	useEffect(() => {
++		if (!onAlpha && store.get(REOPEN_KEY)) {
++			store.set(REOPEN_KEY, "");
++			setShow(true);
++			sw.go();
++		}
++		// eslint-disable-next-line react-hooks/exhaustive-deps
++	}, []);
++
++	useEffect(() => {
++		if (onAlpha) {
++			return;
++		}
++		fetch(CONFIG, { cache: "no-cache" })
++			.then((r) => (r.ok ? r.json() : undefined))
++			.then((c: Config | undefined) => {
++				if (!c?.active) {
++					return;
++				}
++				setConfig(c);
++				const later = Number(store.get(LATER_KEY) || 0);
++				if (!store.get(SEEN_KEY) && Date.now() > later) {
++					setShow(true);
++				}
++			})
++			.catch(() => {});
++	}, [onAlpha]);
++
++	if (onAlpha) {
++		return <AlphaBar />;
++	}
++	if (!config) {
++		return null;
++	}
++
++	const close = (forever: boolean) => {
++		if (forever) {
++			store.set(SEEN_KEY, "1");
++		} else {
++			store.set(LATER_KEY, String(Date.now() + LATER_DAYS * 864e5));
++		}
++		setShow(false);
++		setDismissed(true);
++	};
++
++	return (
++		<>
++			{/* After closing the card, a small always-there way in */}
++			{dismissed || !show ? (
++				<div className="px-3 pb-3">
++					<button
++						type="button"
++						className="btn btn-sm fw-bold"
++						style={{ background: "#ffb81c", color: "#0a0e14" }}
++						onClick={() => setShow(true)}
++					>
++						🏈 Try the Live Football alpha
++					</button>
++				</div>
++			) : null}
++			<Modal
++				show={show}
++				onHide={() => close(false)}
++				centered
++				size="lg"
++				contentClassName="overflow-hidden border-0"
++			>
++				<div
++					style={{ position: "relative", background: "#0a0e14", color: "#fff" }}
++				>
++					{show ? <Burst /> : null}
++					<button
++						type="button"
++						className="btn-close btn-close-white"
++						aria-label="Close"
++						onClick={() => close(false)}
++						style={{ position: "absolute", top: 14, right: 14, zIndex: 3 }}
++					/>
++					<div
++						style={{
++							height: 210,
++							background: `linear-gradient(180deg, rgba(10,14,20,0) 35%, #0a0e14 100%), url(${HERO}) center/cover`,
++						}}
++					/>
++					<div
++						className="px-4 pb-4"
++						style={{ marginTop: -54, position: "relative", zIndex: 1 }}
++					>
++						<span
++							className="badge mb-2"
++							style={{
++								background: "#ffb81c",
++								color: "#0a0e14",
++								letterSpacing: 1.5,
++							}}
++						>
++							NEW · ALPHA
++						</span>
++						<h2
++							className="fw-bold mb-2"
++							style={{
++								fontSize: "clamp(28px, 6vw, 44px)",
++								lineHeight: 1.05,
++								textTransform: "uppercase",
++							}}
++						>
++							Live Football is here
++						</h2>
++						<p className="mb-3 opacity-75" style={{ fontSize: 17 }}>
++							Stop just simming. Watch any game in your league play out on the
++							field, with a TV-style broadcast around it.
++						</p>
++						<ul className="mb-4 ps-3" style={{ lineHeight: 1.7 }}>
++							<li>
++								<b>Watch any game</b> in a 3D broadcast view, an overhead view,
++								or classic 2D
++							</li>
++							<li>
++								<b>The full TV show:</b> game open, pregame, score bugs, replays
++								and big-play graphics
++							</li>
++							<li>
++								<b>Also new:</b> the league calendar and championship banners
++							</li>
++						</ul>
++						{sw.status === "reopening" ? (
++							<div className="alert alert-warning mb-0">
++								<b>NFL History is now its own app.</b> It's reopening as{" "}
++								<b>NFL History.exe</b> (in your mod folder; your old shortcut opens
++								it too). This page reloads when it's back and carries on to the
++								alpha by itself. About a minute.
++							</div>
++						) : sw.status === "working" ? (
++							<div className="alert alert-warning mb-0">
++								<b>Switching to the alpha...</b> This takes a few minutes the
++								first time. The game restarts by itself and this page reloads
++								when it's ready. Your leagues stay right where they are.
++							</div>
++						) : sw.status === "failed" ? (
++							<div className="alert alert-light mb-0">
++								<div className="fw-bold mb-1">One more step: restart NFL History.</div>
++								<div className="mb-2">
++									Close NFL History completely, open it again, and click{" "}
++									<b>Play the alpha now</b> once more. Your leagues stay right
++									where they are.
++								</div>
++								<div className="small text-body-secondary">
++									Still stuck?{" "}
++									<a
++										href={
++											config.release ??
++											"https://github.com/JenZiMiBruh/nfl-history-fbgm/releases"
++										}
++										target="_blank"
++										rel="noopener noreferrer"
++									>
++										Download the alpha
++									</a>{" "}
++									and unzip it into its own folder.
++								</div>
++							</div>
++						) : (
++							<div className="d-flex flex-wrap align-items-center gap-2">
++								<button
++									type="button"
++									className="btn btn-lg fw-bold px-4"
++									style={{ background: "#ffb81c", color: "#0a0e14" }}
++									onClick={sw.go}
++								>
++									Play the alpha now
++								</button>
++								{config.trailer ? (
++									<a
++										className="btn btn-lg btn-outline-light"
++										href={config.trailer}
++										target="_blank"
++										rel="noopener noreferrer"
++									>
++										Watch the trailer
++									</a>
++								) : null}
++								<button
++									type="button"
++									className="btn btn-link text-white-50 ms-auto"
++									onClick={() => close(true)}
++								>
++									No thanks
++								</button>
++							</div>
++						)}
++						<p className="small opacity-50 mt-3 mb-0">
++							It's an alpha: expect rough edges. You can go back to the regular
++							mod any time from the bar at the bottom of the page.
++						</p>
++					</div>
++				</div>
++			</Modal>
++		</>
++	);
++};
 diff --git a/src/ui/components/Controller/NflWhatsNew.tsx b/src/ui/components/Controller/NflWhatsNew.tsx
 new file mode 100644
-index 000000000..67190e37a
+index 000000000..7828df0a3
 --- /dev/null
 +++ b/src/ui/components/Controller/NflWhatsNew.tsx
-@@ -0,0 +1,343 @@
+@@ -0,0 +1,346 @@
 +import { useEffect, useState, type ReactNode } from "react";
 +import { Modal } from "react-bootstrap";
++import { NflLiveAlpha } from "./NflLiveAlpha.tsx";
 +
 +// NFL history mod: the mod's version in the corner, its changelog in the game, and a pop up the first time a new version
 +// is opened. The launcher copies version.json and CHANGELOG.md next to the mod's other files.
@@ -447,7 +901,8 @@ index 000000000..67190e37a
 +				fetch(RELEASES)
 +					.then((r) => r.json())
 +					.then((rel) => {
-+						if (rel.tag_name && isNewer(rel.tag_name, v.version)) {
++						// (the Live Football alpha updates through its own channel: no regular update pill there)
++						if (rel.tag_name && !String(v.version).includes("alpha") && isNewer(rel.tag_name, v.version)) {
 +							setLatest(rel.tag_name);
 +						}
 +					})
@@ -486,6 +941,7 @@ index 000000000..67190e37a
 +				</div>
 +			) : null}
 +			</div>
++			<NflLiveAlpha version={version} />
 +			<Modal show={show !== undefined} onHide={() => setShow(undefined)} size="lg" scrollable>
 +				<Modal.Header closeButton>
 +					<Modal.Title>
@@ -4565,10 +5021,17 @@ index 146046dd5..e328d14a4 100644
  
  type GameAttributeKey = (typeof gameAttributeKeys)[number];
 diff --git a/tools/lib/server.ts b/tools/lib/server.ts
-index dd727b3c3..9ae2ee159 100644
+index dd727b3c3..4f261df02 100644
 --- a/tools/lib/server.ts
 +++ b/tools/lib/server.ts
-@@ -115,6 +115,7 @@ const PREFIXES_STATIC = [
+@@ -1,4 +1,5 @@
+-import { createReadStream } from "node:fs";
++import { createReadStream, existsSync } from "node:fs";
++import { spawn } from "node:child_process";
+ import http from "node:http";
+ import path from "node:path";
+ import os from "node:os";
+@@ -115,6 +116,7 @@ const PREFIXES_STATIC = [
  	"/gen/",
  	"/ico/",
  	"/img/",
@@ -4576,6 +5039,40 @@ index dd727b3c3..9ae2ee159 100644
  	"/manifest",
  
  	// Not worth the confusion unless the service worker is being worked on
+@@ -183,6 +185,33 @@ export const startServer = async ({
+ 
+ 		const { pathname } = new URL(req.url!, localUrl);
+ 
++		// NFL history mod: reopen as the NFL History app. Players updating from v1.25.0 or older are still run by
++		// their old launcher, which can't switch to the Live Football alpha. This starts NFL History.exe (the new
++		// app and launcher, in the mod folder above the game) a few seconds from now, then ends this server; the old
++		// launcher closes when the game stops, so the app finds the ports free. Only from the game's own page.
++		if (pathname === "/nfl-reopen" && req.method === "POST") {
++			const origin = req.headers.origin ?? "";
++			const exe = path.join(process.cwd(), "..", "NFL History.exe");
++			if (
++				process.platform !== "win32" ||
++				!/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
++				!existsSync(exe)
++			) {
++				res.writeHead(404);
++				res.end();
++				return;
++			}
++			res.writeHead(202);
++			res.end("reopening");
++			spawn("cmd", ["/c", `ping -n 5 127.0.0.1 >nul & start "" "${exe}"`], {
++				detached: true,
++				stdio: "ignore",
++				windowsHide: true,
++			}).unref();
++			setTimeout(() => process.exit(0), 500);
++			return;
++		}
++
+ 		if (PREFIXES_STATIC.some((prefix) => pathname.startsWith(prefix))) {
+ 			showStatic(pathname, res);
+ 		} else {
 diff --git a/tools/native/RecordStore.js b/tools/native/RecordStore.js
 new file mode 100644
 index 000000000..4293303cd
