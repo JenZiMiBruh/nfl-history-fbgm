@@ -1,21 +1,22 @@
-<p align="center"><img src="assets/banner.png" alt="NFL History for Football GM: every season from 1966 to today" width="100%"></p>
+<p align="center"><img src="assets/live/banner.svg" alt="Live Football alpha: you've read the box score, now watch it" width="100%"></p>
 
 <p align="center">
-  <a href="https://jenzimibruh.github.io/nfl-history-fbgm/download.html"><img src="https://img.shields.io/github/v/release/JenZiMiBruh/nfl-history-fbgm?style=for-the-badge&label=latest&color=ffb81c&labelColor=0a0e14" alt="Latest release"></a>
-  <img src="https://img.shields.io/badge/seasons-1966%E2%80%932027-2c8a54?style=for-the-badge&labelColor=0a0e14" alt="Seasons 1966 to 2027">
-  <img src="https://img.shields.io/badge/real%20players-28%2C700%2B-2c8a54?style=for-the-badge&labelColor=0a0e14" alt="28,700+ real players">
-  <img src="https://img.shields.io/github/downloads/JenZiMiBruh/nfl-history-fbgm/total?style=for-the-badge&label=downloads&color=ffb81c&labelColor=0a0e14" alt="Total downloads">
+  <img src="https://img.shields.io/badge/status-alpha-ffb81c?style=for-the-badge&labelColor=0a0e14" alt="Status: alpha">
+  <img src="https://img.shields.io/badge/views-3D%20%C2%B7%20blimp%20%C2%B7%202D-2c8a54?style=for-the-badge&labelColor=0a0e14" alt="Views: 3D, blimp, 2D">
+  <img src="https://img.shields.io/badge/runs%20on-PC%20%26%20phones-2c8a54?style=for-the-badge&labelColor=0a0e14" alt="Runs on PC and phones">
+  <img src="https://img.shields.io/badge/built%20on-NFL%20History%20v1.26-ffb81c?style=for-the-badge&labelColor=0a0e14" alt="Built on NFL History v1.26">
+  <img src="https://img.shields.io/github/downloads/JenZiMiBruh/nfl-history-fbgm/live-alpha-2/total?style=for-the-badge&label=alpha%20downloads&color=ffb81c&labelColor=0a0e14" alt="Alpha downloads">
 </p>
 
 <h3 align="center">
-  <a href="https://jenzimibruh.github.io/nfl-history-fbgm/download.html">⬇️ Download</a> &nbsp;·&nbsp;
-  <a href="https://jenzimibruh.github.io/nfl-history-fbgm/">🌐 The site</a> &nbsp;·&nbsp;
-  <a href="https://jenzimibruh.github.io/nfl-history-fbgm/updates.html#vote">🗳️ Vote on what's next</a> &nbsp;·&nbsp;
-  <a href="CHANGELOG.md">🆕 What's new</a> &nbsp;·&nbsp;
-  <a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new/choose">🐞 Report a bug</a>
+  <a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/tag/live-alpha-2">⬇️ Download the alpha</a> &nbsp;·&nbsp;
+  <a href="https://jenzimibruh.github.io/nfl-history-fbgm/live.html">🌐 Live on the site</a> &nbsp;·&nbsp;
+  <a href="#-known-issues">🧪 Known issues</a> &nbsp;·&nbsp;
+  <a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new/choose">🐞 Report a bug</a> &nbsp;·&nbsp;
+  <a href="https://github.com/JenZiMiBruh/nfl-history-fbgm">🏠 The main mod</a>
 </h3>
 
-<p align="center"><b>Every NFL season since 1966 for <a href="https://football-gm.com">Football GM</a>.</b> Real players with ratings built from their real careers, real schedules and drafts, every logo and jersey switching on the real date, and the things that really happened: moves, expansions, retirements, comebacks and suspensions.</p>
+<p align="center"><b>Every game in your Football GM league, played out on the field.</b> Football GM's own sim still calls every play. Live Football acts it out, snap by snap, with a TV broadcast around it: the open, the pregame, score bugs, replays and the big-play graphics.</p>
 
 ---
 
@@ -23,305 +24,132 @@
 
 <p align="center"><a href="https://youtu.be/osboZgSy4L8"><img src="https://img.youtube.com/vi/osboZgSy4L8/maxresdefault.jpg" alt="NFL History: Official Trailer" width="100%"></a></p>
 
-<p align="center"><b><a href="https://youtu.be/osboZgSy4L8">▶ Watch the trailer</a></b> · Premieres Thursday, Nov. 12 at 12:00 PM ET</p>
+<p align="center"><b><a href="https://youtu.be/osboZgSy4L8">▶ Watch the trailer</a></b></p>
 
 ---
 
-## Pick how you play
+## Pick how you watch
 
 <table>
 <tr>
 <td width="33%" valign="top">
-<h3>⚡ This season</h3>
-The real 2026 season as of the latest week, with all of history behind it.<br><br>
-✅ Regular Football GM<br>✅ Phone or computer<br>⏱️ 2 minutes<br><br>
-<a href="#-this-season"><b>How →</b></a>
+<h3>📺 Broadcast</h3>
+The full 3D view: a stadium, the crowd, lights and weather, and broadcast cameras following the ball.<br><br>
+✅ The whole show<br>💻 Best on a computer
 </td>
 <td width="33%" valign="top">
-<h3>📅 Any season</h3>
-Start in 1985, 2007, any year from 1967: preseason, any week, the playoffs or draft day.<br><br>
-✅ Regular Football GM<br>✅ Built in your browser<br>⏱️ 5 minutes<br><br>
-<a href="#-any-season"><b>How →</b></a>
+<h3>🛰️ Blimp</h3>
+The overhead view, straight down on the field. Every route and every block, easy to follow.<br><br>
+✅ Lightest to run<br>📱 Best on phones
 </td>
 <td width="33%" valign="top">
-<h3>🏈 The mod</h3>
-History keeps happening after day one: real schedules, drafts, careers and events.<br><br>
-✅ Every season built in<br>✅ Updates itself<br>⏱️ 10 minutes, once<br><br>
-<a href="#-the-mod"><b>How →</b></a>
+<h3>📋 Classic</h3>
+The flat 2D field. Quick, clean, and the fastest way to get through a game.<br><br>
+✅ Any device<br>⚡ Fastest
 </td>
 </tr>
 </table>
 
-<p align="center"><a href="https://jenzimibruh.github.io/nfl-history-fbgm/download.html"><img src="assets/shots/download.png" alt="The Download page: this season, pick a year, or the mod" width="88%"></a></p>
+## What's in the alpha
 
-## Why this exists
+<table>
+<tr>
+<td width="50%" valign="top">
+<img src="assets/live/td.jpg" alt="A touchdown on the field" width="100%">
+<h3>🏈 Every snap</h3>
+Your real game, play by play: runs, passes, sacks, picks, punts, kicks and returns, each acted out to land exactly where the sim says.
+</td>
+<td width="50%" valign="top">
+<img src="assets/live/tale.jpg" alt="The pregame tale of the tape" width="100%">
+<h3>🎙️ The whole show</h3>
+A game open, a pregame with the tale of the tape, lineups and leaders, replays, flags, and graphics for the big moments.
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+<img src="assets/live/snow.jpg" alt="A snow game" width="100%">
+<h3>🌨️ Real conditions</h3>
+Afternoon light, night games, rain and snow.
+</td>
+<td width="50%" valign="top">
+<img src="assets/live/boards.jpg" alt="The stadium video boards" width="100%">
+<h3>🏟️ The stadium</h3>
+A full bowl with the crowd, video boards and light towers, and benches, coaches and camera crews on the sidelines.
+</td>
+</tr>
+</table>
 
-I've played Football GM since 2020. Basketball GM is what got me into NBA history and stats: real players, real ratings, portraits, logos and jersey history going back decades. You can start in 1985 and see if you'd have drafted Jordan.
+| | |
+|---|---|
+| 📊 **Score bugs** | Several original broadcast looks, plus Thanksgiving and Christmas versions |
+| 🔁 **Replays** | The big plays again, after you've seen them |
+| 🚩 **Flags** | The flag on the play, and the referee's call |
+| 🗓️ **League calendar** | Every game's date and kickoff time, for the league and for your team |
+| 🏆 **Championship banners** | A banner for every title on the team history page. Tap one to see it up close |
+| 🎚️ **A switch for everything** | Each broadcast and field effect can be turned off in the Live view's settings |
+| 🌍 **Any league** | NFL History leagues and random-player leagues alike |
 
-Football GM didn't have any of that, so I built it. — **JenZiMiBruh**
+Everything else is the regular [NFL History mod](https://github.com/JenZiMiBruh/nfl-history-fbgm): every season since 1966, 28,700+ real players, and logos and jerseys by era.
 
 ## How to play
 
-### ⚡ This season
+1. **Already have NFL History?** Open it and click **Play the alpha now** on the announcement card. It switches by itself, and your leagues stay where they are.
+2. **New here?** [Download the alpha](https://github.com/JenZiMiBruh/nfl-history-fbgm/releases/tag/live-alpha-2) (`NFL_History_Mod.zip`), unzip it, and double-click `NFL History.exe` (Mac or Linux: `install_and_play.sh`). The first run sets up in 5–10 minutes.
+3. The game opens in your browser. Start or open a football league, and **watch any game** from the schedule.
+4. **On your phone**, scan the QR code in the window, or open the address it shows, on the same Wi-Fi. The blimp view is the smoothest there.
 
-The real 2026 season as of the latest week: standings, stats, rosters and injuries, with all of NFL history since 1966 behind it. Updated every week of the season.
-
-1. **Download** this season from the [Download page](https://jenzimibruh.github.io/nfl-history-fbgm/download.html). Don't unzip it. Older or low-memory phone? Get the phone-friendly version there (13 MB).
-2. **Open** [play.football-gm.com](https://play.football-gm.com) and tap **New League**.
-3. In the **Customize** box, change **Default** to **Upload league file** and choose the file.
-4. **Pick your team** and tap **Create league**.
-
-<details><summary>Show me every screen</summary>
-
-<p align="center"><img src="assets/guide/today.png" alt="This season, step by step" width="100%"></p>
-</details>
-
-### 📅 Any season
-
-Any season from 1967 on, at any start point: **preseason**, **any week** (real results already played), **the playoffs**, **after the playoffs** (real champion and awards) or **draft day** (real draft order).
-
-1. **Open** [Build a league](https://jenzimibruh.github.io/nfl-history-fbgm/build.html) and tap **Load NFL history**.
-2. **Pick** a season, a start point and the real events you want, then **Generate & download**.
-3. **Upload** it in Football GM, same as above.
-
-Offline? Get the offline selector and the seasons file from the [Download page](https://jenzimibruh.github.io/nfl-history-fbgm/download.html) and drop the seasons file on the selector.
-
-<details><summary>Show me every screen</summary>
-
-<p align="center"><img src="assets/guide/season.png" alt="Any season, step by step" width="100%"></p>
-</details>
-
-### 🏈 The mod
-
-Everything above, plus history that keeps happening: the real schedule every season, real drafts, careers that follow the real one, real retirements, comebacks and suspensions, with a setting for each.
-
-1. **Download** the mod from the [Download page](https://jenzimibruh.github.io/nfl-history-fbgm/download.html) and unzip it.
-2. **Double-click** `NFL History.exe` (Mac or Linux: `install_and_play.sh`). The first run sets up in 5–10 minutes; after that it starts in seconds. It can add itself to your Start menu and desktop, and it's safe to pin. If the app won't open, `Install_and_Play.bat` does the same in a terminal window.
-3. The game opens in your browser. In **New League**, the **NFL History** box lets you pick any season.
-4. **On your phone**, scan the QR code in the window, or open the address it shows, on the same Wi-Fi. If it won't load, see the [phone FAQ](#faq).
-
-The mod checks for updates every time you start it and shows what's new.
-
-<details><summary>Show me every screen</summary>
-
-<p align="center"><img src="assets/guide/mod.png" alt="The mod, step by step" width="100%"></p>
-</details>
-
-> Seasons are named the way Basketball GM names them, by the year they end: 2008 is the 2007 season.
+> Want to go back? Click **Back to the regular mod** in the bar at the bottom of any page. The game switches over by itself.
 
 ## Things to try
 
 | | |
 |---|---|
-| 🏆 **Go 19-0** | Start in 2007 with the Patriots. Same roster, same schedule. Finish what they couldn't. |
-| 🦁 **Keep Barry Sanders** | Start in 1999 and talk him out of retiring. How many yards does he end with? |
-| 🐻 **Run it back with the '85 Bears** | Can Ditka's defense win more than one ring? |
-| 🏈 **Draft Arch Manning** | Start today and sim to April. The real 2027 class is waiting. |
-| 🔁 **Rewrite a relocation** | Keep the Oilers in Houston or the Browns in Cleveland, and see who becomes a dynasty. |
-| 📈 **Turn history off** | Set Real Player Determinism to 0 and watch 60 years of football go sideways. |
+| 🏆 **Watch 19-0** | Start in 2007 with the Patriots and watch every game of the run. |
+| ❄️ **A December game in the snow** | Sim to late in a season and watch a cold-weather game at night. |
+| 🦃 **Thanksgiving football** | Watch a Thanksgiving game and catch the holiday score bug. |
+| 🛰️ **The blimp on your phone** | Open the game on your phone and switch to the overhead view. |
+| 🎚️ **Strip it down** | Turn every effect off in settings and watch just the football. |
 
-## Your team's history
+## 🧪 Known issues
 
-Every franchise has its own page on the **[NFL History site](https://jenzimibruh.github.io/nfl-history-fbgm/teams.html)**: every logo and jersey, every season's record, and every notable player with his rating season by season. Everything below is a real screenshot.
+It's an alpha, so here's what's known and not fixed yet. Seen something not on this list? [Report it](https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new/choose).
 
-<p align="center"><img src="assets/shots/header.png" alt="Patriots team page: record since 1966, playoff seasons, six titles, retired numbers" width="100%"></p>
-
-### Every logo and jersey, switching on the real date
-
-146 looks across 32 franchises, built into the league file. Start in 1976 and the Bucs are creamsicle orange; sim to 1997 and they switch on the real date. The Oilers become the Titans, the Rams go to St. Louis and back, and the Titans unveil the Shield in 2026.
-
-<p align="center"><img src="assets/shots/looks.png" alt="Logos and jerseys by era" width="100%"></p>
-
-<details><summary><b>The Rams: 14 looks</b></summary>
-
-<p align="center"><img src="assets/shots/looks2.png" alt="Every Rams logo and jersey since 1966" width="100%"></p>
-</details>
-
-### Every season, every rating
-
-<p align="center"><img src="assets/shots/chart.png" alt="Patriots win percentage by season, playoff years highlighted, six titles starred" width="100%"></p>
-
-Pick any season and see who mattered, rated from what they really did. The 2007 Patriots:
-
-<p align="center"><img src="assets/shots/roster.png" alt="Best players on the 2007 Patriots: Brady 85, Light 81, Vrabel 81, Moss 80" width="100%"></p>
-
-<table><tr>
-<td width="56%"><img src="assets/shots/legends.png" alt="49ers franchise legends with rating sparklines and honors"></td>
-<td width="44%"><img src="assets/shots/player.png" alt="Tom Brady's rating by season with the Patriots"></td>
-</tr></table>
-
-## The real next three drafts
-
-Sim past today and you're not drafting made-up players. The 2027, 2028 and 2029 classes are **1,020 real college players** with their real schools, hometowns and headshots, ranked from college production, recruiting pedigree and where their position really goes. The top of 2027 follows ESPN's big board ([how](docs/draft-classes.md)).
-
-<p align="center"><img src="assets/shots/draft.png" alt="The 2027 draft class with headshots, ratings and upside" width="100%"></p>
-
-## What's in the league
-
-| | |
+| Issue | Details |
 |---|---|
-| 🧑‍🤝‍🧑 **28,700+ real players** | Season stats from 1966 on: passing, rushing, receiving, defense, kicking by distance, punting, returns, playoffs |
-| ⭐ **Ratings for everyone** | Built from real production, including players with almost no stats; real returners return kicks ([how](docs/ratings.md)) |
-| 👨‍👦 **Families** | 435 players linked to their fathers, sons and brothers: the Mannings, the Sanders, the Watts, the Bosas. The Relatives page works out grandfathers, uncles and cousins |
-| 🏆 **Awards & honors** | MVP (with the AFL's before the merger), OPOY/DPOY, rookies, Super Bowl MVP, All-Pro, Pro Bowl, Hall of Fame by induction year, retired numbers |
-| 🎨 **Logos & jerseys by era** | Primary logos by era, and today's uniforms matched to the real 2026 ones |
-| 🗓️ **Real schedules** | Every game since 1966, in order, including the pre-merger AFL and NFL and the strike seasons |
-| 📰 **121 real-life events** | Each with its reason: retirements, comebacks, suspensions (Deflategate), relocations and expansions |
-| 🔴 **This season, live** | Standings, stats, rosters, injured reserve and injuries, updated every week |
-| 📸 **Player photos** | Real headshots for 4,000+ players and every draft prospect |
-| 🎓 **Real draft classes 2027–2029** | 1,020 real college players ([how](docs/draft-classes.md)) |
-
-## The mod: settings for everything
-
-The league file works anywhere, but stock Football GM forgets history the moment you sim: it makes up schedules, drafts fictional rookies, and players develop at random. The mod fixes that, and every piece is a setting, on the New League screen and later in **Settings → Real Players**.
-
-| | |
-|---|---|
-| 📈 **RPD** | Real Player Determinism: careers follow the real one, on a slider from random to exactly real |
-| 🗓️ **Real schedules** | Every real game, in order, since 1966 |
-| 🎯 **Real drafts** | The real players go to the teams that really took them |
-| 📰 **Real events** | Retirements, comebacks, and suspensions for the real number of games, during the season when they really happened |
-| 🏥 **Real injuries** | Famous injuries strike when they really did, and players who missed a whole season stay on their real team, out for the year (setting: Scheduled Injuries) |
-| 🕯️ **Real deaths** | On their real week, with the cause where known. Young and in-career deaths appear in Tragic Deaths (setting: Scheduled Deaths) |
-| 🔙 **Your Team First** | A player who really returned to the team he left comes back to you if he retired on your team. One who really moved on goes where he really went (setting: Comeback Destination) |
-| 🏃 **Era football** | Lead back workload, QB runs, pace and interceptions change by era (settings: Lead Back Workload, QB Designed Run Rate) |
-| 🏆 **Real playoff seeds** | Every saved bracket has the real seeds, and a league that starts at the playoffs plays the real bracket |
-| 🔁 **Moves on the real date** | The Browns' players and picks move to Baltimore in 1996, expansion drafts, mid-season trades, numbers retired when they really were |
-| ⚙️ **Era calibration** | Seven sim factors retuned every season: 1972 plays like 1972 |
-| 🎨 **Your team's colors** | The whole interface takes your team's colors, and changes when theirs do |
-| 🗳️ **Have your say** | A one-tap poll on the What's new screen: vote on what gets built next |
-
-### RPD: careers that follow the real one
-
-Turn Real Player Determinism up and Jerry Rice still plays into his 40s and Barry Sanders still walks away at 31. Turn it down and history gets a reroll.
-
-<p align="center"><img src="assets/rpd.svg" alt="How the RPD slider changes a player's career curve" width="100%"></p>
-
-### Real schedules: every real game, in order
-
-<p align="center"><img src="assets/schedule.svg" alt="The 2007 Patriots' real schedule, game by game" width="100%"></p>
-
-## Does it hold up?
-
-The test: start in 1966, sim all the way to today, and compare with what really happened.
-
-<p align="center"><img src="assets/accuracy.svg" alt="Simulated careers as a percentage of real careers, by position" width="100%"></p>
-
-- League-wide stats per era land within a few tenths of real
-- Team ratings line up with real records (median correlation 0.83 by season), and 94% of All-Pros rate top 5 at their position
-- Quarterbacks finish at 103% and running backs at 89% of their real careers (median), with league-wide plays, passes and runs each within about 1% of real
-
-Details in [docs/results.md](docs/results.md).
-
-## Known issues
-
-Here's what's known and not fixed yet. Seen something not on this list? [Report it](https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new/choose).
-
-| Issue | Where | Details |
-|---|---|---|
-| **Windows warns about NFL History.exe** | The mod (Windows) | The app isn't code-signed (signing costs money every year), so the first time Windows SmartScreen may say "Windows protected your PC". Click **More info**, then **Run anyway**. It's built from the source in the `app` folder of this repo. Rather not? `Install_and_Play.bat` does the same thing |
-| **The Browns' move needs the mod** | Regular Football GM | Football GM can't move a team without its history, so in a league from 1995 or earlier the Browns' players go to free agency and Baltimore holds an expansion draft. History stays right in Cleveland. [Why, and vote on it](#faq) |
-| **Arch Manning's family needs the mod** | Regular Football GM | His tie to Archie, Peyton and Eli runs through his father Cooper, who didn't play. The mod shows it on player pages; regular Football GM can't |
-| **Windows warns about the mod** | Installing the mod | The mod isn't signed with a paid certificate. Choose Keep if the browser warns, then More info → Run anyway on the blue screen |
-| **Running backs finish a bit short** | The mod | Star running back careers land around 89% of real, and workhorse seasons can run a little high |
-| **Some ratings follow a stat that likes good teams** | Everywhere | Ratings lean on Approximate Value, so a great player in a quieter year can rate low (Patrick Mahomes in 2024). Use the Flag a rating button |
-| **Everyday injuries in past seasons** | The mod | Famous and season-long injuries are in. Ordinary short injuries from past seasons aren't, so a mid-season start only shows those |
-| **Seasons with no roster record** | The mod | Mostly before 2002: a player who missed a whole year with no record of where he was is a free agent that year |
-| **Mod on an Android phone: "This site can't be reached"** | The mod, played on a phone | Android blocks Chrome from local addresses until you allow it: Settings → Apps → Chrome → Permissions → Nearby devices (or Local network) → Allow. [More](#faq) |
-| **Practice-squad call-ups** | Leagues starting mid-season, mostly 2020–21 | Football GM has no practice squad. Players who were only called up for games may start as free agents |
-| **Late-season events happen at the trade deadline** | The mod | Football GM runs events between phases, so something from December (Marshawn Lynch's 2019 return) happens at the trade deadline |
-| **Hall of Fame after your start season** | The mod | Football GM picks new Hall of Famers with its own formula when they retire, like Basketball GM does, not on their real induction date |
-| **Existing leagues keep their data** | Everywhere | Fixes reach new leagues. Download again and start a new league to get them |
-
-Fixed recently: see the [changelog](CHANGELOG.md).
-
-## Roster updates & timeline
-
-Like Madden, the league is updated all year: **a roster update every week of the season** (stats, signings, trades, injuries, ratings), then free agency in March, the real draft in April, the schedule in May, and a **new season release every August**. Full schedule in [docs/roadmap.md](docs/roadmap.md). Want a say in what comes next? [Vote on the site](https://jenzimibruh.github.io/nfl-history-fbgm/updates.html#vote), no account needed.
-
-## How it was built
-
-<p align="center"><img src="assets/pipeline.svg" alt="Data pipeline: sources, build, clean and rate, play" width="100%"></p>
-
-The hard parts, and why each decision was made. Each has its own deep dive with charts.
-
-<table>
-<tr><td width="50%" valign="top"><a href="docs/ratings.md"><img src="assets/docs/two.png" alt="How every player is rated"></a><br><b><a href="docs/ratings.md">How every player is rated →</a></b><br><sub>Approximate Value for how good, his stats against his era for what kind, with a full Barry Sanders worked example</sub></td><td width="50%" valign="top"><a href="docs/ratings.md#step-4-the-curve"><img src="assets/docs/curve.png" alt="From rank to rating"></a><br><b><a href="docs/ratings.md#step-4-the-curve">From rank to rating →</a></b><br><sub>Why stars land in the 80s, nobody is a 99, and an MVP can't rate below 86</sub></td></tr>
-<tr><td width="50%" valign="top"><a href="docs/sources.md"><img src="assets/docs/sources.png" alt="Where every number comes from"></a><br><b><a href="docs/sources.md">Where every number comes from →</a></b><br><sub>Nine sources stitched together, from archived Pro-Football-Reference pages to Wikidata</sub></td><td width="50%" valign="top"><a href="docs/calibration.md"><img src="assets/docs/eras.png" alt="Making 1972 play like 1972"></a><br><b><a href="docs/calibration.md">Making 1972 play like 1972 →</a></b><br><sub>The sim's dials set season by season, checked against a 60-season sim</sub></td></tr>
-<tr><td width="50%" valign="top"><a href="docs/data-fixes.md"><img src="assets/docs/fixes.png" alt="Stat heads will notice"></a><br><b><a href="docs/data-fixes.md">Stat heads will notice →</a></b><br><sub>Fake players, merged namesakes, co-MVPs, deaths, see-through logos, and how each was fixed</sub></td><td width="50%" valign="top"><a href="docs/draft-classes.md"><img src="assets/docs/funnel.png" alt="The real next three drafts"></a><br><b><a href="docs/draft-classes.md">The real next three drafts →</a></b><br><sub>From 13,800 college players to three real classes of 340</sub></td></tr>
-</table>
-
-And [the mod](mod/): every file it touches and why.
+| **Fan cams** | The crowd camera shots don't work right yet |
+| **The QB walkout** | The quarterback's walk out to the field isn't smooth yet |
+| **Huddle shuffle** | Players can slide sideways as a group in the huddle before they break |
+| **Sideline clipping** | People and props on the sidelines can overlap |
+| **Sideline zooms** | The camera sometimes zooms on the sideline for no reason |
+| **The ball and the crowd** | Both are simple for now and will look better |
+| **Phones** | The 3D view can be slow on older phones: use the blimp or classic view |
 
 ## FAQ
 
-<details><summary><b>Do I need the mod?</b></summary>
+<details><summary><b>Does Live Football change my results?</b></summary>
 
-No. This season's file and any season from the selector work in regular Football GM. The mod is what keeps history behaving like history after you start simming: real schedules, real drafts, real careers and events.
+No. Football GM's sim decides every play, exactly as before. Live Football only shows it: the animation always ends where the sim says, and nothing on screen tells you a result before the play happens.
 </details>
 
-<details><summary><b>What happens to the Browns and Ravens in 1995-96?</b></summary>
+<details><summary><b>Will my leagues still be there?</b></summary>
 
-After the 1995 season, Art Modell moved the Browns to Baltimore. The NFL's 1996 agreement kept the Browns' name, colors and history in Cleveland, so Baltimore started as a new team (the Ravens), and Cleveland came back in 1999 as the Browns with all of their history.
-
-- **With the mod:** the Browns' players, contracts and draft picks move to Baltimore with the franchise, like they really did. Cleveland's history stays in Cleveland, and the Browns come back in 1999 with an expansion draft.
-- **In regular Football GM:** Football GM can't move a team without moving its history. So the Browns' history stays right in Cleveland, but the 1995 Browns become free agents and Baltimore builds its roster in an expansion draft.
-
-Why not move the team and its history? Then the Browns' 1966-95 records, players and Hall of Famers would belong to the Ravens, which isn't true. Think regular Football GM should do it the other way? [Vote on the site](https://jenzimibruh.github.io/nfl-history-fbgm/updates.html#vote).
+Yes, if you switch to the alpha from inside the mod. Leagues are saved in your browser, and both versions use the same one. A fresh download in a new folder opens at a different address, so it starts with no leagues.
 </details>
 
-<details><summary><b>Does it work on my phone?</b></summary>
+<details><summary><b>Does it work with the league files for regular Football GM?</b></summary>
 
-Yes. Download this season or build any season on the site, then upload it in Football GM's New League screen. The mod runs on a computer, and your phone can play on it over Wi-Fi: open the address the mod window shows, on the same Wi-Fi.
-
-**"This site can't be reached" (ERR_TOO_MANY_RETRIES) on Android?** Newer Android versions stop Chrome from opening addresses on your home network until you allow it. On the phone, open **Settings → Apps → Chrome → Permissions**, set **Nearby devices** (or **Local network**) to **Allow**, then close Chrome fully and open the address again. If the router's page (192.168.0.1 or similar) also won't open on the phone, this is the fix.
-
-Still stuck? Check that the phone and computer are on the same Wi-Fi (not mobile data or a guest network), that Windows Firewall allows Node.js on private networks, and that no VPN is on. **After a mod update,** force stop Chrome on the phone (Settings > Apps > Chrome > Force stop), or it keeps running the old version in the background.
+No. Live Football comes with the mod. The league files for regular Football GM won't have it.
 </details>
 
-<details><summary><b>How current is this season's file?</b></summary>
+<details><summary><b>How do I report a bug?</b></summary>
 
-It's updated every week of the season with every final score, stat line, roster move and injury. Games still to be played stay on the schedule.
+[Open an issue](https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new/choose) with what happened, the two teams and the game's date. A screenshot helps a lot.
 </details>
-
-<details><summary><b>Why is the 2008 season called 2009?</b></summary>
-
-Football GM, like Basketball GM, names a season by the year it ends. The 2008 NFL season ends with the Super Bowl in February 2009.
-</details>
-
-<details><summary><b>How do I vote, and can I see the results?</b></summary>
-
-On the site's [Updates page](https://jenzimibruh.github.io/nfl-history-fbgm/updates.html#vote), or at the bottom of the mod's What's new screen. No account needed: one vote in each poll. Results show after you vote, so the current leader doesn't sway anyone.
-</details>
-
-<details><summary><b>How do I uninstall the mod?</b></summary>
-
-Double-click `Uninstall.bat` in the mod folder (Mac or Linux: `uninstall.sh`). It stops the game and deletes the folder: the mod, the downloaded Football GM files and its private copy of Node.js. Nothing else on your computer is touched.
-
-Your leagues are saved in your browser, not in the folder: to delete them, delete them from the game's **Leagues** page before you uninstall.
-</details>
-
-<details><summary><b>Something's wrong with a player or a logo. Where do I report it?</b></summary>
-
-Every player card and team page on the site has a one-tap report link. Or [open an issue](https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new/choose) with the player, the season and what's off. Accuracy is the whole point.
-</details>
-
-## Building from source
-
-Needs Node 18+. The scripts in [`src/`](src/) rebuild everything from raw data; the full order and options are in [docs/building.md](docs/building.md).
 
 ## Thank you
 
-To the creator of [Football GM](https://football-gm.com) and [Basketball GM](https://basketball-gm.com): thank you for the amazing games and all the work you've put into them over the years. None of this exists without them.
-
-## Credits
-
-- **[nflverse](https://github.com/nflverse)**: rosters, games, modern stats and the live season
-- **[Pro-Football-Reference](https://www.pro-football-reference.com)** via the **Internet Archive**: 1966–98 stats and Approximate Value
-- **Wikipedia, Wikidata & Wikimedia Commons**: awards, drafts, Hall of Fame, retired numbers, families, uniforms, logos
-- **ESPN**: college rosters, recruiting grades, draft board and headshots
-- **OverTheCap** (contracts), **spreadspoke** (scores), **Logopedia** and **SportsLogos.net** (logos)
+To the creator of [Football GM](https://football-gm.com) and [Basketball GM](https://basketball-gm.com): none of this exists without the game and its sim. And to everyone testing the alpha: thank you for every bug report.
 
 Team names and logos belong to the NFL and its teams. This is a fan project for personal play, not affiliated with or endorsed by the NFL or Football GM.
 
-<p align="center">Made with way too many hours and a lot of love by <b>JenZiMiBruh</b>, a Cardinals fan who has made peace with it.<br><sub>Psst: try the Konami code on the site. And look up Larry Fitzgerald.</sub><br><b>Thank you, dumbmatter.</b></p>
+<p align="center">Made with way too many hours and a lot of love by <b>JenZiMiBruh</b>.<br><b>Thank you, dumbmatter.</b></p>
