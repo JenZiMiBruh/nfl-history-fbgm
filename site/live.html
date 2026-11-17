@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Football · NFL History</title>
+<meta name="description" content="Watch your league play out in a full 3D broadcast. The Live Football alpha is out now.">
+<meta property="og:title" content="Live Football · NFL History for Football GM">
+<meta property="og:image" content="https://jenzimibruh.github.io/nfl-history-fbgm/assets/live/field.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Big+Shoulders+Display:wght@700;800;900&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+.film{position:relative;border-radius:6px;overflow:hidden;background:#000;box-shadow:0 30px 70px rgba(0,0,0,.35);border:1px solid var(--line)}
+.film video{display:block;width:100%;height:auto}
+.date{display:flex;flex-wrap:wrap;gap:18px 44px;align-items:center;justify-content:space-between;padding:26px 30px;margin-top:26px;background:var(--hero);color:var(--hero-ink);border-left:8px solid var(--signal)}
+.date b{font:900 clamp(38px,6vw,68px)/1 var(--display);text-transform:uppercase;color:var(--signal)}
+.date span{font:600 13px/1.5 var(--mono);letter-spacing:1.2px;text-transform:uppercase;color:var(--hero-muted);max-width:430px}
+.shots{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.shot{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.shot.wide{grid-column:1/-1}
+.shot img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover}
+.shot figcaption{padding:14px 18px 16px}
+.shot b{display:block;font:800 24px/1.1 var(--display);text-transform:uppercase}
+.shot span{color:var(--muted);font-size:15.5px}
+.feat{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:4px solid var(--ink)}
+.feat li{padding:22px 22px 24px 0;border-bottom:1px solid var(--line)}
+.feat b{display:block;font:900 26px/1.05 var(--display);text-transform:uppercase;margin-bottom:6px}
+.feat span{color:var(--muted);font-size:15.5px}
+.tag{display:inline-block;font:600 12px/1 var(--mono);letter-spacing:1.4px;text-transform:uppercase;background:var(--signal);color:var(--signal-ink);padding:6px 8px;border-radius:2px}
+@media(max-width:760px){.shots{grid-template-columns:1fr}.feat{grid-template-columns:1fr}}
+</style>
+<script src="assets/site.js" defer></script>
+</head>
+<body data-page="live">
+
+<header class="phead"><div class="wrap">
+  <div class="chy"><b>Out now</b><span>Alpha</span></div>
+  <h1>Live <em>Football</em></h1>
+  <p class="lede">You've read the box score. Now watch it. Every game in your league, played out in a full 3D broadcast with real players, real stadiums and the right uniforms for the year.</p>
+  <div class="yard" aria-hidden="true">LIVE</div>
+</div></header>
+
+<section class="tight"><div class="wrap">
+  <div class="film"><iframe src="https://www.youtube-nocookie.com/embed/osboZgSy4L8?rel=0" title="NFL History: Official Trailer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy" style="display:block;width:100%;aspect-ratio:16/9;border:0"></iframe></div>
+  <div class="date"><b>Out now</b><span>Already have NFL History? Open it and click <b>Play the alpha now</b> on the announcement card; it updates itself, and <b>Back to the regular mod</b> switches you back any time. New here? <a href="download.html">Get NFL History</a> first. It's an alpha: expect bugs, and <a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new/choose">tell us what you find</a>.</span></div>
+</div></section>
+
+<section class="band"><div class="wrap">
+  <div class="sh"><div><div class="chy"><b>01</b><span>The broadcast</span></div><h2>A game you can watch</h2></div></div>
+  <div class="shots">
+    <figure class="shot wide"><img loading="lazy" src="assets/live/field.jpg" alt="A live game in the 3D stadium"><figcaption><b>Every snap</b><span>Your real game, play by play, in a stadium built for that team.</span></figcaption></figure>
+    <figure class="shot"><img loading="lazy" src="assets/live/td.jpg" alt="A touchdown celebration"><figcaption><b>The big moments</b><span>Touchdowns, replays, flags and injuries, on the play they happen.</span></figcaption></figure>
+    <figure class="shot"><img loading="lazy" src="assets/live/snow.jpg" alt="A night game in the snow"><figcaption><b>Real conditions</b><span>Afternoon light, night games, rain and snow.</span></figcaption></figure>
+    <figure class="shot"><img loading="lazy" src="assets/live/tale.jpg" alt="Tale of the tape before kickoff"><figcaption><b>The whole show</b><span>Pregame, halftime, commercials and the crowd.</span></figcaption></figure>
+    <figure class="shot"><img loading="lazy" src="assets/live/boards.jpg" alt="Scoreboards from different eras and holidays"><figcaption><b>Every era's scoreboard</b><span>From the 1970s to today, plus Thanksgiving, Christmas and more.</span></figcaption></figure>
+  </div>
+</div></section>
+
+<section class="band"><div class="wrap">
+  <div class="sh"><div><div class="chy"><b>02</b><span>Also new</span></div><h2>In this release</h2></div></div>
+  <ul class="feat">
+    <li><b>Real jerseys on every player</b><span>Player pictures wear their team's real jersey from that season, from every era, number on the chest.</span></li>
+    <li><b>Jersey and logo history</b><span>Every team's jersey eras and logos on its history page, with names on the back.</span></li>
+    <li><b>Championship banners</b><span>A banner for every title, with that game's Super Bowl logo. Click one to see it up close.</span></li>
+    <li><b>Every Super Bowl logo</b><span>I through LXI, on the playoffs page and the banners.</span></li>
+    <li><b>The league calendar</b><span>Real game dates and times, a team calendar, and a compact calendar on your dashboard.</span></li>
+  </ul>
+</div></section>
+
+<section><div class="wrap">
+  <div class="sh"><div><div class="chy"><b>03</b><span>Good to know</span></div><h2>What to expect</h2></div></div>
+  <ul class="feat">
+    <li><b>It's an alpha</b><span>The history mod is finished. Live Football is brand new, so it will have rough edges.</span></li>
+    <li><b>It comes with the mod</b><span>Live Football needs the mod. The league files for regular Football GM won't have it.</span></li>
+    <li><b>Phones use your Wi-Fi</b><span>Run the mod on your computer and open it on your phone over your home network.</span></li>
+  </ul>
+  <p style="margin-top:28px"><a class="btn go" href="download.html">Get NFL History now <span class="arr">→</span></a></p>
+</div></section>
+
+</body>
+</html>
