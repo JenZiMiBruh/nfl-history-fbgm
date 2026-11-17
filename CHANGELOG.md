@@ -6,6 +6,10 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.28.0 · Nov 16, 2026
+
+- Fixed: the game sometimes never finished loading** (stuck on "static files", no league would open). Windows counted simply opening a file as a change, so the game kept starting its setup over. If this happened to you, open NFL History again and it loads.
+
 ## v1.27.0 · Nov 16, 2026
 
 - Live Football alpha is easier to get.** The game asks every time you open it (until you click Stop asking), and the NFL History window has its own **Play the alpha** button. One click: nothing to download yourself, and your leagues stay where they are.

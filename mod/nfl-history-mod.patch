@@ -6138,3 +6138,36 @@ index 000000000..10d8eece2
 +	}
 +	return out;
 +};
+diff --git a/tools/watch/makeNormalWatcher.ts b/tools/watch/makeNormalWatcher.ts
+index b60002e58..9f2dc50de 100644
+--- a/tools/watch/makeNormalWatcher.ts
++++ b/tools/watch/makeNormalWatcher.ts
+@@ -1,3 +1,4 @@
++import { statSync } from "node:fs";
+ import { watch } from "chokidar";
+ import { type Spinners } from "./spinners.ts";
+ import type { Update } from "./cli.ts";
+@@ -42,7 +43,22 @@ export const makeNormalWatcher = ({
+ 
+ 		// "all" rather than "change" so adding/deleting files triggers a build too. ignoreInitial because otherwise there is an "add" event for every existing file on startup.
+ 		const watcher = watch(watchFiles, { ignoreInitial: true });
+-		watcher.on("all", async () => {
++		// NFL history mod: Windows reports reading a file (its last-access time) as a "change". The static files copy reads
++		// every file it copies, so it restarted itself every couple of seconds and never finished ("static files" spinning
++		// forever, no league would open). Worse with pnpm, which hard-links one copy of a package into every game folder.
++		// A real edit has a modified time newer than the last build's start; anything older is skipped.
++		let lastBuildStart = Date.now();
++		watcher.on("all", async (event, file) => {
++			if (event === "change") {
++				try {
++					if (statSync(file).mtimeMs < lastBuildStart - 2000) {
++						return;
++					}
++				} catch {
++					// gone already: build
++				}
++			}
++			lastBuildStart = Date.now();
+ 			await buildWrapped(currentSport);
+ 		});
+ 		eventEmitter.on("newSport", async (sport) => {
