@@ -208,7 +208,15 @@ function install(cfg) {
     run('git', ['fetch', '-q', 'origin'], { cwd: GAME });
   }
   run('git', ['checkout', '-q', '-f', cfg.base], { cwd: GAME });
-  run('git', ['clean', '-q', '-fd', '-e', 'node_modules'], { cwd: GAME });
+  // OneDrive (and some antivirus) can hold a folder open so Windows won't delete it even after git emptied it. An empty
+  // leftover folder doesn't hurt the install, so only a failure that isn't just "failed to remove" stops it
+  try { run('git', ['clean', '-q', '-fd', '-e', 'node_modules'], { cwd: GAME }); } catch (e) {
+    const lines = String(e.stderr || '').split(/\r?\n/).filter(l => l.trim());
+    const stuck = lines.filter(l => /^warning: failed to remove (.+?): /.test(l)).map(l => l.match(/^warning: failed to remove (.+?): /)[1]);
+    if (!lines.length || stuck.length !== lines.length) throw e;
+    for (const p of stuck) { try { fs.rmSync(path.join(GAME, p), { recursive: true, force: true, maxRetries: 5, retryDelay: 300 }); } catch { /* left behind, harmless */ } }
+    log(`Couldn't remove ${stuck.length} folder(s) (likely OneDrive holding them open): ${stuck.join(', ')}. Carrying on.`);
+  }
   step(3, 'Applying the NFL History mod');
   say('Applying the NFL History mod...');
   run('git', ['apply', '--whitespace=nowarn', path.join(MOD, 'nfl-history-mod.patch')], { cwd: GAME });
