@@ -15,9 +15,11 @@ const MODE = process.argv[3] === 'full' ? 'full' : 'quick';
 const FROM = +(process.argv[4] || 1966), TO = +(process.argv[5] || 2026);
 
 // The full sweep in parallel: the seasons are split between a few copies of this script, as many as the free memory
-// allows (each needs about 4.5 GB), and their findings are merged into the same report. Same checks, same output.
+// allows, and their findings are merged into the same report. Same checks, same output. Each copy is capped at 3 GB of
+// heap: measured on 2024-25 (the heaviest seasons), a copy peaks at 2.2 GB capped and gives identical findings, while
+// uncapped it lets garbage pile up to 4.3 GB, which used to leave room for only one copy (a 53-minute sweep).
 if (MODE === 'full' && !process.env.NFLH_SWEEP_CHILD && TO - FROM >= 8) {
-  const K = Math.max(1, Math.min(4, os.cpus().length - 1, Math.floor((os.freemem() / 1e9 - 2) / 4.5)));
+  const K = Math.max(1, Math.min(4, os.cpus().length - 1, Math.floor((os.freemem() / 1e9 - 1.5) / 3.2)));
   if (K >= 2) {
     const { spawn } = require('child_process');
     // newer seasons have weekly starts to build, so they weigh more: split by weight, not by count
@@ -29,7 +31,7 @@ if (MODE === 'full' && !process.env.NFLH_SWEEP_CHILD && TO - FROM >= 8) {
     const outs = parts.map((_, i) => path.join(os.tmpdir(), `nflh_sweep_part${i}.json`));
     Promise.all(parts.map(([x, y], i) => new Promise(res => {
       try { fs.unlinkSync(outs[i]); } catch (e) {}
-      spawn(process.execPath, ['--max-old-space-size=8000', __filename, ROOT, 'full', String(x), String(y)], { stdio: ['ignore', 'inherit', 'inherit'], env: { ...process.env, NFLH_SWEEP_CHILD: '1', NFLH_SWEEP_OUT: outs[i] } }).on('exit', code => res(code));
+      spawn(process.execPath, ['--max-old-space-size=3000', __filename, ROOT, 'full', String(x), String(y)], { stdio: ['ignore', 'inherit', 'inherit'], env: { ...process.env, NFLH_SWEEP_CHILD: '1', NFLH_SWEEP_OUT: outs[i] } }).on('exit', code => res(code));
     }))).then(codes => {
       const probs = {}; let built = 0;
       outs.forEach((f, i) => {
