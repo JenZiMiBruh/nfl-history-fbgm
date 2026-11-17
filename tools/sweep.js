@@ -19,7 +19,12 @@ const FROM = +(process.argv[4] || 1966), TO = +(process.argv[5] || 2026);
 // heap: measured on 2024-25 (the heaviest seasons), a copy peaks at 2.2 GB capped and gives identical findings, while
 // uncapped it lets garbage pile up to 4.3 GB, which used to leave room for only one copy (a 53-minute sweep).
 if (MODE === 'full' && !process.env.NFLH_SWEEP_CHILD && TO - FROM >= 8) {
-  const K = Math.max(1, Math.min(4, os.cpus().length - 1, Math.floor((os.freemem() / 1e9 - 1.5) / 3.2)));
+  // NFLH_PERF (the Control Center's Performance setting): lite = one part, so the computer stays usable; max = as many
+  // parts as the computer's total memory allows (close Chrome and other big programs first); auto = what is free now
+  const PERF = process.env.NFLH_PERF || 'auto';
+  const room = PERF === 'max' ? os.totalmem() / 1e9 - 4 : os.freemem() / 1e9 - 1.5;
+  const K = PERF === 'lite' ? 1 : Math.max(1, Math.min(4, os.cpus().length - 1, Math.floor(room / 3.2)));
+  console.log(`performance: ${PERF}, ${K} part${K > 1 ? 's' : ''}`);
   if (K >= 2) {
     const { spawn } = require('child_process');
     // newer seasons have weekly starts to build, so they weigh more: split by weight, not by count
