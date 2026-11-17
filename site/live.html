@@ -44,7 +44,7 @@
 
 <section class="tight"><div class="wrap">
   <div class="film"><iframe src="https://www.youtube-nocookie.com/embed/osboZgSy4L8?rel=0" title="NFL History: Official Trailer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy" style="display:block;width:100%;aspect-ratio:16/9;border:0"></iframe></div>
-  <div class="date"><b>Out now</b><span>Already have NFL History? Open it and click <b>Play the alpha now</b> on the announcement card; it updates itself, and <b>Back to the regular mod</b> switches you back any time. New here? <a href="download.html">Get NFL History</a> first. It's an alpha: expect bugs, and <a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new/choose">tell us what you find</a>.</span></div>
+  <div class="date"><b>Out now</b><span id="aDl" hidden style="display:block;font-weight:700;color:#ffb81c"></span><span>Already have NFL History? Open it and click <b>Play the alpha now</b> on the announcement card; it updates itself, and <b>Back to the regular mod</b> switches you back any time. New here? <a href="download.html">Get NFL History</a> first. It's an alpha: expect bugs, and <a href="https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new/choose">tell us what you find</a>.</span></div>
 </div></section>
 
 <section class="band"><div class="wrap">
@@ -79,5 +79,12 @@
   <p style="margin-top:28px"><a class="btn go" href="download.html">Get NFL History now <span class="arr">→</span></a></p>
 </div></section>
 
+<script>
+// Alpha downloads, counted on their own: every live-alpha-N release on GitHub (the regular mod's count leaves these out)
+fetch('https://api.github.com/repos/JenZiMiBruh/nfl-history-fbgm/releases?per_page=100').then(r => r.ok ? r.json() : null).then(rs => {
+  if (!rs) return; const n = rs.filter(r => /^live-alpha/.test(r.tag_name)).reduce((t, r) => t + r.assets.reduce((m, a) => m + a.download_count, 0), 0);
+  if (n > 0) { const el = document.getElementById('aDl'); el.textContent = n.toLocaleString() + (n === 1 ? ' alpha download' : ' alpha downloads'); el.hidden = false; }
+}).catch(() => {});
+</script>
 </body>
 </html>

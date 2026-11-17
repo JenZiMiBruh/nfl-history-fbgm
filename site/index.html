@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const GC = 'galloade';
   const show = (id, n) => { if (!(n > 0)) return; const el = document.getElementById(id); el.hidden = false; document.getElementById('fFirst').hidden = true; const b = el.querySelector('b'), t0 = performance.now(); const tick = t => { const k = Math.min(1, (t - t0) / 1200); b.textContent = Math.round(n * (1 - Math.pow(1 - k, 3))).toLocaleString(); if (k < 1) requestAnimationFrame(tick); }; requestAnimationFrame(tick); };
   fetch('https://' + GC + '.goatcounter.com/counter/TOTAL.json').then(r => r.ok ? r.json() : null).then(j => j && show('fVisits', +String(j.count).replace(/[^0-9]/g, ''))).catch(() => {});
-  fetch('https://api.github.com/repos/JenZiMiBruh/nfl-history-fbgm/releases').then(r => r.ok ? r.json() : null).then(rs => rs && show('fDl', rs.reduce((n, r) => n + r.assets.reduce((m, a) => m + a.download_count, 0), 0))).catch(() => {});
+  fetch('https://api.github.com/repos/JenZiMiBruh/nfl-history-fbgm/releases').then(r => r.ok ? r.json() : null).then(rs => rs && show('fDl', rs.filter(r => !/^live-alpha/.test(r.tag_name)).reduce((n, r) => n + r.assets.reduce((m, a) => m + a.download_count, 0), 0))).catch(() => {});
   fetch('https://api.github.com/repos/JenZiMiBruh/nfl-history-fbgm').then(r => r.ok ? r.json() : null).then(j => j && show('fStars', j.stargazers_count)).catch(() => {});
   // Playing right now: the mod checks in every 4 minutes under the current 10-minute window (mod/launcher.mjs). Players
   // in this window or the last one, whichever is more (a window that just began has few check-ins yet). Every minute.
