@@ -164,26 +164,29 @@ index 8d10a9884..3c9572ac6 100644
  						{t.season !== undefined ? `${t.season} ` : null}
 diff --git a/src/ui/components/Controller/NflLiveAlpha.tsx b/src/ui/components/Controller/NflLiveAlpha.tsx
 new file mode 100644
-index 000000000..b5b93fd29
+index 000000000..fa6bc2557
 --- /dev/null
 +++ b/src/ui/components/Controller/NflLiveAlpha.tsx
-@@ -0,0 +1,447 @@
-+import { useEffect, useRef, useState } from "react";
+@@ -0,0 +1,517 @@
++import { useEffect, useRef, useState, type ReactNode } from "react";
++import { createPortal } from "react-dom";
 +import { Modal } from "react-bootstrap";
 +
-+// NFL history mod: the Live Football alpha announcement. On the regular mod it opens once (a big card with a short
-+// confetti burst) and offers a one-click switch: the launcher downloads the alpha build and restarts the game, and
-+// leagues stay where they are (same browser storage). On the alpha build it shows a small bar instead, with a way back.
++// NFL history mod: the Live Football alpha announcement. On the regular mod it opens every time the game is opened
++// (a big card with a short confetti burst) until the player clicks "Stop asking", and offers a one-click switch: the
++// launcher downloads the alpha build and restarts the game, and leagues stay where they are (same browser storage).
++// A strip at the top of every page keeps the way in visible. On the alpha build the strip says so, with a way back.
 +// It only appears while the site's live-alpha.json says the alpha is out, so it can be turned on or off without a release.
 +const CONFIG =
 +	"https://jenzimibruh.github.io/nfl-history-fbgm/data/live-alpha.json";
 +const HERO =
 +	"https://jenzimibruh.github.io/nfl-history-fbgm/assets/live/field.jpg";
-+const SEEN_KEY = "nflLiveAlphaSeen";
++// a new key: the old one-time "No thanks" (nflLiveAlphaSeen) doesn't count as "Stop asking"
++const STOP_KEY = "nflLiveAlphaStopAsking";
 +// set just before NFL History reopens itself as the new app, so the switch carries on by itself afterwards
 +const REOPEN_KEY = "nflLiveAlphaAfterReopen";
-+const LATER_KEY = "nflLiveAlphaLater";
-+const LATER_DAYS = 3;
++// once per page load (opening the game), not again on every page change inside it
++let askedThisLoad = false;
 +const ISSUES =
 +	"https://github.com/JenZiMiBruh/nfl-history-fbgm/issues/new/choose";
 +
@@ -362,11 +365,15 @@ index 000000000..b5b93fd29
 +	return { status, go };
 +};
 +
++// Puts the strip at the top of the page (NflWhatsNew passes the spot); without one it stays where it is
++const Top = ({ slot, children }: { slot?: HTMLElement | null; children: ReactNode }) =>
++	slot ? createPortal(children, slot) : <>{children}</>;
++
 +const AlphaBar = () => {
 +	const back = useSwitch("stable");
 +	return (
 +		<div
-+			className="d-flex flex-wrap align-items-center gap-2 small px-3 py-2 mx-3 mb-3 rounded"
++			className="d-flex flex-wrap align-items-center gap-2 small px-3 py-2 mb-2 rounded"
 +			style={{
 +				background: "#0a0e14",
 +				color: "#fff",
@@ -390,8 +397,8 @@ index 000000000..b5b93fd29
 +				<span>Switching back... the game restarts by itself.</span>
 +			) : back.status === "failed" ? (
 +				<span>
-+					Couldn't switch from here: delete channel.txt in the mod folder, then
-+					run Install_and_Play.
++					Couldn't switch from here: close NFL History, delete channel.txt in
++					the mod folder, then open NFL History again.
 +				</span>
 +			) : (
 +				<button
@@ -407,12 +414,34 @@ index 000000000..b5b93fd29
 +	);
 +};
 +
-+export const NflLiveAlpha = ({ version }: { version: string }) => {
++export const NflLiveAlpha = ({
++	version,
++	ready = true,
++	slot,
++}: {
++	version: string;
++	// false while the What's new window is open: one window at a time
++	ready?: boolean;
++	slot?: HTMLElement | null;
++}) => {
 +	const onAlpha = version.includes("alpha");
 +	const [config, setConfig] = useState<Config>();
 +	const [show, setShow] = useState(false);
-+	const [dismissed, setDismissed] = useState(false);
++	const [wantShow, setWantShow] = useState(false);
++	const [stopped, setStopped] = useState(() => !!store.get(STOP_KEY));
 +	const sw = useSwitch("alpha");
++
++	// open the card once the What's new window (if any) is closed
++	useEffect(() => {
++		if (wantShow && ready) {
++			// after the What's new window has faded out, so the two never show at once
++			const t = setTimeout(() => {
++				setWantShow(false);
++				setShow(true);
++			}, 450);
++			return () => clearTimeout(t);
++		}
++	}, [wantShow, ready]);
 +
 +	// Back after reopening as the new app: carry on with the switch
 +	useEffect(() => {
@@ -435,46 +464,70 @@ index 000000000..b5b93fd29
 +					return;
 +				}
 +				setConfig(c);
-+				const later = Number(store.get(LATER_KEY) || 0);
-+				if (!store.get(SEEN_KEY) && Date.now() > later) {
-+					setShow(true);
++				if (!store.get(STOP_KEY) && !askedThisLoad) {
++					askedThisLoad = true;
++					setWantShow(true);
 +				}
 +			})
 +			.catch(() => {});
 +	}, [onAlpha]);
 +
 +	if (onAlpha) {
-+		return <AlphaBar />;
++		return (
++			<Top slot={slot}>
++				<AlphaBar />
++			</Top>
++		);
 +	}
 +	if (!config) {
 +		return null;
 +	}
 +
++	// "Not now" closes it until the game is opened again; "Stop asking" for good (the strip shrinks to a small button)
 +	const close = (forever: boolean) => {
 +		if (forever) {
-+			store.set(SEEN_KEY, "1");
-+		} else {
-+			store.set(LATER_KEY, String(Date.now() + LATER_DAYS * 864e5));
++			store.set(STOP_KEY, "1");
++			setStopped(true);
 +		}
 +		setShow(false);
-+		setDismissed(true);
 +	};
 +
 +	return (
 +		<>
-+			{/* After closing the card, a small always-there way in */}
-+			{dismissed || !show ? (
-+				<div className="px-3 pb-3">
++			<Top slot={slot}>
++				{stopped ? (
 +					<button
 +						type="button"
-+						className="btn btn-sm fw-bold"
++						className="btn btn-sm fw-bold mb-2"
 +						style={{ background: "#ffb81c", color: "#0a0e14" }}
 +						onClick={() => setShow(true)}
 +					>
 +						🏈 Try the Live Football alpha
 +					</button>
-+				</div>
-+			) : null}
++				) : (
++					<div
++						className="d-flex flex-wrap align-items-center gap-2 px-3 py-2 mb-2 rounded"
++						style={{
++							background: "#0a0e14",
++							color: "#fff",
++							borderLeft: "4px solid #ffb81c",
++						}}
++					>
++						<b style={{ color: "#ffb81c" }}>🏈 LIVE FOOTBALL ALPHA IS OUT</b>
++						<span className="opacity-75">
++							Watch your league's games play out on the field.
++						</span>
++						<button
++							type="button"
++							className="btn btn-sm fw-bold"
++							style={{ background: "#ffb81c", color: "#0a0e14" }}
++							onClick={() => setShow(true)}
++						>
++							See what's new
++						</button>
++					</div>
++				)}
++			</Top>
 +			<Modal
 +				show={show}
 +				onHide={() => close(false)}
@@ -529,8 +582,7 @@ index 000000000..b5b93fd29
 +						</p>
 +						<ul className="mb-4 ps-3" style={{ lineHeight: 1.7 }}>
 +							<li>
-+								<b>Watch any game</b> in a 3D broadcast view, an overhead view,
-+								or classic 2D
++								<b>Watch any game</b> play out in a 3D stadium
 +							</li>
 +							<li>
 +								<b>The full TV show:</b> game open, pregame, score bugs, replays
@@ -596,18 +648,36 @@ index 000000000..b5b93fd29
 +										Watch the trailer
 +									</a>
 +								) : null}
-+								<button
-+									type="button"
-+									className="btn btn-link text-white-50 ms-auto"
-+									onClick={() => close(true)}
-+								>
-+									No thanks
-+								</button>
++								<div className="ms-auto d-flex gap-1">
++									<button
++										type="button"
++										className="btn btn-outline-light"
++										onClick={() => close(false)}
++									>
++										Not now
++									</button>
++									<button
++										type="button"
++										className="btn btn-link text-white"
++										style={{ opacity: 0.75 }}
++										onClick={() => close(true)}
++									>
++										Stop asking
++									</button>
++								</div>
 +							</div>
 +						)}
-+						<p className="small opacity-50 mt-3 mb-0">
++						{sw.status === "idle" ? (
++							<p className="small opacity-75 mt-3 mb-0">
++								<b>What happens when you click:</b> NFL History downloads the
++								alpha and restarts the game by itself (a few minutes the first
++								time). This page reloads when it's ready. Your leagues stay right
++								where they are.
++							</p>
++						) : null}
++						<p className="small opacity-50 mt-2 mb-0">
 +							It's an alpha: expect rough edges. You can go back to the regular
-+							mod any time from the bar at the bottom of the page.
++							mod any time from the bar at the top of the page.
 +						</p>
 +					</div>
 +				</div>
@@ -617,11 +687,12 @@ index 000000000..b5b93fd29
 +};
 diff --git a/src/ui/components/Controller/NflWhatsNew.tsx b/src/ui/components/Controller/NflWhatsNew.tsx
 new file mode 100644
-index 000000000..7828df0a3
+index 000000000..f03536fa6
 --- /dev/null
 +++ b/src/ui/components/Controller/NflWhatsNew.tsx
-@@ -0,0 +1,346 @@
+@@ -0,0 +1,370 @@
 +import { useEffect, useState, type ReactNode } from "react";
++import { createPortal } from "react-dom";
 +import { Modal } from "react-bootstrap";
 +import { NflLiveAlpha } from "./NflLiveAlpha.tsx";
 +
@@ -864,6 +935,11 @@ index 000000000..7828df0a3
 +	const [show, setShow] = useState<"new" | "all" | undefined>();
 +	const [latest, setLatest] = useState<string>();
 +	const [updateStatus, setUpdateStatus] = useState("");
++	const [slot, setSlot] = useState<HTMLElement | null>(null);
++	const [alphaSlot, setAlphaSlot] = useState<HTMLElement | null>(null);
++	useEffect(() => {
++		setSlot(document.getElementById("nfl-top-strip"));
++	}, []);
 +
 +	const update = async () => {
 +		try {
@@ -885,7 +961,7 @@ index 000000000..7828df0a3
 +				}
 +			}, 5000);
 +		} catch {
-+			setUpdateStatus("Close the mod window and run Install_and_Play again to update.");
++			setUpdateStatus("Couldn't update from here. Close NFL History and open it again: it updates by itself when it starts.");
 +		}
 +	};
 +
@@ -921,27 +997,45 @@ index 000000000..7828df0a3
 +		return null;
 +	}
 +
-+	return (
++	// At the top of every page, in the page flow (not fixed: a fixed button covered the sidebar and roster rows on
++	// phones). Controller puts an empty #nfl-top-strip under the title bar; until it's there, this stays at the bottom.
++	const strip = (
 +		<>
-+			{/* In the page flow at the bottom, not fixed: a fixed button covered the sidebar and roster rows on phones */}
-+			<div className="d-flex flex-wrap align-items-start gap-2 px-3 pb-3">
-+			<button
-+				className="btn btn-sm btn-link text-body-secondary p-0"
-+				type="button"
-+				onClick={() => setShow("all")}
-+			>
-+				NFL History v{version} · What's new
-+			</button>
 +			{latest ? (
-+				<div className="alert alert-info mb-0" style={{ maxWidth: 340 }}>
-+					<div className="mb-2">Update available: <b>{latest}</b></div>
-+					{updateStatus ? <div>{updateStatus}</div> : (
-+						<button className="btn btn-sm btn-primary" type="button" onClick={update}>Update now</button>
++				<div
++					className="d-flex flex-wrap align-items-center gap-2 px-3 py-2 mb-2 rounded text-white"
++					style={{ background: "#0b5ed7" }}
++				>
++					<b>⬆ NFL History {latest} is out</b>
++					{updateStatus ? (
++						<span>{updateStatus}</span>
++					) : (
++						<>
++							<span className="opacity-75">You have v{version}.</span>
++							<button className="btn btn-sm btn-light fw-bold" type="button" onClick={update}>
++								Update now
++							</button>
++						</>
 +					)}
 +				</div>
 +			) : null}
++			<div ref={setAlphaSlot} />
++			<div className="d-flex justify-content-end mb-1">
++				<button
++					className="btn btn-sm btn-outline-secondary py-0"
++					type="button"
++					onClick={() => setShow("all")}
++				>
++					📰 What's new in NFL History v{version}
++				</button>
 +			</div>
-+			<NflLiveAlpha version={version} />
++		</>
++	);
++
++	return (
++		<>
++			{slot ? createPortal(strip, slot) : <div className="px-3 pb-3">{strip}</div>}
++			<NflLiveAlpha version={version} ready={show === undefined} slot={alphaSlot} />
 +			<Modal show={show !== undefined} onHide={() => setShow(undefined)} size="lg" scrollable>
 +				<Modal.Header closeButton>
 +					<Modal.Title>
@@ -1070,7 +1164,7 @@ index 000000000..020362979
 +	return null;
 +};
 diff --git a/src/ui/components/Controller/index.tsx b/src/ui/components/Controller/index.tsx
-index fc14a9fc3..b0c12d458 100644
+index fc14a9fc3..3716e3b73 100644
 --- a/src/ui/components/Controller/index.tsx
 +++ b/src/ui/components/Controller/index.tsx
 @@ -12,6 +12,8 @@ import { Notifications } from "./Notifications.tsx";
@@ -1082,7 +1176,16 @@ index fc14a9fc3..b0c12d458 100644
  import { useViewData } from "../../util/viewManager.tsx";
  import api from "../../api/index.ts";
  import { ErrorBoundary } from "../ErrorBoundary.tsx";
-@@ -120,6 +122,8 @@ export const Controller = () => {
+@@ -102,6 +104,8 @@ export const Controller = () => {
+ 				<div className="h-100 w-100 d-flex flex-column" style={minWidth0}>
+ 					{popup ? null : <LeagueTopBar />}
+ 					<TitleBar />
++					{/* NFL history mod: update, Live Football alpha and What's new strip (filled by NflWhatsNew) */}
++					<div id="nfl-top-strip" className="container-fluid mt-2" />
+ 					<div className="container-fluid position-relative mt-2 flex-grow-1 h-100">
+ 						<div className="d-flex" style={minHeight100}>
+ 							<div className="w-100 d-flex flex-column" style={minWidth0}>
+@@ -120,6 +124,8 @@ export const Controller = () => {
  							</div>
  							<Skyscraper />
  						</div>
@@ -5021,7 +5124,7 @@ index 146046dd5..e328d14a4 100644
  
  type GameAttributeKey = (typeof gameAttributeKeys)[number];
 diff --git a/tools/lib/server.ts b/tools/lib/server.ts
-index dd727b3c3..4f261df02 100644
+index dd727b3c3..ecbb6c649 100644
 --- a/tools/lib/server.ts
 +++ b/tools/lib/server.ts
 @@ -1,4 +1,5 @@
@@ -5039,7 +5142,7 @@ index dd727b3c3..4f261df02 100644
  	"/manifest",
  
  	// Not worth the confusion unless the service worker is being worked on
-@@ -183,6 +185,33 @@ export const startServer = async ({
+@@ -183,6 +185,36 @@ export const startServer = async ({
  
  		const { pathname } = new URL(req.url!, localUrl);
  
@@ -5061,10 +5164,13 @@ index dd727b3c3..4f261df02 100644
 +			}
 +			res.writeHead(202);
 +			res.end("reopening");
-+			spawn("cmd", ["/c", `ping -n 5 127.0.0.1 >nul & start "" "${exe}"`], {
++			// verbatim: Node would otherwise write the inner quotes as \" , which cmd doesn't understand, and the app
++			// never opened (the game just closed)
++			spawn("cmd", ["/c", `"ping -n 5 127.0.0.1 >nul & start "" "${exe}""`], {
 +				detached: true,
 +				stdio: "ignore",
 +				windowsHide: true,
++				windowsVerbatimArguments: true,
 +			}).unref();
 +			setTimeout(() => process.exit(0), 500);
 +			return;

@@ -6,6 +6,15 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.27.0 · Nov 16, 2026
+
+- Live Football alpha is easier to get.** The game asks every time you open it (until you click Stop asking), and the NFL History window has its own **Play the alpha** button. One click: nothing to download yourself, and your leagues stay where they are.
+- Fixed: players coming from the old black window** can now switch to the alpha. Before, the game closed and nothing opened.
+- Fixed: the game no longer closes right after an update** or a switch to the alpha. Before, it installed fine but then said "Something went wrong" until you opened it again.
+- Updates and What's new are at the top of every page now**, instead of hidden at the bottom.
+- Fixed: the What's new window and the alpha card opened on top of each other.
+- Fixed: on the alpha, NFL History downloaded the alpha again every time it started.
+
 ## v1.26.0 · Nov 16, 2026
 
 **Start a new league to get this update.**
