@@ -238,8 +238,10 @@ static class App {
   public static Release Latest() {
     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
     var api = Environment.GetEnvironmentVariable("NFL_RELEASE_API");
-    bool alpha = Alpha() && string.IsNullOrEmpty(api);
-    var url = !string.IsNullOrEmpty(api) ? api : alpha ? "https://api.github.com/repos/JenZiMiBruh/nfl-history-fbgm/releases?per_page=30" : "https://api.github.com/repos/JenZiMiBruh/nfl-history-fbgm/releases/latest";
+    var list = Environment.GetEnvironmentVariable("NFL_RELEASES_API"); // testing: the alpha channel's list (as in the launcher)
+    bool alpha = Alpha() && (string.IsNullOrEmpty(api) || !string.IsNullOrEmpty(list));
+    var url = alpha ? (!string.IsNullOrEmpty(list) ? list : "https://api.github.com/repos/JenZiMiBruh/nfl-history-fbgm/releases?per_page=30")
+      : !string.IsNullOrEmpty(api) ? api : "https://api.github.com/repos/JenZiMiBruh/nfl-history-fbgm/releases/latest";
     try {
       var req = WebRequest.Create(url);
       req.Timeout = 10000;
@@ -263,7 +265,8 @@ static class App {
     } catch (Exception e) { LogLine("update check: " + e.Message); return null; }
   }
   public static bool IsNewer(string a, string b) {
-    if (Alpha()) return a != b; // alpha builds: any other build is the update
+    // alpha builds: any other alpha number is the update ("3" from the tag live-alpha-3 against 1.26.0-alpha.3 installed)
+    if (Alpha()) { var na = Regex.Match(a, @"(\d+)$").Groups[1].Value; var nb = Regex.Match(b, @"alpha[.-](\d+)$").Groups[1].Value; return nb == "" || na != nb; }
     var pa = a.TrimStart('v').Split('.'); var pb = b.TrimStart('v').Split('.');
     for (int i = 0; i < Math.Max(pa.Length, pb.Length); i++) {
       int x = 0, y = 0; if (i < pa.Length) int.TryParse(pa[i], out x); if (i < pb.Length) int.TryParse(pb[i], out y);
@@ -272,9 +275,21 @@ static class App {
     return false;
   }
   // Asks the running launcher to update (the same request the game's Update button sends). Returns the HTTP status.
-  public static int AskLauncherToUpdate() {
+  public static int AskLauncherToUpdate() { return AskLauncher("/update"); }
+  // The Live Football alpha switch (the same request the game's alpha card sends): to = "alpha" or "stable"
+  public static int AskLauncherToSwitch(string to) { return AskLauncher("/channel?to=" + to); }
+  // Is the alpha out? (the site's live-alpha.json, the same switch the game's card reads)
+  public static bool AlphaOut() {
     try {
-      var req = (HttpWebRequest)WebRequest.Create("http://localhost:3099/update");
+      ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+      var req = (HttpWebRequest)WebRequest.Create("https://jenzimibruh.github.io/nfl-history-fbgm/data/live-alpha.json?t=" + DateTime.UtcNow.Ticks);
+      req.Timeout = 8000; req.UserAgent = "nfl-history-fbgm-app";
+      using (var res = req.GetResponse()) using (var r = new StreamReader(res.GetResponseStream())) return Regex.IsMatch(r.ReadToEnd(), "\"active\"\\s*:\\s*true");
+    } catch (Exception e) { LogLine("alpha check: " + e.Message); return false; }
+  }
+  static int AskLauncher(string what) {
+    try {
+      var req = (HttpWebRequest)WebRequest.Create("http://localhost:3099" + what);
       req.Method = "POST"; req.Proxy = null; req.Timeout = 5000; req.ContentLength = 0;
       req.Headers["Origin"] = GAME_URL;
       using (var res = (HttpWebResponse)req.GetResponse()) return (int)res.StatusCode;
@@ -407,8 +422,10 @@ class MainForm : Form {
   readonly Label stepLabel, detailLabel, phoneLabel, phoneHelp, versionLabel, bannerText;
   readonly ProgressBar bar;
   readonly PictureBox qr;
-  readonly Panel body, banner, footer;
-  readonly Button openBtn, quitBtn, logBtn, reportBtn, copyBtn, bannerBtn;
+  readonly Panel body, banner, footer, alphaBanner;
+  readonly Button openBtn, quitBtn, logBtn, reportBtn, copyBtn, bannerBtn, alphaBtn;
+  readonly LinkLabel backLink;
+  bool alphaOut;
   readonly NotifyIcon tray;
   readonly System.Windows.Forms.Timer checkTimer;
   Process launcher;
@@ -437,6 +454,15 @@ class MainForm : Form {
     details.Click += (s, e) => ShowPendingNotes();
     banner.Controls.AddRange(new Control[] { bannerText, details, bannerBtn });
 
+    // the Live Football alpha (regular mod, while the alpha is out): one click switches, the launcher does the rest
+    alphaBanner = new Panel { BackColor = Color.FromArgb(10, 14, 20), Location = new Point(6, 86), Size = new Size(534, 44), Visible = false };
+    var alphaText = new Label { Text = "LIVE FOOTBALL ALPHA IS OUT", ForeColor = Look.Gold, Font = new Font("Segoe UI", 10f, FontStyle.Bold), AutoSize = false, Location = new Point(18, 12), Size = new Size(240, 22) };
+    var alphaMore = Look.Link("What is it?", new Point(262, 14)); alphaMore.LinkColor = Look.Fg;
+    alphaMore.Click += (s, e) => MessageBox.Show(this, "Watch any game in your league play out on the field, with a TV-style broadcast around it.\n\nClick Play the alpha: NFL History downloads it and restarts the game by itself (a few minutes the first time). Your leagues stay where they are.\n\nIt's an early alpha, so expect rough edges. You can go back to the regular mod any time.", "Live Football alpha");
+    alphaBtn = Look.Button("Play the alpha", true, new Point(380, 6), 136); alphaBtn.Height = 32;
+    alphaBtn.Click += (s, e) => Switch("alpha");
+    alphaBanner.Controls.AddRange(new Control[] { alphaText, alphaMore, alphaBtn });
+
     body = new Panel { Location = new Point(6, 86), Size = new Size(534, 200), BackColor = Look.Bg };
     stepLabel = new Label { Text = "Starting...", Font = new Font("Segoe UI", 12f, FontStyle.Bold), AutoSize = false, Location = new Point(18, 8), Size = new Size(492, 26) };
     bar = new ProgressBar { Location = new Point(18, 38), Size = new Size(492, 14), Maximum = 5, Style = ProgressBarStyle.Continuous };
@@ -463,9 +489,11 @@ class MainForm : Form {
     var check = Look.Link("Check for updates", new Point(104, 9)); check.Click += (s, e) => CheckForUpdates(true);
     var set = Look.Link("Settings", new Point(232, 9)); set.Click += (s, e) => { using (var f = new SettingsForm()) f.ShowDialog(this); };
     var about = Look.Link("About", new Point(298, 9)); about.Click += (s, e) => ShowAbout();
-    footer.Controls.AddRange(new Control[] { sep, news, check, set, about });
+    backLink = Look.Link("Back to the regular mod", new Point(350, 9)); backLink.Visible = false;
+    backLink.Click += (s, e) => { if (MessageBox.Show(this, "Leave the Live Football alpha and go back to the regular mod? The game restarts by itself; your leagues stay where they are.", "NFL History", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK) Switch("stable"); };
+    footer.Controls.AddRange(new Control[] { sep, news, check, set, about, backLink });
 
-    Controls.AddRange(new Control[] { stripe, title, sub, versionLabel, banner, body, footer });
+    Controls.AddRange(new Control[] { stripe, title, sub, versionLabel, banner, alphaBanner, body, footer });
 
     // the tray icon: open the game, show this window, check for updates, quit
     var menu = new ContextMenuStrip();
@@ -539,7 +567,7 @@ class MainForm : Form {
     if (cmd.StartsWith("STEP ")) {
       var p = cmd.Substring(5).Split(new[] { '|' }, 2);
       int n; int.TryParse(p[0], out n);
-      if (ready) { updating = true; Ui(() => { ShowReady(false); banner.Visible = false; Relayout(); }); }
+      if (ready) { updating = true; Ui(() => { ShowReady(false); banner.Visible = alphaBanner.Visible = false; Relayout(); }); }
       Step(n, p.Length > 1 ? p[1] : "");
     } else if (cmd.StartsWith("READY ")) {
       var p = cmd.Substring(6).Split('|');
@@ -567,6 +595,7 @@ class MainForm : Form {
         }
         if (wasUpdate) tray.ShowBalloonTip(8000, "NFL History updated", "You're on v" + App.Version() + ". Start a new league to get every fix.", ToolTipIcon.Info);
         ShowWhatsNewIfUpdated();
+        RefreshAlpha();
       });
     } else if (cmd.StartsWith("QR ")) {
       var rows = cmd.Substring(3).Split(',');
@@ -575,7 +604,7 @@ class MainForm : Form {
       var why = cmd.Substring(14);
       Ui(() => MessageBox.Show(this, "The update didn't work: " + why + "\n\nThe game keeps running on v" + App.Version() + ". It tries again the next time NFL History starts.", "NFL History", MessageBoxButtons.OK, MessageBoxIcon.Warning));
     } else if (cmd == "IDLE") {
-      if (updating && App.GameAlive()) Ui(() => { updating = false; ready = true; RefreshVersion(); ShowReady(true); });
+      if (updating && App.GameAlive()) Ui(() => { updating = false; ready = true; RefreshVersion(); ShowReady(true); RefreshAlpha(); });
     } else if (cmd.StartsWith("FAIL ")) {
       App.LogLine("launcher failed: " + cmd.Substring(5));
     }
@@ -645,6 +674,22 @@ class MainForm : Form {
     new NotesForm("Update available", "NFL History " + rel.Tag + " is out", "## " + rel.Tag + "\n" + rel.Notes, ready ? "Update now" : null, ready ? (Action)StartUpdate : null).Show(this);
   }
 
+  void RefreshAlpha() {
+    backLink.Visible = App.Alpha();
+    if (App.Alpha()) { alphaOut = false; ShowAlphaBanner(); return; }
+    new Thread(() => { var on = App.AlphaOut(); Ui(() => { alphaOut = on; ShowAlphaBanner(); }); }) { IsBackground = true }.Start();
+  }
+  void ShowAlphaBanner() { alphaBanner.Visible = alphaOut && ready && !updating && !App.Alpha(); Relayout(); }
+
+  void Switch(string to) {
+    if (!ready || updating) return;
+    var code = App.AskLauncherToSwitch(to);
+    App.LogLine("switch to " + to + ": " + code);
+    if (code == 202) { updating = true; banner.Visible = alphaBanner.Visible = false; ShowReady(false); stepLabel.Text = to == "alpha" ? "Switching to the Live Football alpha..." : "Switching back to the regular mod..."; detailLabel.Visible = true; detailLabel.Text = "A few minutes the first time. The game restarts by itself and its page reloads when it's ready."; Relayout(); }
+    else if (code == 409) MessageBox.Show(this, "An update is already installing.", "NFL History");
+    else MessageBox.Show(this, "The switch couldn't start. Quit NFL History, open it again, and try once more.", "NFL History", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+  }
+
   void StartUpdate() {
     if (!ready || updating) return;
     var code = App.AskLauncherToUpdate();
@@ -667,7 +712,8 @@ class MainForm : Form {
   }
 
   void Relayout() {
-    int top = 86 + (banner.Visible ? 48 : 0);
+    alphaBanner.Location = new Point(6, 86 + (banner.Visible ? 48 : 0));
+    int top = 86 + (banner.Visible ? 48 : 0) + (alphaBanner.Visible ? 48 : 0);
     bool phone = phoneLabel.Visible;
     int y = failed ? 158 : !ready || updating ? 158 : phone ? 176 : 48;
     openBtn.Location = new Point(18, y); quitBtn.Location = new Point(failed ? 398 : 178, y);
@@ -684,7 +730,7 @@ class MainForm : Form {
       stepLabel.Width = 492;
       detailLabel.Visible = true;
       detailLabel.Text = msg + "\n\nOpen NFL History again first (it picks up where it stopped). Still failing? Click Report it and paste the details (Copy details puts them on your clipboard).";
-      openBtn.Visible = phoneLabel.Visible = phoneHelp.Visible = qr.Visible = bar.Visible = banner.Visible = false;
+      openBtn.Visible = phoneLabel.Visible = phoneHelp.Visible = qr.Visible = bar.Visible = banner.Visible = alphaBanner.Visible = false;
       reportBtn.Visible = copyBtn.Visible = logBtn.Visible = true;
       Relayout();
       BringBack(false);

@@ -29,11 +29,13 @@ const step = (n, text) => { app(`STEP ${n}|${text}`); log(`step ${n}/5: ${text}`
 // Live Football alpha: channel.txt in this folder says "alpha" to run the newest live-alpha prerelease instead of the
 // latest release. The game's announcement switches it with one click (POST /channel), and "Back to the regular mod" undoes it.
 const CHANNEL_FILE = path.join(DIR, 'channel.txt');
-const RELEASES_API = 'https://api.github.com/repos/JenZiMiBruh/nfl-history-fbgm/releases?per_page=30';
+// Testing: NFL_RELEASES_API points the alpha channel's release list at another URL (with it, NFL_RELEASE_API is only
+// used for the regular channel)
+const RELEASES_API = process.env.NFL_RELEASES_API || 'https://api.github.com/repos/JenZiMiBruh/nfl-history-fbgm/releases?per_page=30';
 const channel = () => { try { return fs.readFileSync(CHANNEL_FILE, 'utf8').trim() === 'alpha' ? 'alpha' : 'stable'; } catch { return 'stable'; } };
 async function fetchRelease() {
   const headers = { 'User-Agent': 'nfl-history-fbgm-launcher' };
-  if (channel() !== 'alpha' || process.env.NFL_RELEASE_API) {
+  if (channel() !== 'alpha' || (process.env.NFL_RELEASE_API && !process.env.NFL_RELEASES_API)) {
     const res = await fetch(API, { headers, signal: AbortSignal.timeout(8000) });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     return res.json();
@@ -104,8 +106,10 @@ async function checkForUpdate(current, force = false) {
   // On the alpha channel any other alpha build is the update (alpha versions like 1.25.0-alpha.2 don't compare as numbers);
   // a channel switch (force) always installs
   const isAlpha = channel() === 'alpha';
-  const want = String(rel.tag_name).replace(/^v/, '').replace(/^live-alpha-/, '');
-  const differs = isAlpha ? want !== current : newer(rel.tag_name, current);
+  // the alpha's number: 3 in both live-alpha-3 (the tag) and 1.26.0-alpha.3 (the installed version). Comparing the whole
+  // texts never matched, so every start downloaded the alpha again. A regular version on the alpha channel (no number) differs.
+  const alphaNo = (s) => (String(s).match(/alpha[.-](\d+)$/) || [])[1];
+  const differs = isAlpha ? alphaNo(rel.tag_name) !== alphaNo(current) || !alphaNo(current) : newer(rel.tag_name, current);
   if (!force && !differs) { say(`  Up to date (v${current}).`); return null; }
   const asset = (rel.assets || []).find(a => a.name === 'NFL_History_Mod.zip');
   if (!asset) return null;
@@ -211,6 +215,11 @@ function install(cfg) {
   // The picker's script, the master file (any season, loaded on its own) and the week-by-week games (mid-season starts)
   fs.mkdirSync(path.join(GAME, 'public', 'football', 'nfl'), { recursive: true });
   fs.cpSync(path.join(MOD, 'public', 'nfl'), path.join(GAME, 'public', 'football', 'nfl'), { recursive: true, force: true });
+  // The game's What's new, update notice and alpha card need these two. The release zip has them in mod/public/nfl;
+  // a copy run straight from the GitHub folder doesn't, and without them none of that shows up.
+  const NFLPUB = path.join(GAME, 'public', 'football', 'nfl');
+  if (!fs.existsSync(path.join(MOD, 'public', 'nfl', 'version.json'))) fs.copyFileSync(path.join(MOD, 'version.json'), path.join(NFLPUB, 'version.json'));
+  if (!fs.existsSync(path.join(MOD, 'public', 'nfl', 'CHANGELOG.md')) && fs.existsSync(path.join(DIR, 'CHANGELOG.md'))) fs.copyFileSync(path.join(DIR, 'CHANGELOG.md'), path.join(NFLPUB, 'CHANGELOG.md'));
   step(4, 'Installing packages (the longest step)');
   say('Installing packages, the longest step...');
   try { run('corepack', ['enable'], { cwd: GAME, shell: true }); } catch { /* not needed when pnpm is reachable */ }
@@ -275,8 +284,11 @@ async function main() {
   const startGame = () => {
     // In the app the game server's own output goes to the log instead of the window
     const out = APP ? fs.openSync(LOG, 'a') : 'inherit';
-    child = spawn(WIN ? 'node.exe' : 'node', ['--run', 'dev', '--', '--host'], { cwd: GAME, stdio: APP ? ['ignore', out, out] : 'inherit', env: { ...process.env, SPORT: 'football' } });
-    child.on('exit', (code) => { if (!updating) process.exit(code ?? 0); });
+    const me = spawn(WIN ? 'node.exe' : 'node', ['--run', 'dev', '--', '--host'], { cwd: GAME, stdio: APP ? ['ignore', out, out] : 'inherit', env: { ...process.env, SPORT: 'football' } });
+    child = me;
+    // Only the game that's running now ends the launcher. The old game stopped for an update reports its exit late
+    // (after the update, when updating is false again), and used to close everything right after an update or alpha switch.
+    me.on('exit', (code) => { if (child === me && !updating) process.exit(code ?? 0); });
   };
   const stopGame = () => {
     if (WIN) { try { execFileSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' }); } catch { /* already gone */ } }
@@ -286,10 +298,13 @@ async function main() {
   // The game's Update now button, the Live Football alpha switch, and its fan poll: only these requests, and only from the game's own page
   http.createServer(async (req, res) => {
     const origin = req.headers.origin || '';
-    if (/:3000$/.test(origin)) res.setHeader('Access-Control-Allow-Origin', origin);
+    // The game's own page: this computer or the home network, on any port (the game moves to 3001+ when 3000 is taken,
+    // e.g. by an old copy still open), never a website
+    const ours = /^http:\/\/(localhost|127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+):\d+$/.test(origin);
+    if (ours) res.setHeader('Access-Control-Allow-Origin', origin);
     // A vote from the What's new poll. GoatCounter drops counts sent from a local page (the game runs on localhost or
     // the home network), so the launcher sends it, the same way as its other counts. Only short ids go through
-    const vote = req.method === 'POST' && /:3000$/.test(origin) && /^\/vote\?/.test(req.url || '') ? new URLSearchParams(req.url.slice(6)) : undefined;
+    const vote = req.method === 'POST' && ours && /^\/vote\?/.test(req.url || '') ? new URLSearchParams(req.url.slice(6)) : undefined;
     if (vote) {
       const poll = vote.get('poll') || '', option = vote.get('option') || '';
       if (!/^[a-z0-9-]{1,40}$/.test(poll) || !/^[a-z0-9-]{1,40}$/.test(option)) { res.writeHead(400); res.end(); return; }
@@ -300,8 +315,8 @@ async function main() {
       return;
     }
     // Live Football alpha: switch channel (alpha or stable) and install that build right away
-    const to = req.method === 'POST' && /:3000$/.test(origin) && /^\/channel\?/.test(req.url || '') ? new URLSearchParams(req.url.slice(9)).get('to') : undefined;
-    const isUpdate = req.method === 'POST' && req.url === '/update' && /:3000$/.test(origin);
+    const to = req.method === 'POST' && ours && /^\/channel\?/.test(req.url || '') ? new URLSearchParams(req.url.slice(9)).get('to') : undefined;
+    const isUpdate = req.method === 'POST' && req.url === '/update' && ours;
     if (!isUpdate && to !== 'alpha' && to !== 'stable') { res.writeHead(404); res.end(); return; }
     if (updating) { res.writeHead(409); res.end(); return; }
     updating = true;
