@@ -35,11 +35,6 @@
           "desc": "All-time and single-season records, and alerts when your players chase them"
         },
         {
-          "id": "real-moves",
-          "label": "Real trades and signings",
-          "desc": "The real dates, trade news, and who was traded for whom, every season"
-        },
-        {
           "id": "coaches",
           "label": "Real head coaches",
           "desc": "The real coach for every team and season, hired and fired on the real dates"
@@ -118,8 +113,8 @@
         },
         {
           "id": "real-moves",
-          "label": "Real trades and signings",
-          "desc": "Players already change teams when they really did, counted in games played. This adds the real dates, trade news, and who was traded for whom"
+          "label": "Real trades and signings (in the mod)",
+          "desc": "In the mod now: every real trade, signing and release this season with news, and players moving on their real dates in past seasons."
         },
         {
           "id": "scoreboards",
