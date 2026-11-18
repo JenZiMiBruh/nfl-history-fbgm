@@ -22,17 +22,12 @@
     {
       "id": "next-feature-2",
       "q": "What should come next?",
-      "note": "Round 2. Round 1's winners (real calendar, named Super Bowls, primetime slots, the live game view) are in the Live Football alpha now.",
+      "note": "Round 2. From round 1, the real calendar, named Super Bowls, primetime slots, the live game view and network scoreboards are in the Live Football alpha now.",
       "options": [
         {
           "id": "draft-show",
           "label": "Draft day show",
           "desc": "Watch the real draft unfold pick by pick, with grades and reactions"
-        },
-        {
-          "id": "scoreboards",
-          "label": "Network scoreboards",
-          "desc": "Era-accurate TV scorebugs during games, from 1966 to today"
         },
         {
           "id": "records",
@@ -79,27 +74,27 @@
     {
       "id": "next-feature",
       "q": "What should come next? (Round 1, closed)",
-      "note": "Closed Nov 18, 2026. The winners (real calendar, named Super Bowls, primetime slots, the live game view) are in the Live Football alpha.",
+      "note": "Closed Nov 18, 2026. The real calendar, named Super Bowls, primetime slots, the live game view and network scoreboards are in the Live Football alpha.",
       "options": [
         {
           "id": "calendar",
-          "label": "Real NFL calendar",
-          "desc": "Games on real dates: Thursday, Sunday, Monday, Thanksgiving, Christmas"
+          "label": "Real NFL calendar (in the alpha)",
+          "desc": "In the Live Football alpha now. Games on real dates: Thursday, Sunday, Monday, Thanksgiving, Christmas"
         },
         {
           "id": "superbowls",
-          "label": "Named Super Bowls",
-          "desc": "Super Bowl I to LX by name, then numbered on in your league"
+          "label": "Named Super Bowls (in the alpha)",
+          "desc": "In the Live Football alpha now. Super Bowl I to LX by name, then numbered on in your league"
         },
         {
           "id": "primetime",
-          "label": "Primetime slots",
-          "desc": "Monday, Sunday and Thursday night games with real kickoff times"
+          "label": "Primetime slots (in the alpha)",
+          "desc": "In the Live Football alpha now. Monday, Sunday and Thursday night games with real kickoff times"
         },
         {
           "id": "livegame",
-          "label": "Live game view",
-          "desc": "Watch games play out on a field with real broadcast graphics"
+          "label": "Live game view (in the alpha)",
+          "desc": "In the Live Football alpha now. Watch games play out on a field with real broadcast graphics"
         },
         {
           "id": "portraits",
@@ -128,8 +123,8 @@
         },
         {
           "id": "scoreboards",
-          "label": "Network scoreboards",
-          "desc": "Era-accurate TV scorebugs during games, from 1966 to today"
+          "label": "Network scoreboards (in the alpha)",
+          "desc": "In the Live Football alpha now. Era-accurate TV scorebugs during games, from 1966 to today"
         },
         {
           "id": "future-nfl",
