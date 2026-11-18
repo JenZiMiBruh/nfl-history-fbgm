@@ -6,6 +6,15 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.28.1 · Nov 17, 2026
+
+**Start a new league to get this update.**
+
+- Faster game:** the mod now builds Football GM once per update and serves the finished game, instead of running Football GM's developer tools the whole time you play. Much less memory, faster starts, and it runs on weaker laptops. It kicks in from your second start after this update.
+- Smaller install:** setting up no longer downloads test browsers the game never uses.
+- Installing on OneDrive works:** setup no longer stops when OneDrive holds a folder open.
+- Rosters through week 10.** Trades, signings, releases and injuries through this week, every box score recounted from the real games, and real starters at QB, kicker and punter kept ahead of their backups.
+
 ## v1.28.0 · Nov 16, 2026
 
 - Fixed: the game sometimes never finished loading** (stuck on "static files", no league would open). Windows counted simply opening a file as a change, so the game kept starting its setup over. If this happened to you, open NFL History again and it loads.
