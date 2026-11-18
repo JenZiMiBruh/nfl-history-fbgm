@@ -302,6 +302,7 @@ async function main() {
     const want = fs.existsSync(MARKER) ? fs.readFileSync(MARKER, 'utf8').trim() : '';
     if (fs.existsSync(path.join(BUILD, 'index.html')) && fs.existsSync(BUILT) && fs.readFileSync(BUILT, 'utf8').trim() === want) return true;
     say('  Building the game (once per update, about a minute)...');
+    app('STEP 5|Building the game (once per update, about a minute)');
     try { run(WIN ? 'node.exe' : 'node', ['--run', 'build'], { cwd: GAME }); fs.writeFileSync(BUILT, want); return true; }
     catch (e) { log('build failed, using the developer server: ' + (e.stderr || e.message)); return false; }
   };
