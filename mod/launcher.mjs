@@ -121,6 +121,9 @@ async function checkForUpdate(current, force = false) {
   if (!force && !differs) { say(`  Up to date (v${current}).`); return null; }
   const asset = (rel.assets || []).find(a => a.name === 'NFL_History_Mod.zip');
   if (!asset) return null;
+  // The mod's own source folder (a git repository: where releases are built) is never updated from a download: on the
+  // alpha that unpacked the alpha's patch and version over the files the next regular release is built from
+  if (fs.existsSync(path.join(DIR, '.git'))) { say(`  (This is the mod's source folder, so it isn't updated from downloads. Play from an installed copy.)`); return null; }
   say(`  Updating the mod: v${current} -> ${rel.tag_name}...`);
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'nfl-update-'));
   const zip = path.join(tmp, 'mod.zip');
