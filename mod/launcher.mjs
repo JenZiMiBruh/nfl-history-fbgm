@@ -272,6 +272,25 @@ async function main() {
   if (ip && APP) {
     try { const { qrMatrix } = await import('./qr.mjs'); app('QR ' + qrMatrix(`http://${ip}:3000`).map(r => r.join('')).join(',')); } catch (e) { log(String(e)); }
   }
+  // Build once for each installed version; a failed build (not enough memory) falls back to the developer server
+  const buildGame = () => {
+    const want = fs.existsSync(MARKER) ? fs.readFileSync(MARKER, 'utf8').trim() : '';
+    if (fs.existsSync(path.join(BUILD, 'index.html')) && fs.existsSync(BUILT) && fs.readFileSync(BUILT, 'utf8').trim() === want) return true;
+    say('  Building the game (once per update, about a minute)...');
+    app('STEP 5|Building the game (once per update, about a minute)');
+    try { run(WIN ? 'node.exe' : 'node', ['--run', 'build'], { cwd: GAME }); fs.writeFileSync(BUILT, want); return true; }
+    catch (e) { log('build failed, using the developer server: ' + (e.stderr || e.message)); return false; }
+  };
+  // the NFL data (weekly files, the seasons file) goes into the build as it changes, so a data update needs no rebuild
+  const syncData = () => {
+    const from = path.join(GAME, 'public', 'football', 'nfl'), to = path.join(BUILD, 'nfl');
+    if (!fs.existsSync(from)) return;
+    const walk = (a, b) => { fs.mkdirSync(b, { recursive: true }); for (const e of fs.readdirSync(a, { withFileTypes: true })) { const x = path.join(a, e.name), y = path.join(b, e.name); if (e.isDirectory()) walk(x, y); else { const sx = fs.statSync(x); let sy = null; try { sy = fs.statSync(y); } catch {} if (!sy || sy.size !== sx.size || sy.mtimeMs < sx.mtimeMs) fs.copyFileSync(x, y); } } };
+    try { walk(from, to); } catch (e) { log('data copy into the build failed: ' + e.message); }
+  };
+  // build before telling the app the game is ready: the app gives a ready game 3 minutes to answer, and a slow
+  // computer's first build can take longer than that
+  buildGame();
   app(`READY http://localhost:3000|${ip ? `http://${ip}:3000` : ''}`);
   if (ip && !APP) {
     say(`  On your phone (same Wi-Fi): http://${ip}:3000`);
@@ -297,22 +316,6 @@ async function main() {
   }
   let child;
   let updating = false;
-  // Build once for each installed version; a failed build (not enough memory) falls back to the developer server
-  const buildGame = () => {
-    const want = fs.existsSync(MARKER) ? fs.readFileSync(MARKER, 'utf8').trim() : '';
-    if (fs.existsSync(path.join(BUILD, 'index.html')) && fs.existsSync(BUILT) && fs.readFileSync(BUILT, 'utf8').trim() === want) return true;
-    say('  Building the game (once per update, about a minute)...');
-    app('STEP 5|Building the game (once per update, about a minute)');
-    try { run(WIN ? 'node.exe' : 'node', ['--run', 'build'], { cwd: GAME }); fs.writeFileSync(BUILT, want); return true; }
-    catch (e) { log('build failed, using the developer server: ' + (e.stderr || e.message)); return false; }
-  };
-  // the NFL data (weekly files, the seasons file) goes into the build as it changes, so a data update needs no rebuild
-  const syncData = () => {
-    const from = path.join(GAME, 'public', 'football', 'nfl'), to = path.join(BUILD, 'nfl');
-    if (!fs.existsSync(from)) return;
-    const walk = (a, b) => { fs.mkdirSync(b, { recursive: true }); for (const e of fs.readdirSync(a, { withFileTypes: true })) { const x = path.join(a, e.name), y = path.join(b, e.name); if (e.isDirectory()) walk(x, y); else { const sx = fs.statSync(x); let sy = null; try { sy = fs.statSync(y); } catch {} if (!sy || sy.size !== sx.size || sy.mtimeMs < sx.mtimeMs) fs.copyFileSync(x, y); } } };
-    try { walk(from, to); } catch (e) { log('data copy into the build failed: ' + e.message); }
-  };
   const startGame = () => {
     const built = buildGame();
     if (built) syncData();
