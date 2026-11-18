@@ -1,6 +1,6 @@
 {
   "note": "Fan polls for the site (assets/vote.js) and the mod's What's new screen. inGame: the poll the game shows. Votes are counted at GoatCounter under /vote/<id>/<option>, so keep ids stable. An option with then: \"flag\" opens the Flag a rating search right after someone votes for it.",
-  "inGame": "next-feature",
+  "inGame": "next-feature-2",
   "polls": [
     {
       "id": "browns-move",
@@ -20,9 +20,66 @@
       ]
     },
     {
-      "id": "next-feature",
+      "id": "next-feature-2",
       "q": "What should come next?",
-      "note": "Pick one. The most-wanted ideas go to the top of the roadmap.",
+      "note": "Round 2. Round 1's winners (real calendar, named Super Bowls, primetime slots, the live game view) are in the Live Football alpha now.",
+      "options": [
+        {
+          "id": "draft-show",
+          "label": "Draft day show",
+          "desc": "Watch the real draft unfold pick by pick, with grades and reactions"
+        },
+        {
+          "id": "scoreboards",
+          "label": "Network scoreboards",
+          "desc": "Era-accurate TV scorebugs during games, from 1966 to today"
+        },
+        {
+          "id": "records",
+          "label": "Record book",
+          "desc": "All-time and single-season records, and alerts when your players chase them"
+        },
+        {
+          "id": "real-moves",
+          "label": "Real trades and signings",
+          "desc": "The real dates, trade news, and who was traded for whom, every season"
+        },
+        {
+          "id": "coaches",
+          "label": "Real head coaches",
+          "desc": "The real coach for every team and season, hired and fired on the real dates"
+        },
+        {
+          "id": "storylines",
+          "label": "League storylines",
+          "desc": "Weekly headlines: hot seats, rivalries, streaks and breakout players"
+        },
+        {
+          "id": "pre-1966",
+          "label": "Older seasons",
+          "desc": "The 1950s and early 1960s, before the AFL"
+        },
+        {
+          "id": "portraits",
+          "label": "More player photos",
+          "desc": "Headshots for more past players (4,000+ players and every draft prospect already have one)"
+        },
+        {
+          "id": "modern-ui",
+          "label": "Modern look",
+          "desc": "An optional redesigned interface for the game"
+        },
+        {
+          "id": "future-nfl",
+          "label": "Future NFL eras",
+          "desc": "After real history ends the league keeps evolving: by 2045 teams might run far more than they did in 2020"
+        }
+      ]
+    },
+    {
+      "id": "next-feature",
+      "q": "What should come next? (Round 1, closed)",
+      "note": "Closed Nov 18, 2026. The winners (real calendar, named Super Bowls, primetime slots, the live game view) are in the Live Football alpha.",
       "options": [
         {
           "id": "calendar",
@@ -79,7 +136,8 @@
           "label": "Future NFL eras",
           "desc": "After real history ends the league keeps evolving: by 2045 teams might run far more than they did in 2020"
         }
-      ]
+      ],
+      "closed": true
     },
     {
       "id": "bug-priority",
