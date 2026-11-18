@@ -18,6 +18,14 @@ const DIR = path.dirname(MOD);
 const GAME = path.join(DIR, 'football-gm');
 const LOG = path.join(DIR, 'install_log.txt');
 const MARKER = path.join(GAME, '.nfl-installed');
+// The game is built once per mod update and served from its build folder (Football GM's own "preview" server), instead
+// of its developer server, which rebuilt and watched the source the whole time you played: about 1.3 GB at build time
+// and almost nothing after, instead of the build tools staying in memory all session. Weak laptops and Chromebook
+// Linux can run it this way.
+const BUILD = path.join(GAME, 'build'), BUILT = path.join(GAME, '.nfl-built');
+process.env.SPORT = 'football';
+// pnpm install would download Playwright's test browsers (hundreds of MB) that only Football GM's own tests use
+process.env.PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = '1';
 const API = process.env.NFL_RELEASE_API || 'https://api.github.com/repos/JenZiMiBruh/nfl-history-fbgm/releases/latest';
 const WIN = process.platform === 'win32';
 // NFL History.exe runs this hidden (NFL_APP=1) and shows its own window: lines starting with @@ are for that window
@@ -289,10 +297,27 @@ async function main() {
   }
   let child;
   let updating = false;
+  // Build once for each installed version; a failed build (not enough memory) falls back to the developer server
+  const buildGame = () => {
+    const want = fs.existsSync(MARKER) ? fs.readFileSync(MARKER, 'utf8').trim() : '';
+    if (fs.existsSync(path.join(BUILD, 'index.html')) && fs.existsSync(BUILT) && fs.readFileSync(BUILT, 'utf8').trim() === want) return true;
+    say('  Building the game (once per update, about a minute)...');
+    try { run(WIN ? 'node.exe' : 'node', ['--run', 'build'], { cwd: GAME }); fs.writeFileSync(BUILT, want); return true; }
+    catch (e) { log('build failed, using the developer server: ' + (e.stderr || e.message)); return false; }
+  };
+  // the NFL data (weekly files, the seasons file) goes into the build as it changes, so a data update needs no rebuild
+  const syncData = () => {
+    const from = path.join(GAME, 'public', 'football', 'nfl'), to = path.join(BUILD, 'nfl');
+    if (!fs.existsSync(from)) return;
+    const walk = (a, b) => { fs.mkdirSync(b, { recursive: true }); for (const e of fs.readdirSync(a, { withFileTypes: true })) { const x = path.join(a, e.name), y = path.join(b, e.name); if (e.isDirectory()) walk(x, y); else { const sx = fs.statSync(x); let sy = null; try { sy = fs.statSync(y); } catch {} if (!sy || sy.size !== sx.size || sy.mtimeMs < sx.mtimeMs) fs.copyFileSync(x, y); } } };
+    try { walk(from, to); } catch (e) { log('data copy into the build failed: ' + e.message); }
+  };
   const startGame = () => {
+    const built = buildGame();
+    if (built) syncData();
     // In the app the game server's own output goes to the log instead of the window
     const out = APP ? fs.openSync(LOG, 'a') : 'inherit';
-    const me = spawn(WIN ? 'node.exe' : 'node', ['--run', 'dev', '--', '--host'], { cwd: GAME, stdio: APP ? ['ignore', out, out] : 'inherit', env: { ...process.env, SPORT: 'football' } });
+    const me = spawn(WIN ? 'node.exe' : 'node', ['--run', built ? 'preview' : 'dev', '--', '--host'], { cwd: GAME, stdio: APP ? ['ignore', out, out] : 'inherit', env: { ...process.env, SPORT: 'football' } });
     child = me;
     // Only the game that's running now ends the launcher. The old game stopped for an update reports its exit late
     // (after the update, when updating is false again), and used to close everything right after an update or alpha switch.
