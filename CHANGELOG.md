@@ -6,6 +6,12 @@ Found something off? [Open an issue](https://github.com/JenZiMiBruh/nfl-history-
 
 ---
 
+## v1.28.2 · Nov 17, 2026
+
+**Start a new league to get this update.**
+
+- More reliable first start:** the game is now built before NFL History says it's ready, so a slow computer's first start after an update no longer reports that the game stopped.
+
 ## v1.28.1 · Nov 17, 2026
 
 **Start a new league to get this update.**
